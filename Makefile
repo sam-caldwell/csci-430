@@ -8,22 +8,24 @@
 # Removes the artifact directory and recreates it
 clean:
 	@echo "Cleaning build/ directory..."
-	@rm -rf build
+	-@rm -rf build build-basic || true
 	@mkdir -p build
 	@echo "Recreated build/"
 
 # Configuration
 CMAKE ?= cmake
 GENERATOR ?= Ninja
-BUILD_DIR ?= cmake-build-debug
 TOOLCHAIN ?= cmake/Toolchain-HomebrewLLVM.cmake
 CONFIG ?= Debug
+# Derive BUILD_DIR from CONFIG unless overridden by the user
+BUILD_SUBDIR := $(shell echo $(CONFIG) | tr A-Z a-z)
+BUILD_DIR ?= build/cmake-build-$(BUILD_SUBDIR)
 
 configure:
 	@if [ ! -f "$(BUILD_DIR)/CMakeCache.txt" ]; then \
 		$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR) -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN) -DCMAKE_BUILD_TYPE=$(CONFIG); \
 	else \
-		$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR); \
+		$(CMAKE) -S . -B $(BUILD_DIR); \
 	fi
 
 # Build all targets via CMake/Ninja
@@ -116,8 +118,31 @@ version:
 	@xcodebuild -version 2>/dev/null || echo 'Xcode not installed'
 
 # Run CTest/GoogleTest suite
-test: build
-	@ctest --test-dir "$(BUILD_DIR)" --output-on-failure -C "$(CONFIG)"
+# Structured test targets (unit -> integration -> e2e)
+.PHONY: unit integration e2e
+
+unit: build
+	@echo "[unit] Running unit tests..."
+	@set -e; \
+	UNIT_BIN="$(BUILD_DIR)/basic_compiler_unit_tests"; \
+	HELLO_BIN="$(BUILD_DIR)/hello_world_tests"; \
+	if [ -x "$$HELLO_BIN" ]; then echo "-- $$HELLO_BIN"; "$$HELLO_BIN"; fi; \
+	if [ -x "$$UNIT_BIN" ]; then echo "-- $$UNIT_BIN"; "$$UNIT_BIN"; else echo "Unit tests binary not found: $$UNIT_BIN"; exit 2; fi
+
+integration: unit
+	@echo "[integration] Running integration tests..."
+	@set -e; \
+	INT_BIN="$(BUILD_DIR)/basic_compiler_integration_tests"; \
+	if [ -x "$$INT_BIN" ]; then echo "-- $$INT_BIN"; "$$INT_BIN"; else echo "Integration tests binary not found: $$INT_BIN"; exit 2; fi
+
+e2e: integration
+	@echo "[e2e] Running end-to-end tests..."
+	@set -e; \
+	E2E_BIN="$(BUILD_DIR)/basic_compiler_e2e_tests"; \
+	if [ -x "$$E2E_BIN" ]; then echo "-- $$E2E_BIN"; "$$E2E_BIN"; else echo "E2E tests binary not found: $$E2E_BIN"; exit 2; fi
+
+test: e2e
+	@echo "All tests completed successfully."
 
 # Display available targets and descriptions
 help:
@@ -143,7 +168,7 @@ help:
 	@echo
 	@echo "Examples:"
 	@echo "  make build CONFIG=Release"
-	@echo "  make lint BUILD_DIR=cmake-build-debug"
+	@echo "  make lint BUILD_DIR=build/cmake-build-debug"
 	@echo "  make tree TREE_ROOT=src"
 
 # Lint all C/C++ sources using clang-tidy
