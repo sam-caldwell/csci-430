@@ -3,6 +3,8 @@
 This repository is configured for modern C/C++ development using Homebrew LLVM (clang/clang++), CMake, and Ninja.
 It is optimized for CLion but works equally well from the command line.
 
+Code repo: https://github.com/sam-caldwell/csci-430
+
 ## Overview
 
 | Tool            | Version      |
