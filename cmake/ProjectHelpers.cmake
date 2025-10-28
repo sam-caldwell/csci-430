@@ -43,13 +43,25 @@ function(build_project target)
     get_filename_component(_ext "${_src}" EXT)
     string(TOLOWER "${_ext}" _ext_l)
 
+    # Create a unique, stable module identifier from the relative source path
+    set(_mod_id "${_src}")
+    string(REGEX REPLACE "[^A-Za-z0-9]+" "_" _mod_id "${_mod_id}")
+
     if(_ext_l STREQUAL ".c")
       set(_compiler "${CLANG_EXECUTABLE}")
-      # Ensure C standard is respected for bitcode generation
+      # Ensure C standard is respected for bitcode generation. Map c23->c2x for Clang 17.
       if(CMAKE_C_EXTENSIONS)
-        set(_std_flag "-std=gnu${CMAKE_C_STANDARD}")
+        if(CMAKE_C_STANDARD EQUAL 23)
+          set(_std_flag "-std=gnu2x")
+        else()
+          set(_std_flag "-std=gnu${CMAKE_C_STANDARD}")
+        endif()
       else()
-        set(_std_flag "-std=c${CMAKE_C_STANDARD}")
+        if(CMAKE_C_STANDARD EQUAL 23)
+          set(_std_flag "-std=c2x")
+        else()
+          set(_std_flag "-std=c${CMAKE_C_STANDARD}")
+        endif()
       endif()
     else()
       set(_compiler "${CLANGXX_EXECUTABLE}")
@@ -61,8 +73,8 @@ function(build_project target)
       endif()
     endif()
 
-    set(_bc "${_outdir}/${_base}.module.bc")
-    set(_ll "${_outdir}/${_base}.module.ll")
+    set(_bc "${_outdir}/${_mod_id}.module.bc")
+    set(_ll "${_outdir}/${_mod_id}.module.ll")
 
     add_custom_command(
       OUTPUT "${_bc}"

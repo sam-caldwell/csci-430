@@ -1,5 +1,6 @@
 #[=======================================================================[.rst:
 # LLVMConfig.cmake - Helper to locate Homebrew LLVM/Clang and tools
+# (c) 2025 Sam Caldwell.  All Rights Reserved.
 #
 # Exposes the following cache variables for other CMake modules:
 #  - CLANG_EXECUTABLE      : path to clang

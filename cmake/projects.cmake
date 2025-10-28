@@ -1,18 +1,20 @@
 # File: cmake/projects.cmake
 # (c) 2025 Sam Caldwell.  All Rights Reserved.
-# Purpose: Central registry of assignment/example targets for this course.
-#          Add new targets with build_project(target sources...).
-# List all targets to build here using build_project(target sources...)
+# Purpose: Central registry delegating to modular project definitions.
 
-# Primary C program (first project)
-build_project(hello_world src/main.c src/hello_world.c)
-target_include_directories(hello_world PRIVATE ${PROJECT_SOURCE_DIR}/include)
+include(cmake/projects/hello_world.cmake)
+include(cmake/projects/hello_world/tests/unit.cmake)
 
-# Unit tests (GoogleTest)
-add_library(hello_core STATIC src/hello_world.c)
-target_include_directories(hello_core PUBLIC ${PROJECT_SOURCE_DIR}/include)
+include(cmake/projects/basic_compiler.cmake)
+include(cmake/projects/basic_compiler/tests/unit.cmake)
+include(cmake/projects/basic_compiler/tests/integration.cmake)
+include(cmake/projects/basic_compiler/tests/e2e.cmake)
 
-add_executable(hello_world_tests test/test_hello_world.cpp)
-target_include_directories(hello_world_tests PRIVATE ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(hello_world_tests PRIVATE hello_core GTest::gtest_main)
-gtest_discover_tests(hello_world_tests)
+# Provide an ordered ctest target (unit -> integration -> e2e)
+add_custom_target(ordered_ctest
+  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -L unit
+  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -L integration
+  COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -L e2e
+  DEPENDS basic_compiler_unit_tests basic_compiler_integration_tests basic_compiler_e2e_tests hello_world_tests
+  USES_TERMINAL
+)
