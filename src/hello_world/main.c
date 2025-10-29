@@ -1,7 +1,9 @@
 // File: src/hello_world/main.c
 // (c) 2025 Sam Caldwell.  All Rights Reserved.
 // Purpose: Implementation of hello_world module functions.
-// Purpose: Provides string-returning helper for unit testing.
+//          Provides string-returning helper for unit testing and sample app.
+
+#include "hello_world/hello_world.h"
 
 /**
  * Return the canonical "Hello, World" string.
@@ -18,4 +20,3 @@
 const char* get_hello_world(void) {
     return "Hello, World";
 }
-

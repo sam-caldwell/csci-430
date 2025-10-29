@@ -23,3 +23,20 @@ endif()
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic>")
 endif()
+
+# Enforce out-of-source build directory under build/
+# Disallow top-level cmake-build-* directories (e.g., cmake-build-debug)
+get_filename_component(_csci430_bin_name "${CMAKE_BINARY_DIR}" NAME)
+get_filename_component(_csci430_bin_parent "${CMAKE_BINARY_DIR}" DIRECTORY)
+
+# Optional: Code coverage instrumentation for Clang toolchains
+option(CODE_COVERAGE "Enable Clang source-based coverage (llvm-cov)" OFF)
+if (CODE_COVERAGE)
+  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(STATUS "Enabling Clang source-based coverage (-fprofile-instr-generate -fcoverage-mapping)")
+    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+    add_link_options(-fprofile-instr-generate -fcoverage-mapping)
+  else()
+    message(WARNING "CODE_COVERAGE requested but compiler is not Clang; ignoring")
+  endif()
+endif()

@@ -21,3 +21,6 @@ include(cmake/ProjectHelpers.cmake)
 
 # Define targets
 include(cmake/projects.cmake)
+
+# Generate CMakePresets.json to guide IDEs to build/cmake-build-<config>
+include(cmake/GeneratePresets.cmake)

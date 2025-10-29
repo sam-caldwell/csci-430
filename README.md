@@ -1,161 +1,85 @@
-# CSCI-430 Development Environment
+# GW-BASIC Compiler (basic_compiler)
 
-This repository is configured for modern C/C++ development using Homebrew LLVM (clang/clang++), CMake, and Ninja.
-It is optimized for CLion but works equally well from the command line.
+This project develops a GW-BASIC compiler which emits LLVM IR, byte code, native assembly, and native executables.
+This is designed for reproducible builds and detailed phase logging for compiler development.
 
 Code repo: https://github.com/sam-caldwell/csci-430
 
-## Overview
+## Supported OS/Architectures
 
-| Tool            | Version      |
-|-----------------|--------------|
-| CMake           | 3.24.2       |
-| Clang / Clang++ | 17.0.2       |
-| LLVM            | 17.0.2       |
-| Ninja           | 1.13.2       |
-| OS              | macOS 12.3.1 |
-| CPU             | Apple M1 Max |
-| Xcode           | 13.3         |
-| C               | 23           |
-| C++             | 23           |
+### CPU Architectures
 
-- Artifacts: Each target writes to `build/<target>/`:
-    - Executable: `build/<target>/<target>`
-    - Linked LLVM: `build/<target>/<target>.bc` and `build/<target>/<target>.ll`
-    - Per-source: `build/<target>/*.bc` and `*.ll`
-- Makefile helpers:
-  - `make build`,
-  - `make clean`,
-  - `make test`,
-  - `make version`
+- x86_64
+- arm64/aarch64
+
+### Operating System
+
+- Linux
+- macOS (Darwin)
 
 ## Prerequisites
 
-- macOS with Homebrew
-- Install tools:
-    - `brew install llvm@17 cmake ninja zip`
-- Optional IDE: JetBrains CLion
+- Tools: `llvm@17` (clang/clang++), `cmake`, `ninja`, `make`, `googletest`.
+- Install (macos): `brew install llvm@17 cmake ninja zip`.
 
-> ***Tip:*** Ensure Homebrew LLVM 17 is preferred in PATH when running outside CMake toolchain files:
-> CMake does this for you automatically.
+## Automation
 
-export PATH="$(brew --prefix llvm@17)/bin:$PATH"
+| make target  | description                                |
+|--------------|--------------------------------------------|
+| `make help`  | List all make targets                      |
+| `make clean` | Clean build artifacts.                     |
+| `make lint`  | Run linter.                                |
+| `make test`  | Run tests (unit, integration, end-to-end)  |
+| `make build` | Build the compiler.                        |
+| `make demo`  | Build a demo program (demos/factorial.bas) |
 
-## Project Layout
+> All Build artifacts are placed in `build/`
+> To Run the demo program, `cd build/demos/factorial` and run `./factorial` then enter a number (e.g., 5)
+> ```text
+> % ./factorial 
+> 5
+> 120.000000
+>```
+> As we see, the result of the factorial function is printed (120.000000).
 
-- `CMakeLists.txt`: Lightweight entry; includes modules and project list.
-- `cmake/` (modular CMake):
-    - `LLVMConfig.cmake`: Finds and prefers Homebrew LLVM 17 tools (`clang`, `clang++`, `llvm-link`, `llvm-dis`), and
-      enforces LLVM 17.x.
-    - `BuildConfig.cmake`: Language standards, compile commands, common warnings.
-    - `ProjectHelpers.cmake`: Provides `build_project(target sources...)` wrapper that emits all artifacts into
-      `build/<target>/`.
-    - `projects.cmake`: Central registry of targets using `build_project(...)`.
-    - `Toolchain-HomebrewLLVM.cmake`: Optional toolchain file to force Homebrew LLVM + Ninja.
-- `src/`: Course “hello_world” C target.
-- `include/`: Public headers (e.g., `hello_world.h`).
-- `test/`: GoogleTest unit/integration tests.
-- `assignments/`: Assignment targets.
-- `discussions/`: Notes, design docs, and example code.
-- `build/`: Artifact directory created by builds (git-ignored).
+## Compiler Usage
 
-## First Target (C)
+- Binary: `build/basic_compiler/basic_compiler`
+- Synopsis:
+    - `basic_compiler <input.bas> [-ll|--ll <file>] [--bc <file>] [-o <exe>] [--asm <file>] [--target <triple>] 
+          [--lex-log <file>] [--syntax-log <file>] [--semantic-log <file>] [--log <file>]`
+    - Help: `basic_compiler -h` or `basic_compiler --help`
+- Notes:
+    - Assembly files begin with a header comment line:
+      `Source: <file> | Target: os=<os>, cpu=<arch> (triple=<triple>)`
+      using an architecture-appropriate comment leader.
+    - If log paths are omitted, logs default next to the input with matching extensions.
+    - Bitcode/EXE/ASM require `clang` to be available; the build injects its path as `CLANG_PATH`.
 
-- Target: `hello_world`
-- Source: `src/main.c`
-- Behavior: prints "Hello, World" (with quotes) and exits.
+## Supported Targets
 
-Run after a build:
+- Whitelist only: x86_64 and arm64/aarch64 on Linux, macOS (Darwin), FreeBSD, Android.
+- Windows/MSVC, ARM32, WebAssembly are not supported.
+- Set explicitly via `--target <triple>`, e.g. `x86_64-unknown-linux-gnu`, `aarch64-apple-macos`.
 
-./build/hello_world/hello_world
+## Artifacts And Logs
 
-## Makefile Targets
+- IR: `.ll` human-readable LLVM IR.
+    - Bitcode: `.bc` machine IR, useful for linking or analysis.
+    - Assembly: `.asm` with a header comment reflecting source and target; dialect matches target triple.
+    - Executable: platform-native binary produced by `clang`.
+    - Logs: phase logs capture tokens, syntax steps, semantic validations, and codegen mappings.
 
-- `make build`: Configures (first run) and builds all targets with CMake/Ninja.
-- `make clean`: Deletes `build/` and recreates it.
-- `make version`: Shows versions for CMake, clang/clang++, llvm (via `llvm-config` and brew), Ninja, OS, CPU, and Xcode.
-- `make test`: Runs unit tests via CTest/GoogleTest.
+## Tips
 
-You can override variables:
-
-make build BUILD_DIR=cmake-build-release CONFIG=Release
-
-Defaults:
-
-- `BUILD_DIR=cmake-build-debug`
-- `GENERATOR=Ninja`
-- `TOOLCHAIN=cmake/Toolchain-HomebrewLLVM.cmake`
-
-## CLI Build (manual)
-
-Run `make build`
-
--or-
-
-Run CMake directly:
-- `cmake -S . -B cmake-build-debug -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-HomebrewLLVM.cmake`
-- `cmake --build cmake-build-debug`
-
-Artifacts will appear under `build/<target>/` per target.
-
-## CLion Setup
-
-1) Open the repository in CLion.
-2) In CMake settings:
-    - Generator: `Ninja`.
-    - CMake toolchain file (recommended): `cmake/Toolchain-HomebrewLLVM.cmake`.
-3) Build the project. Artifacts for each target appear under `build/<target>/`.
-4) Create Run/Debug configurations for executables in `build/<target>/` (or rely on CLion default target selection).
-
-## Adding a New Target
-
-Register a target in `cmake/projects.cmake` using the helper:
-
-build_project(myprog assignments/myprog/main.cpp)
-
-This will create:
-
-- Executable: `build/myprog/myprog`
-- Linked LLVM: `build/myprog/myprog.bc` and `build/myprog/myprog.ll`
-- Per-source LLVM: `build/myprog/*.bc` and `build/myprog/*.ll`
-
-If you need include paths or definitions, set them on the target after the `build_project(...)` call, e.g.:
-
-target_include_directories(myprog PRIVATE assignments/myprog/include)
-target_compile_definitions(myprog PRIVATE FOO=1)
-
-## Tests
-
-- Place tests under `test/` and register a test target in `cmake/projects.cmake`, for example:
-
-  build_project(mytests test/my_test.cpp src/some_impl.c)
-  target_include_directories(mytests PRIVATE ${PROJECT_SOURCE_DIR}/include)
-  target_link_libraries(mytests PRIVATE GTest::gtest_main)
-  gtest_discover_tests(mytests)
-
-Run tests with: `make test`
-
-## Verifying the Environment
-
-Run: `make version`
-> This prints CMake, Clang/LLVM, Ninja, OS, CPU, and Xcode info. Confirm that clang/clang++ show “Homebrew” and 
-> versions match `brew list --versions llvm`.
-
-## LLVM 17 Requirement
-
-- This project requires LLVM 17.x (Clang 17). CMake will fail configuration if a different major version is detected.
-- Install and prefer Homebrew LLVM 17:
-
-      brew install llvm@17
-      export PATH="$(brew --prefix llvm@17)/bin:$PATH"
-
-- If you have multiple versions installed, use the provided toolchain file to force LLVM 17:
-
-      -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-HomebrewLLVM.cmake
+- Use `--target` to control the intended output architecture/OS; defaults to host-appropriate when omitted in demo.
+- For best portability, emit IR/bitcode and link on the destination host with an appropriate `-target`.
 
 ## Troubleshooting
 
-- Wrong compiler picked (Apple clang): Use the toolchain file or prepend Homebrew LLVM 17 to PATH.
-- Stale cache after tool changes: delete `cmake-build-*` and reconfigure.
-- Missing `llvm-link` or `llvm-dis`: ensure `brew install llvm@17` and that `$(brew --prefix llvm@17)/bin` is on PATH,
-  or use the toolchain file.
+- “CLANG_PATH not defined” when asking for `.bc`, `.asm`, or `-o`:
+    - Ensure you built via `make build` so the compiler is compiled with `CLANG_PATH` injected.
+- “unsupported target triple”:
+    - Only x86_64 and arm64/aarch64 for Linux/macOS/FreeBSD/Android are accepted.
+- Mismatched target warnings when linking IR:
+    - Re-run with `--target <triple>` appropriate for your system, or link on the destination host.
