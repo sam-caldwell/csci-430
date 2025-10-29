@@ -25,6 +25,16 @@ BUILD_ROOT := build
 BUILD_SUBDIR := $(shell echo $(CONFIG) | tr A-Z a-z)
 BUILD_DIR ?= $(BUILD_ROOT)/cmake-build-$(BUILD_SUBDIR)
 
+# Parallel build settings: detect CPU cores cross-platform
+# Allows override: make build NUM_CPUS=8
+NUM_CPUS ?= $(shell \
+  N=""; \
+  if command -v sysctl >/dev/null 2>&1; then N=$$(sysctl -n hw.ncpu 2>/dev/null || true); fi; \
+  if [ -z "$$N" ] && command -v nproc >/dev/null 2>&1; then N=$$(nproc 2>/dev/null || true); fi; \
+  if [ -z "$$N" ] && command -v getconf >/dev/null 2>&1; then N=$$(getconf _NPROCESSORS_ONLN 2>/dev/null || true); fi; \
+  if [ -z "$$N" ]; then N=1; fi; \
+  echo $$N)
+
 # Build all targets via CMake/Ninja (auto-configure if needed)
 build:
 	@if [ ! -f "$(BUILD_DIR)/CMakeCache.txt" ]; then \
@@ -32,7 +42,8 @@ build:
 	else \
 		$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR) $(TOOLCHAIN_FLAG); \
 	fi
-	@$(CMAKE) --build $(BUILD_DIR) -v
+	@echo "Building with $(NUM_CPUS) parallel jobs..."
+	@$(CMAKE) --build $(BUILD_DIR) -v -- -j$(NUM_CPUS)
 
 # Tree view of repository (requires 'tree')
 TREE_ROOT ?= .
@@ -168,6 +179,7 @@ help:
 	@printf "  %-14s = %s\n" "GENERATOR" "$(GENERATOR)"
 	@printf "  %-14s = %s\n" "TOOLCHAIN" "$(TOOLCHAIN)"
 	@printf "  %-14s = %s\n" "CONFIG"    "$(CONFIG)"
+	@printf "  %-14s = %s\n" "NUM_CPUS"  "$(NUM_CPUS)"
 	@printf "  %-14s = %s\n" "ZIP_NAME"  "$(ZIP_NAME)"
 	@printf "  %-14s = %s\n" "TREE_ROOT" "$(TREE_ROOT)"
 	@printf "  %-14s = %s\n" "TREE_IGNORES" "$(TREE_IGNORES)"
@@ -181,7 +193,8 @@ help:
 DEMO_SRC := demos/factorial.bas
 demo: build
 	@set -e; \
-	OUT_DIR="$(BUILD_DIR)/demos/factorial"; \
+	BUILD_ROOT="./build"; \
+	OUT_DIR="$(BUILD_ROOT)/demos/factorial"; \
 	BIN_NAME="factorial"; \
 	BIN="$$OUT_DIR/$$BIN_NAME"; \
 	LL="$$OUT_DIR/$$BIN_NAME.ll"; \
@@ -191,13 +204,13 @@ demo: build
 	SYN="$$OUT_DIR/$$BIN_NAME.syntax.log"; \
 	SEM="$$OUT_DIR/$$BIN_NAME.semantic.log"; \
 	CGN="$$OUT_DIR/$$BIN_NAME.codegen.log"; \
-	COMPILER_BIN="$(BUILD_DIR)/basic_compiler/basic_compiler"; \
+	COMPILER_BIN="$(BUILD_ROOT)/basic_compiler/basic_compiler"; \
 	if [ ! -x "$$COMPILER_BIN" ]; then echo "Compiler not found: $$COMPILER_BIN"; exit 2; fi; \
 	mkdir -p "$$OUT_DIR"; \
 	UNAMES=$$(uname -s); ARCH=$$(uname -m); TRIPLE=""; \
 	if [ "$$UNAMES" = "Darwin" ]; then \
-	  if [ "$$ARCH" = "arm64" ]; then TRIPLE=arm64-apple-macos; \
-	  elif [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-apple-macos; fi; \
+	  if [ "$$ARCH" = "arm64" ]; then TRIPLE=arm64-darwin-macos; \
+	  elif [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-darwin-macos; fi; \
 	elif [ "$$UNAMES" = "Linux" ]; then \
 	  if [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-linux-gnu; \
 	  elif [ "$$ARCH" = "aarch64" ] || [ "$$ARCH" = "arm64" ]; then \
@@ -206,7 +219,7 @@ demo: build
 	fi; \
 	TGT_ARG=""; if [ -n "$$TRIPLE" ]; then TGT_ARG="--target $$TRIPLE"; fi; \
 	echo "Compiling $$DEMO_SRC -> $$OUT_DIR (target=$$TRIPLE)"; \
-	"$$COMPILER_BIN" "$(DEMO_SRC)" -ll "$$LL" --bc "$$BC" -o "$$BIN" --asm "$$ASM" \
+	"$$COMPILER_BIN" "$(DEMO_SRC)" --ll "$$LL" --bc "$$BC" -o "$$BIN" --asm "$$ASM" \
 	  $$TGT_ARG --lex-log "$$LEX" --syntax-log "$$SYN" --semantic-log "$$SEM" --log "$$CGN"; \
 	echo "Demo artifacts written to $$OUT_DIR";
 
