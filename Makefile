@@ -146,13 +146,24 @@ integration: unit
 	@echo "[integration] Running integration tests..."
 	@set -e; \
 	INT_BIN="$(BUILD_DIR)/basic_compiler_integration_tests"; \
-	if [ -x "$$INT_BIN" ]; then echo "-- $$INT_BIN"; "$$INT_BIN"; else echo "Integration tests binary not found: $$INT_BIN"; exit 2; fi
+	if [ -x "$$INT_BIN" ]; then \
+	  echo "-- $$INT_BIN"; \
+	  "$$INT_BIN"; \
+    else \
+      echo "Integration tests binary not found: $$INT_BIN"; \
+      exit 2; \
+    fi
 
 e2e: integration
 	@echo "[e2e] Running end-to-end tests..."
 	@set -e; \
 	E2E_BIN="$(BUILD_DIR)/basic_compiler_e2e_tests"; \
-	if [ -x "$$E2E_BIN" ]; then echo "-- $$E2E_BIN"; "$$E2E_BIN"; else echo "E2E tests binary not found: $$E2E_BIN"; exit 2; fi
+	if [ -x "$$E2E_BIN" ]; then \
+	  echo "-- $$E2E_BIN"; \
+	  "$$E2E_BIN"; \
+	else echo "E2E tests binary not found: $$E2E_BIN"; \
+	  exit 2; \
+    fi
 
 test: e2e
 	@echo "All tests completed successfully."
@@ -226,7 +237,7 @@ demo: build
 # Lint all C/C++ sources using clang-tidy
 LINT_PATTERNS ?= -name '*.c' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp'
 LINT_PRUNE ?= \( -path './.git' -o -path './build' -o -path './build-*' -o -path './cmake-build-*' -o -path './out' -o -path './.idea' -o -path './CMakeFiles' -o -path './Testing' \) -prune
-lint: build
+lint:
 	@command -v $(CLANG_TIDY) >/dev/null 2>&1 || { echo "clang-tidy not found; skipping lint."; exit 0; }
 	@echo "Running clang-tidy across repository sources..."
 	@set -e; \
@@ -244,3 +255,52 @@ lint: build
 		  "$(CLANG_TIDY)" -p "$(BUILD_DIR)" -warnings-as-errors='*' $$SDK_ARGS "$$f" || exit $$?; \
 		done; \
 	echo "clang-tidy completed."
+
+# Coverage: instrument build, run unit tests, and report codegen coverage
+.PHONY: coverage
+# Variables:
+#  - COVERAGE_MIN: minimum percent for pass (default 80)
+#  - COVERAGE_SCOPE: path substring to aggregate (default src/basic_compiler/codegenerator/)
+#  - COVERAGE_METRIC: lines|regions|both (default both)
+COVERAGE_MIN ?= 80
+COVERAGE_SCOPE ?= src/basic_compiler/codegenerator/
+COVERAGE_METRIC ?= both
+coverage:
+	@echo "[coverage] Configuring with CODE_COVERAGE=ON..."
+	@$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR) $(TOOLCHAIN_FLAG) -DCMAKE_BUILD_TYPE=$(CONFIG) -DCODE_COVERAGE=ON
+	@echo "[coverage] Building tests..."
+	@$(CMAKE) --build $(BUILD_DIR) -v -- -j$(NUM_CPUS)
+	@echo "[coverage] Running unit tests with profiling..."
+	@set -e; \
+	  OUT="$(BUILD_DIR)/coverage"; mkdir -p "$$OUT"; \
+	  UNIT_BIN="$(BUILD_DIR)/basic_compiler_unit_tests"; \
+	  if [ ! -x "$$UNIT_BIN" ]; then echo "Unit tests not found: $$UNIT_BIN"; exit 2; fi; \
+	  LLVM_PROFILE_FILE="$$OUT/unit-%p.profraw" "$$UNIT_BIN" >/dev/null; \
+	  echo "[coverage] Merging profiles..."; \
+	  LLVM_PROFDATA=$(LLVM_PREFIX)/bin/llvm-profdata; \
+	  if [ ! -x "$$LLVM_PROFDATA" ]; then LLVM_PROFDATA=llvm-profdata; fi; \
+	  $$LLVM_PROFDATA merge -sparse "$$OUT"/*.profraw -o "$$OUT/coverage.profdata"; \
+	  echo "[coverage] Generating report..."; \
+	  LLVM_COV=$(LLVM_PREFIX)/bin/llvm-cov; \
+	  if [ ! -x "$$LLVM_COV" ]; then LLVM_COV=llvm-cov; fi; \
+	  $$LLVM_COV report "$$UNIT_BIN" -instr-profile="$$OUT/coverage.profdata" -use-color=false > "$$OUT/report.txt"; \
+	  echo "[coverage] Aggregating scope: $(COVERAGE_SCOPE)"; \
+	  SCOPE="$(COVERAGE_SCOPE)"; \
+	  grep "$$SCOPE" "$$OUT/report.txt" | awk '{ reg+=$$2; miss+=$$3; line+=$$8; lmiss+=$$9 } END { \
+	    if (reg>0) printf("Regions %d/%d %.0f\n", reg-miss, reg, (reg-miss)*100/reg); \
+	    if (line>0) printf("Lines %d/%d %.0f\n", line-lmiss, line, (line-lmiss)*100/line); \
+	  }' > "$$OUT/scope.txt"; \
+	  echo "[coverage] Scope summary:"; cat "$$OUT/scope.txt" | sed 's/^/  /'; \
+	  LINES=$$(awk '/^Lines/{print $$3}' "$$OUT/scope.txt"); \
+	  REGS=$$(awk '/^Regions/{print $$3}' "$$OUT/scope.txt"); \
+	  FAIL=0; \
+	  case "$(COVERAGE_METRIC)" in \
+	    lines)   VAL=$$LINES;; \
+	    regions) VAL=$$REGS;; \
+	    both)    VAL=$$LINES; if [ -n "$$REGS" ] && [ $${REGS:-0} -lt $(COVERAGE_MIN) ]; then FAIL=1; fi;; \
+	    *)       VAL=$$LINES;; \
+	  esac; \
+	  if [ -z "$$VAL" ]; then echo "Could not parse coverage values for scope $(COVERAGE_SCOPE)."; exit 4; fi; \
+	  if [ $${VAL:-0} -lt $(COVERAGE_MIN) ]; then FAIL=1; fi; \
+	  if [ $$FAIL -ne 0 ]; then echo "Coverage below threshold $(COVERAGE_MIN)% (lines=$$LINES, regions=$$REGS)."; exit 3; fi; \
+	  echo "[coverage] OK. Detailed report: $$OUT/report.txt"

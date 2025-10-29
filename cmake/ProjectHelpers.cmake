@@ -79,7 +79,7 @@ function(build_project target)
       add_custom_command(
         OUTPUT "${_bc}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${_outdir}"
-        COMMAND ${CMAKE_COMMAND} -E env CPATH=${_cpath_expr} "${_compiler}" ${_std_flag} -emit-llvm -c "${_abs_src}" -o "${_bc}" ${_def_expr} ${_opt_expr}
+        COMMAND ${CMAKE_COMMAND} -E env CPATH=${_cpath_expr} "${_compiler}" ${_std_flag} -emit-llvm -c "${_abs_src}" -o "${_bc}" ${_def_expr}
         DEPENDS "${_abs_src}"
         COMMENT "Generating LLVM bitcode ${_bc}"
         VERBATIM
