@@ -48,8 +48,5 @@ if(NOT DEFINED CMAKE_C_COMPILER OR NOT DEFINED CMAKE_CXX_COMPILER)
   endif()
 endif()
 
-# Prefer Ninja if available
-find_program(_ninja_exe NAMES ninja)
-if(_ninja_exe)
-  set(CMAKE_MAKE_PROGRAM "${_ninja_exe}" CACHE FILEPATH "Build tool" FORCE)
-endif()
+# Do not override the build tool (CMAKE_MAKE_PROGRAM).
+# The selected CMake generator determines the build tool (e.g., Ninja or Make).

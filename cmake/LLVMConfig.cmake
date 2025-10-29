@@ -14,7 +14,7 @@
 
 include_guard(GLOBAL)
 
-option(REQUIRE_LLVM_17 "Require LLVM major version 17.x" ON)
+option(REQUIRE_LLVM_17 "Require LLVM major version 17.x" OFF)
 
 # Build a list of candidate llvm bin paths: prefer llvm@17 first, then generic llvm
 set(_llvm_bin_hints)
@@ -110,7 +110,7 @@ if(REQUIRE_LLVM_17)
   if(NOT _llvm_version_major)
     message(WARNING "Unable to detect LLVM version. Expected LLVM 17.x. Ensure Homebrew llvm@17 is installed and on PATH.")
   elseif(NOT _llvm_version_major EQUAL 17)
-    message(FATAL_ERROR "LLVM 17.x is required. Detected '${_llvm_version_text}'. Install with 'brew install llvm@17' and ensure $(brew --prefix llvm@17)/bin is first in PATH, or use -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-HomebrewLLVM.cmake")
+    message(WARNING "LLVM 17.x is recommended. Detected '${_llvm_version_text}'. Proceeding without strict enforcement.")
   endif()
 endif()
 

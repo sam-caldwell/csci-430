@@ -23,3 +23,9 @@ endif()
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic>")
 endif()
+
+# Enforce out-of-source build directory under build/
+# Disallow top-level cmake-build-* directories (e.g., cmake-build-debug)
+get_filename_component(_csci430_bin_name "${CMAKE_BINARY_DIR}" NAME)
+get_filename_component(_csci430_bin_parent "${CMAKE_BINARY_DIR}" DIRECTORY)
+

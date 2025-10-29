@@ -2,34 +2,36 @@
 # (c) 2025 Sam Caldwell.  All Rights Reserved.
 # Purpose: Convenience wrapper for configure/build and environment reporting.
 #          Provides 'build', 'clean', and 'version' targets for developers.
-.PHONY: clean build configure version tree zip lint test help
+.PHONY: clean build version tree zip lint test help demo
 .DEFAULT_GOAL := help
 
 # Removes the artifact directory and recreates it
 clean:
 	@echo "Cleaning build/ directory..."
-	-@rm -rf build build-basic || true
+	-@rm -rf build build-basic cmake-build-* || true
 	@mkdir -p build
 	@echo "Recreated build/"
 
 # Configuration
 CMAKE ?= cmake
-GENERATOR ?= Ninja
+# Prefer Ninja if available, otherwise fall back to Unix Makefiles
+GENERATOR ?= $(shell if command -v ninja >/dev/null 2>&1; then echo Ninja; else echo "Unix Makefiles"; fi)
 TOOLCHAIN ?= cmake/Toolchain-HomebrewLLVM.cmake
+# Only pass a toolchain if the file exists
+TOOLCHAIN_FLAG := $(if $(wildcard $(TOOLCHAIN)),-DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN),)
 CONFIG ?= Debug
 # Derive BUILD_DIR from CONFIG unless overridden by the user
+BUILD_ROOT := build
 BUILD_SUBDIR := $(shell echo $(CONFIG) | tr A-Z a-z)
-BUILD_DIR ?= build/cmake-build-$(BUILD_SUBDIR)
+BUILD_DIR ?= $(BUILD_ROOT)/cmake-build-$(BUILD_SUBDIR)
 
-configure:
+# Build all targets via CMake/Ninja (auto-configure if needed)
+build:
 	@if [ ! -f "$(BUILD_DIR)/CMakeCache.txt" ]; then \
-		$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR) -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN) -DCMAKE_BUILD_TYPE=$(CONFIG); \
+		$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR) $(TOOLCHAIN_FLAG) -DCMAKE_BUILD_TYPE=$(CONFIG); \
 	else \
-		$(CMAKE) -S . -B $(BUILD_DIR); \
+		$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR) $(TOOLCHAIN_FLAG); \
 	fi
-
-# Build all targets via CMake/Ninja
-build: configure
 	@$(CMAKE) --build $(BUILD_DIR) -v
 
 # Tree view of repository (requires 'tree')
@@ -148,14 +150,18 @@ test: e2e
 help:
 	@echo "Available make targets:"
 	@printf "  %-12s %s\n" "help"     "Show this help message"
+	@echo
 	@printf "  %-12s %s\n" "build"    "Configure (first run) and build all targets via CMake/Ninja"
-	@printf "  %-12s %s\n" "configure" "Configure CMake in $(BUILD_DIR) using generator $(GENERATOR)"
-	@printf "  %-12s %s\n" "test"     "Run unit/integration tests (CTest/GoogleTest)"
-	@printf "  %-12s %s\n" "lint"     "Run clang-tidy on all C/C++ sources"
-	@printf "  %-12s %s\n" "version"  "Show versions for CMake, Clang/LLVM, Ninja, OS, CPU, Xcode"
-	@printf "  %-12s %s\n" "tree"     "Print repository tree (requires 'tree')"
-	@printf "  %-12s %s\n" "zip"      "Archive repository into $(ZIP_NAME), excluding build/ and VCS/IDE files"
 	@printf "  %-12s %s\n" "clean"    "Delete and recreate the artifact directory 'build/'"
+	@printf "  %-12s %s\n" "demo"     "Compile demos/factorial.bas to build/demos/factorial/ (bin, .ll, .bc, .asm, logs)"
+	@printf "  %-12s %s\n" "e2e"      "Run end-to-end tests (depends on integration)"
+	@printf "  %-12s %s\n" "integration" "Run integration tests (depends on unit)"
+	@printf "  %-12s %s\n" "lint"     "Run clang-tidy on all C/C++ sources"
+	@printf "  %-12s %s\n" "test"     "Run unit, integration, and e2e tests"
+	@printf "  %-12s %s\n" "tree"     "Print repository tree (requires 'tree')"
+	@printf "  %-12s %s\n" "unit"     "Run unit tests"
+	@printf "  %-12s %s\n" "version"  "Show versions for CMake, Clang/LLVM, Ninja, OS, CPU, Xcode"
+	@printf "  %-12s %s\n" "zip"      "Archive repository into $(ZIP_NAME), excluding build/ and VCS/IDE files"
 	@echo
 	@echo "Overridable variables (current values):"
 	@printf "  %-14s = %s\n" "BUILD_DIR" "$(BUILD_DIR)"
@@ -171,11 +177,44 @@ help:
 	@echo "  make lint BUILD_DIR=build/cmake-build-debug"
 	@echo "  make tree TREE_ROOT=src"
 
+# Build the factorial demo into build/demos/factorial/
+DEMO_SRC := demos/factorial.bas
+demo: build
+	@set -e; \
+	OUT_DIR="$(BUILD_DIR)/demos/factorial"; \
+	BIN_NAME="factorial"; \
+	BIN="$$OUT_DIR/$$BIN_NAME"; \
+	LL="$$OUT_DIR/$$BIN_NAME.ll"; \
+	BC="$$OUT_DIR/$$BIN_NAME.bc"; \
+	ASM="$$OUT_DIR/$$BIN_NAME.asm"; \
+	LEX="$$OUT_DIR/$$BIN_NAME.lex.log"; \
+	SYN="$$OUT_DIR/$$BIN_NAME.syntax.log"; \
+	SEM="$$OUT_DIR/$$BIN_NAME.semantic.log"; \
+	CGN="$$OUT_DIR/$$BIN_NAME.codegen.log"; \
+	COMPILER_BIN="$(BUILD_DIR)/basic_compiler/basic_compiler"; \
+	if [ ! -x "$$COMPILER_BIN" ]; then echo "Compiler not found: $$COMPILER_BIN"; exit 2; fi; \
+	mkdir -p "$$OUT_DIR"; \
+	UNAMES=$$(uname -s); ARCH=$$(uname -m); TRIPLE=""; \
+	if [ "$$UNAMES" = "Darwin" ]; then \
+	  if [ "$$ARCH" = "arm64" ]; then TRIPLE=arm64-apple-macos; \
+	  elif [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-apple-macos; fi; \
+	elif [ "$$UNAMES" = "Linux" ]; then \
+	  if [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-linux-gnu; \
+	  elif [ "$$ARCH" = "aarch64" ] || [ "$$ARCH" = "arm64" ]; then \
+	    TRIPLE=aarch64-linux-gnu; \
+	  fi; \
+	fi; \
+	TGT_ARG=""; if [ -n "$$TRIPLE" ]; then TGT_ARG="--target $$TRIPLE"; fi; \
+	echo "Compiling $$DEMO_SRC -> $$OUT_DIR (target=$$TRIPLE)"; \
+	"$$COMPILER_BIN" "$(DEMO_SRC)" -ll "$$LL" --bc "$$BC" -o "$$BIN" --asm "$$ASM" \
+	  $$TGT_ARG --lex-log "$$LEX" --syntax-log "$$SYN" --semantic-log "$$SEM" --log "$$CGN"; \
+	echo "Demo artifacts written to $$OUT_DIR";
+
 # Lint all C/C++ sources using clang-tidy
 LINT_PATTERNS ?= -name '*.c' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp'
 LINT_PRUNE ?= \( -path './.git' -o -path './build' -o -path './build-*' -o -path './cmake-build-*' -o -path './out' -o -path './.idea' -o -path './CMakeFiles' -o -path './Testing' \) -prune
-lint: configure
-	@command -v $(CLANG_TIDY) >/dev/null 2>&1 || { echo "clang-tidy not found. Install via: brew install llvm"; exit 1; }
+lint: build
+	@command -v $(CLANG_TIDY) >/dev/null 2>&1 || { echo "clang-tidy not found; skipping lint."; exit 0; }
 	@echo "Running clang-tidy across repository sources..."
 	@set -e; \
 	SDK=$$(xcrun --show-sdk-path 2>/dev/null || true); \
@@ -187,8 +226,8 @@ lint: configure
 	  FILES=$$(find . $(LINT_PRUNE) -o -type f \( $(LINT_PATTERNS) \) -print); \
 	fi; \
 	if [ -z "$$FILES" ]; then echo "No C/C++ source files found to lint."; exit 0; fi; \
-	for f in $$FILES; do \
-	  echo "-- $$f"; \
-	  "$(CLANG_TIDY)" -p "$(BUILD_DIR)" $$SDK_ARGS "$$f" || exit $$?; \
-	done; \
+		for f in $$FILES; do \
+		  echo "-- $$f"; \
+		  "$(CLANG_TIDY)" -p "$(BUILD_DIR)" -warnings-as-errors='*' $$SDK_ARGS "$$f" || exit $$?; \
+		done; \
 	echo "clang-tidy completed."
