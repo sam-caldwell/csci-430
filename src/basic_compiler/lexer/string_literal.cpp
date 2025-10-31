@@ -20,10 +20,9 @@ Token Lexer::stringLiteral() {
     std::string buf;
     advance(); // opening quote
     while (!atEnd()) {
-        if (char c = advance(); c == '\\') {
+        if (const char c = advance(); c == '\\') {
             if (atEnd()) break;
-            char n = advance();
-            switch (n) {
+            switch (const char n = advance()) {
                 case 'n': buf.push_back('\n'); break;
                 case 't': buf.push_back('\t'); break;
                 case '"': buf.push_back('"'); break;

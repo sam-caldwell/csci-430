@@ -29,8 +29,8 @@ void CodeGenerator::collectDecls(const Program& program) {
         lineMap_[line.number] = &line;
         for (const auto& st : line.statements) collectStmtVars(st.get());
     }
-    std::sort(lineNumbers_.begin(), lineNumbers_.end());
-    lineNumbers_.erase(std::unique(lineNumbers_.begin(), lineNumbers_.end()), lineNumbers_.end());
+    std::ranges::sort(lineNumbers_);
+    lineNumbers_.erase(std::ranges::unique(lineNumbers_).begin(), lineNumbers_.end());
 }
 
 } // namespace gwbasic

@@ -6,7 +6,7 @@ namespace gwbasic::cli {
 bool takeOptValue(const std::string& arg,
                   const char* name,
                   int& i,
-                  int argc,
+                  const int argc,
                   char** argv,
                   std::optional<std::string>& out) {
     if (arg == name) {
@@ -14,7 +14,7 @@ bool takeOptValue(const std::string& arg,
             out = argv[++i];
             return true;
         }
-        // Missing value; do not consume. Let caller handle error/reporting.
+        // Missing value; do not consume. Let the caller handle error/reporting.
     }
     return false;
 }

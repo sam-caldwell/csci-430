@@ -2,7 +2,6 @@
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/ToString.h"
-#include <cstdio>
 
 namespace gwbasic {
 
@@ -24,7 +23,7 @@ void Lexer::logToken(const Token& t) {
         case TokenType::NewLine:
             break;
         default: {
-            std::string esc = escapeForLog(t.lexeme);
+            const std::string esc = escapeForLog(t.lexeme);
             lexLog_ << " \"" << esc << "\"";
             break;
         }
@@ -44,7 +43,7 @@ void Lexer::logToken(const Token& t) {
 std::string Lexer::escapeForLog(const std::string& s) {
     std::string out;
     out.reserve(s.size());
-    for (unsigned char ch : s) {
+    for (const unsigned char ch : s) {
         switch (ch) {
             case '\\': out += "\\\\"; break;
             case '\n': out += "\\n"; break;

@@ -16,8 +16,7 @@ void CodeGenerator::ensureVarAllocated(std::ostringstream& out, const std::strin
      *  - Checks for an existing alloca mapping; if absent, emits an alloca
      *    of type double and zero-initializes it.
      */
-    auto it = varAllocaName_.find(name);
-    if (it != varAllocaName_.end() && !it->second.empty()) return;
+    if (auto it = varAllocaName_.find(name); it != varAllocaName_.end() && !it->second.empty()) return;
     std::string a = "%"; a += name;
     varAllocaName_[name] = a;
     {

@@ -7,10 +7,10 @@ namespace gwbasic::cli {
 bool takeOptValue(const std::string& arg,
                   std::initializer_list<const char*> names,
                   int& i,
-                  int argc,
+                  const int argc,
                   char** argv,
                   std::optional<std::string>& out) {
-    for (auto name : names) {
+    for (const auto name : names) {
         if (takeOptValue(arg, name, i, argc, argv, out)) return true;
     }
     return false;

@@ -17,7 +17,8 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
      */
     if (check(TokenType::String)) {
         std::string s = peek().lexeme;
-        int l = peek().line, c = peek().col;
+        const int l = peek().line;
+        const int c = peek().col;
         advance();
         auto n = std::make_unique<PrintStmt>(std::make_unique<StringExpr>(s));
         n->pos = {l, c};

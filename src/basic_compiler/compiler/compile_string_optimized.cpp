@@ -9,8 +9,7 @@ std::string Compiler::compileStringOptimized(const std::string& source) {
     auto tokens = lex.tokenize();
     Parser parser(std::move(tokens));
     auto program = parser.parseProgram();
-    AstOptimizer opt;
-    opt.optimize(program);
+    gwbasic::AstOptimizer::optimize(program);
     CodeGenerator gen;
     return gen.generate(program);
 }

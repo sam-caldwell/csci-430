@@ -15,7 +15,7 @@ namespace gwbasic {
  */
 void Lexer::skipWhitespace() {
     while (!atEnd()) {
-        char c = peek();
+        const char c = peek();
         if (c == ' ' || c == '\t' || c == '\r') {
             advance();
             continue;
