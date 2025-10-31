@@ -1,6 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/TargetUtils.h"
-#include <cctype>
 
 bool isSupportedTargetTriple(const std::string& triple) {
     std::string t = triple;

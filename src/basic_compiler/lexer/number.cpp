@@ -1,6 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
-#include <cctype>
 
 namespace gwbasic {
 

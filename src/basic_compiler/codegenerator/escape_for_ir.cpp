@@ -1,6 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include <cstdio>
 
 namespace gwbasic {
 
@@ -17,7 +16,7 @@ std::string CodeGenerator::escapeForIR(const std::string& s) {
      *    common characters like backslash and quotes.
      */
     std::string out;
-    for (unsigned char c : s) {
+    for (const unsigned char c : s) {
         switch (c) {
             case '\\': out += "\\5C"; break;
             case '"': out += "\\22"; break;

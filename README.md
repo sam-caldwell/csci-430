@@ -65,10 +65,10 @@ Code repo: https://github.com/sam-caldwell/csci-430
 ## Artifacts And Logs
 
 - IR: `.ll` human-readable LLVM IR.
-    - Bitcode: `.bc` machine IR, useful for linking or analysis.
-    - Assembly: `.asm` with a header comment reflecting source and target; dialect matches target triple.
-    - Executable: platform-native binary produced by `clang`.
-    - Logs: phase logs capture tokens, syntax steps, semantic validations, and codegen mappings.
+- Bitcode: `.bc` machine IR, useful for linking or analysis.
+- Assembly: `.asm` with a header comment reflecting source and target; dialect matches target triple.
+- Executable: platform-native binary produced by `clang`.
+- Logs: phase logs capture tokens, syntax steps, semantic validations, and codegen mappings.
 
 ## Tips
 
@@ -77,9 +77,8 @@ Code repo: https://github.com/sam-caldwell/csci-430
 
 ## Troubleshooting
 
-- “CLANG_PATH not defined” when asking for `.bc`, `.asm`, or `-o`:
-    - Ensure you built via `make build` so the compiler is compiled with `CLANG_PATH` injected.
-- “unsupported target triple”:
-    - Only x86_64 and arm64/aarch64 for Linux/macOS/FreeBSD/Android are accepted.
-- Mismatched target warnings when linking IR:
-    - Re-run with `--target <triple>` appropriate for your system, or link on the destination host.
+| Problem                                    | Solution                                                     |
+|--------------------------------------------|--------------------------------------------------------------|
+| “CLANG_PATH not defined”                   | Use `make build` so the project has `CLANG_PATH` injected.   |
+| “unsupported target triple”                | Only x86_64 and arm64/aarch64 for Linux/macOS are accepted.  |
+| Mismatched target warnings when linking IR | Re-run with `--target <triple>` appropriate for your system. |

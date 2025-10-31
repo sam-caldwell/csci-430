@@ -23,7 +23,7 @@ std::string CodeGenerator::generate(const Program& program) {
     emitGlobals(out);
     emitMainPrologue(out);
     if (!lineNumbers_.empty()) {
-        int lastIdx = static_cast<int>(lineNumbers_.size() - 1);
+        const int lastIdx = static_cast<int>(lineNumbers_.size() - 1);
         std::map<int, const Line*> lm;
         for (const auto& l : program.lines) lm[l.number] = &l;
         for (int i = 0; i <= lastIdx; ++i) {

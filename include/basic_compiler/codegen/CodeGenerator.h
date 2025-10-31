@@ -66,7 +66,8 @@ private:
     void emitHeader(std::ostringstream& out);
     void emitGlobals(std::ostringstream& out);
     void emitMainPrologue(std::ostringstream& out);
-    void emitMainEpilogue(std::ostringstream& out);
+
+    static void emitMainEpilogue(std::ostringstream& out);
     void emitLineBlock(std::ostringstream& out, const Line& line, int lineIndex, int lastIndex);
     void emitFor(std::ostringstream& out, const ForStmt* fs, const std::string& currLineLabel, int& localCounter);
     void emitSubroutineInline(std::ostringstream& out, int targetLine, const std::string& entryLabel, const std::string& returnLabel);

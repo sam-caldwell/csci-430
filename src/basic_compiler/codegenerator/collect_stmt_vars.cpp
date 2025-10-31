@@ -17,6 +17,7 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
     if (const auto p = dynamic_cast<const PrintStmt*>(s)) {
         collectExprVars(p->value.get());
         if (const auto se = dynamic_cast<StringExpr*>(p->value.get())) {
+            // ReSharper disable once CppUseAssociativeContains
             if (!strLiteralId_.count(se->value)) strLiteralId_[se->value] = strCounter_++;
             { std::ostringstream m; m << "StringLiteral @ " << se->pos.line << ':' << se->pos.col; logSem(m.str()); }
         }

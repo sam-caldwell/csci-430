@@ -13,7 +13,7 @@ const Line* CodeGenerator::findLine(int ln) const {
      * Theory of operation:
      *  - Performs a map lookup using the prebuilt lineMap_.
      */
-    auto it = lineMap_.find(ln);
+    const auto it = lineMap_.find(ln);
     if (it == lineMap_.end()) return nullptr;
     return it->second;
 }
