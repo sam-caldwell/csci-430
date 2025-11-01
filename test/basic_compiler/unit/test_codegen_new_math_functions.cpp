@@ -14,9 +14,9 @@ TEST(CodeGenMathExt, RndCintCsngCdbl) {
         "40 PRINT CDBL(2)\n"
         "50 END\n";
     std::string ir = Compiler::compileString(src);
-    // RND -> drand48
-    EXPECT_NE(ir.find("declare double @drand48()"), std::string::npos);
-    EXPECT_NE(ir.find("call double @drand48()"), std::string::npos);
+    // RND -> gwb_rnd helper
+    EXPECT_NE(ir.find("define double @gwb_rnd(double"), std::string::npos);
+    EXPECT_NE(ir.find("call double @gwb_rnd(double"), std::string::npos);
     // CINT -> round
     EXPECT_NE(ir.find("declare double @round(double)"), std::string::npos);
     EXPECT_NE(ir.find("call double @round(double"), std::string::npos);
@@ -24,4 +24,3 @@ TEST(CodeGenMathExt, RndCintCsngCdbl) {
     EXPECT_NE(ir.find(" = fptrunc double"), std::string::npos);
     EXPECT_NE(ir.find(" = fpext float"), std::string::npos);
 }
-
