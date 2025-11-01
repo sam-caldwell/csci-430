@@ -2,6 +2,8 @@
 #pragma once
 
 #include <string>
+#include <istream>
+#include <sstream>
 #include <vector>
 #include <stdexcept>
 #include <fstream>
@@ -42,6 +44,18 @@ public:
      */
     explicit Lexer(std::string source)
         : src_(std::move(source)) {}
+
+    /**
+     * Construct a lexer from an input stream.
+     *
+     * Inputs:
+     *  - in: std::istream providing source characters (ifstream, stringstream, etc.)
+     */
+    explicit Lexer(std::istream& in) {
+        std::ostringstream buf;
+        buf << in.rdbuf();
+        src_ = std::move(buf).str();
+    }
 
     /**
      * Tokenize: Produce the complete list of tokens for the source.
