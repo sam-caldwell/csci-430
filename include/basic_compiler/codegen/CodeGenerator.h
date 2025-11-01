@@ -10,8 +10,27 @@
 
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/NumberExpr.h"
+#include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/StringExpr.h"
+#include "basic_compiler/ast/ForStmt.h"
+#include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/InputStmt.h"
+#include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
+#include "basic_compiler/ast/GosubStmt.h"
+#include "basic_compiler/ast/EndStmt.h"
+#include "basic_compiler/ast/ReturnStmt.h"
+#include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/codegen/CodeGenError.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/ast/Traits.h"
 
 namespace gwbasic {
 
@@ -52,6 +71,7 @@ private:
     std::vector<int> lineNumbers_; // sorted line numbers
     std::map<int, const Line*> lineMap_;
     int currentLine_{0};
+    bool needsRndHelper_{false};
     // Optional semantic input
     bool semProvided_{false};
     std::set<std::string> semVariables_{};
@@ -75,6 +95,9 @@ private:
     void collectDecls(const Program& program);
     void collectExprVars(const Expr* e);
     void collectStmtVars(const Stmt* s);
+    // Lightweight scan for RND usage independent of semantics
+    void scanExprForRnd(const Expr* e);
+    void scanStmtForRnd(const Stmt* s);
 
     // Emission helpers
     void emitHeader(std::ostringstream& out);
@@ -87,7 +110,7 @@ private:
     void emitSubroutineInline(std::ostringstream& out, int targetLine, const std::string& entryLabel, const std::string& returnLabel);
 
     // Expression lowering
-    std::string emitExpr(std::ostringstream& out, const Expr* e, const std::string& currBlockSuffix);
+    std::string emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix);
     std::string emitComparison(std::ostringstream& out, const BinaryExpr* c);
 
     // Utilities
@@ -102,26 +125,8 @@ private:
     void logSem(const std::string& msg) {
         if (semLogEnabled_ && semLogFile_.is_open()) semLogFile_ << msg << "\n";
     }
-    static const char* nodeName(const Stmt* s) {
-        if (isa<AssignStmt>(s)) return "AssignStmt";
-        if (isa<PrintStmt>(s)) return "PrintStmt";
-        if (isa<GotoStmt>(s)) return "GotoStmt";
-        if (isa<GosubStmt>(s)) return "GosubStmt";
-        if (isa<ReturnStmt>(s)) return "ReturnStmt";
-        if (isa<IfStmt>(s)) return "IfStmt";
-        if (isa<InputStmt>(s)) return "InputStmt";
-        if (isa<ForStmt>(s)) return "ForStmt";
-        if (isa<EndStmt>(s)) return "EndStmt";
-        return "Stmt";
-    }
-    static const char* nodeName(const Expr* e) {
-        if (isa<NumberExpr>(e)) return "NumberExpr";
-        if (isa<StringExpr>(e)) return "StringExpr";
-        if (isa<VarExpr>(e)) return "VarExpr";
-        if (isa<UnaryExpr>(e)) return "UnaryExpr";
-        if (isa<BinaryExpr>(e)) return "BinaryExpr";
-        return "Expr";
-    }
+    static const char* nodeName(const Stmt* s) { return prettyName(s ? s->getKind() : NodeKind::AbstractStmt); }
+    static const char* nodeName(const Expr* e) { return prettyName(e ? e->getKind() : NodeKind::AbstractExpr); }
 
 public:
     /** Enable code generation logging to the specified file path. */
