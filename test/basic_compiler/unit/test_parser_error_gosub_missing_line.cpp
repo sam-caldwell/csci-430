@@ -14,7 +14,8 @@ using namespace gwbasic;
  */
 TEST(Parser, ErrorGosubMissingLine) {
     std::string src = "10 GOSUB\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);

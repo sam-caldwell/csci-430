@@ -14,7 +14,8 @@ using namespace gwbasic;
  */
 TEST(Parser, ErrorIfMissingLineNumber) {
     std::string src = "10 IF A > 1 THEN PRINT 5\n"; // not a line number
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);

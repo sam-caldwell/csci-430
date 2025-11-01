@@ -14,7 +14,8 @@ using namespace gwbasic;
  */
 TEST(Parser, ErrorIfMissingThen) {
     std::string src = "10 IF A < 10 50\n"; // missing THEN keyword
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);

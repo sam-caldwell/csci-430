@@ -19,7 +19,8 @@ TEST(CodeGenCore, GenerateWithoutSemanticsCollectsVars) {
         "20 IF A>1 THEN 30\n"
         "30 PRINT A\n"
         "40 END\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     auto prog = p.parseProgram();
@@ -28,4 +29,3 @@ TEST(CodeGenCore, GenerateWithoutSemanticsCollectsVars) {
     std::string ir = gen.generate(prog);
     EXPECT_NE(ir.find("@.fmt_num"), std::string::npos);
 }
-

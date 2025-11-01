@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <string>
+#include <sstream>
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/GosubStmt.h"
@@ -16,7 +17,8 @@ using namespace gwbasic;
  */
 TEST(Parser, GosubAndReturn) {
     std::string src = "10 GOSUB 300\n20 RETURN\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     auto [lines] = p.parseProgram();

@@ -19,7 +19,8 @@ using namespace gwbasic;
 TEST(Parser, UnaryMinusBasic) {
     // A = -1 + 2  => Add( Unary(-,1), 2 )
     std::string src = "10 LET A = -1 + 2\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     auto [lines] = p.parseProgram();

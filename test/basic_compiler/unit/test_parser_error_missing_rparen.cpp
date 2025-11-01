@@ -14,7 +14,8 @@ using namespace gwbasic;
  */
 TEST(Parser, ErrorMissingRightParen) {
     std::string src = "10 PRINT (1+2\n"; // missing ')'
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);
