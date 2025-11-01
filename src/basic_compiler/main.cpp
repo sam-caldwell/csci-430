@@ -41,17 +41,25 @@ int main(int argc, char** argv) {
     auto detectDefaultTriple = []() -> std::string {
 #ifdef CLANG_PATH
         std::string triple;
-        std::string cmd = std::string(CLANG_PATH) + " -print-target-triple 2>/dev/null";
+        // Ask clang how it will invoke cc1 for IR, and parse the -triple it uses
+        std::string cmd = std::string(CLANG_PATH) + " -### -S -x ir - -o /dev/null 2>&1";
         FILE* pipe = popen(cmd.c_str(), "r");
         if (pipe) {
             char buf[256];
-            size_t n = fread(buf, 1, sizeof(buf) - 1, pipe);
-            if (n > 0) {
-                buf[n] = '\0';
-                triple.assign(buf);
-                while (!triple.empty() && (triple.back() == '\n' || triple.back() == '\r' || triple.back() == ' ' || triple.back() == '\t')) triple.pop_back();
-            }
+            std::string out;
+            while (size_t n = fread(buf, 1, sizeof(buf), pipe)) out.append(buf, buf + n);
             pclose(pipe);
+            // Find -triple "..."
+            auto pos = out.find("\"-triple\"");
+            if (pos != std::string::npos) {
+                auto q1 = out.find('"', pos + 9);
+                if (q1 != std::string::npos) {
+                    auto q2 = out.find('"', q1 + 1);
+                    if (q2 != std::string::npos && q2 > q1 + 1) {
+                        triple = out.substr(q1 + 1, q2 - (q1 + 1));
+                    }
+                }
+            }
         }
         return triple;
 #else
@@ -140,7 +148,7 @@ int main(int argc, char** argv) {
             } else {
                 llTmp = std::filesystem::path(*outBC).replace_extension(".ll");
                 std::ofstream out(llTmp);
-                out << ir;
+                out << irWithTriple;
             }
             std::ostringstream oss;
             oss << CLANG_PATH << " -c -emit-llvm -x ir \"" << llTmp.string() << "\" -o \"" << *outBC << "\"";
@@ -163,11 +171,11 @@ int main(int argc, char** argv) {
             } else {
                 llTmp = std::filesystem::path(*outBIN).replace_extension(".ll");
                 std::ofstream out(llTmp);
-                out << ir;
+                out << irWithTriple;
             }
             std::ostringstream oss;
             oss << CLANG_PATH << ' ';
-            if (targetTriple) oss << "-target \"" << *targetTriple << "\" ";
+            if (!chosenTriple.empty()) oss << "-target \"" << chosenTriple << "\" ";
             oss << '"' << llTmp.string() << "\" -o \"" << *outBIN << "\"";
             // Link math library where required
             #if defined(__APPLE__)
@@ -199,9 +207,9 @@ int main(int argc, char** argv) {
                 llTmp = asmOut;
                 llTmp.replace_extension(".ll");
                 std::ofstream out(llTmp);
-                out << ir;
+                out << irWithTriple;
             }
-            std::string triple = targetTriple.value_or(std::string("arm64-apple-macos"));
+            std::string triple = targetTriple.value_or(detectDefaultTriple());
             if (!isSupportedTargetTriple(triple)) {
                 std::cerr << "Error: unsupported target triple for assembly: " << triple
                           << " (supported: x86_64 or arm64/aarch64 on Linux/macOS)\n";
@@ -244,7 +252,7 @@ int main(int argc, char** argv) {
 #endif
         }
         if (!outLL && !outBC && !outBIN && !outASM) {
-            std::cout << ir;
+            std::cout << irWithTriple;
         }
         return 0;
     } catch (const std::exception& ex) {
