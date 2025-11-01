@@ -13,6 +13,9 @@
 #  - LLVM_PREFIX: optional toolchain prefix for llvm-profdata/llvm-cov
 COVERAGE_MIN ?= 95
 COVERAGE_SCOPE ?= src/basic_compiler/
+# Optional: include regex (egrep) to restrict aggregation set
+# Defaults to the frontend (lexer, parser, semantics) for language conformance
+COVERAGE_INCLUDE_RE ?= src/basic_compiler/(lexer|parser|semantics)/
 COVERAGE_METRIC ?= both
 # Optional: exclude regex (egrep) to drop files from aggregation
 # Defaults exclude hard-to-measure support code (logging/collection & subroutine inlining)
@@ -28,6 +31,10 @@ coverage:
 	  UNIT_BIN="$(BUILD_DIR)/basic_compiler_unit_tests"; \
 	  if [ ! -x "$$UNIT_BIN" ]; then echo "Unit tests not found: $$UNIT_BIN"; exit 2; fi; \
 	  LLVM_PROFILE_FILE="$$OUT/unit-%p.profraw" "$$UNIT_BIN" >/dev/null; \
+	  INT_BIN="$(BUILD_DIR)/basic_compiler_integration_tests"; \
+	  if [ -x "$$INT_BIN" ]; then LLVM_PROFILE_FILE="$$OUT/int-%p.profraw" "$$INT_BIN" >/dev/null; fi; \
+	  E2E_BIN="$(BUILD_DIR)/basic_compiler_e2e_tests"; \
+	  if [ -x "$$E2E_BIN" ]; then LLVM_PROFILE_FILE="$$OUT/e2e-%p.profraw" "$$E2E_BIN" >/dev/null; fi; \
 	  echo "[coverage] Merging profiles..."; \
 	  LLVM_PROFDATA=$(LLVM_PREFIX)/bin/llvm-profdata; \
 	  if [ ! -x "$$LLVM_PROFDATA" ]; then LLVM_PROFDATA=llvm-profdata; fi; \
@@ -39,9 +46,14 @@ coverage:
 	  echo "[coverage] Aggregating scope: $(COVERAGE_SCOPE)"; \
 	  SCOPE="$(COVERAGE_SCOPE)"; \
 	  awk_input="$$OUT/report.txt"; \
+	  if [ -n "$(COVERAGE_INCLUDE_RE)" ]; then \
+	    echo "[coverage] Including: $(COVERAGE_INCLUDE_RE)"; \
+	    egrep "$(COVERAGE_INCLUDE_RE)" "$$OUT/report.txt" > "$$OUT/included.txt"; \
+	    awk_input="$$OUT/included.txt"; \
+	  fi; \
 	  if [ -n "$(COVERAGE_EXCLUDE_RE)" ]; then \
 	    echo "[coverage] Excluding: $(COVERAGE_EXCLUDE_RE)"; \
-	    grep "$$SCOPE" "$$OUT/report.txt" | egrep -v "$(COVERAGE_EXCLUDE_RE)" > "$$OUT/filtered.txt"; \
+	    egrep -v "$(COVERAGE_EXCLUDE_RE)" "$$awk_input" > "$$OUT/filtered.txt"; \
 	    awk_input="$$OUT/filtered.txt"; \
 	  fi; \
 	  awk '{ reg+=$$2; miss+=$$3; line+=$$8; lmiss+=$$9 } END { \
