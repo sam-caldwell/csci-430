@@ -8,9 +8,12 @@ file(GLOB BASIC_COMPILER_INTEGRATION_TEST_SOURCES CONFIGURE_DEPENDS
 
 add_executable(basic_compiler_integration_tests ${BASIC_COMPILER_INTEGRATION_TEST_SOURCES})
 
-target_include_directories(basic_compiler_integration_tests PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(basic_compiler_integration_tests PRIVATE
+  ${PROJECT_SOURCE_DIR}/include
+  $<TARGET_PROPERTY:GTest::gtest,INTERFACE_INCLUDE_DIRECTORIES>
+)
 
-target_link_libraries(basic_compiler_integration_tests PRIVATE basic_compiler_lib GTest::gtest_main)
+target_link_libraries(basic_compiler_integration_tests PRIVATE basic_compiler_lib GTest::gtest_main GTest::gtest)
 # Ensure hello_world builds first
 add_dependencies(basic_compiler_integration_tests hello_world)
 
