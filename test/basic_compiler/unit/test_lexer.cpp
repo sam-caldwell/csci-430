@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include <gtest/gtest.h>
+#include <sstream>
 #include "basic_compiler/Lexer.h"
 
 using namespace gwbasic;
@@ -15,7 +16,8 @@ TEST(Lexer, BasicTokens) {
     std::string src = R"(10 LET A = 1+2*3
 20 PRINT "Hello"
 )";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     ASSERT_GE(toks.size(), 12u);
     EXPECT_EQ(toks[0].type, TokenType::Integer);
