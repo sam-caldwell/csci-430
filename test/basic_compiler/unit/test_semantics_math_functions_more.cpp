@@ -18,7 +18,7 @@ TEST(SemanticsMathMore, ArityErrorsReported) {
     const auto src =
         "10 PRINT TAN(1,2)\n"
         "20 END\n";
-    EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
+    EXPECT_THROW({ const auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
 
 TEST(SemanticsMathMore, TypeErrorsOnStringArgs) {
