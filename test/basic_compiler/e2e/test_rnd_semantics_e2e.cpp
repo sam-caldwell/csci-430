@@ -39,6 +39,9 @@ TEST(E2E, RndZeroRepeatsLast) {
     std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
+#ifndef __APPLE__
+    cmd << " -lm";
+#endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLinesE2E(out);
@@ -62,6 +65,9 @@ TEST(E2E, RndNegativeReseeds) {
     std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
+#ifndef __APPLE__
+    cmd << " -lm";
+#endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLinesE2E(out);
@@ -88,6 +94,9 @@ TEST(E2E, RndPositiveAdvancesLast) {
     std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
+#ifndef __APPLE__
+    cmd << " -lm";
+#endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLinesE2E(out);
@@ -95,4 +104,3 @@ TEST(E2E, RndPositiveAdvancesLast) {
     EXPECT_NE(lines[0], lines[1]);
     EXPECT_EQ(lines[1], lines[2]);
 }
-
