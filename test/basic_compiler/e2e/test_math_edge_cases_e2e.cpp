@@ -36,6 +36,9 @@ TEST(E2E, MathEdgeCasesProduceExpectedResults) {
     { std::ofstream f(ll); f << ir; }
 
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
+#ifndef __APPLE__
+    cmd << " -lm";
+#endif
     int ec = std::system(cmd.str().c_str());
     ASSERT_EQ(ec, 0);
 
@@ -51,4 +54,3 @@ TEST(E2E, MathEdgeCasesProduceExpectedResults) {
         "1.000000\n";
     ASSERT_EQ(out, expected);
 }
-

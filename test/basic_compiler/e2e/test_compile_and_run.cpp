@@ -37,7 +37,11 @@ TEST(E2E, CompileAndRun) {
     std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
 
-    std::ostringstream c1; c1 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\""; std::string cmd = c1.str();
+    std::ostringstream c1; c1 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
+#ifndef __APPLE__
+    c1 << " -lm";
+#endif
+    std::string cmd = c1.str();
     int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0) << "Clang failed: " << cmd;
 

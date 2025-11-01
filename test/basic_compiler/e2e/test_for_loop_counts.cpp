@@ -35,7 +35,11 @@ TEST(E2E, ForLoopCounts) {
     std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
 
-    std::ostringstream c2; c2 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\""; std::string cmd = c2.str();
+    std::ostringstream c2; c2 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
+#ifndef __APPLE__
+    c2 << " -lm";
+#endif
+    std::string cmd = c2.str();
     int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0);
     std::ostringstream r2; r2 << '"' << bin.string() << '"'; std::string out = runCommand(r2.str());

@@ -46,6 +46,9 @@ TEST(E2E, MoreMathIntrinsicsWork) {
     { std::ofstream f(ll); f << ir; }
 
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
+#ifndef __APPLE__
+    cmd << " -lm";
+#endif
     int ec = std::system(cmd.str().c_str());
     ASSERT_EQ(ec, 0);
 
@@ -65,4 +68,3 @@ TEST(E2E, MoreMathIntrinsicsWork) {
         EXPECT_LT(v, 1.0);
     }
 }
-
