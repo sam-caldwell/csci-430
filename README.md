@@ -97,3 +97,7 @@ Code repo: https://github.com/sam-caldwell/csci-430
 | “CLANG_PATH not defined”                   | Use `make build` so the project has `CLANG_PATH` injected.   |
 | “unsupported target triple”                | Only x86_64 and arm64/aarch64 for Linux/macOS are accepted.  |
 | Mismatched target warnings when linking IR | Re-run with `--target <triple>` appropriate for your system. |
+
+## Authorities
+We used the following resources to develop this project: 
+- https://hwiegman.home.xs4all.nl/gw-man/
