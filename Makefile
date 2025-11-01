@@ -12,7 +12,7 @@ include Makefile.d/*.mk
 # Configuration
 CMAKE ?= cmake
 # Prefer Ninja if available, otherwise fall back to Unix Makefiles
-GENERATOR ?= $(shell if command -v ninja >/dev/null 2>&1; then echo Ninja; else echo "Unix Makefiles"; fi)
+GENERATOR=Ninja
 TOOLCHAIN ?= cmake/Toolchain-HomebrewLLVM.cmake
 # Only pass a toolchain if the file exists
 TOOLCHAIN_FLAG := $(if $(wildcard $(TOOLCHAIN)),-DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN),)
