@@ -20,3 +20,4 @@ build:
 	fi
 	@echo "Building with $(NUM_CPUS) parallel jobs..."
 	@$(CMAKE) --build $(BUILD_DIR) -v -- -j$(NUM_CPUS)
+	@echo "build complete: ok"
