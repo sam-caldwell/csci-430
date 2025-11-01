@@ -3,6 +3,7 @@
 # Purpose: Configure (if needed) and build all targets via CMake/Ninja.
 #
 # Targets:
+#  - configure: Generate build files only (no build).
 #  - build: Generate (on first run) and build with $(NUM_CPUS) jobs.
 #
 # Variables:
@@ -12,7 +13,8 @@
 #  - Auto-configures when no CMakeCache.txt is present in $(BUILD_DIR).
 #
 # Build all targets via CMake/Ninja (auto-configure if needed)
-build:
+build: configure
+	@echo "Ensuring config with generator: $(GENERATOR) (build dir=$(BUILD_DIR))";
 	@if [ ! -f "$(BUILD_DIR)/CMakeCache.txt" ]; then \
 		$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR) $(TOOLCHAIN_FLAG) -DCMAKE_BUILD_TYPE=$(CONFIG); \
 	else \

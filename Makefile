@@ -6,7 +6,7 @@
 #          Provides 'build', 'clean', and 'version' targets for developers.
 include Makefile.d/*.mk
 
-.PHONY: clean build version tree zip lint test help demo unit integration e2e coverage
+.PHONY: clean configure build version tree zip lint test help demo unit integration e2e coverage
 .DEFAULT_GOAL := help
 
 # Configuration

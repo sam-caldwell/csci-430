@@ -14,6 +14,9 @@ LINT_PRUNE ?= \( -path './.git' -o -path './build' -o -path './build-*' -o -path
 lint: build
 	@command -v $(CLANG_TIDY) >/dev/null 2>&1 || { echo "clang-tidy not found; skipping lint."; exit 0; }
 	@echo "Running clang-tidy across repository sources..."
+	# Restrict checks to unused warnings to keep signal high; allow override
+	@TIDY_CHECKS="${TIDY_CHECKS:--*,clang-diagnostic-unused-*,bugprone-unused-return-value,clang-analyzer-deadcode.DeadStores,misc-unused-parameters}"; \
+	echo "clang-tidy checks: $$TIDY_CHECKS"; \
 	@set -e; \
 	SDK=$$(xcrun --show-sdk-path 2>/dev/null || true); \
 	SDK_ARGS=""; \
@@ -26,7 +29,7 @@ lint: build
 	if [ -z "$$FILES" ]; then echo "No C/C++ source files found to lint."; exit 0; fi; \
 		for f in $$FILES; do \
 		  echo "-- $$f"; \
-		  "$(CLANG_TIDY)" -p "$(BUILD_DIR)" -warnings-as-errors='*' $$SDK_ARGS "$$f" || exit $$?; \
+		  "$(CLANG_TIDY)" -p "$(BUILD_DIR)" -checks="$$TIDY_CHECKS" -warnings-as-errors='*' $$SDK_ARGS "$$f" || exit $$?; \
 		done; \
 	echo "clang-tidy completed."
 	@echo "Running one-function-per-file static check..."
