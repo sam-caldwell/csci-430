@@ -1,0 +1,16 @@
+name: Repo CodeQL Config
+
+queries:
+  - uses: security-and-quality
+
+paths-ignore:
+  - build/**
+  - build-*/**
+  - cmake-build-*/**
+  - cmake-build/**
+  - out/**
+  - .idea/**
+  - .vscode/**
+  - '**/*.bc'
+  - '**/*.ll'
+
