@@ -27,7 +27,7 @@ std::string Compiler::compileFile(const std::string& path) {
     auto res = sema.analyze(program);
     CodeGenerator gen;
     gen.setSemantics(res);
-    return gen.generate(program);
+    return Compiler::addDefaultTripleIfMissing(gen.generate(program));
 }
 
 } // namespace gwbasic
