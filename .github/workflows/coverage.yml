@@ -80,9 +80,7 @@ jobs:
           elif [ "$pct_int" -ge 70 ]; then color=orange
           fi
           mkdir -p coverage-badge/badges
-          cat > coverage-badge/badges/coverage.json <<JSON
-          {"schemaVersion":1, "label":"coverage", "message":"${pct_int}%", "color":"${color}"}
-JSON
+          echo """{"schemaVersion":1, "label":"coverage", "message":"${pct_int}%", "color":"${color}"}""" > coverage-badge/badges/coverage.json <<JSON
           echo "message=${pct_int}%" >> "$GITHUB_OUTPUT"
           echo "color=${color}" >> "$GITHUB_OUTPUT"
 
