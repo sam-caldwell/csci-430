@@ -93,6 +93,12 @@ int main(int argc, char** argv) {
 
         // Target triple + logs
         if (takeOptValue(a, "--target", i, argc, argv, targetTriple)) continue;
+        // Debug helper: print effective IR triple used by clang and exit
+        if (a == "--print-triple") {
+            std::string t = detectDefaultTriple();
+            std::cout << t << '\n';
+            return 0;
+        }
         // ToDo: use Preprocessor directive to exclude log flags
         //       ...need corresponding flags for the logging functionality.
         if (takeOptValue(a, "--log", i, argc, argv, logPath)) continue;
