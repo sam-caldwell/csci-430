@@ -29,3 +29,19 @@ lint: build
 		  "$(CLANG_TIDY)" -p "$(BUILD_DIR)" -warnings-as-errors='*' $$SDK_ARGS "$$f" || exit $$?; \
 		done; \
 	echo "clang-tidy completed."
+	@echo "Running one-function-per-file static check..."
+	@bash scripts/check_one_function_per_file.sh
+	@echo "Running shellcheck on scripts/*.sh (if available)..."
+	@set -e; \
+	if command -v shellcheck >/dev/null 2>&1; then \
+	  SCRIPTS=$$(find scripts -type f -name '*.sh' 2>/dev/null | sort); \
+	  if [ -z "$$SCRIPTS" ]; then \
+	    echo "No shell scripts found under scripts/."; \
+	  else \
+	    echo "shellcheck files:"; echo "$$SCRIPTS" | sed 's/^/ - /'; \
+	    shellcheck -x $$SCRIPTS; \
+	    echo "shellcheck completed."; \
+	  fi; \
+	else \
+	  echo "shellcheck not found; skipping shell script lint."; \
+	fi
