@@ -2,26 +2,32 @@
 01 Nov 2025 - Added LLVM-style RTTI to AST (Node/NodeKind, isa/dyn_cast), introduced SemanticAnalyzer with scope
               tracking, type checks, and strict GOTO/GOSUB validation (now default), enabled string-to-string
               comparisons (codegen via strcmp), refactored codegen/optimizer away from dynamic_cast, integrated
-              semantics into the compile pipeline (CodeGenerator::setSemantics), updated tests/README/CMake; all
-              builds and tests passing.
-01 Nov 2025 - Added targeted file-stream lexer tests (std::ifstream) that write under build/tmp to cover
+              semantics into the compile pipeline (CodeGenerator::setSemantics).
+            - Added targeted file-stream lexer tests (std::ifstream) that write under build/tmp to cover
               Lexer(std::istream&) directly; confirmed main() and compileFile*/phase-log paths use stream-based
               lexing. Strengthened semantic analysis with IF target validation, numeric-only FOR start/end/step,
               and duplicate line number detection; added unit tests for each. Verified 'make clean lint test build
               demo' complete successfully.
-01 Nov 2025 - Added math function calls to expressions:
-              - Introduced CallExpr AST and parsing of identifier(...) with comma-separated args.
-              - Implemented numeric functions SQR (sqrt) and ABS with semantic checks (unary, numeric-only).
-              - Codegen now declares and emits calls to @sqrt and @fabs; added -lm when linking on non-Apple.
-              - Unit tests cover codegen emission and semantic arity/type errors.
-01 Nov 2025 - Extended math intrinsics per GW-BASIC manual (partial set):
-              - Added SIN, COS, TAN, ATN, LOG, EXP, INT, FIX, SGN (numeric-only, arity=1) including domain checks
-                for SQR/SQRT and LOG + string-comparison validation; codegen emits @sin/@cos/@tan/@atan/@log/@exp,
-                @floor, and patterns for FIX/SGN.
-              - New intrinsics: RND (uniform [0,1) via drand48), CINT (round), CSNG (float truncate/extend),
-                CDBL (pass-through). Semantics enforce arity=1 and numeric args.
-              - Codegen declares @drand48 and @round; CSNG lowers to fptrunc/fpext. CDBL is passthrough.
-              - Added exhaustive happy/sad path tests across all math intrinsics: wrong-arity and string-arg
-                SemanticError checks, plus domain-invalid value tests for SQR/SQRT and LOG. Added codegen pattern
-                tests and e2e tests (including CINT half-away-from-zero and RND range assertions).
-              - All unit/integration/e2e tests green; demo targets unchanged.
+            - Added math function calls to expressions:
+            - Introduced CallExpr AST and parsing of identifier(...) with comma-separated args.
+            - Implemented numeric functions SQR (sqrt) and ABS with semantic checks (unary, numeric-only).
+            - Codegen now declares and emits calls to @sqrt and @fabs; added -lm when linking on non-Apple.
+            - Unit tests cover codegen emission and semantic arity/type errors.
+            - Extended math intrinsics per GW-BASIC manual (partial set):
+            - Added SIN, COS, TAN, ATN, LOG, EXP, INT, FIX, SGN (numeric-only, arity=1) including domain checks
+              for SQR/SQRT and LOG + string-comparison validation; codegen emits @sin/@cos/@tan/@atan/@log/@exp,
+              @floor, and patterns for FIX/SGN.
+            - New intrinsics: RND (uniform [0,1) via drand48), CINT (round), CSNG (float truncate/extend),
+              CDBL (pass-through). Semantics enforce arity=1 and numeric args.
+            - Codegen declares @drand48 and @round; CSNG lowers to fptrunc/fpext. CDBL is passthrough.
+            - Added exhaustive happy/sad path tests across all math intrinsics: wrong-arity and string-arg
+              SemanticError checks, plus domain-invalid value tests for SQR/SQRT and LOG. Added codegen pattern
+              tests and e2e tests (including CINT half-away-from-zero and RND range assertions).
+            - All unit/integration/e2e tests green; demo targets unchanged.
+            - Implemented full RND(x) semantics and RANDOMIZE statement:
+            - RND(x): x=0 returns last value; x<0 reseeds using x and returns next; x>0 returns next. Implemented
+              via IR helper function @gwb_rnd and a global @gwb_last_rnd. Helper emitted only when used.
+            - RANDOMIZE [expr]: Seeds RNG via srand48; without expr uses time(NULL). Added parser, semantics, and
+              codegen support.
+            - Tests: unit (semantics/codegen) and e2e validating repeat-on-zero, reseed-on-negative, advance-on-positive,
+              and RANDOMIZE behaviors. All tests pass.
