@@ -21,7 +21,8 @@ namespace gwbasic {
 struct UnaryExpr : Expr {
     char op; // '+' or '-'
     std::unique_ptr<Expr> inner;
-    UnaryExpr(char o, std::unique_ptr<Expr> e) : op(o), inner(std::move(e)) {}
+    UnaryExpr(char o, std::unique_ptr<Expr> e) : Expr(NodeKind::UnaryExpr), op(o), inner(std::move(e)) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::UnaryExpr; }
 };
 
 } // namespace gwbasic

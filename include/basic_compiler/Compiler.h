@@ -5,6 +5,7 @@
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
 
 namespace gwbasic {
 
@@ -31,6 +32,10 @@ public:
         Parser parser(std::move(tokens));
         auto program = parser.parseProgram();
         CodeGenerator gen;
+        // Provide semantic info to avoid duplicate collection
+        SemanticAnalyzer sema;
+        auto res = sema.analyze(program);
+        gen.setSemantics(res);
         return gen.generate(program);
     }
 

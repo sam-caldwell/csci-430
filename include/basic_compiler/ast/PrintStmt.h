@@ -20,7 +20,8 @@ namespace gwbasic {
  */
 struct PrintStmt : Stmt {
     std::unique_ptr<Expr> value; // may be StringExpr or other Expr
-    explicit PrintStmt(std::unique_ptr<Expr> v) : value(std::move(v)) {}
+    explicit PrintStmt(std::unique_ptr<Expr> v) : Stmt(NodeKind::PrintStmt), value(std::move(v)) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::PrintStmt; }
 };
 
 } // namespace gwbasic

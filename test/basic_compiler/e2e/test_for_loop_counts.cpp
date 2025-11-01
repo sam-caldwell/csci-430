@@ -29,7 +29,7 @@ TEST(E2E, ForLoopCounts) {
 )";
     std::string ir = Compiler::compileString(src);
 
-    std::filesystem::path tmp = std::filesystem::temp_directory_path() / "gwbasic_e2e_for";
+    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_for";
     std::filesystem::create_directories(tmp);
     std::filesystem::path ll = tmp / "program.ll";
     std::filesystem::path bin = tmp / "program.out";

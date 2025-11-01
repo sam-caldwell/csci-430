@@ -10,7 +10,7 @@
       "binaryDir": "${sourceDir}/build/cmake-build-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_TOOLCHAIN_FILE": "/Users/samcaldwell/git/champlain/csci-430/cmake/Toolchain-HomebrewLLVM.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "cmake/Toolchain-HomebrewLLVM.cmake"
       }
     },
     {
@@ -21,7 +21,7 @@
       "binaryDir": "${sourceDir}/build/cmake-build-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_TOOLCHAIN_FILE": "/Users/samcaldwell/git/champlain/csci-430/cmake/Toolchain-HomebrewLLVM.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "cmake/Toolchain-HomebrewLLVM.cmake"
       }
     }
   ],

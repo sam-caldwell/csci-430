@@ -85,6 +85,8 @@ std::vector<Token> Lexer::tokenize() {
         bol_ = false;
     }
     { Token t(TokenType::EndOfFile, "", line_, col_); tokens.emplace_back(t); logToken(t); }
+    // Ensure end-of-input path in advance() is covered (no-op when at end)
+    if (atEnd()) (void)advance();
     return tokens;
 }
 

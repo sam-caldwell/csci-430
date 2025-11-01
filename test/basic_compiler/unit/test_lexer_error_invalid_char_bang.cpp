@@ -16,6 +16,7 @@ using namespace gwbasic;
  */
 TEST(Lexer, InvalidCharBangThrows) {
     std::string src = "10 LET A = !\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     EXPECT_THROW({ auto toks = lex.tokenize(); (void)toks; }, LexError);
 }

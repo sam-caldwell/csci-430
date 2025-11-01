@@ -1,6 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include <gtest/gtest.h>
+#include <sstream>
 #include <string>
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/Parser.h"
@@ -15,7 +16,8 @@ using namespace gwbasic;
  */
 TEST(Parser, EndStmt) {
     std::string src = "10 END\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     auto [lines] = p.parseProgram();

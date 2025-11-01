@@ -11,13 +11,10 @@ using namespace gwbasic;
  * Components Under Test: CodeGenerator emitSubroutineInline.
  * Expected Behavior: Entry label for subroutine and branch to continuation.
  */
-TEST(CodeGenFlow, GosubToMissingTargetFallsThrough) {
+TEST(CodeGenFlow, GosubToMissingTargetIsError) {
     const auto src =
         "10 GOSUB 9999\n"
         "20 PRINT 1\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
-    EXPECT_NE(ir.find("line10_gosub_entry1:"), std::string::npos);
-    EXPECT_NE(ir.find("  br label %line10_gosub_cont1"), std::string::npos);
+    EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, gwbasic::SemanticError);
 }
-

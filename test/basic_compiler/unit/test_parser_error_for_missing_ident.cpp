@@ -14,7 +14,8 @@ using namespace gwbasic;
  */
 TEST(Parser, ErrorForMissingIdentifier) {
     std::string src = "10 FOR = 1 TO 2 : NEXT\n"; // no variable name after FOR
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);

@@ -1,7 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #pragma once
 
-#include "basic_compiler/ast/SourcePos.h"
+#include "basic_compiler/ast/Node.h"
 
 namespace gwbasic {
 
@@ -18,9 +18,30 @@ namespace gwbasic {
  *  - Concrete statements subclass Stmt and are stored via
  *    std::unique_ptr<Stmt> in containing structures.
  */
-struct Stmt {
+struct Stmt : Node {
     virtual ~Stmt() = default;
-    SourcePos pos{};
+protected:
+    explicit Stmt(NodeKind k) : Node(k) {}
+    Stmt() : Node(NodeKind::AbstractStmt) {}
+public:
+    static bool classof(const Node* N) {
+        if (!N) return false;
+        switch (N->kind) {
+            case NodeKind::AbstractStmt:
+            case NodeKind::AssignStmt:
+            case NodeKind::PrintStmt:
+            case NodeKind::GotoStmt:
+            case NodeKind::GosubStmt:
+            case NodeKind::ReturnStmt:
+            case NodeKind::IfStmt:
+            case NodeKind::InputStmt:
+            case NodeKind::ForStmt:
+            case NodeKind::EndStmt:
+                return true;
+            default:
+                return false;
+        }
+    }
 };
 
 } // namespace gwbasic

@@ -18,7 +18,8 @@ namespace gwbasic {
  */
 struct GosubStmt : Stmt {
     int targetLine;
-    explicit GosubStmt(int ln) : targetLine(ln) {}
+    explicit GosubStmt(int ln) : Stmt(NodeKind::GosubStmt), targetLine(ln) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::GosubStmt; }
 };
 
 } // namespace gwbasic

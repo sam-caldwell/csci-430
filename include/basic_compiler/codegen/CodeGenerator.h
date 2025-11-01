@@ -9,7 +9,9 @@
 #include <sstream>
 
 #include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/codegen/CodeGenError.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
 
 namespace gwbasic {
 
@@ -32,6 +34,13 @@ public:
 
     /** Convert Program to LLVM IR (text form). */
     std::string generate(const Program& program);
+    /** Provide precomputed semantic results (variables, strings, lines). */
+    void setSemantics(const SemanticAnalyzer::Result& r) {
+        semProvided_ = true;
+        semVariables_ = r.variables;
+        semStrings_ = r.stringLiterals;
+        semLineNumbers_ = r.lineNumbers;
+    }
 
 private:
     // Counters and symbol maps
@@ -43,6 +52,11 @@ private:
     std::vector<int> lineNumbers_; // sorted line numbers
     std::map<int, const Line*> lineMap_;
     int currentLine_{0};
+    // Optional semantic input
+    bool semProvided_{false};
+    std::set<std::string> semVariables_{};
+    std::set<std::string> semStrings_{};
+    std::set<int> semLineNumbers_{};
 
     // Phase logging
     bool logEnabled_{false};
@@ -89,23 +103,23 @@ private:
         if (semLogEnabled_ && semLogFile_.is_open()) semLogFile_ << msg << "\n";
     }
     static const char* nodeName(const Stmt* s) {
-        if (dynamic_cast<const AssignStmt*>(s)) return "AssignStmt";
-        if (dynamic_cast<const PrintStmt*>(s)) return "PrintStmt";
-        if (dynamic_cast<const GotoStmt*>(s)) return "GotoStmt";
-        if (dynamic_cast<const GosubStmt*>(s)) return "GosubStmt";
-        if (dynamic_cast<const ReturnStmt*>(s)) return "ReturnStmt";
-        if (dynamic_cast<const IfStmt*>(s)) return "IfStmt";
-        if (dynamic_cast<const InputStmt*>(s)) return "InputStmt";
-        if (dynamic_cast<const ForStmt*>(s)) return "ForStmt";
-        if (dynamic_cast<const EndStmt*>(s)) return "EndStmt";
+        if (isa<AssignStmt>(s)) return "AssignStmt";
+        if (isa<PrintStmt>(s)) return "PrintStmt";
+        if (isa<GotoStmt>(s)) return "GotoStmt";
+        if (isa<GosubStmt>(s)) return "GosubStmt";
+        if (isa<ReturnStmt>(s)) return "ReturnStmt";
+        if (isa<IfStmt>(s)) return "IfStmt";
+        if (isa<InputStmt>(s)) return "InputStmt";
+        if (isa<ForStmt>(s)) return "ForStmt";
+        if (isa<EndStmt>(s)) return "EndStmt";
         return "Stmt";
     }
     static const char* nodeName(const Expr* e) {
-        if (dynamic_cast<const NumberExpr*>(e)) return "NumberExpr";
-        if (dynamic_cast<const StringExpr*>(e)) return "StringExpr";
-        if (dynamic_cast<const VarExpr*>(e)) return "VarExpr";
-        if (dynamic_cast<const UnaryExpr*>(e)) return "UnaryExpr";
-        if (dynamic_cast<const BinaryExpr*>(e)) return "BinaryExpr";
+        if (isa<NumberExpr>(e)) return "NumberExpr";
+        if (isa<StringExpr>(e)) return "StringExpr";
+        if (isa<VarExpr>(e)) return "VarExpr";
+        if (isa<UnaryExpr>(e)) return "UnaryExpr";
+        if (isa<BinaryExpr>(e)) return "BinaryExpr";
         return "Expr";
     }
 

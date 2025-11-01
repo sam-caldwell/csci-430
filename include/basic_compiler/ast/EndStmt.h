@@ -15,6 +15,9 @@ namespace gwbasic {
  * Theory of operation:
  *  - Subsequent lines are not executed.
  */
-struct EndStmt : Stmt {};
+struct EndStmt : Stmt {
+    EndStmt() : Stmt(NodeKind::EndStmt) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::EndStmt; }
+};
 
 } // namespace gwbasic
