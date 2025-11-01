@@ -1,3 +1,9 @@
+# File: Makefile.d/tree.mk
+# Purpose: Show a filtered repository tree for quick inspection.
+# Targets:
+#  - tree: runs the external 'tree' tool with ignores.
+# Variables:
+#  - TREE_ROOT, TREE_IGNORES
 # Tree view of repository (requires 'tree')
 TREE_ROOT ?= .
 TREE_IGNORES ?= .git|cmake-build-*|build|build-*|out|.idea|CMakeFiles|Testing|__pycache__

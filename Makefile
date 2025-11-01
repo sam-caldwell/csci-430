@@ -1,5 +1,7 @@
 # File: Makefile
+#
 # (c) 2025 Sam Caldwell.  All Rights Reserved.
+#
 # Purpose: Convenience wrapper for configure/build and environment reporting.
 #          Provides 'build', 'clean', and 'version' targets for developers.
 include Makefile.d/*.mk

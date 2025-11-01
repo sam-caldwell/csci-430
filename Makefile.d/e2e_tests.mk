@@ -1,3 +1,9 @@
+# File: Makefile.d/e2e_tests.mk
+#
+# Purpose: Run end-to-end tests after integration tests.
+#
+# Targets:
+#  - e2e: Executes the basic_compiler_e2e_tests binary if present.
 e2e: integration
 	@echo "[e2e] Running end-to-end tests..."
 	@set -e; \

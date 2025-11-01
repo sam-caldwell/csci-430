@@ -1,3 +1,9 @@
+# File: Makefile.d/unit_tests.mk
+#
+# Purpose: Run unit tests (and hello_world tests) from the build tree.
+#
+# Targets:
+#  - unit: executes hello_world_tests (if present) and basic_compiler_unit_tests
 unit: build
 	@echo "[unit] Running unit tests..."
 	@set -e; \

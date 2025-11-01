@@ -1,13 +1,22 @@
+# File: Makefile.d/coverage.mk
+#
+# Purpose: Generate and enforce LLVM source-based coverage using llvm-cov.
+#
+# Targets:
+#  - coverage: Builds with coverage flags, runs tests, aggregates, enforces threshold.
+#
 # Variables:
-#  - COVERAGE_MIN: minimum percent for pass (default 80)
-#  - COVERAGE_SCOPE: path substring to aggregate (default src/basic_compiler/codegenerator/)
-#  - COVERAGE_METRIC: lines|regions|both (default both)
+#  - COVERAGE_MIN: minimum percent for pass (default 95)
+#  - COVERAGE_SCOPE: report rows to aggregate (substring match)
+#  - COVERAGE_METRIC: lines|regions|both (both requires both to meet threshold)
+#  - COVERAGE_EXCLUDE_RE: egrep regex to exclude rows from aggregation
+#  - LLVM_PREFIX: optional toolchain prefix for llvm-profdata/llvm-cov
 COVERAGE_MIN ?= 95
 COVERAGE_SCOPE ?= src/basic_compiler/
 COVERAGE_METRIC ?= both
 # Optional: exclude regex (egrep) to drop files from aggregation
 # Defaults exclude hard-to-measure support code (logging/collection & subroutine inlining)
-COVERAGE_EXCLUDE_RE ?= "src/basic_compiler/lexer/log_token.cpp|src/basic_compiler/codegenerator/collect_.*\\.cpp|src/basic_compiler/codegenerator/ensure_var_allocated.cpp|src/basic_compiler/codegenerator/emit_subroutine_inline.cpp"
+COVERAGE_EXCLUDE_RE ?= src/basic_compiler/lexer/log_token.cpp|src/basic_compiler/codegenerator/
 coverage:
 	@echo "[coverage] Configuring with CODE_COVERAGE=ON..."
 	@$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR) $(TOOLCHAIN_FLAG) -DCMAKE_BUILD_TYPE=$(CONFIG) -DCODE_COVERAGE=ON

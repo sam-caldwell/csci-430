@@ -1,3 +1,10 @@
+# File: Makefile.d/help.mk
+#
+# Purpose: Display available make targets and commonly overridden variables.
+#
+# Targets:
+#  - help: Prints a concise overview of project commands.
+#
 # Display available targets and descriptions
 help:
 	@echo "Available make targets:"

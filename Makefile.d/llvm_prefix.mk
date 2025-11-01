@@ -1,3 +1,10 @@
+# File: Makefile.d/llvm_prefix.mk
+#
+# Purpose: Prefer Homebrew LLVM toolchain if installed; fall back to system.
+#
+# Variables:
+#  - LLVM_PREFIX: install prefix for llvm binaries (optional)
+#
 # Attempt to prefer Homebrew LLVM 17 tools for version reporting
 LLVM_PREFIX ?= $(shell brew --prefix llvm@17 2>/dev/null)
 ifeq ($(LLVM_PREFIX),)

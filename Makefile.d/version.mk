@@ -1,3 +1,10 @@
+# File: Makefile.d/version.mk
+#
+# Purpose: Display toolchain and system versions to aid debugging.
+#
+# Targets:
+#  - version: prints versions for CMake, Clang/LLVM, Ninja, OS, CPU, Xcode
+#
 # Show toolchain and system versions
 version:
 	@echo "==== CMake ===="

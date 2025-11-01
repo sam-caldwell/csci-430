@@ -1,3 +1,9 @@
+# File: Makefile.d/integration_tests.mk
+#
+# Purpose: Run integration tests after unit tests.
+#
+# Targets:
+#  - integration: Executes the basic_compiler_integration_tests binary.
 integration: unit
 	@echo "[integration] Running integration tests..."
 	@set -e; \

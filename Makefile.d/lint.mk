@@ -1,3 +1,13 @@
+# File: Makefile.d/lint.mk
+#
+# Purpose: Lint all C/C++ sources using clang-tidy.
+#
+# Targets:
+#  - lint: Runs clang-tidy with compile_commands.json if available.
+#
+# Variables:
+#  - LINT_PATTERNS, LINT_PRUNE, CLANG_TIDY, BUILD_DIR
+#
 # Lint all C/C++ sources using clang-tidy
 LINT_PATTERNS ?= -name '*.c' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp'
 LINT_PRUNE ?= \( -path './.git' -o -path './build' -o -path './build-*' -o -path './cmake-build-*' -o -path './out' -o -path './.idea' -o -path './CMakeFiles' -o -path './Testing' \) -prune

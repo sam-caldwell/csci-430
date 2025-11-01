@@ -1,3 +1,16 @@
+# File: Makefile.d/demo.mk
+#
+# Purpose: Build the factorial demo and all related artifacts into build/demos/factorial/.
+#
+# Targets:
+#  - demo: Compiles demo source and emits .ll, .bc, executable, .asm, and logs.
+#
+# Variables:
+#  - DEMO_SRC: path to demo source (default demos/factorial.bas)
+#
+# Notes:
+#  - Uses the built basic_compiler CLI and infers a portable target triple.
+#
 # Build the factorial demo into build/demos/factorial/
 DEMO_SRC := demos/factorial.bas
 demo: build

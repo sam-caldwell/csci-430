@@ -1,3 +1,13 @@
+# File: Makefile.d/zip.mk
+#
+# Purpose: Create a zip archive of the repository, excluding build and tooling outputs.
+#
+# Targets:
+#  - zip: writes $(ZIP_NAME) with standard exclusions.
+#
+# Variables:
+#  - ZIP_BASE, ZIP_NAME, ZIP_EXCLUDES
+#
 # Zip the repository (excluding build and VCS/IDE artifacts)
 ZIP_BASE := $(notdir $(CURDIR))
 ZIP_NAME ?= $(ZIP_BASE).zip
