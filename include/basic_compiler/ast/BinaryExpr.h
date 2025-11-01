@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 #include "basic_compiler/ast/BinaryOp.h"
 
 namespace gwbasic {
@@ -20,13 +21,12 @@ namespace gwbasic {
  *  - Codegen emits arithmetic as fadd/fsub/fmul/fdiv and comparisons as
  *    fcmp with subsequent uitofp to produce 0.0/1.0 semantics.
  */
-struct BinaryExpr : Expr {
+struct BinaryExpr : ASTLeaf<NodeKind::BinaryExpr, Expr> {
     BinaryOp op;
     std::unique_ptr<Expr> lhs;
     std::unique_ptr<Expr> rhs;
-    BinaryExpr(BinaryOp o, std::unique_ptr<Expr> a, std::unique_ptr<Expr> b)
-        : Expr(NodeKind::BinaryExpr), op(o), lhs(std::move(a)), rhs(std::move(b)) {}
-    static bool classof(const Node* N) { return N && N->kind == NodeKind::BinaryExpr; }
+    BinaryExpr(const BinaryOp o, std::unique_ptr<Expr> a, std::unique_ptr<Expr> b)
+        : ASTLeaf(), op(o), lhs(std::move(a)), rhs(std::move(b)) {}
 };
 
 } // namespace gwbasic

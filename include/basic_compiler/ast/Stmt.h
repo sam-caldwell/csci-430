@@ -37,6 +37,7 @@ public:
             case NodeKind::InputStmt:
             case NodeKind::ForStmt:
             case NodeKind::EndStmt:
+            case NodeKind::RandomizeStmt:
                 return true;
             default:
                 return false;

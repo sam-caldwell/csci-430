@@ -11,14 +11,14 @@ enum class NodeKind {
     // Abstract/base markers
     AbstractExpr,
     AbstractStmt,
-    // Exprs
+    // Expressions
     NumberExpr,
     StringExpr,
     VarExpr,
     UnaryExpr,
     BinaryExpr,
     CallExpr,
-    // Stmts
+    // Statements
     AssignStmt,
     PrintStmt,
     GotoStmt,
@@ -28,6 +28,7 @@ enum class NodeKind {
     InputStmt,
     ForStmt,
     EndStmt,
+    RandomizeStmt,
 };
 
 } // namespace gwbasic

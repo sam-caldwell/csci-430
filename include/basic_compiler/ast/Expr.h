@@ -19,9 +19,10 @@ namespace gwbasic {
  *    typically via std::unique_ptr<Expr> in parent nodes.
  */
 struct Expr : Node {
-    virtual ~Expr() = default;
+    // ReSharper disable once CppEnforceOverridingDestructorStyle
+    ~Expr() override = default;
 protected:
-    explicit Expr(NodeKind k) : Node(k) {}
+    explicit Expr(const NodeKind k) : Node(k) {}
     Expr() : Node(NodeKind::AbstractExpr) {}
 public:
     static bool classof(const Node* N) {

@@ -15,10 +15,11 @@ struct Node {
     NodeKind kind;
     SourcePos pos{};
 protected:
-    explicit Node(NodeKind k) : kind(k) {}
+    explicit Node(const NodeKind k) : kind(k) {}
 public:
-    NodeKind getKind() const { return kind; }
+    [[nodiscard]] NodeKind getKind() const { return kind; }
+    /** Fluent setter to unify position assignment. */
+    Node& setPos(const SourcePos& p) { pos = p; return *this; }
 };
 
 } // namespace gwbasic
-

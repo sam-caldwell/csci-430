@@ -2,6 +2,7 @@
 #pragma once
 
 #include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -16,10 +17,9 @@ namespace gwbasic {
  * Theory of operation:
  *  - Current lowering may inline GOSUB bodies and synthesize a return path.
  */
-struct GosubStmt : Stmt {
+struct GosubStmt : ASTLeaf<NodeKind::GosubStmt, Stmt> {
     int targetLine;
-    explicit GosubStmt(int ln) : Stmt(NodeKind::GosubStmt), targetLine(ln) {}
-    static bool classof(const Node* N) { return N && N->kind == NodeKind::GosubStmt; }
+    explicit GosubStmt(const int ln) : ASTLeaf(), targetLine(ln) {}
 };
 
 } // namespace gwbasic

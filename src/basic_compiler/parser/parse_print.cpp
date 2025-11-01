@@ -1,5 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/StringExpr.h"
 
 namespace gwbasic {
 
@@ -20,17 +23,13 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
         const int l = peek().line;
         const int c = peek().col;
         advance();
-        auto n = std::make_unique<PrintStmt>(std::make_unique<StringExpr>(s));
-        n->pos = {l, c};
-        return n;
+        auto str = make_node<StringExpr>({l, c}, s);
+        return make_node<PrintStmt>({l, c}, std::move(str));
     }
     auto expr = parseExpression();
     // Capture position before moving from the unique_ptr to avoid use-after-move
-    const int eline = expr->pos.line;
-    const int ecol = expr->pos.col;
-    auto n = std::make_unique<PrintStmt>(std::move(expr));
-    n->pos = {eline, ecol};
-    return n;
+    const SourcePos p = expr->pos;
+    return make_node<PrintStmt>(p, std::move(expr));
 }
 
 } // namespace gwbasic

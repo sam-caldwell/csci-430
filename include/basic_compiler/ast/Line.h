@@ -12,7 +12,7 @@ namespace gwbasic {
  * Purpose:
  *  - Represent a numbered GW-BASIC line containing zero or more statements.
  * Inputs:
- *  - number: Line number (1..N, increasing)
+ *  - number: Line number (1, ..., N, increasing)
  *  - statements: Owned list of statements in execution order
  * Outputs:
  *  - Structural node used to organize Program content

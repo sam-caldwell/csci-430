@@ -7,18 +7,6 @@ namespace gwbasic {
 // verified the first character is alphabetic. No separate isIdentStart() is
 // required here, so we only keep isIdentChar() below.
 
-/*
- * Function: isIdentChar
- * Inputs:
- *  - c: character to classify
- * Outputs:
- *  - bool: true if character is alphanumeric or underscore
- * Theory of operation:
- *  - Uses std::isalnum to allow letters and digits, and admits '_' to support
- *    a conventional superset while keeping the lexer simple.
- */
-static bool isIdentChar(char c) { return std::isalnum(static_cast<unsigned char>(c)) != 0 || c == '_'; }
-
 Token Lexer::identifierOrKeyword() {
     /*
      * Function: Lexer::identifierOrKeyword
@@ -33,7 +21,7 @@ Token Lexer::identifierOrKeyword() {
     const int startLine = line_;
     const int startCol = col_;
     std::string buf;
-    while (isIdentChar(peek())) buf.push_back(advance());
+    while (std::isalnum(static_cast<unsigned char>(peek())) != 0 || peek() == '_') buf.push_back(advance());
 
     std::string upper;
     upper.reserve(buf.size());
@@ -52,6 +40,7 @@ Token Lexer::identifierOrKeyword() {
     if (upper == "GOSUB") return Token{TokenType::KwGosub, buf, startLine, startCol};
     if (upper == "RETURN") return Token{TokenType::KwReturn, buf, startLine, startCol};
     if (upper == "INPUT") return Token{TokenType::KwInput, buf, startLine, startCol};
+    if (upper == "RANDOMIZE") return Token{TokenType::KwRandomize, buf, startLine, startCol};
     if (upper == "REM") { // treat as comment to EOL
         skipToEOL();
         return Token{TokenType::NewLine, "\n", startLine, startCol};

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -16,10 +17,9 @@ namespace gwbasic {
  * Theory of operation:
  *  - Emitted as an SSA constant or loaded immediate in LLVM IR.
  */
-struct NumberExpr : Expr {
+struct NumberExpr : ASTLeaf<NodeKind::NumberExpr, Expr> {
     double value;
-    explicit NumberExpr(double v) : Expr(NodeKind::NumberExpr), value(v) {}
-    static bool classof(const Node* N) { return N && N->kind == NodeKind::NumberExpr; }
+    explicit NumberExpr(const double v) : ASTLeaf(), value(v) {}
 };
 
 } // namespace gwbasic

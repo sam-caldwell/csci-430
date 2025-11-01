@@ -6,6 +6,8 @@
 #include <vector>
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Traits.h"
 
 namespace gwbasic {
 
@@ -25,15 +27,14 @@ namespace gwbasic {
  * Theory of operation:
  *  - Generator lowers to labeled blocks with loop cond/body/inc structure.
  */
-struct ForStmt : Stmt {
+struct ForStmt : ASTLeaf<NodeKind::ForStmt, Stmt, ForStmtTraits> {
     std::string var;
     std::unique_ptr<Expr> start;
     std::unique_ptr<Expr> end;
     std::unique_ptr<Expr> step; // may be null -> default 1
     std::vector<std::unique_ptr<Stmt>> body; // inline for body until NEXT (same line)
     ForStmt(std::string v, std::unique_ptr<Expr> s, std::unique_ptr<Expr> e, std::unique_ptr<Expr> st)
-        : Stmt(NodeKind::ForStmt), var(std::move(v)), start(std::move(s)), end(std::move(e)), step(std::move(st)) {}
-    static bool classof(const Node* N) { return N && N->kind == NodeKind::ForStmt; }
+        : ASTLeaf(), var(std::move(v)), start(std::move(s)), end(std::move(e)), step(std::move(st)) {}
 };
 
 } // namespace gwbasic

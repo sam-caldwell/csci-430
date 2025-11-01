@@ -4,6 +4,7 @@
 #include <memory>
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -18,10 +19,9 @@ namespace gwbasic {
  * Theory of operation:
  *  - String literals use "%s\n"; numeric expressions use "%f\n".
  */
-struct PrintStmt : Stmt {
+struct PrintStmt : ASTLeaf<NodeKind::PrintStmt, Stmt> {
     std::unique_ptr<Expr> value; // may be StringExpr or other Expr
-    explicit PrintStmt(std::unique_ptr<Expr> v) : Stmt(NodeKind::PrintStmt), value(std::move(v)) {}
-    static bool classof(const Node* N) { return N && N->kind == NodeKind::PrintStmt; }
+    explicit PrintStmt(std::unique_ptr<Expr> v) : ASTLeaf(), value(std::move(v)) {}
 };
 
 } // namespace gwbasic

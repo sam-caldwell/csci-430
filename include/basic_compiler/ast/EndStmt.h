@@ -2,6 +2,7 @@
 #pragma once
 
 #include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -15,9 +16,8 @@ namespace gwbasic {
  * Theory of operation:
  *  - Subsequent lines are not executed.
  */
-struct EndStmt : Stmt {
-    EndStmt() : Stmt(NodeKind::EndStmt) {}
-    static bool classof(const Node* N) { return N && N->kind == NodeKind::EndStmt; }
+struct EndStmt : ASTLeaf<NodeKind::EndStmt, Stmt> {
+    EndStmt() : ASTLeaf() {}
 };
 
 } // namespace gwbasic
