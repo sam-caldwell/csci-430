@@ -83,7 +83,8 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         std::ostringstream m; m << "For var=" << f->var << " @ " << f->pos.line << ':' << f->pos.col; log(m.str());
         analyzeExpr(f->start.get());
         analyzeExpr(f->end.get());
-        if (f->step) analyzeExpr(f->step.get());
+        // Always analyze step (may be null); analyzeExpr handles nulls.
+        analyzeExpr(f->step.get());
         enterScope();
         for (const auto& st : f->body) analyzeStmt(st.get());
         exitScope();
