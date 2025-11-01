@@ -8,6 +8,9 @@
  */
 #include "basic_compiler/opt/AstOptimizer.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/NumberExpr.h"
 
 namespace gwbasic {
 

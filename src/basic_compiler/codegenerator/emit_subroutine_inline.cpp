@@ -38,23 +38,25 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
                 std::string ir = "  store double "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name];
                 out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " AssignStmt -> " << ir; log(m.str()); }
             } else if (auto pr = dyn_cast<PrintStmt>(st.get())) {
-                if (isa<StringExpr>(pr->value.get())) {
-                    int id = strLiteralId_[dyn_cast<StringExpr>(pr->value.get())->value];
-                    std::string sptr = nextTemp();
-                    std::string ir1 = "  "; ir1 += sptr; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += globalStringName(id); ir1 += ", i64 0";
-                    out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); }
-                    std::string fmt = nextTemp();
-                    std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr @.fmt_str, i64 0";
-                    out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); }
-                    std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")";
-                    out << ir3 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir3; log(m.str()); }
-                } else {
-                    auto val = emitExpr(out, pr->value.get(), entryLabel);
-                    std::string fmt = nextTemp();
-                    std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_num, i64 0";
-                    out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); }
-                    std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")";
-                    out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); }
+                std::vector<const Expr*> items;
+                if (pr->value) items.push_back(pr->value.get());
+                for (const auto& v : pr->more) items.push_back(v.get());
+                for (size_t pi = 0; pi < items.size(); ++pi) {
+                    const bool last = (pi + 1 == items.size());
+                    const Expr* v = items[pi];
+                    if (isa<StringExpr>(v)) {
+                        int id = strLiteralId_[dyn_cast<StringExpr>(v)->value];
+                        std::string sptr = nextTemp();
+                        { std::string ir1 = "  "; ir1 += sptr; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += globalStringName(id); ir1 += ", i64 0"; out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); } }
+                        std::string fmt = nextTemp();
+                        { std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr "; ir2 += (last ? "@.fmt_str" : "@.fmt_str_sp"); ir2 += ", i64 0"; out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); } }
+                        { std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")"; out << ir3 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir3; log(m.str()); } }
+                    } else {
+                        auto val = emitExpr(out, v, entryLabel);
+                        std::string fmt = nextTemp();
+                        { std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += (last ? "@.fmt_num" : "@.fmt_num_sp"); ir1 += ", i64 0"; out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); } }
+                        { std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")"; out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); } }
+                    }
                 }
             } else if (auto ins = dyn_cast<InputStmt>(st.get())) {
                 std::string fmt = nextTemp();

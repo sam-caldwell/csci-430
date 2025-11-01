@@ -37,23 +37,25 @@ void CodeGenerator::emitLineBlock(std::ostringstream& out, const Line& line, int
             out << ir << "\n";
             std::ostringstream m; m << "line " << currentLine_ << ' ' << nodeName(st.get()) << " -> " << ir; log(m.str());
         } else if (auto pr = dyn_cast<PrintStmt>(st.get())) {
-            if (isa<StringExpr>(pr->value.get())) {
-                int id = strLiteralId_[dyn_cast<StringExpr>(pr->value.get())->value];
-                std::string sptr = nextTemp();
-                std::string ir1 = "  "; ir1 += sptr; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += globalStringName(id); ir1 += ", i64 0";
-                out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); }
-                std::string fmt = nextTemp();
-                std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr @.fmt_str, i64 0";
-                out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); }
-                std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")";
-                out << ir3 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir3; log(m.str()); }
-            } else {
-                auto val = emitExpr(out, pr->value.get(), "");
-                std::string fmt = nextTemp();
-                std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_num, i64 0";
-                out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); }
-                std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")";
-                out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); }
+            std::vector<const Expr*> items;
+            if (pr->value) items.push_back(pr->value.get());
+            for (const auto& v : pr->more) items.push_back(v.get());
+            for (size_t pi = 0; pi < items.size(); ++pi) {
+                const bool last = (pi + 1 == items.size());
+                const Expr* v = items[pi];
+                if (isa<StringExpr>(v)) {
+                    int id = strLiteralId_[dyn_cast<StringExpr>(v)->value];
+                    std::string sptr = nextTemp();
+                    { std::string ir1 = "  "; ir1 += sptr; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += globalStringName(id); ir1 += ", i64 0"; out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); } }
+                    std::string fmt = nextTemp();
+                    { std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr "; ir2 += (last ? "@.fmt_str" : "@.fmt_str_sp"); ir2 += ", i64 0"; out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); } }
+                    { std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")"; out << ir3 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir3; log(m.str()); } }
+                } else {
+                    auto val = emitExpr(out, v, "");
+                    std::string fmt = nextTemp();
+                    { std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += (last ? "@.fmt_num" : "@.fmt_num_sp"); ir1 += ", i64 0"; out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); } }
+                    { std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")"; out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); } }
+                }
             }
         } else if (auto gt = dyn_cast<GotoStmt>(st.get())) {
             std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine);
@@ -90,6 +92,18 @@ void CodeGenerator::emitLineBlock(std::ostringstream& out, const Line& line, int
             out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " InputStmt -> " << ir2; log(m.str()); }
         } else if (auto fs = dyn_cast<ForStmt>(st.get())) {
             emitFor(out, fs, lineLabelName(line.number), localContCounter);
+        } else if (auto rz = dyn_cast<RandomizeStmt>(st.get())) {
+            // RANDOMIZE [expr]
+            if (rz->seed) {
+                auto val = emitExpr(out, rz->seed.get(), "");
+                std::string si = nextTemp();
+                { std::string ir = "  "; ir += si; ir += " = fptosi double "; ir += val; ir += " to i64"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " Randomize fptosi -> " << ir; log(m.str()); } }
+                { std::string ir = "  call void @srand48(i64 "; ir += si; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " Randomize srand48 -> " << ir; log(m.str()); } }
+            } else {
+                std::string t = nextTemp();
+                { std::string ir = "  "; ir += t; ir += " = call i64 @time(ptr null)"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " Randomize time -> " << ir; log(m.str()); } }
+                { std::string ir = "  call void @srand48(i64 "; ir += t; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " Randomize srand48(time) -> " << ir; log(m.str()); } }
+            }
         } else if (isa<ReturnStmt>(st.get())) {
             std::string ir = "  br label %exit";
             out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ReturnStmt -> " << ir; log(m.str()); }

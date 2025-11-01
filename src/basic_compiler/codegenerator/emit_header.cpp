@@ -32,6 +32,32 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
     // Additional helpers for extended math/CVT
     out << "declare double @drand48()\n";
     out << "declare double @round(double)\n\n";
+    // RNG seed + time
+    out << "declare void @srand48(i64)\n";
+    out << "declare i64 @time(ptr)\n\n";
+
+    // Provide helper implementing full RND(x) semantics if needed
+    if (needsRndHelper_) {
+        out << "define double @gwb_rnd(double %x) {\n";
+        out << "entry:\n";
+        out << "  %iszero = fcmp oeq double %x, 0.0\n";
+        out << "  br i1 %iszero, label %retlast, label %nonzero\n";
+        out << "retlast:\n";
+        out << "  %last = load double, ptr @gwb_last_rnd\n";
+        out << "  ret double %last\n";
+        out << "nonzero:\n";
+        out << "  %isneg = fcmp olt double %x, 0.0\n";
+        out << "  br i1 %isneg, label %seedcase, label %gen\n";
+        out << "seedcase:\n";
+        out << "  %xi = fptosi double %x to i64\n";
+        out << "  call void @srand48(i64 %xi)\n";
+        out << "  br label %gen\n";
+        out << "gen:\n";
+        out << "  %rv = call double @drand48()\n";
+        out << "  store double %rv, ptr @gwb_last_rnd\n";
+        out << "  ret double %rv\n";
+        out << "}\n\n";
+    }
     log("emitHeader: declared printf/scanf");
 }
 

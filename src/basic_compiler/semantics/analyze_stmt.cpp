@@ -1,11 +1,27 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/ForStmt.h"
+#include "basic_compiler/ast/InputStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
+#include "basic_compiler/ast/GosubStmt.h"
+#include "basic_compiler/ast/ReturnStmt.h"
+#include "basic_compiler/ast/EndStmt.h"
+#include "basic_compiler/ast/StringExpr.h"
+#include "basic_compiler/ast/RandomizeStmt.h"
 #include <sstream>
 
 namespace gwbasic {
 
 void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
-    if (auto p = dyn_cast<const PrintStmt>(s)) { analyzeExpr(p->value.get()); return; }
+    if (auto p = dyn_cast<const PrintStmt>(s)) {
+        if (p->value) analyzeExpr(p->value.get());
+        for (const auto& v : p->more) analyzeExpr(v.get());
+        return;
+    }
     if (auto a = dyn_cast<const AssignStmt>(s)) {
         reference(a->name, a->pos);
         if (typeOf(a->value.get()) == ValueType::String) {
@@ -76,4 +92,3 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
 }
 
 } // namespace gwbasic
-

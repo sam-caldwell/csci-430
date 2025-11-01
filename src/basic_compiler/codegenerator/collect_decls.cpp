@@ -12,9 +12,10 @@ void CodeGenerator::collectDecls(const Program& program) {
      * Outputs:
      *  - void (initializes internal maps/sets and prepares line ordering)
      * Theory of operation:
-     *  - Clears internal state, scans all lines/statements to populate the
-     *    sets of variables and string literals, records and sorts line numbers
-     *    and builds a line-number to Line* map for later codegen.
+     *  - Clear internal state,
+     *  - Scan all lines/statements to populate the sets of variables and string literals,
+     *  - Records and sorts line numbers and
+     *  - builds a line-number to Line* map for later codegen.
      */
     variables_.clear();
     varAllocaName_.clear();
@@ -23,6 +24,7 @@ void CodeGenerator::collectDecls(const Program& program) {
     strCounter_ = 0;
     lineNumbers_.clear();
     lineMap_.clear();
+    needsRndHelper_ = false;
 
     for (const auto& line : program.lines) {
         lineNumbers_.push_back(line.number);
@@ -30,6 +32,8 @@ void CodeGenerator::collectDecls(const Program& program) {
         if (!semProvided_) {
             for (const auto& st : line.statements) collectStmtVars(st.get());
         }
+        // Always scan for RND usage to decide helper emission
+        for (const auto& st : line.statements) scanStmtForRnd(st.get());
     }
     std::ranges::sort(lineNumbers_);
     lineNumbers_.erase(std::ranges::unique(lineNumbers_).begin(), lineNumbers_.end());

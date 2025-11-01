@@ -16,11 +16,21 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
      *    string constants, recursing into contained expressions/blocks.
      */
     if (const auto p = dyn_cast<const PrintStmt>(s)) {
-        collectExprVars(p->value.get());
-        if (const auto se = dyn_cast<StringExpr>(p->value.get())) {
-            // ReSharper disable once CppUseAssociativeContains
-            if (!strLiteralId_.count(se->value)) strLiteralId_[se->value] = strCounter_++;
-            { std::ostringstream m; m << "StringLiteral @ " << se->pos.line << ':' << se->pos.col; logSem(m.str()); }
+        if (p->value) {
+            const Expr* v = p->value.get();
+            collectExprVars(v);
+            if (const auto se = dyn_cast<StringExpr>(v)) {
+                if (!strLiteralId_.count(se->value)) strLiteralId_[se->value] = strCounter_++;
+                { std::ostringstream m; m << "StringLiteral @ " << se->pos.line << ':' << se->pos.col; logSem(m.str()); }
+            }
+        }
+        for (const auto& vx : p->more) {
+            const Expr* v = vx.get();
+            collectExprVars(v);
+            if (const auto se = dyn_cast<StringExpr>(v)) {
+                if (!strLiteralId_.count(se->value)) strLiteralId_[se->value] = strCounter_++;
+                { std::ostringstream m; m << "StringLiteral @ " << se->pos.line << ':' << se->pos.col; logSem(m.str()); }
+            }
         }
     } else if (const auto a = dyn_cast<const AssignStmt>(s)) {
         variables_.insert(a->name);
@@ -39,6 +49,9 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
     } else if (const auto in = dyn_cast<const InputStmt>(s)) {
         variables_.insert(in->name);
         { std::ostringstream m; m << "Input " << in->name << " @ " << in->pos.line << ':' << in->pos.col; logSem(m.str()); }
+    } else if (const auto rz = dyn_cast<const RandomizeStmt>(s)) {
+        if (rz->seed) collectExprVars(rz->seed.get());
+        { std::ostringstream m; m << "Randomize @ " << rz->pos.line << ':' << rz->pos.col; logSem(m.str()); }
     }
 }
 

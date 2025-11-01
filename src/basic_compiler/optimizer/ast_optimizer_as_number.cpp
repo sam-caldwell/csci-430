@@ -6,6 +6,7 @@
  *    literals in expression trees and extracting their values.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/ast/NumberExpr.h"
 #include "basic_compiler/ast/RTTI.h"
 
 namespace gwbasic {

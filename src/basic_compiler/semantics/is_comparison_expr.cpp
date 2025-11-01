@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/BinaryExpr.h"
 #include "basic_compiler/ast/BinaryOp.h"
 

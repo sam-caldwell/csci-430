@@ -3,14 +3,16 @@
 
 #include <set>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 #include <fstream>
 
 #include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/semantics/SemanticError.h"
+
 
 namespace gwbasic {
 

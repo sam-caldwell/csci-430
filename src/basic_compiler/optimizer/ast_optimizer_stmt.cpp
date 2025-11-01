@@ -10,6 +10,11 @@
  */
 #include "basic_compiler/opt/AstOptimizer.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
+#include "basic_compiler/ast/ForStmt.h"
 
 namespace gwbasic {
 
@@ -37,7 +42,8 @@ void AstOptimizer::optimize(Program& program) {
                 asg->value = optExpr(std::move(asg->value));
                 newStmts.emplace_back(std::move(st));
             } else if (const auto pr = dyn_cast<PrintStmt>(st.get())) {
-                pr->value = optExpr(std::move(pr->value));
+                if (pr->value) pr->value = optExpr(std::move(pr->value));
+                for (auto& v : pr->more) v = optExpr(std::move(v));
                 newStmts.emplace_back(std::move(st));
             } else if (const auto is = dyn_cast<IfStmt>(st.get())) {
                 is->cond = optExpr(std::move(is->cond));
@@ -67,7 +73,8 @@ void AstOptimizer::optimize(Program& program) {
                         basg->value = optExpr(std::move(basg->value));
                         body.emplace_back(std::move(bs));
                     } else if (const auto bpr = dyn_cast<PrintStmt>(bs.get())) {
-                        bpr->value = optExpr(std::move(bpr->value));
+                        if (bpr->value) bpr->value = optExpr(std::move(bpr->value));
+                        for (auto& v : bpr->more) v = optExpr(std::move(v));
                         body.emplace_back(std::move(bs));
                     } else {
                         // leave as-is; other constructs in FOR body unchanged

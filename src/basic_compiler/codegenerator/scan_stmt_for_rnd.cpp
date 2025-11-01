@@ -7,7 +7,8 @@ namespace gwbasic {
 void CodeGenerator::scanStmtForRnd(const Stmt* s) {
     if (!s) return;
     if (const auto p = dyn_cast<const PrintStmt>(s)) {
-        scanExprForRnd(p->value.get());
+        if (p->value) scanExprForRnd(p->value.get());
+        for (const auto& v : p->more) scanExprForRnd(v.get());
     } else if (const auto a = dyn_cast<const AssignStmt>(s)) {
         scanExprForRnd(a->value.get());
     } else if (const auto i = dyn_cast<const IfStmt>(s)) {
@@ -23,4 +24,3 @@ void CodeGenerator::scanStmtForRnd(const Stmt* s) {
 }
 
 } // namespace gwbasic
-

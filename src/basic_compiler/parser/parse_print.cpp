@@ -18,18 +18,16 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
      *    otherwise parses an expression and returns a PrintStmt for numeric
      *    output.
      */
-    if (check(TokenType::String)) {
-        std::string s = peek().lexeme;
-        const int l = peek().line;
-        const int c = peek().col;
-        advance();
-        auto str = make_node<StringExpr>({l, c}, s);
-        return make_node<PrintStmt>({l, c}, std::move(str));
+    // Parse one or more expressions separated by commas
+    std::vector<std::unique_ptr<Expr>> items;
+    int l = peek().line, c = peek().col;
+    // First expression (string literal or general expression)
+    items.push_back(parseExpression());
+    // Additional items separated by commas
+    while (match(TokenType::Comma)) {
+        items.push_back(parseExpression());
     }
-    auto expr = parseExpression();
-    // Capture position before moving from the unique_ptr to avoid use-after-move
-    const SourcePos p = expr->pos;
-    return make_node<PrintStmt>(p, std::move(expr));
+    return make_node<PrintStmt>({l, c}, std::move(items));
 }
 
 } // namespace gwbasic

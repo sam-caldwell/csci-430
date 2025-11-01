@@ -1,5 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+#include "basic_compiler/ast/StringExpr.h"
 #include <sstream>
 #include <cctype>
 
@@ -52,4 +58,3 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
 }
 
 } // namespace gwbasic
-
