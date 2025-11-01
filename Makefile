@@ -2,7 +2,7 @@
 # (c) 2025 Sam Caldwell.  All Rights Reserved.
 # Purpose: Convenience wrapper for configure/build and environment reporting.
 #          Provides 'build', 'clean', and 'version' targets for developers.
-include "Makefile.d/*.mk"
+include Makefile.d/*.mk
 
 .PHONY: clean build version tree zip lint test help demo unit integration e2e coverage
 .DEFAULT_GOAL := help
@@ -25,4 +25,3 @@ CLANGXX ?= $(if $(LLVM_PREFIX),$(LLVM_PREFIX)/bin/clang++,clang++)
 CLANG_TIDY ?= $(if $(LLVM_PREFIX),$(LLVM_PREFIX)/bin/clang-tidy,clang-tidy)
 
 LLVM_CONFIG ?= $(if $(LLVM_PREFIX),$(LLVM_PREFIX)/bin/llvm-config,llvm-config)
-

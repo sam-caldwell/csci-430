@@ -19,7 +19,8 @@ namespace gwbasic {
  */
 struct InputStmt : Stmt {
     std::string name;
-    explicit InputStmt(std::string n) : name(std::move(n)) {}
+    explicit InputStmt(std::string n) : Stmt(NodeKind::InputStmt), name(std::move(n)) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::InputStmt; }
 };
 
 } // namespace gwbasic

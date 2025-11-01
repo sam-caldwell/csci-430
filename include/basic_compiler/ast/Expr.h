@@ -1,7 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #pragma once
 
-#include "basic_compiler/ast/SourcePos.h"
+#include "basic_compiler/ast/Node.h"
 
 namespace gwbasic {
 
@@ -18,9 +18,26 @@ namespace gwbasic {
  *  - Concrete subclasses implement specific expression forms. Ownership is
  *    typically via std::unique_ptr<Expr> in parent nodes.
  */
-struct Expr {
+struct Expr : Node {
     virtual ~Expr() = default;
-    SourcePos pos{};
+protected:
+    explicit Expr(NodeKind k) : Node(k) {}
+    Expr() : Node(NodeKind::AbstractExpr) {}
+public:
+    static bool classof(const Node* N) {
+        if (!N) return false;
+        switch (N->kind) {
+            case NodeKind::AbstractExpr:
+            case NodeKind::NumberExpr:
+            case NodeKind::StringExpr:
+            case NodeKind::VarExpr:
+            case NodeKind::UnaryExpr:
+            case NodeKind::BinaryExpr:
+                return true;
+            default:
+                return false;
+        }
+    }
 };
 
 } // namespace gwbasic

@@ -15,6 +15,9 @@ namespace gwbasic {
  * Theory of operation:
  *  - Works in conjunction with GosubStmt lowering strategy.
  */
-struct ReturnStmt : Stmt { };
+struct ReturnStmt : Stmt {
+    ReturnStmt() : Stmt(NodeKind::ReturnStmt) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::ReturnStmt; }
+};
 
 } // namespace gwbasic

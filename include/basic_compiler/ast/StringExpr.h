@@ -20,7 +20,8 @@ namespace gwbasic {
  */
 struct StringExpr : Expr {
     std::string value;
-    explicit StringExpr(std::string v) : value(std::move(v)) {}
+    explicit StringExpr(std::string v) : Expr(NodeKind::StringExpr), value(std::move(v)) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::StringExpr; }
 };
 
 } // namespace gwbasic

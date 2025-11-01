@@ -18,7 +18,8 @@ namespace gwbasic {
  */
 struct NumberExpr : Expr {
     double value;
-    explicit NumberExpr(double v) : value(v) {}
+    explicit NumberExpr(double v) : Expr(NodeKind::NumberExpr), value(v) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::NumberExpr; }
 };
 
 } // namespace gwbasic

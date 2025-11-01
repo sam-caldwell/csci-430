@@ -24,7 +24,8 @@ struct AssignStmt : Stmt {
     std::string name;
     std::unique_ptr<Expr> value;
     AssignStmt(std::string n, std::unique_ptr<Expr> v)
-        : name(std::move(n)), value(std::move(v)) {}
+        : Stmt(NodeKind::AssignStmt), name(std::move(n)), value(std::move(v)) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::AssignStmt; }
 };
 
 } // namespace gwbasic

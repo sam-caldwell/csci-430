@@ -25,7 +25,8 @@ struct BinaryExpr : Expr {
     std::unique_ptr<Expr> lhs;
     std::unique_ptr<Expr> rhs;
     BinaryExpr(BinaryOp o, std::unique_ptr<Expr> a, std::unique_ptr<Expr> b)
-        : op(o), lhs(std::move(a)), rhs(std::move(b)) {}
+        : Expr(NodeKind::BinaryExpr), op(o), lhs(std::move(a)), rhs(std::move(b)) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::BinaryExpr; }
 };
 
 } // namespace gwbasic

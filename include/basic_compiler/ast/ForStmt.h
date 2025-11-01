@@ -32,7 +32,8 @@ struct ForStmt : Stmt {
     std::unique_ptr<Expr> step; // may be null -> default 1
     std::vector<std::unique_ptr<Stmt>> body; // inline for body until NEXT (same line)
     ForStmt(std::string v, std::unique_ptr<Expr> s, std::unique_ptr<Expr> e, std::unique_ptr<Expr> st)
-        : var(std::move(v)), start(std::move(s)), end(std::move(e)), step(std::move(st)) {}
+        : Stmt(NodeKind::ForStmt), var(std::move(v)), start(std::move(s)), end(std::move(e)), step(std::move(st)) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::ForStmt; }
 };
 
 } // namespace gwbasic

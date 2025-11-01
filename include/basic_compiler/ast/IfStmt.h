@@ -22,7 +22,8 @@ namespace gwbasic {
 struct IfStmt : Stmt {
     std::unique_ptr<Expr> cond;
     int targetLine;
-    IfStmt(std::unique_ptr<Expr> c, int ln) : cond(std::move(c)), targetLine(ln) {}
+    IfStmt(std::unique_ptr<Expr> c, int ln) : Stmt(NodeKind::IfStmt), cond(std::move(c)), targetLine(ln) {}
+    static bool classof(const Node* N) { return N && N->kind == NodeKind::IfStmt; }
 };
 
 } // namespace gwbasic
