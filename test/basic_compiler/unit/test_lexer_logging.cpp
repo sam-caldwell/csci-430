@@ -14,7 +14,9 @@ using namespace gwbasic;
  */
 TEST(Lexer, LoggingProducesOutput) {
     const std::string src = "10 PRINT \"HI\"\n20 END\n";
-    std::filesystem::path tmp = std::filesystem::current_path() / "lexer_logging_test.log";
+    std::filesystem::path tmpdir = std::filesystem::path("..") / "tmp" / "unit_logs";
+    std::filesystem::create_directories(tmpdir);
+    std::filesystem::path tmp = tmpdir / "lexer_logging_test.log";
     std::error_code ec; std::filesystem::remove(tmp, ec); // best-effort cleanup
     Lexer lex(src);
     lex.setLexLogPath(tmp.string());
