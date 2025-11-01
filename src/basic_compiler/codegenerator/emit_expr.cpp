@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/ast/RTTI.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -18,7 +19,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, cons
      *    string) and emits the corresponding LLVM IR instructions, returning
      *    a name/literal which the caller can use.
      */
-    if (auto num = dynamic_cast<const NumberExpr*>(e)) {
+    if (auto num = dyn_cast<const NumberExpr>(e)) {
         char buf[64];
         std::snprintf(buf, sizeof(buf), "%.17g", num->value);
         std::string s(buf);
@@ -27,7 +28,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, cons
 
         return s;
     }
-    if (auto v = dynamic_cast<const VarExpr*>(const_cast<Expr*>(e))) {
+    if (auto v = dyn_cast<const VarExpr>(e)) {
         ensureVarAllocated(out, v->name);
         std::string a = varAllocaName_[v->name];
         std::string r = nextTemp();
@@ -38,7 +39,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, cons
         }
         return r;
     }
-    if (auto u = dynamic_cast<const UnaryExpr*>(const_cast<Expr*>(e))) {
+    if (auto u = dyn_cast<const UnaryExpr>(e)) {
         auto inner = emitExpr(out, u->inner.get(), "");
         if (u->op == '+') return inner;
         if (u->op == '-') {
@@ -49,7 +50,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, cons
             return res;
         }
     }
-    if (auto b = dynamic_cast<const BinaryExpr*>(const_cast<Expr*>(e))) {
+    if (auto b = dyn_cast<const BinaryExpr>(e)) {
         if (b->op == BinaryOp::Eq || b->op == BinaryOp::Ne || b->op == BinaryOp::Lt || b->op == BinaryOp::Le || b->op == BinaryOp::Gt || b->op == BinaryOp::Ge) {
             std::string i1 = emitComparison(out, b);
             std::string i1z = nextTemp();
@@ -71,7 +72,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, cons
         }
         return res;
     }
-    if (auto s = dynamic_cast<const StringExpr*>(const_cast<Expr*>(e))) {
+    if (auto s = dyn_cast<const StringExpr>(e)) {
         int id = strLiteralId_[s->value];
         std::string gep = nextTemp();
         std::string ir = "  "; ir += gep; ir += " = getelementptr inbounds i8, ptr "; ir += globalStringName(id); ir += ", i64 0";

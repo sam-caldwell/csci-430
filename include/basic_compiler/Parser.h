@@ -8,6 +8,7 @@
 #include <fstream>
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/RTTI.h"
 
 namespace gwbasic {
 
@@ -97,15 +98,15 @@ public:
 private:
     void logSyntax(const std::string& msg) { if (syntaxLogEnabled_ && syntaxLog_.is_open()) syntaxLog_ << msg << '\n'; }
     static const char* nodeName(const Stmt* s) {
-        if (dynamic_cast<const AssignStmt*>(s)) return "AssignStmt";
-        if (dynamic_cast<const PrintStmt*>(s)) return "PrintStmt";
-        if (dynamic_cast<const GotoStmt*>(s)) return "GotoStmt";
-        if (dynamic_cast<const GosubStmt*>(s)) return "GosubStmt";
-        if (dynamic_cast<const ReturnStmt*>(s)) return "ReturnStmt";
-        if (dynamic_cast<const IfStmt*>(s)) return "IfStmt";
-        if (dynamic_cast<const InputStmt*>(s)) return "InputStmt";
-        if (dynamic_cast<const ForStmt*>(s)) return "ForStmt";
-        if (dynamic_cast<const EndStmt*>(s)) return "EndStmt";
+        if (isa<AssignStmt>(s)) return "AssignStmt";
+        if (isa<PrintStmt>(s)) return "PrintStmt";
+        if (isa<GotoStmt>(s)) return "GotoStmt";
+        if (isa<GosubStmt>(s)) return "GosubStmt";
+        if (isa<ReturnStmt>(s)) return "ReturnStmt";
+        if (isa<IfStmt>(s)) return "IfStmt";
+        if (isa<InputStmt>(s)) return "InputStmt";
+        if (isa<ForStmt>(s)) return "ForStmt";
+        if (isa<EndStmt>(s)) return "EndStmt";
         return "Stmt";
     }
 };

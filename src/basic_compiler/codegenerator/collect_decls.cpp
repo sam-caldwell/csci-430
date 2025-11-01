@@ -27,10 +27,24 @@ void CodeGenerator::collectDecls(const Program& program) {
     for (const auto& line : program.lines) {
         lineNumbers_.push_back(line.number);
         lineMap_[line.number] = &line;
-        for (const auto& st : line.statements) collectStmtVars(st.get());
+        if (!semProvided_) {
+            for (const auto& st : line.statements) collectStmtVars(st.get());
+        }
     }
     std::ranges::sort(lineNumbers_);
     lineNumbers_.erase(std::ranges::unique(lineNumbers_).begin(), lineNumbers_.end());
+
+    if (semProvided_) {
+        // Seed variables and strings from semantics
+        variables_ = semVariables_;
+        strLiteralId_.clear();
+        strCounter_ = 0;
+        for (const auto& s : semStrings_) {
+            // Only assign ids once; stable deterministic order
+            if (!strLiteralId_.contains(s)) strLiteralId_[s] = strCounter_++;
+        }
+        // LineNumbers are computed from AST to drive emission order; no change
+    }
 }
 
 } // namespace gwbasic

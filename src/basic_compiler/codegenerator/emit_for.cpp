@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/ast/RTTI.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -50,13 +51,13 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
 
     out << bodyLbl << ":\n";
     for (const auto& s : fs->body) {
-        if (auto asg = dynamic_cast<AssignStmt*>(s.get())) {
+        if (auto asg = dyn_cast<AssignStmt>(s.get())) {
             std::string val = emitExpr(out, asg->value.get(), currLineLabel);
             std::string ir = "  store double "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name];
             out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt body Assign -> " << ir; log(m.str()); }
-        } else if (auto pr = dynamic_cast<PrintStmt*>(s.get())) {
-            if (dynamic_cast<StringExpr*>(pr->value.get())) {
-                int id = strLiteralId_[dynamic_cast<StringExpr*>(pr->value.get())->value];
+        } else if (auto pr = dyn_cast<PrintStmt>(s.get())) {
+            if (isa<StringExpr>(pr->value.get())) {
+                int id = strLiteralId_[dyn_cast<StringExpr>(pr->value.get())->value];
                 std::string sptr = nextTemp();
               std::string ir1 = "  "; ir1 += sptr; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += globalStringName(id); ir1 += ", i64 0";
               out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt body Print -> " << ir1; log(m.str()); }
