@@ -30,15 +30,22 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            clang \
+            clang-tidy
 
-      - name: Build (CMake)
+      - name: Build (Make)
+        env:
+          # Prefer Ninja; Makefile auto-detects if installed
+          GENERATOR: Ninja
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build -- -j2
+          make clean
+          make build
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
           category: '/language:cpp'
-
