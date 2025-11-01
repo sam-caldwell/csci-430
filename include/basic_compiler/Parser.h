@@ -8,19 +8,13 @@
 #include <fstream>
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/parser/ParseError.h"
+#include "basic_compiler/ast/Traits.h"
 
 namespace gwbasic {
-
-/**
- * ParseError: Exception for syntactic errors during parsing.
- *
- * Purpose:
- *  - Surface unexpected tokens or malformed grammar constructs.
- */
-class ParseError final : public std::runtime_error {
-public:
-    using std::runtime_error::runtime_error;
-};
 
 /**
  * Parser: Builds an AST (Program) from a token stream.
@@ -89,25 +83,13 @@ private:
 
 public:
     /** Enable syntax analysis logging to the specified file path. */
-    void setSyntaxLogPath(const std::string& path) {
-        if (syntaxLog_.is_open()) syntaxLog_.close();
-        syntaxLog_.open(path, std::ios::out | std::ios::trunc);
-        syntaxLogEnabled_ = syntaxLog_.is_open();
-    }
+    void setSyntaxLogPath(const std::string& path);
 private:
-    void logSyntax(const std::string& msg) { if (syntaxLogEnabled_ && syntaxLog_.is_open()) syntaxLog_ << msg << '\n'; }
-    static const char* nodeName(const Stmt* s) {
-        if (dynamic_cast<const AssignStmt*>(s)) return "AssignStmt";
-        if (dynamic_cast<const PrintStmt*>(s)) return "PrintStmt";
-        if (dynamic_cast<const GotoStmt*>(s)) return "GotoStmt";
-        if (dynamic_cast<const GosubStmt*>(s)) return "GosubStmt";
-        if (dynamic_cast<const ReturnStmt*>(s)) return "ReturnStmt";
-        if (dynamic_cast<const IfStmt*>(s)) return "IfStmt";
-        if (dynamic_cast<const InputStmt*>(s)) return "InputStmt";
-        if (dynamic_cast<const ForStmt*>(s)) return "ForStmt";
-        if (dynamic_cast<const EndStmt*>(s)) return "EndStmt";
-        return "Stmt";
-    }
+    /** Write a syntax-phase log line if logging is enabled. */
+    void logSyntax(const std::string& msg);
+
+    /** Return a pretty node name for syntax logging. */
+    static const char* nodeName(const Stmt* s);
 };
 
 } // namespace gwbasic

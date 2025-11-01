@@ -3,6 +3,7 @@
 
 #include <string>
 #include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -17,9 +18,9 @@ namespace gwbasic {
  * Theory of operation:
  *  - Current implementation may be simplified; semantics logged for tracing.
  */
-struct InputStmt : Stmt {
+struct InputStmt : ASTLeaf<NodeKind::InputStmt, Stmt> {
     std::string name;
-    explicit InputStmt(std::string n) : name(std::move(n)) {}
+    explicit InputStmt(std::string n) : ASTLeaf(), name(std::move(n)) {}
 };
 
 } // namespace gwbasic

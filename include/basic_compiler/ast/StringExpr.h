@@ -3,6 +3,7 @@
 
 #include <string>
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -18,9 +19,9 @@ namespace gwbasic {
  *  - Codegen interns literals and emits global string constants with
  *    references via getelementptr for @printf calls.
  */
-struct StringExpr : Expr {
+struct StringExpr : ASTLeaf<NodeKind::StringExpr, Expr> {
     std::string value;
-    explicit StringExpr(std::string v) : value(std::move(v)) {}
+    explicit StringExpr(std::string v) : ASTLeaf(), value(std::move(v)) {}
 };
 
 } // namespace gwbasic

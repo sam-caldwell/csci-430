@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -18,10 +19,10 @@ namespace gwbasic {
  * Theory of operation:
  *  - Codegen emits a no-op for unary '+' and an fneg for unary '-'.
  */
-struct UnaryExpr : Expr {
+struct UnaryExpr : ASTLeaf<NodeKind::UnaryExpr, Expr> {
     char op; // '+' or '-'
     std::unique_ptr<Expr> inner;
-    UnaryExpr(char o, std::unique_ptr<Expr> e) : op(o), inner(std::move(e)) {}
+    UnaryExpr(char o, std::unique_ptr<Expr> e) : ASTLeaf(), op(o), inner(std::move(e)) {}
 };
 
 } // namespace gwbasic

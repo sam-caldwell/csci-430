@@ -5,6 +5,7 @@
 #include <string>
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -20,11 +21,11 @@ namespace gwbasic {
  * Theory of operation:
  *  - Codegen emits store to an alloca location tracked per variable name.
  */
-struct AssignStmt : Stmt {
+struct AssignStmt : ASTLeaf<NodeKind::AssignStmt, Stmt> {
     std::string name;
     std::unique_ptr<Expr> value;
     AssignStmt(std::string n, std::unique_ptr<Expr> v)
-        : name(std::move(n)), value(std::move(v)) {}
+        : ASTLeaf(), name(std::move(n)), value(std::move(v)) {}
 };
 
 } // namespace gwbasic

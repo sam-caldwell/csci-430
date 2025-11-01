@@ -18,7 +18,8 @@ using namespace gwbasic;
 TEST(Parser, ExprNestedParentheses) {
     // A = (1 + (2 * (3 + 4)))
     std::string src = "10 LET A = (1 + (2 * (3 + 4)))\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     auto [lines] = p.parseProgram();

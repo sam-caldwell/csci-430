@@ -16,7 +16,8 @@ using namespace gwbasic;
  */
 TEST(Parser, ForWithStep) {
     std::string src = "10 FOR I = 1 TO 10 STEP 2 : NEXT I\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     auto [lines] = p.parseProgram();

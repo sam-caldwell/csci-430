@@ -9,6 +9,12 @@
  *    expression simplification to `optExpr`.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
+#include "basic_compiler/ast/ForStmt.h"
 
 namespace gwbasic {
 
@@ -32,13 +38,14 @@ void AstOptimizer::optimize(Program& program) {
         std::vector<std::unique_ptr<Stmt>> newStmts;
         newStmts.reserve(statements.size());
         for (auto& st : statements) {
-            if (const auto asg = dynamic_cast<AssignStmt*>(st.get())) {
+            if (const auto asg = dyn_cast<AssignStmt>(st.get())) {
                 asg->value = optExpr(std::move(asg->value));
                 newStmts.emplace_back(std::move(st));
-            } else if (const auto pr = dynamic_cast<PrintStmt*>(st.get())) {
-                pr->value = optExpr(std::move(pr->value));
+            } else if (const auto pr = dyn_cast<PrintStmt>(st.get())) {
+                if (pr->value) pr->value = optExpr(std::move(pr->value));
+                for (auto& v : pr->more) v = optExpr(std::move(v));
                 newStmts.emplace_back(std::move(st));
-            } else if (const auto is = dynamic_cast<IfStmt*>(st.get())) {
+            } else if (const auto is = dyn_cast<IfStmt>(st.get())) {
                 is->cond = optExpr(std::move(is->cond));
                 if (double v; asNumber(is->cond.get(), v)) {
                     if (v != 0.0) {
@@ -52,7 +59,7 @@ void AstOptimizer::optimize(Program& program) {
                 } else {
                     newStmts.emplace_back(std::move(st));
                 }
-            } else if (const auto fs = dynamic_cast<ForStmt*>(st.get())) {
+            } else if (const auto fs = dyn_cast<ForStmt>(st.get())) {
                 fs->start = optExpr(std::move(fs->start));
                 fs->end   = optExpr(std::move(fs->end));
                 if (fs->step) fs->step = optExpr(std::move(fs->step));
@@ -62,11 +69,12 @@ void AstOptimizer::optimize(Program& program) {
                 std::vector<std::unique_ptr<Stmt>> body;
                 body.reserve(fs->body.size());
                 for (auto& bs : fs->body) {
-                    if (const auto basg = dynamic_cast<AssignStmt*>(bs.get())) {
+                    if (const auto basg = dyn_cast<AssignStmt>(bs.get())) {
                         basg->value = optExpr(std::move(basg->value));
                         body.emplace_back(std::move(bs));
-                    } else if (const auto bpr = dynamic_cast<PrintStmt*>(bs.get())) {
-                        bpr->value = optExpr(std::move(bpr->value));
+                    } else if (const auto bpr = dyn_cast<PrintStmt>(bs.get())) {
+                        if (bpr->value) bpr->value = optExpr(std::move(bpr->value));
+                        for (auto& v : bpr->more) v = optExpr(std::move(v));
                         body.emplace_back(std::move(bs));
                     } else {
                         // leave as-is; other constructs in FOR body unchanged
@@ -85,4 +93,3 @@ void AstOptimizer::optimize(Program& program) {
 }
 
 } // namespace gwbasic
-

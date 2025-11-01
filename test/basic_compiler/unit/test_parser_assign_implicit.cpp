@@ -15,7 +15,8 @@ using namespace gwbasic;
  */
 TEST(Parser, AssignImplicitWithoutLet) {
     std::string src = "10 A = 42\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     auto [lines] = p.parseProgram();

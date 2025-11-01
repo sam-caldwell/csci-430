@@ -2,6 +2,7 @@
 #pragma once
 
 #include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -15,6 +16,6 @@ namespace gwbasic {
  * Theory of operation:
  *  - Works in conjunction with GosubStmt lowering strategy.
  */
-struct ReturnStmt : Stmt { };
+struct ReturnStmt : ASTLeaf<NodeKind::ReturnStmt, Stmt> {};
 
 } // namespace gwbasic

@@ -19,8 +19,8 @@ void usage(const char* argv0) {
     std::cerr << "  -o <file>    : Link a native executable to <file>\n";
     std::cerr << "  --asm <file> : Emit assembly (.asm) for the chosen --target\n";
     std::cerr << "  --target <triple>: aarch64-linux-gnu, x86_64-linux-gnu (default host).\n";
+    std::cerr << "  --print-triple : Print the effective IR triple clang uses and exit.\n";
     std::cerr << "  --lex-log, --syntax-log, --semantic-log, --log control phase logs.\n";
     std::cerr << "  Without -ll/--bc/-o/--asm, prints LLVM IR to stdout.\n";
-    std::cerr << "  Supported targets: x86_64 or arm64/aarch64 on Linux/macOS (Darwin). FreeBSD and Android are also allowed.\n";
+    std::cerr << "  Supported targets: x86_64 or arm64/aarch64 on Linux/macOS (Darwin).\n";
 }
-

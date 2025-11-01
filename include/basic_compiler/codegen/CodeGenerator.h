@@ -9,7 +9,28 @@
 #include <sstream>
 
 #include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/NumberExpr.h"
+#include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/StringExpr.h"
+#include "basic_compiler/ast/ForStmt.h"
+#include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/InputStmt.h"
+#include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
+#include "basic_compiler/ast/GosubStmt.h"
+#include "basic_compiler/ast/EndStmt.h"
+#include "basic_compiler/ast/ReturnStmt.h"
+#include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/codegen/CodeGenError.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/ast/Traits.h"
 
 namespace gwbasic {
 
@@ -32,6 +53,13 @@ public:
 
     /** Convert Program to LLVM IR (text form). */
     std::string generate(const Program& program);
+    /** Provide precomputed semantic results (variables, strings, lines). */
+    void setSemantics(const SemanticAnalyzer::Result& r) {
+        semProvided_ = true;
+        semVariables_ = r.variables;
+        semStrings_ = r.stringLiterals;
+        semLineNumbers_ = r.lineNumbers;
+    }
 
 private:
     // Counters and symbol maps
@@ -43,6 +71,12 @@ private:
     std::vector<int> lineNumbers_; // sorted line numbers
     std::map<int, const Line*> lineMap_;
     int currentLine_{0};
+    bool needsRndHelper_{false};
+    // Optional semantic input
+    bool semProvided_{false};
+    std::set<std::string> semVariables_{};
+    std::set<std::string> semStrings_{};
+    std::set<int> semLineNumbers_{};
 
     // Phase logging
     bool logEnabled_{false};
@@ -61,6 +95,9 @@ private:
     void collectDecls(const Program& program);
     void collectExprVars(const Expr* e);
     void collectStmtVars(const Stmt* s);
+    // Lightweight scan for RND usage independent of semantics
+    void scanExprForRnd(const Expr* e);
+    void scanStmtForRnd(const Stmt* s);
 
     // Emission helpers
     void emitHeader(std::ostringstream& out);
@@ -73,7 +110,7 @@ private:
     void emitSubroutineInline(std::ostringstream& out, int targetLine, const std::string& entryLabel, const std::string& returnLabel);
 
     // Expression lowering
-    std::string emitExpr(std::ostringstream& out, const Expr* e, const std::string& currBlockSuffix);
+    std::string emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix);
     std::string emitComparison(std::ostringstream& out, const BinaryExpr* c);
 
     // Utilities
@@ -88,26 +125,8 @@ private:
     void logSem(const std::string& msg) {
         if (semLogEnabled_ && semLogFile_.is_open()) semLogFile_ << msg << "\n";
     }
-    static const char* nodeName(const Stmt* s) {
-        if (dynamic_cast<const AssignStmt*>(s)) return "AssignStmt";
-        if (dynamic_cast<const PrintStmt*>(s)) return "PrintStmt";
-        if (dynamic_cast<const GotoStmt*>(s)) return "GotoStmt";
-        if (dynamic_cast<const GosubStmt*>(s)) return "GosubStmt";
-        if (dynamic_cast<const ReturnStmt*>(s)) return "ReturnStmt";
-        if (dynamic_cast<const IfStmt*>(s)) return "IfStmt";
-        if (dynamic_cast<const InputStmt*>(s)) return "InputStmt";
-        if (dynamic_cast<const ForStmt*>(s)) return "ForStmt";
-        if (dynamic_cast<const EndStmt*>(s)) return "EndStmt";
-        return "Stmt";
-    }
-    static const char* nodeName(const Expr* e) {
-        if (dynamic_cast<const NumberExpr*>(e)) return "NumberExpr";
-        if (dynamic_cast<const StringExpr*>(e)) return "StringExpr";
-        if (dynamic_cast<const VarExpr*>(e)) return "VarExpr";
-        if (dynamic_cast<const UnaryExpr*>(e)) return "UnaryExpr";
-        if (dynamic_cast<const BinaryExpr*>(e)) return "BinaryExpr";
-        return "Expr";
-    }
+    static const char* nodeName(const Stmt* s) { return prettyName(s ? s->getKind() : NodeKind::AbstractStmt); }
+    static const char* nodeName(const Expr* e) { return prettyName(e ? e->getKind() : NodeKind::AbstractExpr); }
 
 public:
     /** Enable code generation logging to the specified file path. */

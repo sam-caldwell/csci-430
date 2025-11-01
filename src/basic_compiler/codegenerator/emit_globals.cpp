@@ -17,7 +17,11 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
      */
     out << "@.fmt_num = private unnamed_addr constant [4 x i8] c\"%f\\0A\\00\"\n";
     out << "@.fmt_str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"\n";
+    out << "@.fmt_num_sp = private unnamed_addr constant [4 x i8] c\"%f\\20\\00\"\n"; // "%f "
+    out << "@.fmt_str_sp = private unnamed_addr constant [4 x i8] c\"%s\\20\\00\"\n"; // "%s "
     out << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"\n";
+    // RNG state: last random value for RND(0)
+    out << "@gwb_last_rnd = global double 0.0\n";
     for (const auto&[fst, snd] : strLiteralId_) {
         const std::string& s = fst;
         const int id = snd;

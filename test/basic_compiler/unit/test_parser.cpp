@@ -18,7 +18,8 @@ TEST(Parser, ParseSimpleProgram) {
 40 PRINT "Done"
 50 END
 )";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     auto [lines] = p.parseProgram();

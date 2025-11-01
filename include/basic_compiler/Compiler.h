@@ -2,9 +2,11 @@
 #pragma once
 
 #include <string>
+#include <cstdio>
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
 
 namespace gwbasic {
 
@@ -31,7 +33,11 @@ public:
         Parser parser(std::move(tokens));
         auto program = parser.parseProgram();
         CodeGenerator gen;
-        return gen.generate(program);
+        // Provide semantic info to avoid duplicate collection
+        SemanticAnalyzer sema;
+        auto res = sema.analyze(program);
+        gen.setSemantics(res);
+        return addDefaultTripleIfMissing(gen.generate(program));
     }
 
     /**
@@ -80,6 +86,34 @@ public:
 
     /** Compile with AST optimization prior to codegen. */
     static std::string compileStringOptimized(const std::string& source);
+
+private:
+    // Prefix IR with clang's effective -cc1 triple for IR compilation to avoid override warnings
+    static std::string addDefaultTripleIfMissing(const std::string& ir) {
+        // If IR already declares a target triple, keep it
+        if (ir.find("target triple =") != std::string::npos) return ir;
+        // Ask the system clang how it would invoke cc1 for IR and parse the -triple argument
+        std::string triple;
+        const char* cmd = "clang -### -S -x ir - -o /dev/null 2>&1";
+        if (FILE* pipe = popen(cmd, "r")) {
+            char buf[256];
+            std::string out;
+            while (size_t n = fread(buf, 1, sizeof(buf), pipe)) out.append(buf, buf + n);
+            pclose(pipe);
+            auto pos = out.find("\"-triple\"");
+            if (pos != std::string::npos) {
+                auto q1 = out.find('"', pos + 9);
+                if (q1 != std::string::npos) {
+                    auto q2 = out.find('"', q1 + 1);
+                    if (q2 != std::string::npos && q2 > q1 + 1) triple = out.substr(q1 + 1, q2 - (q1 + 1));
+                }
+            }
+        }
+        if (triple.empty()) return ir;
+        std::ostringstream out;
+        out << "target triple = \"" << triple << "\"\n\n" << ir;
+        return out.str();
+    }
 };
 
 } // namespace gwbasic

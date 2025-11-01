@@ -2,6 +2,7 @@
 #pragma once
 
 #include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -16,9 +17,9 @@ namespace gwbasic {
  * Theory of operation:
  *  - Line numbers are mapped to basic blocks with labels “line_<N>”.
  */
-struct GotoStmt : Stmt {
+struct GotoStmt : ASTLeaf<NodeKind::GotoStmt, Stmt> {
     int targetLine;
-    explicit GotoStmt(int ln) : targetLine(ln) {}
+    explicit GotoStmt(const int ln) : ASTLeaf(), targetLine(ln) {}
 };
 
 } // namespace gwbasic

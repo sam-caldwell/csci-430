@@ -1,6 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/token/ToString.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/ast/NumberExpr.h"
+#include "basic_compiler/ast/StringExpr.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/VarExpr.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -20,25 +25,30 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
         int l = peek().line, c = peek().col;
         double v = std::stod(peek().lexeme);
         advance();
-        auto n = std::make_unique<NumberExpr>(v);
-        n->pos = {l, c};
-        return n;
+        return make_node<NumberExpr>({l, c}, v);
     }
     if (check(TokenType::String)) {
         int l = peek().line, c = peek().col;
         std::string s = peek().lexeme;
         advance();
-        auto n = std::make_unique<StringExpr>(s);
-        n->pos = {l, c};
-        return n;
+        return make_node<StringExpr>({l, c}, s);
     }
     if (check(TokenType::Identifier)) {
         int l = peek().line, c = peek().col;
-        std::string n = peek().lexeme;
+        std::string name = peek().lexeme;
         advance();
-        auto v = std::make_unique<VarExpr>(n);
-        v->pos = {l, c};
-        return v;
+        // Function call if immediately followed by '('
+        if (match(TokenType::LParen)) {
+            std::vector<std::unique_ptr<Expr>> args;
+            if (!check(TokenType::RParen)) {
+                do {
+                    args.push_back(parseExpression());
+                } while (match(TokenType::Comma));
+            }
+            consume(TokenType::RParen, ")");
+            return make_node<CallExpr>({l, c}, name, std::move(args));
+        }
+        return make_node<VarExpr>({l, c}, name);
     }
     if (match(TokenType::LParen)) {
         auto expr = parseExpression();

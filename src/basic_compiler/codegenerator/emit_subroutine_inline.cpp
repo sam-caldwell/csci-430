@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/ast/RTTI.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -32,62 +33,64 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
         { std::ostringstream m; m << "begin subroutine line " << currentLine_; log(m.str()); }
         bool terminated = false;
         for (const auto& st : line->statements) {
-            if (auto asg = dynamic_cast<AssignStmt*>(st.get())) {
+            if (auto asg = dyn_cast<AssignStmt>(st.get())) {
                 std::string val = emitExpr(out, asg->value.get(), entryLabel);
                 std::string ir = "  store double "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name];
                 out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " AssignStmt -> " << ir; log(m.str()); }
-            } else if (auto pr = dynamic_cast<PrintStmt*>(st.get())) {
-                if (dynamic_cast<StringExpr*>(pr->value.get())) {
-                    int id = strLiteralId_[dynamic_cast<StringExpr*>(pr->value.get())->value];
-                    std::string sptr = nextTemp();
-                    std::string ir1 = "  "; ir1 += sptr; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += globalStringName(id); ir1 += ", i64 0";
-                    out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); }
-                    std::string fmt = nextTemp();
-                    std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr @.fmt_str, i64 0";
-                    out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); }
-                    std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")";
-                    out << ir3 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir3; log(m.str()); }
-                } else {
-                    auto val = emitExpr(out, pr->value.get(), entryLabel);
-                    std::string fmt = nextTemp();
-                    std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_num, i64 0";
-                    out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); }
-                    std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")";
-                    out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); }
+            } else if (auto pr = dyn_cast<PrintStmt>(st.get())) {
+                std::vector<const Expr*> items;
+                if (pr->value) items.push_back(pr->value.get());
+                for (const auto& v : pr->more) items.push_back(v.get());
+                for (size_t pi = 0; pi < items.size(); ++pi) {
+                    const bool last = (pi + 1 == items.size());
+                    const Expr* v = items[pi];
+                    if (isa<StringExpr>(v)) {
+                        int id = strLiteralId_[dyn_cast<StringExpr>(v)->value];
+                        std::string sptr = nextTemp();
+                        { std::string ir1 = "  "; ir1 += sptr; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += globalStringName(id); ir1 += ", i64 0"; out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); } }
+                        std::string fmt = nextTemp();
+                        { std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr "; ir2 += (last ? "@.fmt_str" : "@.fmt_str_sp"); ir2 += ", i64 0"; out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); } }
+                        { std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")"; out << ir3 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir3; log(m.str()); } }
+                    } else {
+                        auto val = emitExpr(out, v, entryLabel);
+                        std::string fmt = nextTemp();
+                        { std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += (last ? "@.fmt_num" : "@.fmt_num_sp"); ir1 += ", i64 0"; out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log(m.str()); } }
+                        { std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")"; out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log(m.str()); } }
+                    }
                 }
-            } else if (auto ins = dynamic_cast<InputStmt*>(st.get())) {
+            } else if (auto ins = dyn_cast<InputStmt>(st.get())) {
                 std::string fmt = nextTemp();
                 std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_in, i64 0";
                 out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " InputStmt -> " << ir1; log(m.str()); }
                 std::string ir2 = "  call i32 (ptr, ...) @scanf(ptr "; ir2 += fmt; ir2 += ", ptr "; ir2 += varAllocaName_[ins->name]; ir2 += ")";
                 out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " InputStmt -> " << ir2; log(m.str()); }
-            } else if (auto is = dynamic_cast<IfStmt*>(st.get())) {
-                auto be = dynamic_cast<BinaryExpr*>(is->cond.get());
+            } else if (auto is = dyn_cast<IfStmt>(st.get())) {
+                auto be = dyn_cast<BinaryExpr>(is->cond.get());
                 if (!be || (be->op != BinaryOp::Eq && be->op != BinaryOp::Ne && be->op != BinaryOp::Lt && be->op != BinaryOp::Le && be->op != BinaryOp::Gt && be->op != BinaryOp::Ge)) throw CodeGenError("IF condition must be a comparison");
                 std::string cond = emitComparison(out, be);
                 std::string contLbl = entryLabel; contLbl += "_cont"; contLbl += std::to_string(++localContCounter);
                 std::string ir = "  br i1 "; ir += cond; ir += ", label %"; ir += lineLabelName(is->targetLine); ir += ", label %"; ir += contLbl;
                 out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " IfStmt -> " << ir; log(m.str()); }
                 out << contLbl << ":\n";
-            } else if (auto gt = dynamic_cast<GotoStmt*>(st.get())) {
+            } else if (auto gt = dyn_cast<GotoStmt>(st.get())) {
                 std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine);
                 out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " GotoStmt -> " << ir; log(m.str()); }
                 terminated = true;
                 break;
-            } else if (auto gs = dynamic_cast<GosubStmt*>(st.get())) {
+            } else if (auto gs = dyn_cast<GosubStmt>(st.get())) {
                 std::string cont = entryLabel; cont += "_gosub_cont"; cont += std::to_string(++localContCounter);
                 std::string ent = entryLabel; ent += "_gosub_entry"; ent += std::to_string(localContCounter);
                 { std::string ir = "  br label %"; ir += ent; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " GosubStmt -> " << ir; log(m.str()); } }
                 emitSubroutineInline(out, gs->targetLine, ent, cont);
                 out << cont << ":\n";
-            } else if (auto fs = dynamic_cast<ForStmt*>(st.get())) {
+            } else if (auto fs = dyn_cast<ForStmt>(st.get())) {
                 emitFor(out, fs, entryLabel, localContCounter);
-            } else if (dynamic_cast<ReturnStmt*>(st.get())) {
+            } else if (isa<ReturnStmt>(st.get())) {
                 std::string ir = "  br label %"; ir += returnLabel;
                 out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ReturnStmt -> " << ir; log(m.str()); }
                 terminated = true;
                 break;
-            } else if (dynamic_cast<EndStmt*>(st.get())) {
+            } else if (isa<EndStmt>(st.get())) {
                 std::string ir = "  br label %exit";
                 out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " EndStmt -> " << ir; log(m.str()); }
                 terminated = true;

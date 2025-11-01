@@ -4,6 +4,7 @@
 #include <memory>
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -19,10 +20,10 @@ namespace gwbasic {
  * Theory of operation:
  *  - Comparisons produce 0.0/1.0; codegen compares against 0.0 and branches.
  */
-struct IfStmt : Stmt {
+struct IfStmt : ASTLeaf<NodeKind::IfStmt, Stmt> {
     std::unique_ptr<Expr> cond;
     int targetLine;
-    IfStmt(std::unique_ptr<Expr> c, int ln) : cond(std::move(c)), targetLine(ln) {}
+    IfStmt(std::unique_ptr<Expr> c, int ln) : ASTLeaf(), cond(std::move(c)), targetLine(ln) {}
 };
 
 } // namespace gwbasic

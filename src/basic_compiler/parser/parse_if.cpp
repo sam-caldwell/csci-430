@@ -1,5 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/ast/IfStmt.h"
 
 namespace gwbasic {
 
@@ -20,9 +22,7 @@ std::unique_ptr<Stmt> Parser::parseIf() {
     if (!check(TokenType::Integer)) throw ParseError("Expected line number after THEN");
     int target = std::stoi(peek().lexeme);
     advance();
-    auto n = std::make_unique<IfStmt>(std::move(cond), target);
-    n->pos = {l, c};
-    return n;
+    return make_node<IfStmt>({l, c}, std::move(cond), target);
 }
 
 } // namespace gwbasic

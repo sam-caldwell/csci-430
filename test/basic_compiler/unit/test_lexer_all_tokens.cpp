@@ -51,7 +51,8 @@ TEST(Lexer, AllRecognizedTokens) {
         // END
         "160 END\n";
 
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
 
     // Collect observed token types

@@ -41,6 +41,7 @@ enum class TokenType {
     KwGosub,
     KwReturn,
     KwInput,
+    KwRandomize,
 
     // Operators / punctuation
     Plus,
@@ -60,4 +61,3 @@ enum class TokenType {
 };
 
 } // namespace gwbasic
-

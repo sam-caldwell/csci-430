@@ -14,7 +14,8 @@ using namespace gwbasic;
  */
 TEST(Parser, ErrorForMissingNextSameLine) {
     std::string src = "10 FOR I = 1 TO 3 : PRINT I\n"; // missing NEXT on same line
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);

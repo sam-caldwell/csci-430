@@ -18,7 +18,8 @@ using namespace gwbasic;
  */
 TEST(Parser, ForNextInlineBody) {
     std::string src = "10 FOR I = 1 TO 3 : PRINT I : NEXT I\n";
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
     auto [lines] = p.parseProgram();

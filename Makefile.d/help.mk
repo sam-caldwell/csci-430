@@ -1,0 +1,38 @@
+# File: Makefile.d/help.mk
+#
+# Purpose: Display available make targets and commonly overridden variables.
+#
+# Targets:
+#  - help: Prints a concise overview of project commands.
+#
+# Display available targets and descriptions
+help:
+	@echo "Available make targets:"
+	@printf "  %-12s %s\n" "help"     "Show this help message"
+	@echo
+	@printf "  %-12s %s\n" "build"    "Configure (first run) and build all targets via CMake/Ninja"
+	@printf "  %-12s %s\n" "clean"    "Delete and recreate the artifact directory 'build/'"
+	@printf "  %-12s %s\n" "demo"     "Compile demos/factorial.bas to build/demos/factorial/ (bin, .ll, .bc, .asm, logs)"
+	@printf "  %-12s %s\n" "e2e"      "Run end-to-end tests (depends on integration)"
+	@printf "  %-12s %s\n" "integration" "Run integration tests (depends on unit)"
+	@printf "  %-12s %s\n" "lint"     "Run clang-tidy on all C/C++ sources"
+	@printf "  %-12s %s\n" "test"     "Run unit, integration, and e2e tests"
+	@printf "  %-12s %s\n" "tree"     "Print repository tree (requires 'tree')"
+	@printf "  %-12s %s\n" "unit"     "Run unit tests"
+	@printf "  %-12s %s\n" "version"  "Show versions for CMake, Clang/LLVM, Ninja, OS, CPU, Xcode"
+	@printf "  %-12s %s\n" "zip"      "Archive repository into $(ZIP_NAME), excluding build/ and VCS/IDE files"
+	@echo
+	@echo "Overridable variables (current values):"
+	@printf "  %-14s = %s\n" "BUILD_DIR" "$(BUILD_DIR)"
+	@printf "  %-14s = %s\n" "GENERATOR" "$(GENERATOR)"
+	@printf "  %-14s = %s\n" "TOOLCHAIN" "$(TOOLCHAIN)"
+	@printf "  %-14s = %s\n" "CONFIG"    "$(CONFIG)"
+	@printf "  %-14s = %s\n" "NUM_CPUS"  "$(NUM_CPUS)"
+	@printf "  %-14s = %s\n" "ZIP_NAME"  "$(ZIP_NAME)"
+	@printf "  %-14s = %s\n" "TREE_ROOT" "$(TREE_ROOT)"
+	@printf "  %-14s = %s\n" "TREE_IGNORES" "$(TREE_IGNORES)"
+	@echo
+	@echo "Examples:"
+	@echo "  make build CONFIG=Release"
+	@echo "  make lint BUILD_DIR=build/cmake-build-debug"
+	@echo "  make tree TREE_ROOT=src"

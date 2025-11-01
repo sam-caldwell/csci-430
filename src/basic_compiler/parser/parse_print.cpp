@@ -1,5 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/StringExpr.h"
 
 namespace gwbasic {
 
@@ -15,22 +18,16 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
      *    otherwise parses an expression and returns a PrintStmt for numeric
      *    output.
      */
-    if (check(TokenType::String)) {
-        std::string s = peek().lexeme;
-        const int l = peek().line;
-        const int c = peek().col;
-        advance();
-        auto n = std::make_unique<PrintStmt>(std::make_unique<StringExpr>(s));
-        n->pos = {l, c};
-        return n;
+    // Parse one or more expressions separated by commas
+    std::vector<std::unique_ptr<Expr>> items;
+    int l = peek().line, c = peek().col;
+    // First expression (string literal or general expression)
+    items.push_back(parseExpression());
+    // Additional items separated by commas
+    while (match(TokenType::Comma)) {
+        items.push_back(parseExpression());
     }
-    auto expr = parseExpression();
-    // Capture position before moving from the unique_ptr to avoid use-after-move
-    const int eline = expr->pos.line;
-    const int ecol = expr->pos.col;
-    auto n = std::make_unique<PrintStmt>(std::move(expr));
-    n->pos = {eline, ecol};
-    return n;
+    return make_node<PrintStmt>({l, c}, std::move(items));
 }
 
 } // namespace gwbasic

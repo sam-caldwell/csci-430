@@ -69,6 +69,21 @@ Code repo: https://github.com/sam-caldwell/csci-430
 - Assembly: `.asm` with a header comment reflecting source and target; dialect matches target triple.
 - Executable: platform-native binary produced by `clang`.
 - Logs: phase logs capture tokens, syntax steps, semantic validations, and codegen mappings.
+  - Lexical (`.lex.log`): token stream with locations.
+  - Syntax (`.syntax.log`): recursive-descent parse events by line and node.
+  - Semantic (`.semantic.log`): symbol declarations/references, loop structure, and scope enter/exit.
+  - Codegen (`.codegen.log`): mapping from AST nodes to emitted LLVM IR.
+
+## Architecture Notes
+
+- Parser: hand-written recursive descent (`Parser`) implementing a classic expression precedence ladder
+  (`parseExpression` → `parseComparison` → `parseTerm` → `parseFactor` → `parseUnary` → `parsePrimary`).
+- AST: lightweight hierarchy with LLVM-style RTTI
+  - Each node carries a `NodeKind`; `isa<>`/`dyn_cast<>` helpers are available in `basic_compiler/ast/RTTI.h`.
+  - `Expr`/`Stmt` are abstract bases; concrete nodes implement `classof()` for fast kind checks.
+- Semantics: dedicated pass (`SemanticAnalyzer`) performs symbol and scope analysis prior to codegen
+  - Records variable declarations/uses with simple, extensible scope tracking.
+  - Emits a semantic log independent from code generation.
 
 ## Tips
 
@@ -82,3 +97,7 @@ Code repo: https://github.com/sam-caldwell/csci-430
 | “CLANG_PATH not defined”                   | Use `make build` so the project has `CLANG_PATH` injected.   |
 | “unsupported target triple”                | Only x86_64 and arm64/aarch64 for Linux/macOS are accepted.  |
 | Mismatched target warnings when linking IR | Re-run with `--target <triple>` appropriate for your system. |
+
+## Authorities
+We used the following resources to develop this project: 
+- https://hwiegman.home.xs4all.nl/gw-man/

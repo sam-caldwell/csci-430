@@ -15,6 +15,7 @@ using namespace gwbasic;
  */
 TEST(Lexer, UnterminatedStringThrows) {
     std::string src = "10 PRINT \"Hello\n"; // missing closing quote
-    Lexer lex(src);
+    std::istringstream iss(src);
+    Lexer lex(iss);
     EXPECT_THROW({ auto toks = lex.tokenize(); (void)toks; }, LexError);
 }

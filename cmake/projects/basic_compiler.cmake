@@ -7,6 +7,7 @@ file(GLOB_RECURSE BASIC_COMPILER_CORE_SOURCES CONFIGURE_DEPENDS
   ${PROJECT_SOURCE_DIR}/src/basic_compiler/lexer/*.cpp
   ${PROJECT_SOURCE_DIR}/src/basic_compiler/parser/*.cpp
   ${PROJECT_SOURCE_DIR}/src/basic_compiler/codegenerator/*.cpp
+  ${PROJECT_SOURCE_DIR}/src/basic_compiler/semantics/*.cpp
   ${PROJECT_SOURCE_DIR}/src/basic_compiler/optimizer/*.cpp
   ${PROJECT_SOURCE_DIR}/src/basic_compiler/compiler/*.cpp
 )

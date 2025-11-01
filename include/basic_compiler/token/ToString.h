@@ -38,6 +38,7 @@ inline std::string to_string(TokenType t) {
         case TokenType::KwGosub: return "GOSUB";
         case TokenType::KwReturn: return "RETURN";
         case TokenType::KwInput: return "INPUT";
+        case TokenType::KwRandomize: return "RANDOMIZE";
         case TokenType::Plus: return "+";
         case TokenType::Minus: return "-";
         case TokenType::Star: return "*";
@@ -57,4 +58,3 @@ inline std::string to_string(TokenType t) {
 }
 
 } // namespace gwbasic
-

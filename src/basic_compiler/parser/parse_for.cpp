@@ -1,5 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/ast/ForStmt.h"
 
 namespace gwbasic {
 
@@ -26,7 +28,7 @@ std::unique_ptr<Stmt> Parser::parseFor() {
     if (match(TokenType::KwStep)) {
         step = parseExpression();
     }
-    auto node = std::make_unique<ForStmt>(var, std::move(start), std::move(end), std::move(step));
+    auto node = make_node<ForStmt>({l, c}, var, std::move(start), std::move(end), std::move(step));
     while (!check(TokenType::KwNext)) {
         if (check(TokenType::NewLine) || atEnd()) {
             throw ParseError("FOR body must end with NEXT on the same line for now");
@@ -39,7 +41,6 @@ std::unique_ptr<Stmt> Parser::parseFor() {
     if (check(TokenType::Identifier)) {
         advance();
     }
-    node->pos = {l, c};
     return node;
 }
 

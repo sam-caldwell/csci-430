@@ -7,6 +7,10 @@
  *    identities.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/NumberExpr.h"
 
 namespace gwbasic {
 
@@ -26,7 +30,7 @@ namespace gwbasic {
  */
 std::unique_ptr<Expr> AstOptimizer::optExpr(std::unique_ptr<Expr> e) {
     if (!e) return e;
-    if (auto u = dynamic_cast<UnaryExpr*>(e.get())) {
+    if (auto u = dyn_cast<UnaryExpr>(e.get())) {
         u->inner = optExpr(std::move(u->inner));
         if (u->op == '+') return std::move(u->inner);
         if (u->op == '-') {
@@ -35,7 +39,7 @@ std::unique_ptr<Expr> AstOptimizer::optExpr(std::unique_ptr<Expr> e) {
         }
         return e;
     }
-    if (auto b = dynamic_cast<BinaryExpr*>(e.get())) {
+    if (auto b = dyn_cast<BinaryExpr>(e.get())) {
         b->lhs = optExpr(std::move(b->lhs));
         b->rhs = optExpr(std::move(b->rhs));
         double L, R;
@@ -87,4 +91,3 @@ std::unique_ptr<Expr> AstOptimizer::optExpr(std::unique_ptr<Expr> e) {
 }
 
 } // namespace gwbasic
-

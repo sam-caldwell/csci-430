@@ -3,6 +3,7 @@
 
 #include <string>
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -18,9 +19,9 @@ namespace gwbasic {
  *  - Codegen maintains a symbol table mapping variable names to allocas
  *    within the current function scope.
  */
-struct VarExpr : Expr {
+struct VarExpr : ASTLeaf<NodeKind::VarExpr, Expr> {
     std::string name;
-    explicit VarExpr(std::string n) : name(std::move(n)) {}
+    explicit VarExpr(std::string n) : ASTLeaf(), name(std::move(n)) {}
 };
 
 } // namespace gwbasic
