@@ -11,12 +11,15 @@ include Makefile.d/*.mk
 
 # Configuration
 CMAKE ?= cmake
+
 # Prefer Ninja if available, otherwise fall back to Unix Makefiles
 GENERATOR=Ninja
 TOOLCHAIN ?= cmake/Toolchain-HomebrewLLVM.cmake
+
 # Only pass a toolchain if the file exists
 TOOLCHAIN_FLAG := $(if $(wildcard $(TOOLCHAIN)),-DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN),)
 CONFIG ?= Debug
+
 # Derive BUILD_DIR from CONFIG unless overridden by the user
 BUILD_ROOT := build
 BUILD_SUBDIR := $(shell echo $(CONFIG) | tr A-Z a-z)
