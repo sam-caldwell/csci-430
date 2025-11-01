@@ -17,6 +17,7 @@
 #include "basic_compiler/ast/NumberExpr.h"
 #include "basic_compiler/ast/StringExpr.h"
 #include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/CallExpr.h"
 
 namespace gwbasic {
 

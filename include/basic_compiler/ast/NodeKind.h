@@ -17,6 +17,7 @@ enum class NodeKind {
     VarExpr,
     UnaryExpr,
     BinaryExpr,
+    CallExpr,
     // Stmts
     AssignStmt,
     PrintStmt,

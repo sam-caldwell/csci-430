@@ -138,6 +138,12 @@ int main(int argc, char** argv) {
             oss << CLANG_PATH << ' ';
             if (targetTriple) oss << "-target \"" << *targetTriple << "\" ";
             oss << '"' << llTmp.string() << "\" -o \"" << *outBIN << "\"";
+            // Link math library where required
+            #if defined(__APPLE__)
+            // libSystem provides libm; no extra flag needed
+            #else
+            oss << " -lm";
+            #endif
             std::string cmd = oss.str();
             int ec = std::system(cmd.c_str());
             if (ec != 0) {

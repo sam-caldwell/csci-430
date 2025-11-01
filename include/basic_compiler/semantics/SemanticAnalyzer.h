@@ -66,6 +66,12 @@ private:
     // Basic type analysis (numeric or string)
     enum class ValueType { Number, String };
     ValueType typeOf(const Expr* e);
+    // Extra semantic helpers
+    bool isComparisonExpr(const Expr* e) const;
+    bool constEval(const Expr* e, double& out) const;
+    // Function utilities
+    static bool isKnownNumericFunction(const std::string& name);
+    static int expectedArity(const std::string& name);
 };
 
 } // namespace gwbasic

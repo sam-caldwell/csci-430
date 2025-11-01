@@ -1,6 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include <sstream>
+#include <algorithm>
 
 namespace gwbasic {
 
@@ -33,6 +34,53 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
         reference(v->name, v->pos);
         return;
     }
+    if (auto call = dyn_cast<const CallExpr>(e)) {
+        // normalize name to upper for matching
+        std::string fn = call->callee; for (auto& ch : fn) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+        if (!isKnownNumericFunction(fn)) {
+            std::ostringstream m; m << "Unknown function '" << call->callee << "' @ " << call->pos.line << ':' << call->pos.col;
+            log(m.str());
+            throw SemanticError(m.str());
+        }
+        int exp = expectedArity(fn);
+        if (static_cast<int>(call->args.size()) != exp) {
+            std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects " << exp << " arg(s) @ " << call->pos.line << ':' << call->pos.col;
+            log(m.str());
+            throw SemanticError(m.str());
+        }
+        // Domain checks for arguments (constant folding + comparison-based rejection per policy)
+        if (!call->args.empty()) {
+            const Expr* a0 = call->args[0].get();
+            // Reject using comparison results directly as arguments for LOG/SQR
+            if ((fn == "LOG" || fn == "SQR" || fn == "SQRT") && isComparisonExpr(a0)) {
+                std::ostringstream m; m << "DomainError: " << fn << " argument cannot be a comparison @ " << call->pos.line << ':' << call->pos.col;
+                log(m.str());
+                throw SemanticError(m.str());
+            }
+            double cval;
+            if (constEval(a0, cval)) {
+                if ((fn == "SQR" || fn == "SQRT") && cval < 0.0) {
+                    std::ostringstream m; m << "DomainError: SQR requires argument >= 0 @ " << call->pos.line << ':' << call->pos.col;
+                    log(m.str());
+                    throw SemanticError(m.str());
+                }
+                if (fn == "LOG" && cval <= 0.0) {
+                    std::ostringstream m; m << "DomainError: LOG requires argument > 0 @ " << call->pos.line << ':' << call->pos.col;
+                    log(m.str());
+                    throw SemanticError(m.str());
+                }
+            }
+        }
+        for (const auto& arg : call->args) {
+            if (typeOf(arg.get()) == ValueType::String) {
+                std::ostringstream m; m << "TypeError: function '" << call->callee << "' requires numeric argument @ " << call->pos.line << ':' << call->pos.col;
+                log(m.str());
+                throw SemanticError(m.str());
+            }
+            analyzeExpr(arg.get());
+        }
+        return;
+    }
     if (auto b = dyn_cast<const BinaryExpr>(e)) {
         analyzeExpr(b->lhs.get());
         analyzeExpr(b->rhs.get());
@@ -47,6 +95,59 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
         std::ostringstream m; m << "StringLiteral @ " << s->pos.line << ':' << s->pos.col; log(m.str());
         return;
     }
+}
+
+bool SemanticAnalyzer::isComparisonExpr(const Expr* e) const {
+    if (auto b = dyn_cast<const BinaryExpr>(e)) {
+        switch (b->op) {
+            case BinaryOp::Eq:
+            case BinaryOp::Ne:
+            case BinaryOp::Lt:
+            case BinaryOp::Le:
+            case BinaryOp::Gt:
+            case BinaryOp::Ge:
+                return true;
+            default:
+                return false;
+        }
+    }
+    return false;
+}
+
+bool SemanticAnalyzer::constEval(const Expr* e, double& out) const {
+    if (!e) return false;
+    if (auto n = dyn_cast<const NumberExpr>(e)) { out = n->value; return true; }
+    if (auto u = dyn_cast<const UnaryExpr>(e)) {
+        double v;
+        if (constEval(u->inner.get(), v)) {
+            if (u->op == '+') { out = v; return true; }
+            if (u->op == '-') { out = -v; return true; }
+        }
+        return false;
+    }
+    if (auto b = dyn_cast<const BinaryExpr>(e)) {
+        double L, R;
+        if (constEval(b->lhs.get(), L) && constEval(b->rhs.get(), R)) {
+            switch (b->op) {
+                case BinaryOp::Add: out = L + R; return true;
+                case BinaryOp::Sub: out = L - R; return true;
+                case BinaryOp::Mul: out = L * R; return true;
+                case BinaryOp::Div: out = L / R; return true;
+                case BinaryOp::Eq:  out = (L == R) ? 1.0 : 0.0; return true;
+                case BinaryOp::Ne:  out = (L != R) ? 1.0 : 0.0; return true;
+                case BinaryOp::Lt:  out = (L <  R) ? 1.0 : 0.0; return true;
+                case BinaryOp::Le:  out = (L <= R) ? 1.0 : 0.0; return true;
+                case BinaryOp::Gt:  out = (L >  R) ? 1.0 : 0.0; return true;
+                case BinaryOp::Ge:  out = (L >= R) ? 1.0 : 0.0; return true;
+                default: return false;
+            }
+        }
+        return false;
+    }
+    if (dyn_cast<const StringExpr>(e)) return false;
+    if (dyn_cast<const VarExpr>(e)) return false;
+    if (dyn_cast<const CallExpr>(e)) return false;
+    return false;
 }
 
 void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
@@ -194,6 +295,7 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
     if (!e) return ValueType::Number;
     if (dyn_cast<const NumberExpr>(e)) return ValueType::Number;
     if (dyn_cast<const StringExpr>(e)) return ValueType::String;
+    if (dyn_cast<const CallExpr>(e)) return ValueType::Number;
     if (auto v = dyn_cast<const VarExpr>(e)) {
         (void)v; // variables are numeric in this implementation
         return ValueType::Number;
@@ -241,6 +343,21 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
         }
     }
     return ValueType::Number;
+}
+
+bool SemanticAnalyzer::isKnownNumericFunction(const std::string& upperName) {
+    // Supported numeric intrinsics (subset of GW-BASIC):
+    // SQR (SQRT alias), ABS, SIN, COS, TAN, ATN, LOG, EXP, INT, FIX, SGN
+    return (
+        upperName == "SQR" || upperName == "SQRT" || upperName == "ABS" ||
+        upperName == "SIN" || upperName == "COS" || upperName == "TAN" ||
+        upperName == "ATN" || upperName == "LOG" || upperName == "EXP" ||
+        upperName == "INT" || upperName == "FIX" || upperName == "SGN"
+    );
+}
+
+int SemanticAnalyzer::expectedArity(const std::string& upperName) {
+    (void)upperName; return 1; // all supported numeric functions are unary
 }
 
 } // namespace gwbasic

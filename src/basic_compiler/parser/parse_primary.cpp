@@ -34,9 +34,22 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
     }
     if (check(TokenType::Identifier)) {
         int l = peek().line, c = peek().col;
-        std::string n = peek().lexeme;
+        std::string name = peek().lexeme;
         advance();
-        auto v = std::make_unique<VarExpr>(n);
+        // Function call if immediately followed by '('
+        if (match(TokenType::LParen)) {
+            std::vector<std::unique_ptr<Expr>> args;
+            if (!check(TokenType::RParen)) {
+                do {
+                    args.push_back(parseExpression());
+                } while (match(TokenType::Comma));
+            }
+            consume(TokenType::RParen, ")");
+            auto call = std::make_unique<CallExpr>(name, std::move(args));
+            call->pos = {l, c};
+            return call;
+        }
+        auto v = std::make_unique<VarExpr>(name);
         v->pos = {l, c};
         return v;
     }

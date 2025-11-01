@@ -19,6 +19,16 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
     out << "declare i32 @printf(ptr, ...)\n";
     out << "declare i32 @scanf(ptr, ...)\n";
     out << "declare i32 @strcmp(ptr, ptr)\n\n";
+    // Math library functions used by intrinsic calls
+    out << "declare double @sqrt(double)\n";
+    out << "declare double @fabs(double)\n";
+    out << "declare double @sin(double)\n";
+    out << "declare double @cos(double)\n";
+    out << "declare double @tan(double)\n";
+    out << "declare double @atan(double)\n";
+    out << "declare double @log(double)\n";
+    out << "declare double @exp(double)\n";
+    out << "declare double @floor(double)\n\n";
     log("emitHeader: declared printf/scanf");
 }
 

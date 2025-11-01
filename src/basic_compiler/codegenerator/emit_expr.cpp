@@ -2,6 +2,7 @@
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/RTTI.h"
 #include <sstream>
+#include <cctype>
 
 namespace gwbasic {
 
@@ -71,6 +72,53 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, cons
             default: throw CodeGenError("Unsupported binary op in arithmetic");
         }
         return res;
+    }
+    if (auto call = dyn_cast<const CallExpr>(e)) {
+        // Normalize function name to upper for matching
+        std::string fn = call->callee; for (auto& ch : fn) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+        // Emit args
+        std::vector<std::string> argv; argv.reserve(call->args.size());
+        for (const auto& a : call->args) argv.push_back(emitExpr(out, a.get(), ""));
+        std::string res = nextTemp();
+        if (fn == "SQR" || fn == "SQRT") {
+            std::string ir = "  "; ir += res; ir += " = call double @sqrt(double "; ir += argv[0]; ir += ")";
+            out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sqrt -> " << ir; log(m.str()); }
+            return res;
+        }
+        if (fn == "ABS") {
+            std::string ir = "  "; ir += res; ir += " = call double @fabs(double "; ir += argv[0]; ir += ")";
+            out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr fabs -> " << ir; log(m.str()); }
+            return res;
+        }
+        if (fn == "SIN") { std::string ir = "  "; ir += res; ir += " = call double @sin(double "; ir += argv[0]; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sin -> " << ir; log(m.str()); } return res; }
+        if (fn == "COS") { std::string ir = "  "; ir += res; ir += " = call double @cos(double "; ir += argv[0]; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr cos -> " << ir; log(m.str()); } return res; }
+        if (fn == "TAN") { std::string ir = "  "; ir += res; ir += " = call double @tan(double "; ir += argv[0]; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr tan -> " << ir; log(m.str()); } return res; }
+        if (fn == "ATN") { std::string ir = "  "; ir += res; ir += " = call double @atan(double "; ir += argv[0]; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr atan -> " << ir; log(m.str()); } return res; }
+        if (fn == "LOG") { std::string ir = "  "; ir += res; ir += " = call double @log(double "; ir += argv[0]; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr log -> " << ir; log(m.str()); } return res; }
+        if (fn == "EXP") { std::string ir = "  "; ir += res; ir += " = call double @exp(double "; ir += argv[0]; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr exp -> " << ir; log(m.str()); } return res; }
+        if (fn == "INT") { std::string ir = "  "; ir += res; ir += " = call double @floor(double "; ir += argv[0]; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr floor(INT) -> " << ir; log(m.str()); } return res; }
+        if (fn == "FIX") {
+            std::string ireg = nextTemp();
+            { std::string ir = "  "; ir += ireg; ir += " = fptosi double "; ir += argv[0]; ir += " to i64"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr fix fptosi -> " << ir; log(m.str()); } }
+            { std::string ir = "  "; ir += res; ir += " = sitofp i64 "; ir += ireg; ir += " to double"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr fix sitofp -> " << ir; log(m.str()); } }
+            return res;
+        }
+        if (fn == "SGN") {
+            // sgn(x) = (x>0) - (x<0)
+            std::string cmpPos = nextTemp();
+            { std::string ir = "  "; ir += cmpPos; ir += " = fcmp ogt double "; ir += argv[0]; ir += ", 0.0"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sgn cmp>0 -> " << ir; log(m.str()); } }
+            std::string posD = nextTemp();
+            { std::string ir = "  "; ir += posD; ir += " = uitofp i1 "; ir += cmpPos; ir += " to double"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sgn pos to dbl -> " << ir; log(m.str()); } }
+            std::string cmpNeg = nextTemp();
+            { std::string ir = "  "; ir += cmpNeg; ir += " = fcmp olt double "; ir += argv[0]; ir += ", 0.0"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sgn cmp<0 -> " << ir; log(m.str()); } }
+            std::string negD = nextTemp();
+            { std::string ir = "  "; ir += negD; ir += " = uitofp i1 "; ir += cmpNeg; ir += " to double"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sgn neg to dbl -> " << ir; log(m.str()); } }
+            std::string negVal = nextTemp();
+            { std::string ir = "  "; ir += negVal; ir += " = fsub double 0.0, "; ir += negD; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sgn negate -> " << ir; log(m.str()); } }
+            { std::string ir = "  "; ir += res; ir += " = fadd double "; ir += posD; ir += ", "; ir += negVal; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sgn add -> " << ir; log(m.str()); } }
+            return res;
+        }
+        throw CodeGenError("Unknown function call");
     }
     if (auto s = dyn_cast<const StringExpr>(e)) {
         int id = strLiteralId_[s->value];
