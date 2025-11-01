@@ -8,10 +8,7 @@ set -euo pipefail
 ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT_DIR"
 
-command -v shellcheck || {
-  echo 'missing dependency: shellcheck'
-  exit 1
-}
+# This check does not require shellcheck; run standalone on any OS.
 
 violations=()
 
