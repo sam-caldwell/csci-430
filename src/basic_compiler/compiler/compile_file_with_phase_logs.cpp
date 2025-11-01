@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Compiler.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include <fstream>
 #include <sstream>
 
@@ -30,9 +31,13 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     Parser parser(std::move(tokens));
     parser.setSyntaxLogPath(syntaxLogPath);
     auto program = parser.parseProgram();
+    // Semantic analysis (scope + references + strings)
+    SemanticAnalyzer sema;
+    sema.setLogPath(semanticLogPath);
+    auto semRes = sema.analyze(program);
     CodeGenerator gen;
-    gen.setSemanticLogPath(semanticLogPath);
     if (!codegenLogPath.empty()) gen.setLogPath(codegenLogPath);
+    gen.setSemantics(semRes);
     return gen.generate(program);
 }
 

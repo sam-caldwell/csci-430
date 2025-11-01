@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Compiler.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
 
 namespace gwbasic {
 
@@ -22,6 +23,10 @@ std::string Compiler::compileStringWithLog(const std::string& source, const std:
     auto program = parser.parseProgram();
     CodeGenerator gen;
     gen.setLogPath(logPath);
+    // Provide semantics
+    SemanticAnalyzer sema;
+    auto res = sema.analyze(program);
+    gen.setSemantics(res);
     return gen.generate(program);
 }
 
