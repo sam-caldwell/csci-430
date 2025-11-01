@@ -4,3 +4,8 @@
               comparisons (codegen via strcmp), refactored codegen/optimizer away from dynamic_cast, integrated
               semantics into the compile pipeline (CodeGenerator::setSemantics), updated tests/README/CMake; all
               builds and tests passing.
+01 Nov 2025 - Added targeted file-stream lexer tests (std::ifstream) that write under build/tmp to cover
+              Lexer(std::istream&) directly; confirmed main() and compileFile*/phase-log paths use stream-based
+              lexing. Strengthened semantic analysis with IF target validation, numeric-only FOR start/end/step,
+              and duplicate line number detection; added unit tests for each. Verified 'make clean lint test build
+              demo' complete successfully.
