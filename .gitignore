@@ -4,6 +4,7 @@
 #          Keep only source and configuration files under version control.
 # macOS
 .DS_Store
+default.profraw
 
 # CLion / IntelliJ
 .idea/
