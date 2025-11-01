@@ -58,7 +58,7 @@ Code repo: https://github.com/sam-caldwell/csci-430
 
 ## Supported Targets
 
-- Whitelist only: x86_64 and arm64/aarch64 on Linux, macOS (Darwin), FreeBSD, Android.
+- Whitelist only: x86_64 and arm64/aarch64 on Linux, macOS (Darwin)
 - Windows/MSVC, ARM32, WebAssembly are not supported.
 - Set explicitly via `--target <triple>`, e.g. `x86_64-unknown-linux-gnu`, `aarch64-apple-macos`.
 
