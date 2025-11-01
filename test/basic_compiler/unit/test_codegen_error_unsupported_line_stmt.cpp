@@ -12,7 +12,7 @@
 
 using namespace gwbasic;
 
-namespace { struct DummyStmt : Stmt {}; }
+namespace { struct DummyStmt final : Stmt {}; }
 
 TEST(CodeGenErrors, UnsupportedStatementInLineBlock) {
     Program p;
