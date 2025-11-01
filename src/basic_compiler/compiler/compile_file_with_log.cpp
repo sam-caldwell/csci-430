@@ -29,7 +29,7 @@ std::string Compiler::compileFileWithLog(const std::string& path, const std::str
     SemanticAnalyzer sema;
     auto res = sema.analyze(program);
     gen.setSemantics(res);
-    return gen.generate(program);
+    return Compiler::addDefaultTripleIfMissing(gen.generate(program));
 }
 
 } // namespace gwbasic

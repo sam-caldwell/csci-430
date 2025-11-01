@@ -38,7 +38,7 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     CodeGenerator gen;
     if (!codegenLogPath.empty()) gen.setLogPath(codegenLogPath);
     gen.setSemantics(semRes);
-    return gen.generate(program);
+    return Compiler::addDefaultTripleIfMissing(gen.generate(program));
 }
 
 std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
@@ -75,7 +75,7 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
     CodeGenerator gen;
     if (!codegenLogPath.empty()) gen.setLogPath(codegenLogPath);
     gen.setSemantics(semRes);
-    return gen.generate(program);
+    return Compiler::addDefaultTripleIfMissing(gen.generate(program));
 }
 
 } // namespace gwbasic

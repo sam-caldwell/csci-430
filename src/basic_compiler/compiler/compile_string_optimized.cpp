@@ -15,7 +15,7 @@ std::string Compiler::compileStringOptimized(const std::string& source) {
     SemanticAnalyzer sema;
     auto res = sema.analyze(program);
     gen.setSemantics(res);
-    return gen.generate(program);
+    return Compiler::addDefaultTripleIfMissing(gen.generate(program));
 }
 
 } // namespace gwbasic

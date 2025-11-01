@@ -27,7 +27,7 @@ std::string Compiler::compileStringWithLog(const std::string& source, const std:
     SemanticAnalyzer sema;
     auto res = sema.analyze(program);
     gen.setSemantics(res);
-    return gen.generate(program);
+    return Compiler::addDefaultTripleIfMissing(gen.generate(program));
 }
 
 } // namespace gwbasic
