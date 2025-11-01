@@ -27,6 +27,7 @@ void CodeGenerator::collectExprVars(const Expr* e) {
     if (const auto u = dyn_cast<const UnaryExpr>(e)) {
         collectExprVars(u->inner.get()); return;
     }
+    if (const auto c = dyn_cast<const CallExpr>(e)) { for (const auto& a : c->args) collectExprVars(a.get()); return; }
 }
 
 } // namespace gwbasic
