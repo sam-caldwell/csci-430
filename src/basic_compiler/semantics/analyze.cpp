@@ -74,6 +74,17 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             throw SemanticError(m.str());
         }
         analyzeExpr(i->cond.get());
+        // Validate target line exists
+        if (!lines_.contains(i->targetLine)) {
+            if (strictControlFlow_) {
+                std::ostringstream err; err << "ControlFlowError: missing IF target line " << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col;
+                log(err.str());
+                throw SemanticError(err.str());
+            } else {
+                std::ostringstream w; w << "Warning: IF missing target line " << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col;
+                log(w.str());
+            }
+        }
         std::ostringstream m; m << "IfThen target=" << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log(m.str());
         return;
     }
@@ -81,6 +92,22 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         // Induction var is a variable; in BASIC it's global, but we note loop scope
         reference(f->var, f->pos);
         std::ostringstream m; m << "For var=" << f->var << " @ " << f->pos.line << ':' << f->pos.col; log(m.str());
+        // Type-check bounds and step are numeric
+        if (typeOf(f->start.get()) == ValueType::String) {
+            std::ostringstream err; err << "TypeError: FOR start must be numeric @ " << f->pos.line << ':' << f->pos.col;
+            log(err.str());
+            throw SemanticError(err.str());
+        }
+        if (typeOf(f->end.get()) == ValueType::String) {
+            std::ostringstream err; err << "TypeError: FOR end must be numeric @ " << f->pos.line << ':' << f->pos.col;
+            log(err.str());
+            throw SemanticError(err.str());
+        }
+        if (f->step && typeOf(f->step.get()) == ValueType::String) {
+            std::ostringstream err; err << "TypeError: FOR step must be numeric @ " << f->pos.line << ':' << f->pos.col;
+            log(err.str());
+            throw SemanticError(err.str());
+        }
         analyzeExpr(f->start.get());
         analyzeExpr(f->end.get());
         // Always analyze step (may be null); analyzeExpr handles nulls.
@@ -143,8 +170,16 @@ SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
     scopes_.clear(); scopes_.emplace_back();
     vars_.clear(); strings_.clear(); lines_.clear();
     currentLine_ = 0;
-    // Record all line numbers up-front for GOTO/GOSUB validation
-    for (const auto& line : program.lines) lines_.insert(line.number);
+    // Record all line numbers up-front and check for duplicates (invalid IR otherwise)
+    std::unordered_set<int> seen;
+    for (const auto& line : program.lines) {
+        if (!seen.insert(line.number).second) {
+            std::ostringstream err; err << "ControlFlowError: duplicate line number " << line.number;
+            log(err.str());
+            throw SemanticError(err.str());
+        }
+        lines_.insert(line.number);
+    }
     // Traverse
     for (const auto& line : program.lines) analyzeLine(line);
     // Build result
