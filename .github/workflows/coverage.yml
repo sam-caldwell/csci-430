@@ -54,43 +54,12 @@ jobs:
         run: |
           make coverage
 
-      - name: Generate Shields JSON
-        id: badge
-        shell: bash
-        run: |
-          set -euo pipefail
-          BUILD_DIR="build/cmake-build-debug"
-          SCOPE_FILE="$BUILD_DIR/coverage/scope.txt"
-          if [ ! -f "$SCOPE_FILE" ]; then
-            echo "scope.txt not found at $SCOPE_FILE" >&2
-            exit 2
-          fi
-          pct=$(awk '/^Lines/{print $3}' "$SCOPE_FILE")
-          if [ -z "$pct" ]; then
-            echo "Could not parse coverage percent from scope.txt" >&2
-            echo "------ scope.txt ------"; cat "$SCOPE_FILE"; echo "-----------------------"
-            exit 3
-          fi
-          # pct is like 97 or 97.0; ensure integer for display
-          pct_int=$(printf '%.*f' 0 "$pct")
-          color=red
-          if   [ "$pct_int" -ge 95 ]; then color=brightgreen
-          elif [ "$pct_int" -ge 90 ]; then color=green
-          elif [ "$pct_int" -ge 80 ]; then color=yellow
-          elif [ "$pct_int" -ge 70 ]; then color=orange
-          fi
-          mkdir -p coverage-badge/badges
-          echo """{"schemaVersion":1, "label":"coverage", "message":"${pct_int}%", "color":"${color}"}""" > coverage-badge/badges/coverage.json <<JSON
-          echo "message=${pct_int}%" >> "$GITHUB_OUTPUT"
-          echo "color=${color}" >> "$GITHUB_OUTPUT"
-
-      - name: Publish to gh-pages
-        if: github.event_name == 'push'
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: coverage-badge
-          keep_files: true
-          commit_message: "ci(coverage): update coverage badge to ${{ steps.badge.outputs.message }}"
-
+          files: build/cmake-build-debug/coverage/lcov.info
+          name: codecov-coverage
+          fail_ci_if_error: true
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

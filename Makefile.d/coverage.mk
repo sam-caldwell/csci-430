@@ -42,7 +42,12 @@ coverage:
 	  echo "[coverage] Generating report..."; \
 	  LLVM_COV=$(LLVM_PREFIX)/bin/llvm-cov; \
 	  if [ ! -x "$$LLVM_COV" ]; then LLVM_COV=llvm-cov; fi; \
-	  $$LLVM_COV report "$$UNIT_BIN" -instr-profile="$$OUT/coverage.profdata" -use-color=false > "$$OUT/report.txt"; \
+  $$LLVM_COV report "$$UNIT_BIN" -instr-profile="$$OUT/coverage.profdata" -use-color=false > "$$OUT/report.txt"; \
+  echo "[coverage] Exporting LCOV to $$OUT/lcov.info..."; \
+  LCOV_FILE="$$OUT/lcov.info"; : > "$$LCOV_FILE"; \
+  $$LLVM_COV export -format=lcov "$$UNIT_BIN" -instr-profile="$$OUT/coverage.profdata" >> "$$LCOV_FILE"; \
+  if [ -x "$$INT_BIN" ]; then $$LLVM_COV export -format=lcov "$$INT_BIN" -instr-profile="$$OUT/coverage.profdata" >> "$$LCOV_FILE"; fi; \
+  if [ -x "$$E2E_BIN" ]; then $$LLVM_COV export -format=lcov "$$E2E_BIN" -instr-profile="$$OUT/coverage.profdata" >> "$$LCOV_FILE"; fi; \
 	  echo "[coverage] Aggregating scope: $(COVERAGE_SCOPE)"; \
 	  SCOPE="$(COVERAGE_SCOPE)"; \
 	  awk_input="$$OUT/report.txt"; \
@@ -73,4 +78,4 @@ coverage:
 	  if [ -z "$$VAL" ]; then echo "Could not parse coverage values for scope $(COVERAGE_SCOPE)."; exit 4; fi; \
 	  if [ $${VAL:-0} -lt $(COVERAGE_MIN) ]; then FAIL=1; fi; \
 	  if [ $$FAIL -ne 0 ]; then echo "Coverage below threshold $(COVERAGE_MIN)% (lines=$$LINES, regions=$$REGS)."; exit 3; fi; \
-	  echo "[coverage] OK. Detailed report: $$OUT/report.txt"
+  echo "[coverage] OK. Detailed report: $$OUT/report.txt (lcov: $$OUT/lcov.info)"
