@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cctype>
 #include <sstream>
+#include <cstdio>
 
 #include "basic_compiler/Compiler.h"
 #include "basic_compiler/AsmUtils.h"
@@ -36,6 +37,34 @@ int main(int argc, char** argv) {
     }
 
     std::string input = argv[1];
+    // Helper to detect clang's default target triple (for aligning IR)
+    auto detectDefaultTriple = []() -> std::string {
+#ifdef CLANG_PATH
+        std::string triple;
+        std::string cmd = std::string(CLANG_PATH) + " -print-target-triple 2>/dev/null";
+        FILE* pipe = popen(cmd.c_str(), "r");
+        if (pipe) {
+            char buf[256];
+            size_t n = fread(buf, 1, sizeof(buf) - 1, pipe);
+            if (n > 0) {
+                buf[n] = '\0';
+                triple.assign(buf);
+                while (!triple.empty() && (triple.back() == '\n' || triple.back() == '\r' || triple.back() == ' ' || triple.back() == '\t')) triple.pop_back();
+            }
+            pclose(pipe);
+        }
+        return triple;
+#else
+        return std::string();
+#endif
+    };
+    auto withTripleHeader = [](const std::string& ir, const std::string& triple) -> std::string {
+        if (triple.empty()) return ir;
+        if (ir.find("target triple =") != std::string::npos) return ir;
+        std::ostringstream out;
+        out << "target triple = \"" << triple << "\"\n\n" << ir;
+        return out.str();
+    };
     std::optional<std::string> outLL;
     std::optional<std::string> outBC;
     std::optional<std::string> outBIN;
@@ -71,7 +100,7 @@ int main(int argc, char** argv) {
     }
     if (targetTriple && !isSupportedTargetTriple(*targetTriple)) {
         std::cerr << "Error: unsupported target triple: " << *targetTriple
-                  << " (supported: x86_64 or arm64/aarch64 on Linux/macOS/FreeBSD/Android)\n";
+                  << " (supported: x86_64 or arm64/aarch64 on Linux/macOS)\n";
         return 2;
     }
     try {
@@ -96,10 +125,12 @@ int main(int argc, char** argv) {
             *syntaxLogPath,
             *semanticLogPath,
             *logPath);
+        const std::string chosenTriple = targetTriple.value_or(detectDefaultTriple());
+        const std::string irWithTriple = withTripleHeader(ir, chosenTriple);
 
         if (outLL) {
             std::ofstream out(*outLL);
-            out << ir;
+            out << irWithTriple;
         }
         if (outBC) {
 #ifdef CLANG_PATH
@@ -173,7 +204,7 @@ int main(int argc, char** argv) {
             std::string triple = targetTriple.value_or(std::string("arm64-apple-macos"));
             if (!isSupportedTargetTriple(triple)) {
                 std::cerr << "Error: unsupported target triple for assembly: " << triple
-                          << " (supported: x86_64 or arm64/aarch64 on Linux/macOS/FreeBSD/Android)\n";
+                          << " (supported: x86_64 or arm64/aarch64 on Linux/macOS)\n";
                 return 2;
             }
             std::ostringstream oss;
@@ -193,9 +224,7 @@ int main(int argc, char** argv) {
                 if (dash != std::string::npos) arch = triple.substr(0, dash);
                 std::string lowerTriple = triple; for (auto& c : lowerTriple) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
                 if (lowerTriple.find("linux") != std::string::npos) os = "linux";
-                else if (lowerTriple.find("macos") != std::string::npos || lowerTriple.find("darwin") != std::string::npos || lowerTriple.find("apple") != std::string::npos) os = "macos";
-                else if (lowerTriple.find("freebsd") != std::string::npos) os = "freebsd";
-                else if (lowerTriple.find("android") != std::string::npos) os = "android";
+                else if (lowerTriple.find("macos") != std::string::npos || lowerTriple.find("darwin") != std::string::npos) os = "macos";
                 // Choose a comment leader appropriate to the assembler dialect
                 std::string commentLeader = asmCommentLeaderForTriple(triple);
                 std::ifstream inAsm(*outASM);
