@@ -24,6 +24,7 @@ compile_commands.json
 Testing/
 CTestTestfile.cmake
 .venv/
+CMakePresets.json
 
 # Objects and libraries
 *.o
