@@ -6,7 +6,7 @@
 
 namespace gwbasic {
 
-std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, const std::string&) {
+std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix) {
     /*
      * Function: CodeGenerator::emitExpr
      * Inputs:
@@ -118,15 +118,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, cons
             { std::string ir = "  "; ir += res; ir += " = fadd double "; ir += posD; ir += ", "; ir += negVal; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sgn add -> " << ir; log(m.str()); } }
             return res;
         }
-        if (fn == "RND") {
-            // GW-BASIC RND(x): returns pseudorandom number in [0,1).
-            // For now, ignore x semantics (sign) and return next value from drand48().
-            std::string ir = "  "; ir += res; ir += " = call double @drand48()";
-            out << ir << "\n";
-            { std::ostringstream m; m << "line " << currentLine_ << " CallExpr rnd -> " << ir; log(m.str()); }
-            (void)argv; // unused
-            return res;
-        }
+        if (fn == "RND") { std::string ir = "  "; ir += res; ir += " = call double @gwb_rnd(double "; ir += argv[0]; ir += ")"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr rnd(full) -> " << ir; log(m.str()); } return res; }
         if (fn == "CINT") {
             std::string ir = "  "; ir += res; ir += " = call double @round(double "; ir += argv[0]; ir += ")";
             out << ir << "\n";
