@@ -14,3 +14,14 @@
               - Implemented numeric functions SQR (sqrt) and ABS with semantic checks (unary, numeric-only).
               - Codegen now declares and emits calls to @sqrt and @fabs; added -lm when linking on non-Apple.
               - Unit tests cover codegen emission and semantic arity/type errors.
+01 Nov 2025 - Extended math intrinsics per GW-BASIC manual (partial set):
+              - Added SIN, COS, TAN, ATN, LOG, EXP, INT, FIX, SGN (numeric-only, arity=1) including domain checks
+                for SQR/SQRT and LOG + string-comparison validation; codegen emits @sin/@cos/@tan/@atan/@log/@exp,
+                @floor, and patterns for FIX/SGN.
+              - New intrinsics: RND (uniform [0,1) via drand48), CINT (round), CSNG (float truncate/extend),
+                CDBL (pass-through). Semantics enforce arity=1 and numeric args.
+              - Codegen declares @drand48 and @round; CSNG lowers to fptrunc/fpext. CDBL is passthrough.
+              - Added exhaustive happy/sad path tests across all math intrinsics: wrong-arity and string-arg
+                SemanticError checks, plus domain-invalid value tests for SQR/SQRT and LOG. Added codegen pattern
+                tests and e2e tests (including CINT half-away-from-zero and RND range assertions).
+              - All unit/integration/e2e tests green; demo targets unchanged.

@@ -348,11 +348,14 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
 bool SemanticAnalyzer::isKnownNumericFunction(const std::string& upperName) {
     // Supported numeric intrinsics (subset of GW-BASIC):
     // SQR (SQRT alias), ABS, SIN, COS, TAN, ATN, LOG, EXP, INT, FIX, SGN
+    // Additional conversions and random: CINT, CSNG, CDBL, RND
     return (
         upperName == "SQR" || upperName == "SQRT" || upperName == "ABS" ||
         upperName == "SIN" || upperName == "COS" || upperName == "TAN" ||
         upperName == "ATN" || upperName == "LOG" || upperName == "EXP" ||
-        upperName == "INT" || upperName == "FIX" || upperName == "SGN"
+        upperName == "INT" || upperName == "FIX" || upperName == "SGN" ||
+        upperName == "CINT" || upperName == "CSNG" || upperName == "CDBL" ||
+        upperName == "RND"
     );
 }
 

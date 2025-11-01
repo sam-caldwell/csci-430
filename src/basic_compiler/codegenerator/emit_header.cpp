@@ -29,6 +29,9 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
     out << "declare double @log(double)\n";
     out << "declare double @exp(double)\n";
     out << "declare double @floor(double)\n\n";
+    // Additional helpers for extended math/CVT
+    out << "declare double @drand48()\n";
+    out << "declare double @round(double)\n\n";
     log("emitHeader: declared printf/scanf");
 }
 
