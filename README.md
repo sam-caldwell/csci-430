@@ -1,5 +1,9 @@
 # GW-BASIC Compiler (basic_compiler)
 
+[![Build](https://github.com/sam-caldwell/csci-430/actions/workflows/ci.yaml/badge.svg)](https://github.com/sam-caldwell/csci-430/actions/workflows/ci.yaml)
+[![Tests](https://img.shields.io/github/actions/workflow/status/sam-caldwell/csci-430/ci.yaml?label=tests)](https://github.com/sam-caldwell/csci-430/actions/workflows/ci.yaml)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/sam-caldwell/csci-430/gh-pages/badges/coverage.json)](https://github.com/sam-caldwell/csci-430/actions/workflows/coverage.yml)
+
 This project develops a GW-BASIC compiler which emits LLVM IR, byte code, native assembly, and native executables.
 This is designed for reproducible builds and detailed phase logging for compiler development.
 
