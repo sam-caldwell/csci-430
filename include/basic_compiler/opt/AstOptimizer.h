@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/Expr.h"
 
 namespace gwbasic {
 
