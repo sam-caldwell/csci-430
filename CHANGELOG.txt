@@ -9,3 +9,8 @@
               lexing. Strengthened semantic analysis with IF target validation, numeric-only FOR start/end/step,
               and duplicate line number detection; added unit tests for each. Verified 'make clean lint test build
               demo' complete successfully.
+01 Nov 2025 - Added math function calls to expressions:
+              - Introduced CallExpr AST and parsing of identifier(...) with comma-separated args.
+              - Implemented numeric functions SQR (sqrt) and ABS with semantic checks (unary, numeric-only).
+              - Codegen now declares and emits calls to @sqrt and @fabs; added -lm when linking on non-Apple.
+              - Unit tests cover codegen emission and semantic arity/type errors.
