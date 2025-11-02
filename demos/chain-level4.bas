@@ -1,2 +1,2 @@
-10 PRINT "The answer is...42"
+10 PRINT 999
 20 END
