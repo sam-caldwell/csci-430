@@ -32,6 +32,7 @@ jobs:
             clang \
             clang-tidy \
             llvm \
+            make \
             shellcheck
 
       - name: Environment info
