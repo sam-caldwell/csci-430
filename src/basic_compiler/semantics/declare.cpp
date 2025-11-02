@@ -5,10 +5,11 @@
 namespace gwbasic {
 
 void SemanticAnalyzer::declare(const std::string& name) {
-    scopes_.back().insert(name);
+    // BASIC variables are global; record declarations in the global scope
+    if (scopes_.empty()) scopes_.emplace_back();
+    scopes_.front().insert(name);
     vars_.insert(name);
     std::ostringstream m; m << "VarDecl " << name; log(m.str());
 }
 
 } // namespace gwbasic
-

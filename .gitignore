@@ -25,6 +25,8 @@ Testing/
 CTestTestfile.cmake
 .venv/
 CMakePresets.json
+tmp/
+log/
 
 # Objects and libraries
 *.o
@@ -35,3 +37,4 @@ CMakePresets.json
 *.dylib
 *.dll
 *.zip
+*.log
