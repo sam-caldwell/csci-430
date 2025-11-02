@@ -1,13 +1,11 @@
 # File: Makefile.d/unit_tests.mk
 #
-# Purpose: Run unit tests (and hello_world tests) from the build tree.
+# Purpose: Run unit tests via CTest in parallel.
 #
 # Targets:
-#  - unit: executes hello_world_tests (if present) and basic_compiler_unit_tests
+#  - unit: executes CTest tests with label 'unit' using $(NUM_CPUS) jobs.
 unit: build
-	@echo "[unit] Running unit tests..."
+	@echo "[unit] Running unit tests (ctest, -j$(NUM_CPUS))..."
 	@set -e; \
-	UNIT_BIN="$(BUILD_DIR)/basic_compiler_unit_tests"; \
-	HELLO_BIN="$(BUILD_DIR)/hello_world_tests"; \
-	if [ -x "$$HELLO_BIN" ]; then echo "-- $$HELLO_BIN"; "$$HELLO_BIN"; fi; \
-	if [ -x "$$UNIT_BIN" ]; then echo "-- $$UNIT_BIN"; "$$UNIT_BIN"; else echo "Unit tests binary not found: $$UNIT_BIN"; exit 2; fi
+	  CTEST_PARALLEL_LEVEL="$(NUM_CPUS)" \
+	  ctest --test-dir "$(BUILD_DIR)" --output-on-failure -L unit -j "$(NUM_CPUS)"

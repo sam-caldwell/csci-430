@@ -1,16 +1,11 @@
 # File: Makefile.d/e2e_tests.mk
 #
-# Purpose: Run end-to-end tests after integration tests.
+# Purpose: Run end-to-end tests via CTest in parallel (after integration).
 #
 # Targets:
-#  - e2e: Executes the basic_compiler_e2e_tests binary if present.
+#  - e2e: Executes CTest tests with label 'e2e' using $(NUM_CPUS) jobs.
 e2e: integration
-	@echo "[e2e] Running end-to-end tests..."
+	@echo "[e2e] Running end-to-end tests (ctest, -j$(NUM_CPUS))..."
 	@set -e; \
-	E2E_BIN="$(BUILD_DIR)/basic_compiler_e2e_tests"; \
-	if [ -x "$$E2E_BIN" ]; then \
-	  echo "-- $$E2E_BIN"; \
-	  "$$E2E_BIN"; \
-	else echo "E2E tests binary not found: $$E2E_BIN"; \
-	  exit 2; \
-    fi
+	  CTEST_PARALLEL_LEVEL="$(NUM_CPUS)" \
+	  ctest --test-dir "$(BUILD_DIR)" --output-on-failure -L e2e -j "$(NUM_CPUS)"
