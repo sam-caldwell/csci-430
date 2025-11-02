@@ -53,3 +53,4 @@
               - Makefile.d/demo.mk updated to build new demos.
             - Tooling/build: All targets green.
               - Verified 'make clean configure lint test build demo' succeeds.
+            - Improved tests for scoping to ensure our semantic analysis is correct.
