@@ -5,6 +5,8 @@ This is designed for reproducible builds and detailed phase logging for compiler
 
 Code repo: https://github.com/sam-caldwell/csci-430
 
+(Note: this repo is branched by course week.)
+
 ## Supported OS/Architectures
 
 ### CPU Architectures
