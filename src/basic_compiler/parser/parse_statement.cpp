@@ -8,6 +8,10 @@
 #include "basic_compiler/ast/InputStmt.h"
 #include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/ast/EndStmt.h"
+#include "basic_compiler/ast/NextStmt.h"
+#include "basic_compiler/ast/IfBlockStmt.h"
+#include "basic_compiler/ast/WhileStmt.h"
+#include "basic_compiler/ast/WendStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -28,6 +32,7 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
     if (match(TokenType::KwPrint)) { auto n = parsePrint(); n->pos = {startTok.line, startTok.col}; return n; }
     if (check(TokenType::KwLet) || check(TokenType::Identifier)) { auto n = parseAssignOrLet(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwIf)) { auto n = parseIf(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwWhile)) { auto n = parseWhile(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwFor)) { auto n = parseFor(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwGoto)) {
         if (!check(TokenType::Integer)) throw ParseError("Expected line number after GOTO");
@@ -59,7 +64,21 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
         }
         return make_node<RandomizeStmt>({startTok.line, startTok.col}, std::move(seed));
     }
-    if (match(TokenType::KwEnd)) { return make_node<EndStmt>({startTok.line, startTok.col}); }
+    if (match(TokenType::KwElse)) {
+        return make_node<ElseStmt>({startTok.line, startTok.col});
+    }
+    if (match(TokenType::KwWend)) {
+        return make_node<WendStmt>({startTok.line, startTok.col});
+    }
+    if (match(TokenType::KwNext)) {
+        std::optional<std::string> v;
+        if (check(TokenType::Identifier)) { v = peek().lexeme; advance(); }
+        return make_node<NextStmt>({startTok.line, startTok.col}, std::move(v));
+    }
+    if (match(TokenType::KwEnd)) {
+        if (match(TokenType::KwIf)) { return make_node<EndIfStmt>({startTok.line, startTok.col}); }
+        return make_node<EndStmt>({startTok.line, startTok.col});
+    }
     std::ostringstream oss;
     oss << "Unexpected token in statement: " << to_string(peek().type) << " at " << peek().line << ":" << peek().col;
     throw ParseError(oss.str());

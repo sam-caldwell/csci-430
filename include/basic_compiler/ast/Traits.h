@@ -25,10 +25,16 @@ template <> struct NodeKindTraits<NodeKind::GotoStmt>    { static constexpr cons
 template <> struct NodeKindTraits<NodeKind::GosubStmt>   { static constexpr const char* pretty = "GosubStmt"; };
 template <> struct NodeKindTraits<NodeKind::ReturnStmt>  { static constexpr const char* pretty = "ReturnStmt"; };
 template <> struct NodeKindTraits<NodeKind::IfStmt>      { static constexpr const char* pretty = "IfStmt"; };
+template <> struct NodeKindTraits<NodeKind::IfBlockStmt> { static constexpr const char* pretty = "IfBlockStmt"; };
+template <> struct NodeKindTraits<NodeKind::ElseStmt>    { static constexpr const char* pretty = "ElseStmt"; };
+template <> struct NodeKindTraits<NodeKind::EndIfStmt>   { static constexpr const char* pretty = "EndIfStmt"; };
 template <> struct NodeKindTraits<NodeKind::InputStmt>   { static constexpr const char* pretty = "InputStmt"; };
 template <> struct NodeKindTraits<NodeKind::ForStmt>     { static constexpr const char* pretty = "ForStmt"; };
+template <> struct NodeKindTraits<NodeKind::NextStmt>    { static constexpr const char* pretty = "NextStmt"; };
 template <> struct NodeKindTraits<NodeKind::EndStmt>     { static constexpr const char* pretty = "EndStmt"; };
 template <> struct NodeKindTraits<NodeKind::RandomizeStmt> { static constexpr const char* pretty = "RandomizeStmt"; };
+template <> struct NodeKindTraits<NodeKind::WhileStmt>    { static constexpr const char* pretty = "WhileStmt"; };
+template <> struct NodeKindTraits<NodeKind::WendStmt>     { static constexpr const char* pretty = "WendStmt"; };
 
 // Map a runtime NodeKind to a human-readable pretty name
 inline const char* prettyName(NodeKind k) {
@@ -47,10 +53,16 @@ inline const char* prettyName(NodeKind k) {
         case NodeKind::GosubStmt: return NodeKindTraits<NodeKind::GosubStmt>::pretty;
         case NodeKind::ReturnStmt: return NodeKindTraits<NodeKind::ReturnStmt>::pretty;
         case NodeKind::IfStmt: return NodeKindTraits<NodeKind::IfStmt>::pretty;
+        case NodeKind::IfBlockStmt: return NodeKindTraits<NodeKind::IfBlockStmt>::pretty;
+        case NodeKind::ElseStmt: return NodeKindTraits<NodeKind::ElseStmt>::pretty;
+        case NodeKind::EndIfStmt: return NodeKindTraits<NodeKind::EndIfStmt>::pretty;
         case NodeKind::InputStmt: return NodeKindTraits<NodeKind::InputStmt>::pretty;
         case NodeKind::ForStmt: return NodeKindTraits<NodeKind::ForStmt>::pretty;
+        case NodeKind::NextStmt: return NodeKindTraits<NodeKind::NextStmt>::pretty;
         case NodeKind::EndStmt: return NodeKindTraits<NodeKind::EndStmt>::pretty;
         case NodeKind::RandomizeStmt: return NodeKindTraits<NodeKind::RandomizeStmt>::pretty;
+        case NodeKind::WhileStmt: return NodeKindTraits<NodeKind::WhileStmt>::pretty;
+        case NodeKind::WendStmt: return NodeKindTraits<NodeKind::WendStmt>::pretty;
     }
     return "Node";
 }
@@ -59,4 +71,3 @@ inline const char* prettyName(NodeKind k) {
 struct ForStmtTraits { static constexpr double defaultStep = 1.0; };
 
 } // namespace gwbasic
-

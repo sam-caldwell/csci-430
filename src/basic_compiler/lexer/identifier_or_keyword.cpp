@@ -31,6 +31,7 @@ Token Lexer::identifierOrKeyword() {
     if (upper == "PRINT") return Token{TokenType::KwPrint, buf, startLine, startCol};
     if (upper == "IF") return Token{TokenType::KwIf, buf, startLine, startCol};
     if (upper == "THEN") return Token{TokenType::KwThen, buf, startLine, startCol};
+    if (upper == "ELSE") return Token{TokenType::KwElse, buf, startLine, startCol};
     if (upper == "GOTO") return Token{TokenType::KwGoto, buf, startLine, startCol};
     if (upper == "END") return Token{TokenType::KwEnd, buf, startLine, startCol};
     if (upper == "FOR") return Token{TokenType::KwFor, buf, startLine, startCol};
@@ -41,6 +42,8 @@ Token Lexer::identifierOrKeyword() {
     if (upper == "RETURN") return Token{TokenType::KwReturn, buf, startLine, startCol};
     if (upper == "INPUT") return Token{TokenType::KwInput, buf, startLine, startCol};
     if (upper == "RANDOMIZE") return Token{TokenType::KwRandomize, buf, startLine, startCol};
+    if (upper == "WHILE") return Token{TokenType::KwWhile, buf, startLine, startCol};
+    if (upper == "WEND") return Token{TokenType::KwWend, buf, startLine, startCol};
     if (upper == "REM") { // treat as comment to EOL
         skipToEOL();
         return Token{TokenType::NewLine, "\n", startLine, startCol};

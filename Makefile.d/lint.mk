@@ -11,7 +11,7 @@
 # Lint all C/C++ sources using clang-tidy
 LINT_PATTERNS ?= -name '*.c' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp'
 LINT_PRUNE ?= \( -path './.git' -o -path './build' -o -path './build-*' -o -path './cmake-build-*' -o -path './out' -o -path './.idea' -o -path './CMakeFiles' -o -path './Testing' \) -prune
-lint:
+lint: configure
 	@command -v $(CLANG_TIDY) >/dev/null 2>&1 || { echo "clang-tidy not found; skipping lint."; exit 0; }
 	@echo "Running clang-tidy across repository sources..."
 	@set -e; \

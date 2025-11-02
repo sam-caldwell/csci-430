@@ -28,6 +28,7 @@ inline std::string to_string(TokenType t) {
         case TokenType::KwPrint: return "PRINT";
         case TokenType::KwIf: return "IF";
         case TokenType::KwThen: return "THEN";
+        case TokenType::KwElse: return "ELSE";
         case TokenType::KwGoto: return "GOTO";
         case TokenType::KwEnd: return "END";
         case TokenType::KwRem: return "REM";
@@ -39,6 +40,8 @@ inline std::string to_string(TokenType t) {
         case TokenType::KwReturn: return "RETURN";
         case TokenType::KwInput: return "INPUT";
         case TokenType::KwRandomize: return "RANDOMIZE";
+        case TokenType::KwWhile: return "WHILE";
+        case TokenType::KwWend: return "WEND";
         case TokenType::Plus: return "+";
         case TokenType::Minus: return "-";
         case TokenType::Star: return "*";

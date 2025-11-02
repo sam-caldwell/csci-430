@@ -25,10 +25,16 @@ enum class NodeKind {
     GosubStmt,
     ReturnStmt,
     IfStmt,
+    IfBlockStmt,
+    ElseStmt,
+    EndIfStmt,
     InputStmt,
     ForStmt,
+    NextStmt,
     EndStmt,
     RandomizeStmt,
+    WhileStmt,
+    WendStmt,
 };
 
 } // namespace gwbasic

@@ -12,8 +12,8 @@
 #  - Uses the built basic_compiler CLI and infers a portable target triple.
 #
 # Build demo programs into build/demos/<name>/
-DEMO_SRCS := demos/factorial.bas demos/trig.bas demos/sqrt.bas
-demo: build
+DEMO_SRCS := demos/factorial.bas demos/trig.bas demos/trig-multi-line-loop.bas demos/sqrt.bas demos/fibonacci.bas
+demo:
 	@set -e; \
 	BUILD_ROOT="./build"; \
 	COMPILER_BIN="$(BUILD_ROOT)/basic_compiler/basic_compiler"; \
@@ -28,7 +28,7 @@ demo: build
 	    TRIPLE=aarch64-linux-gnu; \
 	  fi; \
 	fi; \
-	TGT_ARG=""; if [ -n "$$TRIPLE" ]; then TGT_ARG="--target $$TRIPLE"; fi; \
+	TGT_ARG=""; \
 	for SRC in $(DEMO_SRCS); do \
 	  BN=$$(basename "$$SRC" .bas); \
 	  OUT_DIR="$$BUILD_ROOT/demos/$$BN"; \
