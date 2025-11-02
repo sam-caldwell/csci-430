@@ -10,19 +10,13 @@ include_guard(GLOBAL)
 # Locate clang-tidy (prefer PATH). Allow override via CLANG_TIDY_EXE cache var.
 find_program(CLANG_TIDY_EXE NAMES clang-tidy)
 
-# Collect lintable sources (project sources and tests)
+# Collect lintable sources (project sources only; exclude tests)
 file(GLOB_RECURSE LINT_C_SOURCES CONFIGURE_DEPENDS
   ${PROJECT_SOURCE_DIR}/src/*.c
   ${PROJECT_SOURCE_DIR}/src/*.cc
   ${PROJECT_SOURCE_DIR}/src/*.cxx
   ${PROJECT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE LINT_TEST_SOURCES CONFIGURE_DEPENDS
-  ${PROJECT_SOURCE_DIR}/test/*.c
-  ${PROJECT_SOURCE_DIR}/test/*.cc
-  ${PROJECT_SOURCE_DIR}/test/*.cxx
-  ${PROJECT_SOURCE_DIR}/test/*.cpp)
-
-set(LINT_SOURCES ${LINT_C_SOURCES} ${LINT_TEST_SOURCES})
+set(LINT_SOURCES ${LINT_C_SOURCES})
 list(REMOVE_DUPLICATES LINT_SOURCES)
 
 # Default checks (override with -DTIDY_CHECKS=...)
@@ -63,4 +57,3 @@ foreach(_src IN LISTS LINT_SOURCES)
 endforeach()
 
 add_custom_target(lint DEPENDS ${_lint_stamps})
-

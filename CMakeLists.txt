@@ -27,3 +27,6 @@ include(cmake/GeneratePresets.cmake)
 
 # Linter target (clang-tidy via CMake)
 include(cmake/linter.cmake)
+
+# Coverage target (llvm-cov via CMake)
+include(cmake/Coverage.cmake)
