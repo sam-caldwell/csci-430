@@ -7,9 +7,9 @@ bool isSupportedTargetTriple(const std::string& triple) {
     // Arch: x86_64 or arm64 only
     const bool archOK = (t.find("x86_64") != std::string::npos) ||
                         (t.find("arm64") != std::string::npos);
-    // OS: linux, darwin
+    // OS: linux, darwin, macos/macosx
     const bool osOK = (t.find("linux") != std::string::npos) ||
-                      (t.find("darwin") != std::string::npos);
+                      (t.find("darwin") != std::string::npos) ||
+                      (t.find("macos") != std::string::npos);
     return archOK && osOK;
 }
-

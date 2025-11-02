@@ -34,10 +34,16 @@ public:
             case NodeKind::GosubStmt:
             case NodeKind::ReturnStmt:
             case NodeKind::IfStmt:
+            case NodeKind::IfBlockStmt:
+            case NodeKind::ElseStmt:
+            case NodeKind::EndIfStmt:
             case NodeKind::InputStmt:
             case NodeKind::ForStmt:
+            case NodeKind::NextStmt:
             case NodeKind::EndStmt:
             case NodeKind::RandomizeStmt:
+            case NodeKind::WhileStmt:
+            case NodeKind::WendStmt:
                 return true;
             default:
                 return false;

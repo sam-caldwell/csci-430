@@ -31,3 +31,25 @@
               codegen support.
             - Tests: unit (semantics/codegen) and e2e validating repeat-on-zero, reseed-on-negative, advance-on-positive,
               and RANDOMIZE behaviors. All tests pass.
+02 Nov 2025 - Control flow and loops expansion + demos
+            - FOR: Added multi-line FOR...NEXT support.
+              - New AST marker NextStmt; parseFor now permits newline before NEXT.
+              - Parser folding pass aggregates intervening statements into ForStmt::body; validates NEXT var name.
+              - Semantics analyze loop bodies; codegen unchanged for ForStmt bodies.
+            - FOR STEP: Implemented ascending/descending loops.
+              - Codegen chooses <= or >= based on step sign (select across fcmp results).
+              - E2E tests cover descending loops and sad paths (no-iteration cases).
+            - IF blocks: Added multi-line IF...THEN and IF...THEN...ELSE with END IF.
+              - Tokens: ELSE. AST: IfBlockStmt, ElseStmt, EndIfStmt. Parser folding handles THEN/ELSE bodies.
+              - Codegen emitIfBlock lowers then/else paths; semantics validate and analyze bodies.
+              - Unit + E2E tests added for happy/sad paths.
+            - WHILE: Added single-line and multi-line WHILE...WEND.
+              - Tokens: WHILE, WEND. AST: WhileStmt (+ WendStmt marker). Parser folding handles multi-line bodies.
+              - Codegen emitWhile generates cond/body/end; semantics validate condition and analyze bodies.
+              - Unit + E2E tests added (inline, multi-line, and error cases).
+            - Demos: Added multi-line loop examples and Fibonacci.
+              - demos/trig-multi-line-loop.bas (multi-line FOR loop).
+              - demos/fibonacci.bas (multi-line WHILE...WEND printing up to 100).
+              - Makefile.d/demo.mk updated to build new demos.
+            - Tooling/build: All targets green.
+              - Verified 'make clean configure lint test build demo' succeeds.

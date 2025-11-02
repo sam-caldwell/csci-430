@@ -23,11 +23,13 @@
 #include "basic_compiler/ast/PrintStmt.h"
 #include "basic_compiler/ast/InputStmt.h"
 #include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/IfBlockStmt.h"
 #include "basic_compiler/ast/GotoStmt.h"
 #include "basic_compiler/ast/GosubStmt.h"
 #include "basic_compiler/ast/EndStmt.h"
 #include "basic_compiler/ast/ReturnStmt.h"
 #include "basic_compiler/ast/RandomizeStmt.h"
+#include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/codegen/CodeGenError.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include "basic_compiler/ast/Traits.h"
@@ -107,6 +109,8 @@ private:
     static void emitMainEpilogue(std::ostringstream& out);
     void emitLineBlock(std::ostringstream& out, const Line& line, int lineIndex, int lastIndex);
     void emitFor(std::ostringstream& out, const ForStmt* fs, const std::string& currLineLabel, int& localCounter);
+    void emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, const std::string& currLineLabel, int& localCounter);
+    void emitWhile(std::ostringstream& out, const WhileStmt* ws, const std::string& currLineLabel, int& localCounter);
     void emitSubroutineInline(std::ostringstream& out, int targetLine, const std::string& entryLabel, const std::string& returnLabel);
 
     // Expression lowering

@@ -78,6 +78,10 @@ void CodeGenerator::emitLineBlock(std::ostringstream& out, const Line& line, int
             std::string ir = "  br i1 "; ir += cond; ir += ", label %"; ir += lineLabelName(is->targetLine); ir += ", label %"; ir += contLbl;
             out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " IfStmt -> " << ir; log(m.str()); }
             out << contLbl << ":\n";
+        } else if (auto ib = dyn_cast<IfBlockStmt>(st.get())) {
+            emitIfBlock(out, ib, lineLabelName(line.number), localContCounter);
+        } else if (auto ws = dyn_cast<WhileStmt>(st.get())) {
+            emitWhile(out, ws, lineLabelName(line.number), localContCounter);
         } else if (isa<EndStmt>(st.get())) {
             std::string ir = "  br label %exit";
             out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " EndStmt -> " << ir; log(m.str()); }

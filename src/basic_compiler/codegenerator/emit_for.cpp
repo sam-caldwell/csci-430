@@ -41,12 +41,19 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
         out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt cond load -> " << ir; log(m.str()); }
     }
     {
+        // Evaluate end and step for condition decision
         std::string endReg = emitExpr(out, fs->end.get(), currLineLabel);
+        std::string stepReg = fs->step ? emitExpr(out, fs->step.get(), currLineLabel) : std::string("1.0");
+        std::string isNeg = nextTemp();
+        { std::string ir = "  "; ir += isNeg; ir += " = fcmp olt double "; ir += stepReg; ir += ", 0.0"; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt step<0 -> " << ir; log(m.str()); } }
+        std::string condLe = nextTemp();
+        { std::string ir = "  "; ir += condLe; ir += " = fcmp ole double "; ir += curVal; ir += ", "; ir += endReg; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt cond <= -> " << ir; log(m.str()); } }
+        std::string condGe = nextTemp();
+        { std::string ir = "  "; ir += condGe; ir += " = fcmp oge double "; ir += curVal; ir += ", "; ir += endReg; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt cond >= -> " << ir; log(m.str()); } }
         std::string cond = nextTemp();
-        std::string ir1 = "  "; ir1 += cond; ir1 += " = fcmp ole double "; ir1 += curVal; ir1 += ", "; ir1 += endReg;
-        out << ir1 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt cond cmp -> " << ir1; log(m.str()); }
-        std::string ir2 = "  br i1 "; ir2 += cond; ir2 += ", label %"; ir2 += bodyLbl; ir2 += ", label %"; ir2 += endLbl;
-        out << ir2 << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt branch -> " << ir2; log(m.str()); }
+        { std::string ir = "  "; ir += cond; ir += " = select i1 "; ir += isNeg; ir += ", i1 "; ir += condGe; ir += ", i1 "; ir += condLe; out << ir << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt select cond -> " << ir; log(m.str()); } }
+        std::string br = "  br i1 "; br += cond; br += ", label %"; br += bodyLbl; br += ", label %"; br += endLbl;
+        out << br << "\n"; { std::ostringstream m; m << "line " << currentLine_ << " ForStmt branch -> " << br; log(m.str()); }
     }
 
     out << bodyLbl << ":\n";

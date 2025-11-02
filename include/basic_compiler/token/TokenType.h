@@ -31,6 +31,7 @@ enum class TokenType {
     KwPrint,
     KwIf,
     KwThen,
+    KwElse,
     KwGoto,
     KwEnd,
     KwRem,
@@ -42,6 +43,8 @@ enum class TokenType {
     KwReturn,
     KwInput,
     KwRandomize,
+    KwWhile,
+    KwWend,
 
     // Operators / punctuation
     Plus,

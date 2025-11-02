@@ -1,0 +1,30 @@
+// (c) 2025 Sam Caldwell. All Rights Reserved.
+
+#include <gtest/gtest.h>
+#include <sstream>
+#include "basic_compiler/Lexer.h"
+#include "basic_compiler/Parser.h"
+#include "basic_compiler/ast/IfBlockStmt.h"
+#include "basic_compiler/ast/PrintStmt.h"
+
+using namespace gwbasic;
+
+TEST(Parser, IfBlock_ThenOnly_Multiline) {
+    std::string src =
+        "10 IF A < 5 THEN\n"
+        "20 PRINT 1\n"
+        "30 END IF\n";
+    std::istringstream iss(src);
+    Lexer lex(iss);
+    auto toks = lex.tokenize();
+    Parser p(std::move(toks));
+    auto prog = p.parseProgram();
+    ASSERT_EQ(prog.lines.size(), 1u);
+    ASSERT_EQ(prog.lines[0].statements.size(), 1u);
+    auto* ib = dynamic_cast<IfBlockStmt*>(prog.lines[0].statements[0].get());
+    ASSERT_NE(ib, nullptr);
+    ASSERT_EQ(ib->elseBody.size(), 0u);
+    ASSERT_EQ(ib->thenBody.size(), 1u);
+    ASSERT_NE(dynamic_cast<PrintStmt*>(ib->thenBody[0].get()), nullptr);
+}
+

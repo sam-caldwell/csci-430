@@ -33,6 +33,7 @@ struct ForStmt : ASTLeaf<NodeKind::ForStmt, Stmt, ForStmtTraits> {
     std::unique_ptr<Expr> end;
     std::unique_ptr<Expr> step; // may be null -> default 1
     std::vector<std::unique_ptr<Stmt>> body; // inline for body until NEXT (same line)
+    bool inlineNext{false}; // true if NEXT consumed on same line
     ForStmt(std::string v, std::unique_ptr<Expr> s, std::unique_ptr<Expr> e, std::unique_ptr<Expr> st)
         : ASTLeaf(), var(std::move(v)), start(std::move(s)), end(std::move(e)), step(std::move(st)) {}
 };

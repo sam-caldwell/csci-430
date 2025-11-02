@@ -71,6 +71,8 @@ private:
     std::unique_ptr<Stmt> parseAssignOrLet();
     /** parseIf: Parse IF ... THEN <line>. */
     std::unique_ptr<Stmt> parseIf();
+    /** parseWhile: Parse single-line WHILE ... WEND. */
+    std::unique_ptr<Stmt> parseWhile();
     /** parseFor: Parse single-line FOR ... NEXT. */
     std::unique_ptr<Stmt> parseFor();
     /** Expression grammar helpers. */

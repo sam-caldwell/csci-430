@@ -11,10 +11,13 @@ std::unique_ptr<Stmt> Parser::parseFor() {
      * Inputs:
      *  - none (assumes FOR already consumed)
      * Outputs:
-     *  - ForStmt: single-line loop construct with optional STEP and body
+     *  - ForStmt: loop construct with optional STEP and body
      * Theory of operation:
      *  - Parses induction variable, start expression, TO end expression,
      *    optional STEP, then collects statements until NEXT on the same line.
+     *    If end-of-line is reached before NEXT, treat as a multi-line FOR;
+     *    the parser will fold subsequent lines into the body during
+     *    parseProgram restructuring.
      */
     if (!check(TokenType::Identifier)) throw ParseError("Expected variable name after FOR");
     std::string var = peek().lexeme;
@@ -31,7 +34,8 @@ std::unique_ptr<Stmt> Parser::parseFor() {
     auto node = make_node<ForStmt>({l, c}, var, std::move(start), std::move(end), std::move(step));
     while (!check(TokenType::KwNext)) {
         if (check(TokenType::NewLine) || atEnd()) {
-            throw ParseError("FOR body must end with NEXT on the same line for now");
+            // Multi-line FOR: stop collecting inline body; NEXT will appear on a later line
+            return node;
         }
         if (match(TokenType::Colon)) continue;
         node->body.push_back(parseStatement());
@@ -41,6 +45,7 @@ std::unique_ptr<Stmt> Parser::parseFor() {
     if (check(TokenType::Identifier)) {
         advance();
     }
+    node->inlineNext = true;
     return node;
 }
 

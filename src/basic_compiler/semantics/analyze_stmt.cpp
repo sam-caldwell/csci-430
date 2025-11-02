@@ -4,6 +4,7 @@
 #include "basic_compiler/ast/PrintStmt.h"
 #include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/IfBlockStmt.h"
 #include "basic_compiler/ast/ForStmt.h"
 #include "basic_compiler/ast/InputStmt.h"
 #include "basic_compiler/ast/GotoStmt.h"
@@ -12,6 +13,7 @@
 #include "basic_compiler/ast/EndStmt.h"
 #include "basic_compiler/ast/StringExpr.h"
 #include "basic_compiler/ast/RandomizeStmt.h"
+#include "basic_compiler/ast/WhileStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -46,6 +48,22 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             }
         }
         std::ostringstream m; m << "IfThen target=" << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log(m.str());
+        return;
+    }
+    if (auto ib = dyn_cast<const IfBlockStmt>(s)) {
+        if (typeOf(ib->cond.get()) == ValueType::String) {
+            std::ostringstream m; m << "TypeError: IF condition cannot be string @ " << ib->pos.line << ':' << ib->pos.col; log(m.str());
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(ib->cond.get());
+        enterScope();
+        for (const auto& st : ib->thenBody) analyzeStmt(st.get());
+        exitScope();
+        if (!ib->elseBody.empty()) {
+            enterScope();
+            for (const auto& st : ib->elseBody) analyzeStmt(st.get());
+            exitScope();
+        }
         return;
     }
     if (auto f = dyn_cast<const ForStmt>(s)) {
@@ -87,6 +105,17 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             if (typeOf(rz->seed.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: RANDOMIZE requires numeric seed @ " << rz->pos.line << ':' << rz->pos.col; log(m.str()); throw SemanticError(m.str()); }
             analyzeExpr(rz->seed.get());
         }
+        return;
+    }
+    if (auto w = dyn_cast<const WhileStmt>(s)) {
+        if (typeOf(w->cond.get()) == ValueType::String) {
+            std::ostringstream m; m << "TypeError: WHILE condition cannot be string @ " << w->pos.line << ':' << w->pos.col; log(m.str());
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(w->cond.get());
+        enterScope();
+        for (const auto& bs : w->body) analyzeStmt(bs.get());
+        exitScope();
         return;
     }
 }
