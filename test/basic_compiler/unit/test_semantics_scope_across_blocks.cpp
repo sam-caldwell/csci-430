@@ -10,14 +10,6 @@
 
 using namespace gwbasic;
 
-namespace {
-    int countOccurrences(const std::string& haystack, const std::string& needle) {
-        if (needle.empty()) return 0;
-        int count = 0; size_t pos = 0;
-        while ((pos = haystack.find(needle, pos)) != std::string::npos) { ++count; pos += needle.size(); }
-        return count;
-    }
-}
 
 TEST(SemanticsScope, VarDeclaredInIfBodyVisibleAfter) {
     const std::string src =
@@ -30,7 +22,9 @@ TEST(SemanticsScope, VarDeclaredInIfBodyVisibleAfter) {
     Parser p(std::move(toks));
     auto prog = p.parseProgram();
 
-    std::filesystem::path logPath = std::filesystem::path("sem_scope_if.log");
+    std::filesystem::path logDir = std::filesystem::path("..") / "basic_compiler";
+    std::filesystem::create_directories(logDir);
+    std::filesystem::path logPath = logDir / "sem_scope_if.log";
     std::error_code ec; std::filesystem::remove(logPath, ec);
 
     SemanticAnalyzer sema;
@@ -51,7 +45,9 @@ TEST(SemanticsScope, VarDeclaredInForBodyVisibleAfter) {
     Parser p(std::move(toks));
     auto prog = p.parseProgram();
 
-    std::filesystem::path logPath = std::filesystem::path("sem_scope_for.log");
+    std::filesystem::path logDir = std::filesystem::path("..") / "basic_compiler";
+    std::filesystem::create_directories(logDir);
+    std::filesystem::path logPath = logDir / "sem_scope_for.log";
     std::error_code ec; std::filesystem::remove(logPath, ec);
 
     SemanticAnalyzer sema;
@@ -73,11 +69,51 @@ TEST(SemanticsScope, VarDeclaredInWhileBodyVisibleAfter) {
     Parser p(std::move(toks));
     auto prog = p.parseProgram();
 
-    std::filesystem::path logPath = std::filesystem::path("sem_scope_while.log");
+    std::filesystem::path logDir = std::filesystem::path("..") / "basic_compiler";
+    std::filesystem::create_directories(logDir);
+    std::filesystem::path logPath = logDir / "sem_scope_while.log";
     std::error_code ec; std::filesystem::remove(logPath, ec);
 
     SemanticAnalyzer sema;
     sema.setLogPath(logPath.string());
+    auto res = sema.analyze(prog);
+    EXPECT_TRUE(res.variables.contains("W"));
+}
+
+TEST(SemanticsScope, VarDeclaredInIfWithinForVisibleAfter) {
+    const std::string src =
+        "10 FOR I = 1 TO 1\n"
+        "20 IF I = 1 THEN\n"
+        "30 LET N = 5\n"
+        "40 END IF\n"
+        "50 NEXT I\n"
+        "60 PRINT N\n";
+    Lexer lex(src);
+    auto toks = lex.tokenize();
+    Parser p(std::move(toks));
+    auto prog = p.parseProgram();
+
+    SemanticAnalyzer sema;
+    auto res = sema.analyze(prog);
+    EXPECT_TRUE(res.variables.contains("N"));
+}
+
+TEST(SemanticsScope, VarDeclaredInWhileWithinIfVisibleAfter) {
+    const std::string src =
+        "10 IF 1 < 2 THEN\n"
+        "20 LET C = 1\n"
+        "30 WHILE C < 2\n"
+        "40 LET W = C\n"
+        "50 LET C = C + 1\n"
+        "60 WEND\n"
+        "70 END IF\n"
+        "80 PRINT W\n";
+    Lexer lex(src);
+    auto toks = lex.tokenize();
+    Parser p(std::move(toks));
+    auto prog = p.parseProgram();
+
+    SemanticAnalyzer sema;
     auto res = sema.analyze(prog);
     EXPECT_TRUE(res.variables.contains("W"));
 }
