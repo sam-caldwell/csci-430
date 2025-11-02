@@ -6,14 +6,13 @@
 #          Provides 'build', 'clean', and 'version' targets for developers.
 include Makefile.d/*.mk
 
-.PHONY: clean configure build version tree zip lint test help demo unit integration e2e coverage
+.PHONY: clean configure coverage build version tree zip lint test help demo unit integration e2e
 .DEFAULT_GOAL := help
 
 # Configuration
 CMAKE ?= cmake
 
-# Prefer Ninja if available, otherwise fall back to Unix Makefiles
-GENERATOR=Ninja
+GENERATOR = Ninja
 TOOLCHAIN ?= cmake/Toolchain-HomebrewLLVM.cmake
 
 # Only pass a toolchain if the file exists

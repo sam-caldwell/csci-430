@@ -7,8 +7,11 @@ file(GLOB HELLO_WORLD_UNIT_TEST_SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/
 
 add_executable(hello_world_tests ${HELLO_WORLD_UNIT_TEST_SOURCES})
 
-target_include_directories(hello_world_tests PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(hello_world_tests PRIVATE
+  ${PROJECT_SOURCE_DIR}/include
+  $<TARGET_PROPERTY:GTest::gtest,INTERFACE_INCLUDE_DIRECTORIES>
+)
 
-target_link_libraries(hello_world_tests PRIVATE hello_core GTest::gtest_main)
+target_link_libraries(hello_world_tests PRIVATE hello_core GTest::gtest_main GTest::gtest)
 
 gtest_discover_tests(hello_world_tests PROPERTIES LABELS unit)

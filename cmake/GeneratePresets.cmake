@@ -5,17 +5,12 @@
 
 include_guard(GLOBAL)
 
-set(_gen "${CMAKE_GENERATOR}")
-if(NOT _gen)
-  set(_gen "Ninja")
-endif()
-
 set(_tool "${CMAKE_TOOLCHAIN_FILE}")
 if(NOT _tool)
   set(_tool "cmake/Toolchain-HomebrewLLVM.cmake")
 endif()
 
-set(GENERATOR "${_gen}")
+set(GENERATOR "Ninja")
 set(TOOLCHAIN "${_tool}")
 
 configure_file(
