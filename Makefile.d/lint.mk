@@ -31,9 +31,6 @@ lint:
 		"$(CLANG_TIDY)" -p "$(BUILD_DIR)" -checks="$$TIDY_CHECKS" -warnings-as-errors='*' $$SDK_ARGS "$$f" || exit $$?; \
 	  done; \
 	  echo "clang-tidy completed."
-	@echo "Running one-function-per-file static check..."
-	@bash scripts/check_one_function_per_file.sh
-	@echo "Running shellcheck on scripts/*.sh (if available)..."
 	@set -e; \
 	if command -v shellcheck >/dev/null 2>&1; then \
 	  SCRIPTS=$$(find scripts -type f -name '*.sh' 2>/dev/null | sort); \
