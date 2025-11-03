@@ -5,6 +5,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: SemanticAnalyzer::analyze
+ * Inputs:
+ *  - program: Parsed Program AST
+ * Outputs:
+ *  - SemanticAnalyzer::Result: Collected vars/strings/lines/common names
+ * Theory of operation:
+ *  - Resets state, validates unique line numbers, analyzes each line's
+ *    statements, and returns aggregated semantic information.
+ */
 SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
     scopes_.clear(); scopes_.emplace_back();
     vars_.clear(); strings_.clear(); lines_.clear();

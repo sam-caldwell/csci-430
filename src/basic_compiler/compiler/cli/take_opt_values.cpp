@@ -4,6 +4,20 @@
 
 namespace gwbasic::cli {
 
+/*
+ * Function: takeOptValue (multi-name overload)
+ * Inputs:
+ *  - arg: Current argument token (argv[i])
+ *  - names: List of acceptable flag names
+ *  - i: Index into argv; incremented when value is consumed
+ *  - argc/argv: Full argument vector
+ *  - out: Destination optional receiving the consumed value
+ * Outputs:
+ *  - bool: true if any name matched and a value was consumed
+ * Theory of operation:
+ *  - Iterates 'names', delegating to the single-name overload until one
+ *    matches; returns false if none match.
+ */
 bool takeOptValue(const std::string& arg,
                   std::initializer_list<const char*> names,
                   int& i,
@@ -17,4 +31,3 @@ bool takeOptValue(const std::string& arg,
 }
 
 } // namespace gwbasic::cli
-

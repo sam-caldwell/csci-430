@@ -4,6 +4,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: CodeGenerator::scanStmtForRnd
+ * Inputs:
+ *  - s: Statement node to scan
+ * Outputs:
+ *  - void (sets internal flag when RND is referenced)
+ * Theory of operation:
+ *  - Walks the statement and contained expressions/blocks to detect any
+ *    RND(...) call, enabling emission of the helper when required.
+ */
 void CodeGenerator::scanStmtForRnd(const Stmt* s) {
     if (!s) return;
     if (const auto p = dyn_cast<const PrintStmt>(s)) {

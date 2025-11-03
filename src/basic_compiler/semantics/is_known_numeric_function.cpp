@@ -3,6 +3,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: SemanticAnalyzer::isKnownNumericFunction
+ * Inputs:
+ *  - upperName: Function name in uppercase
+ * Outputs:
+ *  - bool: true if recognized as a numeric intrinsic
+ * Theory of operation:
+ *  - Checks name against the supported list of math/numeric intrinsics.
+ */
 bool SemanticAnalyzer::isKnownNumericFunction(const std::string& upperName) {
     return (
         upperName == "SQR" || upperName == "SQRT" || upperName == "ABS" ||
@@ -15,4 +24,3 @@ bool SemanticAnalyzer::isKnownNumericFunction(const std::string& upperName) {
 }
 
 } // namespace gwbasic
-

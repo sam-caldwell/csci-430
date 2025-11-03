@@ -20,6 +20,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: SemanticAnalyzer::analyzeStmt
+ * Inputs:
+ *  - s: Statement node to analyze
+ * Outputs:
+ *  - void (updates internal state, may throw on semantic errors)
+ * Theory of operation:
+ *  - Dispatches by statement kind performing type checks, control-flow
+ *    validation, scope handling, and logs relevant events.
+ */
 void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     if (auto p = dyn_cast<const PrintStmt>(s)) {
         if (p->value) analyzeExpr(p->value.get());

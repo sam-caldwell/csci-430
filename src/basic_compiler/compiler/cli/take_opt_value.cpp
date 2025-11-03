@@ -3,6 +3,20 @@
 
 namespace gwbasic::cli {
 
+/*
+ * Function: takeOptValue
+ * Inputs:
+ *  - arg: Current argument token (argv[i])
+ *  - name: Exact flag name to match (e.g., "--bc", "-o")
+ *  - i: Index into argv; incremented when value is consumed
+ *  - argc/argv: Full argument vector
+ *  - out: Destination optional receiving the consumed value
+ * Outputs:
+ *  - bool: true if the flag matched and a value was consumed
+ * Theory of operation:
+ *  - If 'arg' equals 'name' and a following token exists, stores it in 'out'
+ *    and increments 'i' to skip the consumed value; otherwise returns false.
+ */
 bool takeOptValue(const std::string& arg,
                   const char* name,
                   int& i,
@@ -20,4 +34,3 @@ bool takeOptValue(const std::string& arg,
 }
 
 } // namespace gwbasic::cli
-

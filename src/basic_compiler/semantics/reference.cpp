@@ -4,6 +4,17 @@
 
 namespace gwbasic {
 
+/*
+ * Function: SemanticAnalyzer::reference
+ * Inputs:
+ *  - name: Variable identifier being referenced
+ *  - pos: Source position of the reference (for logging)
+ * Outputs:
+ *  - void (declares implicitly if needed and logs the reference)
+ * Theory of operation:
+ *  - If the variable is undeclared, declares it in the global scope and
+ *    logs implicit declaration; otherwise logs a reference event.
+ */
 void SemanticAnalyzer::reference(const std::string& name, const SourcePos& pos) {
     if (!isDeclared(name)) {
         declare(name);
@@ -14,4 +25,3 @@ void SemanticAnalyzer::reference(const std::string& name, const SourcePos& pos) 
 }
 
 } // namespace gwbasic
-

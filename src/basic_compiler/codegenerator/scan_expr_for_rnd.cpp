@@ -5,6 +5,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: CodeGenerator::scanExprForRnd
+ * Inputs:
+ *  - e: Expression node to scan
+ * Outputs:
+ *  - void (sets internal flag when RND is referenced)
+ * Theory of operation:
+ *  - Recursively traverses the expression; on CallExpr, normalizes the
+ *    callee name and marks needsRndHelper_ if it is 'RND'.
+ */
 void CodeGenerator::scanExprForRnd(const Expr* e) {
     if (!e) return;
     if (const auto c = dyn_cast<const CallExpr>(e)) {
@@ -18,4 +28,3 @@ void CodeGenerator::scanExprForRnd(const Expr* e) {
 }
 
 } // namespace gwbasic
-

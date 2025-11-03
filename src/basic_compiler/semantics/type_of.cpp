@@ -12,6 +12,17 @@
 
 namespace gwbasic {
 
+/*
+ * Function: SemanticAnalyzer::typeOf
+ * Inputs:
+ *  - e: Expression pointer to classify
+ * Outputs:
+ *  - ValueType: Number or String based on expression kind
+ * Theory of operation:
+ *  - Recursively inspects expression nodes, enforcing type rules for unary
+ *    and binary operators, and throws on invalid string arithmetic or mixed
+ *    string/number comparisons.
+ */
 SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
     if (!e) return ValueType::Number;
     if (dyn_cast<const NumberExpr>(e)) return ValueType::Number;

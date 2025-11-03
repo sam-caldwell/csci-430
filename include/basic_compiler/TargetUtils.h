@@ -5,12 +5,11 @@
 
 /**
  * Function: isSupportedTargetTriple
+ * Purpose:
+ *  - Validate that the target triple is within the supported set.
  * Inputs:
  *  - triple: LLVM target triple string
  * Outputs:
  *  - bool: true if the triple is supported by this toolchain
- * Theory of operation:
- *  - Allows only: x86_64 and arm64/aarch64 architectures on Linux, macOS (Darwin/Apple),
  */
 bool isSupportedTargetTriple(const std::string& triple);
-

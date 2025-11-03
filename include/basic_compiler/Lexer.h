@@ -87,44 +87,194 @@ public:
     void setLexLogPath(const std::string& path);
 
 private:
+    /*
+     * Property: src_
+     * Purpose:
+     *  - Holds the entire GW-BASIC source being lexed.
+     * Notes:
+     *  - The lexer operates over this immutable buffer using 'pos_'.
+     */
     std::string src_{};
-    size_t pos_{0};
-    int line_{1};
-    int col_{1};
-    bool bol_{true}; // beginning of line (before optional line number)
 
+    /*
+     * Property: pos_
+     * Purpose:
+     *  - Current byte offset into 'src_'.
+     * Notes:
+     *  - Zero-based; advanced by 'advance()' and helpers.
+     */
+    size_t pos_{0};
+
+    /*
+     * Property: line_
+     * Purpose:
+     *  - 1-based current line number for tokens and diagnostics.
+     * Notes:
+     *  - Incremented on '\n' by 'advance()'.
+     */
+    int line_{1};
+
+    /*
+     * Property: col_
+     * Purpose:
+     *  - 1-based current column within the current line.
+     * Notes:
+     *  - Reset to 1 on newline; incremented on other characters.
+     */
+    int col_{1};
+
+    /*
+     * Property: bol_
+     * Purpose:
+     *  - Beginning-of-line indicator (true before first non-newline char).
+     * Notes:
+     *  - Used for optional line number handling and diagnostics alignment.
+     */
+    bool bol_{true};
+
+    /*
+     * Function: Lexer::atEnd
+     * Purpose:
+     *  - Report whether the lexer has consumed all source characters.
+     * Inputs:
+     *  - none (uses internal cursor state)
+     * Outputs:
+     *  - bool: true when the cursor is at or beyond the last character
+     */
     bool atEnd() const { return pos_ >= src_.size(); }
 
+    /*
+     * Function: Lexer::peek
+     * Purpose:
+     *  - Inspect the current character without consuming it.
+     * Inputs:
+     *  - none (uses internal cursor state)
+     * Outputs:
+     *  - char: current character or '\0' at end-of-input
+     */
     char peek() const { return atEnd() ? '\0' : src_[pos_]; }
 
+    /*
+     * Function: Lexer::peekNext
+     * Purpose:
+     *  - Look one character ahead without consuming.
+     * Inputs:
+     *  - none (uses internal cursor state)
+     * Outputs:
+     *  - char: next character or '\0' if beyond end-of-input
+     */
     char peekNext() const { return (pos_ + 1 < src_.size()) ? src_[pos_ + 1] : '\0'; }
 
-    /** advance: Consume and return the current character. */
+    /*
+     * Function: Lexer::advance
+     * Purpose:
+     *  - Consume and return the current character, updating line/column and
+     *    beginning-of-line tracking on newlines.
+     * Inputs:
+     *  - none (uses internal cursor state)
+     * Outputs:
+     *  - char: the character consumed, or '\0' at end-of-input
+     */
     char advance();
 
-    /** skipWhitespace: Skip spaces, tabs and comments to next significant char. */
+    /*
+     * Function: Lexer::skipWhitespace
+     * Purpose:
+     *  - Advance past spaces, tabs, and comments until a significant
+     *    character is found.
+     * Inputs:
+     *  - none
+     * Outputs:
+     *  - void (moves internal cursor)
+     */
     void skipWhitespace();
 
-    /** number: Scan integer or floating-point literal. */
+    /*
+     * Function: Lexer::number
+     * Purpose:
+     *  - Scan an integer or floating-point numeric literal starting at the
+     *    current position.
+     * Inputs:
+     *  - none (reads from internal cursor)
+     * Outputs:
+     *  - Token: Integer or Float token with captured lexeme and position
+     */
     Token number();
 
-    /** identifierOrKeyword: Scan identifier or recognized keyword. */
+    /*
+     * Function: Lexer::identifierOrKeyword
+     * Purpose:
+     *  - Scan an identifier and normalize it to a keyword token when the
+     *    text matches a reserved word.
+     * Inputs:
+     *  - none
+     * Outputs:
+     *  - Token: Identifier or keyword token with position metadata
+     */
     Token identifierOrKeyword();
 
-    /** stringLiteral: Scan a double-quoted string with simple escapes. */
+    /*
+     * Function: Lexer::stringLiteral
+     * Purpose:
+     *  - Scan a double-quoted string literal handling common escapes.
+     * Inputs:
+     *  - none
+     * Outputs:
+     *  - Token: String token with unescaped content and position
+     */
     Token stringLiteral();
 
-    /** skipToEOL: Skip remaining characters until end-of-line. */
+    /*
+     * Function: Lexer::skipToEOL
+     * Purpose:
+     *  - Skip all remaining characters on the current line.
+     * Inputs:
+     *  - none
+     * Outputs:
+     *  - void (advances to newline or end-of-input)
+     */
     void skipToEOL();
 
     // Lexical logging
+    /*
+     * Property: lexLogEnabled_
+     * Purpose:
+     *  - Controls whether lexical tokens are written to the log.
+     * Notes:
+     *  - Enabled via setLexLogPath(); false disables logging fast-path.
+     */
     bool lexLogEnabled_{false};
+
+    /*
+     * Property: lexLog_
+     * Purpose:
+     *  - Output stream used to record tokenization events.
+     * Notes:
+     *  - Opened/truncated in setLexLogPath(); checked before writes.
+     */
     std::ofstream lexLog_;
 
-    /** Log a token to the lex log if enabled. */
+    /*
+     * Function: Lexer::logToken
+     * Purpose:
+     *  - Emit a human-readable token description to the lex log when
+     *    logging is enabled.
+     * Inputs:
+     *  - t: Token to log
+     * Outputs:
+     *  - void (writes a line to the log file if open)
+     */
     void logToken(const Token& t);
 
-    /** Escape text for readable logging. */
+    /*
+     * Function: Lexer::escapeForLog
+     * Purpose:
+     *  - Escape control characters and quotes for readable log output.
+     * Inputs:
+     *  - s: Raw string input
+     * Outputs:
+     *  - std::string: Escaped representation suitable for logs
+     */
     static std::string escapeForLog(const std::string& s);
 };
 
