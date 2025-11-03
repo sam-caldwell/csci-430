@@ -38,3 +38,6 @@ log/
 *.dll
 *.zip
 *.log
+*.bin
+*.exe
+
