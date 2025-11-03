@@ -43,6 +43,7 @@ demo:
 	  fi; \
 	fi; \
 	TGT_ARG=""; \
+	if [ -n "$$TRIPLE" ]; then TGT_ARG="--target $$TRIPLE"; fi; \
 	for SRC in $(DEMO_SRCS); do \
 	  BN=$$(basename "$$SRC" .bas); \
 	  OUT_DIR="$$BUILD_ROOT/demos/$$BN"; \
