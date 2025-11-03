@@ -8,7 +8,7 @@
 
 namespace gwbasic {
 
-struct BsaveStmt : ASTLeaf<NodeKind::BsaveStmt, Stmt> {
+struct BsaveStmt final : ASTLeaf<NodeKind::BsaveStmt, Stmt> {
     std::unique_ptr<Expr> filename; // string expr
     std::unique_ptr<Expr> offset;   // numeric
     std::unique_ptr<Expr> length;   // numeric

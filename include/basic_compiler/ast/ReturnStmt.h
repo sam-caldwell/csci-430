@@ -16,6 +16,6 @@ namespace gwbasic {
  * Theory of operation:
  *  - Works in conjunction with GosubStmt lowering strategy.
  */
-struct ReturnStmt : ASTLeaf<NodeKind::ReturnStmt, Stmt> {};
+struct ReturnStmt final : ASTLeaf<NodeKind::ReturnStmt, Stmt> {};
 
 } // namespace gwbasic

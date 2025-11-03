@@ -8,7 +8,7 @@
 
 namespace gwbasic {
 
-struct ChdirStmt : ASTLeaf<NodeKind::ChdirStmt, Stmt> {
+struct ChdirStmt final : ASTLeaf<NodeKind::ChdirStmt, Stmt> {
     std::unique_ptr<Expr> path;
     explicit ChdirStmt(std::unique_ptr<Expr> p) : ASTLeaf(), path(std::move(p)) {}
 };

@@ -9,18 +9,18 @@ namespace gwbasic {
 
 enum class FileMode { Input, Output };
 
-struct OpenStmt : ASTLeaf<NodeKind::OpenStmt, Stmt> {
+struct OpenStmt final : ASTLeaf<NodeKind::OpenStmt, Stmt> {
     std::unique_ptr<Expr> filename;
     FileMode mode{FileMode::Input};
     int channel{1};
     OpenStmt() = default;
-    OpenStmt(std::unique_ptr<Expr> f, FileMode m, int ch)
+    OpenStmt(std::unique_ptr<Expr> f, const FileMode m, const int ch)
         : ASTLeaf(), filename(std::move(f)), mode(m), channel(ch) {}
 };
 
-struct CloseStmt : ASTLeaf<NodeKind::CloseStmt, Stmt> {
+struct CloseStmt final : ASTLeaf<NodeKind::CloseStmt, Stmt> {
     int channel{1};
-    explicit CloseStmt(int ch) : ASTLeaf(), channel(ch) {}
+    explicit CloseStmt(const int ch) : ASTLeaf(), channel(ch) {}
 };
 
 } // namespace gwbasic

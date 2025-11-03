@@ -8,7 +8,8 @@
 
 namespace gwbasic {
 
-struct PokeStmt : ASTLeaf<NodeKind::PokeStmt, Stmt> {
+// Note: this is an unsafe statement
+struct PokeStmt final : ASTLeaf<NodeKind::PokeStmt, Stmt> {
     std::unique_ptr<Expr> address;
     std::unique_ptr<Expr> value;
     PokeStmt(std::unique_ptr<Expr> a, std::unique_ptr<Expr> v) : ASTLeaf(), address(std::move(a)), value(std::move(v)) {}

@@ -6,7 +6,7 @@
 
 namespace gwbasic {
 
-struct WendStmt : ASTLeaf<NodeKind::WendStmt, Stmt> { WendStmt() = default; };
+struct WendStmt final : ASTLeaf<NodeKind::WendStmt, Stmt> { WendStmt() = default; };
 
 } // namespace gwbasic
 

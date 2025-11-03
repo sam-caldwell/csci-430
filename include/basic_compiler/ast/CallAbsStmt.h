@@ -8,7 +8,7 @@
 
 namespace gwbasic {
 
-struct CallAbsStmt : ASTLeaf<NodeKind::CallAbsStmt, Stmt> {
+struct CallAbsStmt final : ASTLeaf<NodeKind::CallAbsStmt, Stmt> {
     std::unique_ptr<Expr> address;
     explicit CallAbsStmt(std::unique_ptr<Expr> a) : ASTLeaf(), address(std::move(a)) {}
 };

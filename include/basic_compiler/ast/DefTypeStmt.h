@@ -20,7 +20,7 @@ struct DefTypeStmt : ASTLeaf<NodeKind::DefTypeStmt, Stmt> {
     enum class Kind { Int, Sng, Dbl, Str };
     Kind kind;
     std::vector<std::pair<char,char>> ranges; // inclusive, uppercase
-    DefTypeStmt(Kind k, std::vector<std::pair<char,char>> r)
+    DefTypeStmt(const Kind k, std::vector<std::pair<char,char>> r)
         : ASTLeaf(), kind(k), ranges(std::move(r)) {}
 };
 

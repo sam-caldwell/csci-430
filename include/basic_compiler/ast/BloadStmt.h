@@ -8,7 +8,7 @@
 
 namespace gwbasic {
 
-struct BloadStmt : ASTLeaf<NodeKind::BloadStmt, Stmt> {
+struct BloadStmt final : ASTLeaf<NodeKind::BloadStmt, Stmt> {
     std::unique_ptr<Expr> filename; // string expr
     std::unique_ptr<Expr> offset;   // optional numeric
     BloadStmt(std::unique_ptr<Expr> fn, std::unique_ptr<Expr> off)

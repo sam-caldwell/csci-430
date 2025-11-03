@@ -58,6 +58,7 @@ enum class NodeKind {
     CallAbsStmt,
     DefUsrStmt,
     ChdirStmt,
+    ColorStmt,
 };
 
 } // namespace gwbasic

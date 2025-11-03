@@ -19,7 +19,7 @@ namespace gwbasic {
  *    std::unique_ptr<Stmt> in containing structures.
  */
 struct Stmt : Node {
-    virtual ~Stmt() = default;
+    ~Stmt() override = default;
 protected:
     explicit Stmt(NodeKind k) : Node(k) {}
     Stmt() : Node(NodeKind::AbstractStmt) {}
