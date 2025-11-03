@@ -80,8 +80,8 @@
               - CALL: added @gwb_call(i64 %addr) helper; current behavior interprets opcode byte 1 at %addr to print "CALLED\n";
                 lowered CALL expr to compute effective address and invoke helper. USR(x) returns argument (identity) for now.
               - Tests: unit (semantics + codegen patterns), integration (presence of stdio calls), E2E (DEF SEG with PEEK/POKE/BSAVE/BLOAD/USR, CALL helper).
-                
-03 Nov 2025 - COLOR statement tests + robust codegen
+
+            - COLOR statement tests + robust codegen
             - Implemented unit/integration/e2e tests for COLOR.
               - Unit: parser variants (0–3 args), semantics numeric-only args, and codegen pattern (uses SGR printf).
               - Integration: IR contains @.fmt_sgr and @printf usage when COLOR present.
@@ -137,4 +137,16 @@
               - Collected DATA/READ literal ids in semantics-driven collection to drive @gwb_data emission.
 
             - All pipelines green
-              - Verified 'make clean configure lint test demo' completes successfully on macOS (arm64-apple-macosx) with Ninja/Clang 17.
+              - Verified 'make clean configure lint test demo' completes successfully on macOS (arm64-apple-macOS) with Ninja/Clang 17.
+
+          - SCREEN function and virtual screen buffer
+            - Implemented SCREEN(row,col[,z]) as a numeric intrinsic returning the ASCII code (0–255) at the given 1-based coordinates.
+              - Semantics: recognized as builtin; accepts 2 or 3 numeric args; third arg reserved (ignored for now).
+              - Codegen: reads from a new 80x25 virtual screen buffer @gwb_screen; clamps indices to bounds.
+            - Mirrored PRINT output to the virtual screen:
+              - Declared @snprintf and added IR helper @gwb_screen_write(ptr,len) to update @gwb_screen and cursor.
+              - PRINT to stdout now formats into @gwb_sbuf and calls @gwb_screen_write; file channels (#n) are unaffected.
+              - New globals: @gwb_screen (2000 bytes), @gwb_cur_row/@gwb_cur_col, @gwb_sbuf (256 bytes).
+            - Tests added:
+              - Unit: test_semantics_screen_function.cpp (arity/type), test_codegen_screen_ir.cpp (globals/helper present).
+              - E2E: test_screen_e2e.cpp validates ASCII codes after printing "ABC".
