@@ -3,6 +3,7 @@
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 
 namespace gwbasic {
 
@@ -72,10 +73,9 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
     };
 
     auto resolvePath = [](const std::string& base, const std::string& rel) -> std::string {
-        namespace fs = std::filesystem;
-        fs::path p(rel);
+        std::filesystem::path p(rel);
         if (p.is_absolute()) return p.string();
-        fs::path b(base);
+        std::filesystem::path b(base);
         return (b.parent_path() / p).string();
     };
     auto parseFile = [&](const std::string& fpath) -> gwbasic::Program {

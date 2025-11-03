@@ -2,6 +2,7 @@
 #include "basic_compiler/Compiler.h"
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 
 namespace gwbasic {
 /*
@@ -21,8 +22,10 @@ std::string Compiler::compileFile(const std::string& path) {
     // Depth-first non-recursive import resolution (no logs)
     struct Frame { std::string path; gwbasic::Program prog; size_t idx{0}; bool mergeMode{false}; bool clearOnEnter{false}; };
     auto resolvePath = [](const std::string& base, const std::string& rel) -> std::string {
-        namespace fs = std::filesystem;
-        fs::path p(rel); if (p.is_absolute()) return p.string(); fs::path b(base); return (b.parent_path() / p).string();
+        std::filesystem::path p(rel);
+        if (p.is_absolute()) return p.string();
+        std::filesystem::path b(base);
+        return (b.parent_path() / p).string();
     };
     auto parseOne = [&](const std::string& fpath) -> gwbasic::Program {
         std::ifstream fin(fpath); if (!fin) throw std::runtime_error(std::string("Unable to open input file: ").append(fpath));
