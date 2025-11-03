@@ -17,9 +17,8 @@ Token Lexer::number() {
     const int startLine = line_;
     const int startCol = col_;
     bool seenDot = false;
-    auto buf = scanWhile([&](char ch) {
-        const unsigned char uch = static_cast<unsigned char>(ch);
-        if (std::isdigit(uch)) return true;
+    const auto buf = scanWhile([&](const char ch) {
+        if (const auto uch = static_cast<unsigned char>(ch); std::isdigit(uch)) return true;
         if (!seenDot && ch == '.') { seenDot = true; return true; }
         return false;
     });

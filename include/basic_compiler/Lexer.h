@@ -72,8 +72,24 @@ public:
     void setLexLogPath(const std::string& path);
 
 private:
+    // Common ASCII characters/constants
+    static constexpr char CH_SPACE         = 0x20;  // ' '
+    static constexpr char CH_DEL           = 0x7F;  // DEL
+    static constexpr char CH_LF            = '\n';
+    static constexpr char CH_TAB           = '\t';
+    static constexpr char CH_CR            = '\r';
+    static constexpr char CH_SINGLE_QUOTE  = '\'';
+    static constexpr char CH_NULL          = '\0';
+
+    // Common string fragments
+    static constexpr char STR_LF[]         = "\n";
+    static constexpr char STR_DBL_QUOTE[]  = "\"";
+
+    // Keyword spellings used in special cases
+    static constexpr std::string_view KW_REM = "REM";
+
     // Compile-time keyword table (REM is handled specially as a comment)
-    inline static constexpr struct { std::string_view kw; TokenType tt; } kKeywords_[] = {
+    static constexpr struct { std::string_view kw; TokenType tt; } kKeywords_[] = {
         {"LET",       TokenType::KwLet},
         {"PRINT",     TokenType::KwPrint},
         {"IF",        TokenType::KwIf},
@@ -253,7 +269,7 @@ private:
      * Outputs:
      *  - char: current character or '\0' at end-of-input
      */
-    char peek() const { return atEnd() ? '\0' : src_[pos_]; }
+    char peek() const { return atEnd() ? CH_NULL : src_[pos_]; }
 
     /*
      * Function: Lexer::peekNext
@@ -264,7 +280,7 @@ private:
      * Outputs:
      *  - char: next character or '\0' if beyond end-of-input
      */
-    char peekNext() const { return (pos_ + 1 < src_.size()) ? src_[pos_ + 1] : '\0'; }
+    char peekNext() const { return (pos_ + 1 < src_.size()) ? src_[pos_ + 1] : CH_NULL; }
 
     /*
      * Function: Lexer::advance

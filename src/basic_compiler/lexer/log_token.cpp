@@ -17,20 +17,18 @@ namespace gwbasic {
  */
 void Lexer::logToken(const Token& t) {
     if (!lexLogEnabled_ || !lexLog_.is_open()) return;
-    lexLog_ << "token " << to_string(t.type) << " @ " << t.line << ":" << t.col;
+    lexLog_ << "token" << CH_SPACE << to_string(t.type) << CH_SPACE << "@" << CH_SPACE << t.line << ":" << t.col;
     switch (t.type) {
         case TokenType::EndOfFile:
         case TokenType::NewLine:
             break;
         default: {
             const std::string esc = escapeForLog(t.lexeme);
-            lexLog_ << " \"" << esc << "\"";
+            lexLog_ << CH_SPACE << STR_DBL_QUOTE << esc << STR_DBL_QUOTE;
             break;
         }
     }
     lexLog_ << "\n";
 }
-
- 
 
 } // namespace gwbasic

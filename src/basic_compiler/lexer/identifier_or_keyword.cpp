@@ -20,8 +20,8 @@ Token Lexer::identifierOrKeyword() {
      */
     const int startLine = line_;
     const int startCol = col_;
-    auto buf = scanWhile([](char ch){
-        const unsigned char uch = static_cast<unsigned char>(ch);
+    const auto buf = scanWhile([](const char ch){
+        const auto uch = static_cast<unsigned char>(ch);
         return std::isalnum(uch) != 0 || ch == '_';
     });
 
@@ -29,11 +29,11 @@ Token Lexer::identifierOrKeyword() {
     upper.reserve(buf.size());
     for (const char c : buf) upper.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(c))));
 
-    if (upper == "REM") { // treat as comment to EOL
+    if (upper == KW_REM) { // treat as comment to EOL
         skipToEOL();
-        return Token{TokenType::NewLine, "\n", startLine, startCol};
+        return Token{TokenType::NewLine, STR_LF, startLine, startCol};
     }
-    if (TokenType kw = lookupKeyword(upper); kw != TokenType::Identifier)
+    if (const TokenType kw = lookupKeyword(upper); kw != TokenType::Identifier)
         return Token{kw, buf, startLine, startCol};
     return Token{TokenType::Identifier, buf, startLine, startCol};
 }

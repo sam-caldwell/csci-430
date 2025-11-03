@@ -22,9 +22,9 @@ std::vector<Token> Lexer::tokenize() {
         if (atEnd()) break;
 
         char c = peek();
-        if (c == '\n') {
+        if (c == CH_LF) {
             advance();
-            emitFixed<TokenType::NewLine>(tokens, "\n", line_ - 1, 1);
+            emitFixed<TokenType::NewLine>(tokens, STR_LF, line_ - 1, 1);
             bol_ = true;
             continue;
         }

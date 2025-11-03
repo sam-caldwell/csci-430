@@ -25,7 +25,7 @@ std::string Lexer::escapeForLog(const std::string& s) {
             case '\t': out += "\\t"; break;
             case '"':  out += "\\\""; break;
             default:
-                if (ch < 0x20 || ch == 0x7F) {
+                if (ch < CH_SPACE || ch == CH_DEL) {
                     char buf[5];
                     std::snprintf(buf, sizeof(buf), "\\x%02X", ch);
                     out += buf;

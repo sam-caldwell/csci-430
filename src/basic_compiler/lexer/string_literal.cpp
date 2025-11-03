@@ -23,8 +23,8 @@ Token Lexer::stringLiteral() {
         if (const char c = advance(); c == '\\') {
             if (atEnd()) break;
             switch (const char n = advance()) {
-                case 'n': buf.push_back('\n'); break;
-                case 't': buf.push_back('\t'); break;
+                case 'n': buf.push_back(CH_LF); break;
+                case 't': buf.push_back(CH_TAB); break;
                 case '"': buf.push_back('"'); break;
                 case '\\': buf.push_back('\\'); break;
                 default: buf.push_back(n); break;
