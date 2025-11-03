@@ -49,6 +49,15 @@ enum class NodeKind {
     WriteStmt,
     FileInputStmt,
     LineInputStmt,
+    DefFnStmt,
+    DefTypeStmt,
+    DefSegStmt,
+    BloadStmt,
+    BsaveStmt,
+    PokeStmt,
+    CallAbsStmt,
+    DefUsrStmt,
+    ChdirStmt,
 };
 
 } // namespace gwbasic

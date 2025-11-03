@@ -28,7 +28,12 @@ SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
         lines_.insert(line.number);
     }
     for (const auto& line : program.lines) analyzeLine(line);
-    Result r; r.variables = vars_; r.stringLiterals = strings_; r.lineNumbers = lines_; r.commonVariables = common_; r.arrays = arrays_; return r;
+    Result r; r.variables = vars_; r.stringLiterals = strings_; r.lineNumbers = lines_; r.commonVariables = common_; r.arrays = arrays_; r.userFunctions = userFunctions_;
+    // Determine which variables are strings by suffix or DEFSTR mapping
+    for (const auto& v : vars_) {
+        if (varNameIsString(v)) r.stringVariables.insert(v);
+    }
+    return r;
 }
 
 } // namespace gwbasic

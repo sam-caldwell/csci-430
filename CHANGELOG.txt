@@ -71,3 +71,58 @@
               - Added tiny AST-driven unit tests to exercise intrinsic helper paths indirectly via analyze()
                 (unknown function errors, arity mismatch, LOG with comparison arg, SQR negative constant).
               - Keeps public API boundaries intact; no private hooks needed. All tests pass.
+03 Nov 2025 - GW-BASIC extensions: memory ops, CALL/USR, DEF SEG/USR, CHDIR, ASC/CHR$/LEFT$/RIGHT$/MID$, DATA/READ, demos
+            - DEF SEG + memory-mapped operations and USR/CALL
+              - Parser/AST/Semantics: added DefSegStmt (DEF SEG[=expr]); BLOAD/BSAVE/POKE/CALL; DEF USR.
+                - Validations: filenames must be strings; addresses/offsets/lengths numeric; DEF SEG numeric; CALL/DEF USR address numeric.
+              - Codegen: introduced emulated memory and segment globals: @gwb_mem (1 MiB) and @gwb_seg; declared libc funcs
+                fopen/fclose/fread/fwrite; lowered PEEK/POKE/BSAVE/BLOAD against seg*16+offset addressing.
+              - CALL: added @gwb_call(i64 %addr) helper; current behavior interprets opcode byte 1 at %addr to print "CALLED\n";
+                lowered CALL expr to compute effective address and invoke helper. USR(x) returns argument (identity) for now.
+              - Tests: unit (semantics + codegen patterns), integration (presence of stdio calls), E2E (DEF SEG with PEEK/POKE/BSAVE/BLOAD/USR, CALL helper).
+
+            - DATA/READ backend
+              - Codegen emits @gwb_data (ptr table of string literals) and @gwb_data_idx; READ consumes sequentially,
+                storing either pointers (string variables) or atof-converted numbers (numeric variables/arrays).
+              - Tests extended to cover READ targets and ensure IR structures exist.
+
+            - CHDIR statement
+              - Parser/AST: ChdirStmt; Semantics enforce string path; Codegen calls libc chdir(ptr).
+              - Tests: unit/integration/E2E (changes dir then BSAVE creates a file in new cwd).
+
+            - ASC and CHR$ functions
+              - Semantics: ASC expects string arg; CHR$ expects numeric; arity=1.
+              - Codegen: ASC loads first byte of string; CHR$ allocates two bytes and writes char+NUL.
+              - Tests: unit/integration/E2E verifying IR patterns and outputs ("A" and 65.000000).
+
+            - CDBL coverage
+              - Confirmed CDBL is pass-through in codegen; added integration smoke test while existing unit/E2E already covered it.
+
+            - String functions LEFT$, RIGHT$, MID$
+              - Added SemanticAnalyzer::isKnownStringFunction() and robust arity/type validation for string built-ins.
+              - type_of() recognizes built-in string functions as string-typed.
+              - Codegen: declared @strncpy; lowered
+                - LEFT$(s$, n): malloc(n+1); strncpy; NUL-terminate.
+                - RIGHT$(s$, n): compute offset = strlen(s)-n; malloc(n+1); strncpy from s+offset; NUL-terminate.
+                - MID$(s$, start[, len]): 1-based start; compute s+(start-1); len omitted => strlen remainder; malloc(len+1); strncpy; NUL-terminate.
+              - Tests: unit semantics (type+arity), unit codegen (strncpy/malloc present), integration (IR contains @strncpy), E2E (expected results).
+
+            - Demo updates and arrays/data demo
+              - Rewrote demos/data-arrays-strings-integers-and-floats.bas to avoid array element expressions and FOR-body READs.
+                Uses scalar READs then stores into arrays; prints scalar sums and string concatenations; compiles cleanly.
+              - Added demo to Makefile.d/demo.mk and restored chain-level4 demo.
+
+            - E2E working directory and mem.bin location
+              - Adjusted DEF SEG e2e test to BSAVE/BLOAD "build/mem.bin" so artifacts land under build/ rather than repo root.
+              - Left E2E test WORKING_DIRECTORY at project root to preserve relative paths for CHAIN/MERGE/RUN tests against demos/.
+
+            - Codegen/runtime declarations
+              - emit_header: now declares fopen/fclose/fprintf/fread/fwrite, chdir, strncpy; keeps printf/scanf/strcpy/strcat/malloc/strlen helpers.
+              - Added .mode_rb/.mode_wb constants for binary I/O.
+
+            - Parser/semantics/codegen cleanup
+              - Centralized expression string typing predicate; extended isStringExpr for built-in string functions and DEF FN string returns.
+              - Collected DATA/READ literal ids in semantics-driven collection to drive @gwb_data emission.
+
+            - All pipelines green
+              - Verified 'make clean configure lint test demo' completes successfully on macOS (arm64-apple-macosx) with Ninja/Clang 17.

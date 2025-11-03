@@ -22,6 +22,9 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"" << STR_LF
         << "@.mode_r = private unnamed_addr constant [2 x i8] c\"r\\00\"" << STR_LF
         << "@.mode_w = private unnamed_addr constant [2 x i8] c\"w\\00\"" << STR_LF
+        << "@.mode_rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"" << STR_LF
+        << "@.mode_wb = private unnamed_addr constant [3 x i8] c\"wb\\00\"" << STR_LF
+        << "@.call_msg = private unnamed_addr constant [8 x i8] c\"CALLED\\0A\\00\"" << STR_LF
         << "@gwb_last_rnd = global double 0.0" << STR_LF; // RNG state: last random value for RND(0)
     for (const auto&[fst, snd] : strLiteralId_) {
         const std::string& s = fst;
@@ -35,6 +38,22 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         log() << "emitGlobals: literal " << globalStringName(id) << " from StringExpr \"" << s << "\"" << CH_LF;
     }
     out << STR_LF;
+    // Emit DATA/READ backing store if present (array of pointers to literals) and an index
+    {
+        // Always provide an index variable; table may be size 0
+        out << "@gwb_data_idx = global i32 0" << STR_LF;
+        const size_t N = dataLiteralIds_.size();
+        out << "@gwb_data = internal constant [" << N << " x ptr] [";
+        for (size_t i = 0; i < N; ++i) {
+            if (i) out << ", ";
+            out << "ptr " << globalStringName(dataLiteralIds_[i]);
+        }
+        out << "]" << STR_LF << STR_LF;
+    }
+
+    // Emulated memory and current segment
+    out << "@gwb_mem = internal global [1048576 x i8] zeroinitializer" << STR_LF
+        << "@gwb_seg = global i32 0" << STR_LF << STR_LF;
 }
 
 } // namespace gwbasic

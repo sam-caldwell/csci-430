@@ -61,6 +61,17 @@ enum class TokenType {
     KwAs,
     KwOutput,
     KwUsing,
+    KwDef,
+    KwDefInt,
+    KwDefSng,
+    KwDefDbl,
+    KwDefStr,
+    KwSeg,
+    KwBload,
+    KwBsave,
+    KwCall,
+    KwPoke,
+    KwChdir,
 
     // Operators / punctuation
     Plus,

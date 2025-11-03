@@ -57,7 +57,18 @@ inline std::string to_string(const TokenType t) {
         case TokenType::KwAs: return "AS";
         case TokenType::KwOutput: return "OUTPUT";
         case TokenType::KwUsing: return "USING";
+        case TokenType::KwDef: return "DEF";
         case TokenType::KwMerge: return "MERGE";
+        case TokenType::KwDefInt: return "DEFINT";
+        case TokenType::KwDefSng: return "DEFSNG";
+        case TokenType::KwDefDbl: return "DEFDBL";
+        case TokenType::KwDefStr: return "DEFSTR";
+        case TokenType::KwSeg: return "SEG";
+        case TokenType::KwBload: return "BLOAD";
+        case TokenType::KwBsave: return "BSAVE";
+        case TokenType::KwCall: return "CALL";
+        case TokenType::KwPoke: return "POKE";
+        case TokenType::KwChdir: return "CHDIR";
         case TokenType::Plus: return "+";
         case TokenType::Minus: return "-";
         case TokenType::Star: return "*";

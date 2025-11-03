@@ -22,6 +22,15 @@
 #include "basic_compiler/ast/DataStmt.h"
 #include "basic_compiler/ast/ReadStmt.h"
 #include "basic_compiler/ast/WriteStmt.h"
+#include "basic_compiler/ast/DefFnStmt.h"
+#include "basic_compiler/ast/DefTypeStmt.h"
+#include "basic_compiler/ast/DefSegStmt.h"
+#include "basic_compiler/ast/BloadStmt.h"
+#include "basic_compiler/ast/BsaveStmt.h"
+#include "basic_compiler/ast/PokeStmt.h"
+#include "basic_compiler/ast/CallAbsStmt.h"
+#include "basic_compiler/ast/DefUsrStmt.h"
+#include "basic_compiler/ast/ChdirStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -45,7 +54,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     if (auto a = dyn_cast<const AssignStmt>(s)) {
         reference(a->name, a->pos);
         auto vt = typeOf(a->value.get());
-        const bool varIsString = (!a->name.empty() && a->name.back() == '$');
+        const bool varIsString = varNameIsString(a->name);
         if (varIsString && vt != ValueType::String) {
             std::ostringstream m; m << "TypeError: cannot assign number to string var '" << a->name << "' @ " << a->pos.line << ':' << a->pos.col; log() << m.str() << '\n';
             throw SemanticError(m.str());
@@ -146,6 +155,109 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         return;
     }
     if (auto in = dyn_cast<const InputStmt>(s)) { reference(in->name, in->pos); return; }
+    if (auto dt = dyn_cast<const DefTypeStmt>(s)) {
+        for (const auto& [a,b] : dt->ranges) {
+            for (char ch = a; ch <= b; ++ch) {
+                int idx = (std::toupper(static_cast<unsigned char>(ch)) - 'A');
+                if (idx >= 0 && idx < 26) {
+                    switch (dt->kind) {
+                        case DefTypeStmt::Kind::Int: defaultKinds_[idx] = DefaultKind::Int; break;
+                        case DefTypeStmt::Kind::Sng: defaultKinds_[idx] = DefaultKind::Sng; break;
+                        case DefTypeStmt::Kind::Dbl: defaultKinds_[idx] = DefaultKind::Dbl; break;
+                        case DefTypeStmt::Kind::Str: defaultKinds_[idx] = DefaultKind::Str; break;
+                    }
+                }
+            }
+        }
+        log() << "DefType" << '\n';
+        return;
+    }
+    if (auto ds = dyn_cast<const DefSegStmt>(s)) {
+        if (ds->value) {
+            if (typeOf(ds->value.get()) == ValueType::String) {
+                std::ostringstream m; m << "TypeError: DEF SEG requires numeric segment @ " << ds->pos.line << ':' << ds->pos.col; log() << m.str() << '\n';
+                throw SemanticError(m.str());
+            }
+            analyzeExpr(ds->value.get());
+        }
+        log() << "DefSeg" << '\n';
+        return;
+    }
+    if (auto bl = dyn_cast<const BloadStmt>(s)) {
+        if (!dyn_cast<StringExpr>(bl->filename.get())) {
+            std::ostringstream m; m << "TypeError: BLOAD filename must be string @ " << bl->pos.line << ':' << bl->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(bl->filename.get());
+        if (bl->offset) {
+            if (typeOf(bl->offset.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: BLOAD offset must be numeric @ " << bl->pos.line << ':' << bl->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            analyzeExpr(bl->offset.get());
+        }
+        return;
+    }
+    if (auto bs = dyn_cast<const BsaveStmt>(s)) {
+        if (!dyn_cast<StringExpr>(bs->filename.get())) { std::ostringstream m; m << "TypeError: BSAVE filename must be string @ " << bs->pos.line << ':' << bs->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(bs->filename.get());
+        if (typeOf(bs->offset.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: BSAVE offset must be numeric @ " << bs->pos.line << ':' << bs->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (typeOf(bs->length.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: BSAVE length must be numeric @ " << bs->pos.line << ':' << bs->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(bs->offset.get());
+        analyzeExpr(bs->length.get());
+        return;
+    }
+    if (auto pk = dyn_cast<const PokeStmt>(s)) {
+        if (typeOf(pk->address.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: POKE address must be numeric @ " << pk->pos.line << ':' << pk->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (typeOf(pk->value.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: POKE value must be numeric @ " << pk->pos.line << ':' << pk->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(pk->address.get());
+        analyzeExpr(pk->value.get());
+        return;
+    }
+    if (auto ca = dyn_cast<const CallAbsStmt>(s)) {
+        if (typeOf(ca->address.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CALL address must be numeric @ " << ca->pos.line << ':' << ca->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(ca->address.get());
+        return;
+    }
+    if (auto du = dyn_cast<const DefUsrStmt>(s)) {
+        if (typeOf(du->address.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: DEF USR address must be numeric @ " << du->pos.line << ':' << du->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(du->address.get());
+        log() << "DefUsr" << '\n';
+        return;
+    }
+    if (auto cd = dyn_cast<const ChdirStmt>(s)) {
+        if (typeOf(cd->path.get()) != ValueType::String) {
+            std::ostringstream m; m << "TypeError: CHDIR requires string path @ " << cd->pos.line << ':' << cd->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(cd->path.get());
+        return;
+    }
+    if (auto df = dyn_cast<const DefFnStmt>(s)) {
+        // Record user-defined function; body must be a valid expression.
+        // Normalize function name to uppercase for lookup.
+        std::string up = df->fnName; for (auto &ch: up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+        if (userFunctions_.contains(up)) {
+            std::ostringstream m; m << "SemanticError: duplicate DEF for function '" << df->fnName << "' @ " << df->pos.line << ':' << df->pos.col;
+            log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        // Analyze body with param considered local; suppress global reference tracking for it
+        currentFnParam_ = df->paramName;
+        // Validate return type vs. body type
+        const bool retIsString = (!df->fnName.empty() && df->fnName.back() == '$');
+        ValueType bt = typeOf(df->body.get());
+        if (retIsString && bt != ValueType::String) {
+            std::ostringstream m; m << "TypeError: DEF " << df->fnName << " must return string; got numeric @ " << df->pos.line << ':' << df->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        if (!retIsString && bt == ValueType::String) {
+            std::ostringstream m; m << "TypeError: DEF " << df->fnName << " must return number; got string @ " << df->pos.line << ':' << df->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(df->body.get());
+        currentFnParam_.reset();
+        userFunctions_[up] = df;
+        log() << "DefFn " << df->fnName << '\n';
+        return;
+    }
     if (auto g = dyn_cast<const GotoStmt>(s)) {
         std::ostringstream m; m << "Goto target=" << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << m.str() << '\n';
         if (!lines_.contains(g->targetLine)) {

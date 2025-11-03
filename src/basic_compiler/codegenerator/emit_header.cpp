@@ -23,10 +23,14 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare ptr @malloc(i64)" << STR_LF
         << "declare ptr @strcpy(ptr, ptr)" << STR_LF
         << "declare ptr @strcat(ptr, ptr)" << STR_LF << STR_LF
+        << "declare ptr @strncpy(ptr, ptr, i64)" << STR_LF
     // File I/O
         << "declare ptr @fopen(ptr, ptr)" << STR_LF
         << "declare i32 @fclose(ptr)" << STR_LF
-        << "declare i32 @fprintf(ptr, ptr, ...)" << STR_LF << STR_LF
+        << "declare i32 @fprintf(ptr, ptr, ...)" << STR_LF
+        << "declare i64 @fread(ptr, i64, i64, ptr)" << STR_LF
+        << "declare i64 @fwrite(ptr, i64, i64, ptr)" << STR_LF << STR_LF
+        << "declare i32 @chdir(ptr)" << STR_LF
         << "declare double @atof(ptr)" << STR_LF << STR_LF
     // Math library functions used by intrinsic calls
         << "declare double @sqrt(double)" << STR_LF
@@ -67,6 +71,21 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
             << "  ret double %rv" << STR_LF
             << "}" << STR_LF << STR_LF;
     }
+    // Provide a minimal CALL helper that interprets the first byte at the
+    // effective address as an opcode. Currently, opcode 1 prints "CALLED\n".
+    out << "define void @gwb_call(i64 %addr) {" << STR_LF
+        << "entry:" << STR_LF
+        << "  %p = getelementptr inbounds [1048576 x i8], ptr @gwb_mem, i64 0, i64 %addr" << STR_LF
+        << "  %op = load i8, ptr %p" << STR_LF
+        << "  %is1 = icmp eq i8 %op, 1" << STR_LF
+        << "  br i1 %is1, label %case1, label %ret" << STR_LF
+        << "case1:" << STR_LF
+        << "  %fmt = getelementptr inbounds i8, ptr @.call_msg, i64 0" << STR_LF
+        << "  call i32 (ptr, ...) @printf(ptr %fmt)" << STR_LF
+        << "  br label %ret" << STR_LF
+        << "ret:" << STR_LF
+        << "  ret void" << STR_LF
+        << "}" << STR_LF << STR_LF;
     // Global table for file channels (1..16)
     out << "@gwb_files = internal global [16 x ptr] zeroinitializer" << STR_LF << STR_LF;
     log() << "emitHeader: declared stdio + globals" << CH_LF;

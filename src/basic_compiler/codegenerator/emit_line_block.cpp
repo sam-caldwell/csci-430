@@ -5,6 +5,15 @@
 #include "basic_compiler/ast/DataStmt.h"
 #include "basic_compiler/ast/ReadStmt.h"
 #include "basic_compiler/ast/WriteStmt.h"
+#include "basic_compiler/ast/DimStmt.h"
+#include "basic_compiler/ast/DefTypeStmt.h"
+#include "basic_compiler/ast/DefSegStmt.h"
+#include "basic_compiler/ast/BloadStmt.h"
+#include "basic_compiler/ast/BsaveStmt.h"
+#include "basic_compiler/ast/PokeStmt.h"
+#include "basic_compiler/ast/CallAbsStmt.h"
+#include "basic_compiler/ast/DefUsrStmt.h"
+#include "basic_compiler/ast/ChdirStmt.h"
 #include <sstream>
 #include <format>
 
@@ -35,7 +44,7 @@ namespace gwbasic {
             if (auto asg = dyn_cast<AssignStmt>(st.get())) {
                 std::string val = emitExpr(out, asg->value.get(), "");
                 std::string ir;
-                if (!asg->name.empty() && asg->name.back() == CH_DOLLARSIGN) {
+                if (isStringVarNameCG(asg->name)) {
                     ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
                 } else {
                     ir = std::format("  store double {}, ptr {}", val, varAllocaName_[asg->name]);
@@ -59,13 +68,7 @@ namespace gwbasic {
                 for (size_t pi = 0; pi < items.size(); ++pi) {
                     const bool last = (pi + 1 == items.size());
                     const Expr *v = items[pi];
-                    auto isStr = [&](const Expr* e, const auto& self) -> bool {
-                        if (isa<StringExpr>(e)) return true;
-                        if (auto vv = dyn_cast<VarExpr>(e)) return !vv->name.empty() && vv->name.back() == CH_DOLLARSIGN;
-                        if (auto bb = dyn_cast<BinaryExpr>(e)) return (bb->op == BinaryOp::Add) && (self(bb->lhs.get(), self) || self(bb->rhs.get(), self));
-                        return false;
-                    };
-                    if (isStr(v, isStr)) {
+                    if (isStringExpr(v)) {
                         auto sptr = emitExpr(out, v, "");
                         std::string fmt = nextTemp();
                         { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (last ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log() << m.str() << CH_LF; } }
@@ -240,6 +243,9 @@ namespace gwbasic {
                 { std::ostringstream m; m << "line " << currentLine_ << " ChainStmt branch -> " << ir; log() << m.str() << CH_LF; }
                 terminated = true;
                 break;
+            } else if (auto dim = dyn_cast<DimStmt>(st.get())) {
+                // DIM is a no-op at runtime in this compiler
+                { std::ostringstream m; m << "line " << currentLine_ << " DimStmt (no-op)"; log() << m.str() << CH_LF; }
             } else if (auto ds = dyn_cast<DataStmt>(st.get())) {
                 // DATA: no runtime effect; items lowered into globals
                 { std::ostringstream m; m << "line " << currentLine_ << " DataStmt (no-op)"; log() << m.str() << CH_LF; }
@@ -269,7 +275,7 @@ namespace gwbasic {
                     } else {
                         // Scalar var
                         ensureVarAllocated(out, t.name);
-                        if (!t.name.empty() && t.name.back() == CH_DOLLARSIGN) {
+                        if (isStringVarNameCG(t.name)) {
                             std::string ir = std::format("  store ptr {}, ptr {}", sval, varAllocaName_[t.name]); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " Read store$ -> " << ir; log() << m.str() << CH_LF; }
                         } else {
                             std::string dval = nextTemp(); { std::string ir = std::format("  {} = call double @atof(ptr {})", dval, sval); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " Read atof -> " << ir; log() << m.str() << CH_LF; } }
@@ -279,6 +285,74 @@ namespace gwbasic {
                 }
             } else if (dyn_cast<MergeStmt>(st.get())) {
                 { std::ostringstream m; m << "line " << currentLine_ << " MergeStmt (no-op)"; log() << m.str() << CH_LF; }
+            } else if (isa<DefFnStmt>(st.get())) {
+                // DEF FN has no direct runtime effect; handled via inlining in expressions.
+                { std::ostringstream m; m << "line " << currentLine_ << " DefFnStmt (no-op)"; log() << m.str() << CH_LF; }
+            } else if (isa<DefTypeStmt>(st.get())) {
+                // DEFINT/DEFSNG/DEFDBL/DEFSTR are compile-time declarations; no direct codegen
+                { std::ostringstream m; m << "line " << currentLine_ << " DefTypeStmt (no-op)"; log() << m.str() << CH_LF; }
+            } else if (isa<DefSegStmt>(st.get())) {
+                // DEF SEG is a no-op in this compiler
+                { std::ostringstream m; m << "line " << currentLine_ << " DefSegStmt (no-op)"; log() << m.str() << CH_LF; }
+            } else if (auto pk = dyn_cast<PokeStmt>(st.get())) {
+                // Compute physical address = seg*16 + addr
+                std::string seg = nextTemp(); { std::string ir = "  "; ir += seg; ir += " = load i32, ptr @gwb_seg"; out << ir << STR_LF; }
+                std::string seg16 = nextTemp(); { std::string ir = std::format("  {} = mul i32 {}, 16", seg16, seg); out << ir << STR_LF; }
+                std::string off = emitExpr(out, pk->address.get(), "");
+                std::string off64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", off64, off); out << ir << STR_LF; }
+                std::string seg64 = nextTemp(); { std::string ir = std::format("  {} = sext i32 {} to i64", seg64, seg16); out << ir << STR_LF; }
+                std::string addr = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", addr, seg64, off64); out << ir << STR_LF; }
+                std::string base = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [1048576 x i8], ptr @gwb_mem, i64 0, i64 {}", base, addr); out << ir << STR_LF; }
+                std::string v = emitExpr(out, pk->value.get(), "");
+                std::string vi = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", vi, v); out << ir << STR_LF; }
+                std::string vb = nextTemp(); { std::string ir = std::format("  {} = trunc i32 {} to i8", vb, vi); out << ir << STR_LF; }
+                { std::string ir = std::format("  store i8 {}, ptr {}", vb, base); out << ir << STR_LF; }
+            } else if (auto bl = dyn_cast<BloadStmt>(st.get())) {
+                // Open file for binary read; read into mem starting at seg*16 + offset
+                auto fnptr = emitExpr(out, bl->filename.get(), "");
+                std::string mode = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.mode_rb, i64 0", mode); out << ir << STR_LF; }
+                std::string f = nextTemp(); { std::string ir = std::format("  {} = call ptr @fopen(ptr {}, ptr {})", f, fnptr, mode); out << ir << STR_LF; }
+                std::string seg = nextTemp(); { std::string ir = "  "; ir += seg; ir += " = load i32, ptr @gwb_seg"; out << ir << STR_LF; }
+                std::string seg16 = nextTemp(); { std::string ir = std::format("  {} = mul i32 {}, 16", seg16, seg); out << ir << STR_LF; }
+                std::string off = "0.0";
+                if (bl->offset) off = emitExpr(out, bl->offset.get(), "");
+                std::string off64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", off64, off); out << ir << STR_LF; }
+                std::string seg64 = nextTemp(); { std::string ir = std::format("  {} = sext i32 {} to i64", seg64, seg16); out << ir << STR_LF; }
+                std::string addr = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", addr, seg64, off64); out << ir << STR_LF; }
+                std::string dest = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [1048576 x i8], ptr @gwb_mem, i64 0, i64 {}", dest, addr); out << ir << STR_LF; }
+                std::string remain = nextTemp(); { std::string ir = std::format("  {} = sub i64 1048576, {}", remain, addr); out << ir << STR_LF; }
+                { std::string ir = std::format("  call i64 @fread(ptr {}, i64 1, i64 {}, ptr {})", dest, remain, f); out << ir << STR_LF; }
+                { std::string ir = std::format("  call i32 @fclose(ptr {})", f); out << ir << STR_LF; }
+            } else if (auto bs = dyn_cast<BsaveStmt>(st.get())) {
+                auto fnptr = emitExpr(out, bs->filename.get(), "");
+                std::string mode = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.mode_wb, i64 0", mode); out << ir << STR_LF; }
+                std::string f = nextTemp(); { std::string ir = std::format("  {} = call ptr @fopen(ptr {}, ptr {})", f, fnptr, mode); out << ir << STR_LF; }
+                std::string seg = nextTemp(); { std::string ir = "  "; ir += seg; ir += " = load i32, ptr @gwb_seg"; out << ir << STR_LF; }
+                std::string seg16 = nextTemp(); { std::string ir = std::format("  {} = mul i32 {}, 16", seg16, seg); out << ir << STR_LF; }
+                std::string off = emitExpr(out, bs->offset.get(), "");
+                std::string off64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", off64, off); out << ir << STR_LF; }
+                std::string seg64 = nextTemp(); { std::string ir = std::format("  {} = sext i32 {} to i64", seg64, seg16); out << ir << STR_LF; }
+                std::string addr = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", addr, seg64, off64); out << ir << STR_LF; }
+                std::string src = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [1048576 x i8], ptr @gwb_mem, i64 0, i64 {}", src, addr); out << ir << STR_LF; }
+                std::string len = emitExpr(out, bs->length.get(), "");
+                std::string len64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", len64, len); out << ir << STR_LF; }
+                { std::string ir = std::format("  call i64 @fwrite(ptr {}, i64 1, i64 {}, ptr {})", src, len64, f); out << ir << STR_LF; }
+                { std::string ir = std::format("  call i32 @fclose(ptr {})", f); out << ir << STR_LF; }
+            } else if (auto ca = dyn_cast<CallAbsStmt>(st.get())) {
+                // CALL: compute effective address (seg*16 + addr) and invoke helper
+                std::string seg = nextTemp(); { std::string ir = "  "; ir += seg; ir += " = load i32, ptr @gwb_seg"; out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " CALL load seg -> " << ir; log() << m.str() << CH_LF; } }
+                std::string seg16 = nextTemp(); { std::string ir = std::format("  {} = mul i32 {}, 16", seg16, seg); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " CALL seg*16 -> " << ir; log() << m.str() << CH_LF; } }
+                std::string off = emitExpr(out, ca->address.get(), "");
+                std::string off64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", off64, off); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " CALL addr fptosi -> " << ir; log() << m.str() << CH_LF; } }
+                std::string seg64 = nextTemp(); { std::string ir = std::format("  {} = sext i32 {} to i64", seg64, seg16); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " CALL seg sext -> " << ir; log() << m.str() << CH_LF; } }
+                std::string addr = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", addr, seg64, off64); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " CALL eff addr -> " << ir; log() << m.str() << CH_LF; } }
+                { std::string ir = std::format("  call void @gwb_call(i64 {})", addr); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " CALL invoke -> " << ir; log() << m.str() << CH_LF; } }
+            } else if (auto cd = dyn_cast<ChdirStmt>(st.get())) {
+                std::string p = emitExpr(out, cd->path.get(), "");
+                { std::string ir = std::format("  call i32 @chdir(ptr {})", p); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " ChdirStmt chdir -> " << ir; log() << m.str() << CH_LF; } }
+            } else if (auto du = dyn_cast<DefUsrStmt>(st.get())) {
+                // DEF USR is a no-op in this compiler (store ignored)
+                { std::ostringstream m; m << "line " << currentLine_ << " DefUsrStmt (no-op)"; log() << m.str() << CH_LF; }
             } else {
                 throw CodeGenError("Unsupported statement encountered");
             }

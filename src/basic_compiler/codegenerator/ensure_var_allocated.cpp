@@ -20,7 +20,7 @@ void CodeGenerator::ensureVarAllocated(std::ostringstream& out, const std::strin
     if (auto it = varAllocaName_.find(name); it != varAllocaName_.end() && !it->second.empty()) return;
     std::string a = "%"; a += name;
     varAllocaName_[name] = a;
-    const bool isStr = (!name.empty() && name.back() == CH_DOLLARSIGN);
+    const bool isStr = isStringVarNameCG(name);
     if (isStr) {
         std::string ir1 = std::format("  {} = alloca ptr", a);
         out << ir1 << STR_LF; log() << "line " << currentLine_ << " VarAllocStr(" << name << ") -> " << ir1 << CH_LF;

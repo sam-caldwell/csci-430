@@ -26,7 +26,8 @@ DEMO_SRCS := demos/factorial.bas \
 	demos/use-passed-params-all.bas \
 	demos/chain-level2.bas \
 	demos/chain-level3.bas \
-	demos/chain-level4.bas
+	demos/chain-level4.bas \
+	demos/data-arrays-strings-integers-and-floats.bas
 demo:
 	@set -e; \
 	BUILD_ROOT="./build"; \

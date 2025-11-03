@@ -49,6 +49,15 @@ template <> struct NodeKindTraits<NodeKind::RestoreStmt>    { static constexpr c
 template <> struct NodeKindTraits<NodeKind::WriteStmt>      { static constexpr const char* pretty = "WriteStmt"; };
 template <> struct NodeKindTraits<NodeKind::FileInputStmt>  { static constexpr const char* pretty = "FileInputStmt"; };
 template <> struct NodeKindTraits<NodeKind::LineInputStmt>  { static constexpr const char* pretty = "LineInputStmt"; };
+template <> struct NodeKindTraits<NodeKind::DefFnStmt>      { static constexpr const char* pretty = "DefFnStmt"; };
+template <> struct NodeKindTraits<NodeKind::DefTypeStmt>    { static constexpr const char* pretty = "DefTypeStmt"; };
+template <> struct NodeKindTraits<NodeKind::DefSegStmt>     { static constexpr const char* pretty = "DefSegStmt"; };
+template <> struct NodeKindTraits<NodeKind::BloadStmt>      { static constexpr const char* pretty = "BloadStmt"; };
+template <> struct NodeKindTraits<NodeKind::BsaveStmt>      { static constexpr const char* pretty = "BsaveStmt"; };
+template <> struct NodeKindTraits<NodeKind::PokeStmt>       { static constexpr const char* pretty = "PokeStmt"; };
+template <> struct NodeKindTraits<NodeKind::CallAbsStmt>    { static constexpr const char* pretty = "CallAbsStmt"; };
+template <> struct NodeKindTraits<NodeKind::DefUsrStmt>     { static constexpr const char* pretty = "DefUsrStmt"; };
+template <> struct NodeKindTraits<NodeKind::ChdirStmt>      { static constexpr const char* pretty = "ChdirStmt"; };
 
 // Map a runtime NodeKind to a human-readable pretty name
 inline const char* prettyName(NodeKind k) {
@@ -91,6 +100,15 @@ inline const char* prettyName(NodeKind k) {
         case NodeKind::WriteStmt: return NodeKindTraits<NodeKind::WriteStmt>::pretty;
         case NodeKind::FileInputStmt: return NodeKindTraits<NodeKind::FileInputStmt>::pretty;
         case NodeKind::LineInputStmt: return NodeKindTraits<NodeKind::LineInputStmt>::pretty;
+        case NodeKind::DefFnStmt: return NodeKindTraits<NodeKind::DefFnStmt>::pretty;
+        case NodeKind::DefTypeStmt: return NodeKindTraits<NodeKind::DefTypeStmt>::pretty;
+        case NodeKind::DefSegStmt: return NodeKindTraits<NodeKind::DefSegStmt>::pretty;
+        case NodeKind::BloadStmt: return NodeKindTraits<NodeKind::BloadStmt>::pretty;
+        case NodeKind::BsaveStmt: return NodeKindTraits<NodeKind::BsaveStmt>::pretty;
+        case NodeKind::PokeStmt: return NodeKindTraits<NodeKind::PokeStmt>::pretty;
+        case NodeKind::CallAbsStmt: return NodeKindTraits<NodeKind::CallAbsStmt>::pretty;
+        case NodeKind::DefUsrStmt: return NodeKindTraits<NodeKind::DefUsrStmt>::pretty;
+        case NodeKind::ChdirStmt: return NodeKindTraits<NodeKind::ChdirStmt>::pretty;
     }
     return "Node";
 }

@@ -46,6 +46,23 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
     if (match(TokenType::KwRead)) { auto n = parseRead(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwRestore)) { auto n = parseRestore(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwWrite)) { auto n = parseWrite(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwDef)) {
+        if (match(TokenType::KwSeg)) { auto n = parseDefSeg(); n->pos = {startTok.line, startTok.col}; return n; }
+        if (check(TokenType::Identifier)) {
+            std::string id = peek().lexeme; std::string up = id; for (auto &ch: up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+            if (up.rfind("USR", 0) == 0) { auto n = parseDefUsr(); n->pos = {startTok.line, startTok.col}; return n; }
+        }
+        auto n = parseDefFn(); n->pos = {startTok.line, startTok.col}; return n;
+    }
+    if (match(TokenType::KwDefStr)) { auto n = parseDefType(DefTypeStmt::Kind::Str); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwDefInt)) { auto n = parseDefType(DefTypeStmt::Kind::Int); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwDefSng)) { auto n = parseDefType(DefTypeStmt::Kind::Sng); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwDefDbl)) { auto n = parseDefType(DefTypeStmt::Kind::Dbl); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwBload)) { auto n = parseBload(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwBsave)) { auto n = parseBsave(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwPoke)) { auto n = parsePoke(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwCall)) { auto n = parseCallAbs(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwChdir)) { auto n = parseChdir(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwLine)) { consume(TokenType::KwInput, "INPUT"); auto n = parseLineInput(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwChain)) { auto n = parseChain(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwMerge)) { auto n = parseMerge(); n->pos = {startTok.line, startTok.col}; return n; }

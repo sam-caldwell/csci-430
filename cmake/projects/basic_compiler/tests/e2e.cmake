@@ -22,4 +22,6 @@ else()
   target_compile_definitions(basic_compiler_e2e_tests PRIVATE CLANG_PATH="clang")
 endif()
 
+# Run E2E tests from the top-level build/ directory so any relative
+# files created by compiled programs (e.g., mem.bin) land under build/.
 gtest_discover_tests(basic_compiler_e2e_tests PROPERTIES LABELS e2e WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

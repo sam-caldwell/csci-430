@@ -31,11 +31,14 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         return s;
     }
     if (auto v = dyn_cast<const VarExpr>(e)) {
+        // Inline binding for DEF FN parameter?
+        std::string bound;
+        if (lookupBinding(v->name, bound)) return bound;
         ensureVarAllocated(out, v->name);
         std::string a = varAllocaName_[v->name];
         std::string r = nextTemp();
 
-        if (!v->name.empty() && v->name.back() == CH_DOLLARSIGN) {
+        if (isStringVarNameCG(v->name)) {
             std::string ir = std::format("  {} = load ptr, ptr {}", r, a);
             out << ir << STR_LF;
             log() << "line " << currentLine_ << " VarExpr$ -> " << ir << CH_LF;
@@ -72,26 +75,8 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         std::string res = nextTemp();
         switch (b->op) {
             case BinaryOp::Add: {
-                const bool lhsStr = isa<StringExpr>(b->lhs.get()) ||
-                    (
-                        isa<VarExpr>(b->lhs.get()) &&
-                        !dyn_cast<VarExpr>(b->lhs.get())->name.empty() &&
-                        dyn_cast<VarExpr>(b->lhs.get())->name.back() == CH_DOLLARSIGN
-                    ) ||
-                    (
-                        isa<BinaryExpr>(b->lhs.get()) &&
-                        dyn_cast<BinaryExpr>(b->lhs.get())->op == BinaryOp::Add
-                    );
-                const bool rhsStr = isa<StringExpr>(b->rhs.get()) ||
-                    (
-                        isa<VarExpr>(b->rhs.get()) &&
-                        !dyn_cast<VarExpr>(b->rhs.get())->name.empty() &&
-                        dyn_cast<VarExpr>(b->rhs.get())->name.back() == CH_DOLLARSIGN
-                    ) ||
-                    (
-                        isa<BinaryExpr>(b->rhs.get()) &&
-                        dyn_cast<BinaryExpr>(b->rhs.get())->op == BinaryOp::Add
-                    );
+                const bool lhsStr = isStringExpr(b->lhs.get());
+                const bool rhsStr = isStringExpr(b->rhs.get());
                 if (lhsStr && rhsStr) {
                     // String concatenation: malloc(strlen(L)+strlen(R)+1); strcpy; strcat
                     std::string lenL = nextTemp();
@@ -223,6 +208,41 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             return res;
         }
         if (fn == "RND") { std::string ir = std::format("  {} = call double @gwb_rnd(double {})", res, argv[0]); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr rnd(full) -> " << ir; log() << m.str() << CH_LF; } return res; }
+        if (fn == "ASC") {
+            // argv[0] is ptr to string; load first byte and return as double
+            std::string b = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", b, argv[0]); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr asc load -> " << ir; log() << m.str() << CH_LF; } }
+            std::string i32v = nextTemp(); { std::string ir = std::format("  {} = zext i8 {} to i32", i32v, b); out << ir << STR_LF; }
+            { std::string ir = std::format("  {} = uitofp i32 {} to double", res, i32v); out << ir << STR_LF; }
+            return res;
+        }
+        if (fn == "PEEK") {
+            // addr = seg*16 + arg
+            std::string seg = nextTemp(); { std::string ir = "  "; ir += seg; ir += " = load i32, ptr @gwb_seg"; out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PEEK load seg -> " << ir; log() << m.str() << CH_LF; } }
+            std::string seg16 = nextTemp(); { std::string ir = std::format("  {} = mul i32 {}, 16", seg16, seg); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PEEK seg*16 -> " << ir; log() << m.str() << CH_LF; } }
+            std::string off = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", off, argv[0]); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PEEK off fptosi -> " << ir; log() << m.str() << CH_LF; } }
+            std::string seg64 = nextTemp(); { std::string ir = std::format("  {} = sext i32 {} to i64", seg64, seg16); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PEEK seg sext -> " << ir; log() << m.str() << CH_LF; } }
+            std::string addr = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", addr, seg64, off); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PEEK addr -> " << ir; log() << m.str() << CH_LF; } }
+            std::string base = "%tmem"; base = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [1048576 x i8], ptr @gwb_mem, i64 0, i64 {}", base, addr); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PEEK gep -> " << ir; log() << m.str() << CH_LF; } }
+            std::string b = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", b, base); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PEEK load -> " << ir; log() << m.str() << CH_LF; } }
+            std::string i32v = nextTemp(); { std::string ir = std::format("  {} = zext i8 {} to i32", i32v, b); out << ir << STR_LF; }
+            { std::string ir = std::format("  {} = uitofp i32 {} to double", res, i32v); out << ir << STR_LF; }
+            return res;
+        }
+        if (fn == "USR") {
+            // Identity: return argument as-is
+            return argv[0];
+        }
+        // User-defined DEF FN inline expansion
+        auto itUF = userFunctions_.find(fn);
+        if (itUF != userFunctions_.end()) {
+            const DefFnStmt* def = itUF->second;
+            // Bind parameter name to evaluated argument
+            std::map<std::string, std::string> bmap; bmap[def->paramName] = argv.empty() ? std::string() : argv[0];
+            bindingStack_.push_back(std::move(bmap));
+            std::string val = emitExpr(out, def->body.get(), "");
+            bindingStack_.pop_back();
+            return val;
+        }
         if (fn == "CINT") {
             std::string ir = std::format("  {} = call double @round(double {})", res, argv[0]);
             out << ir << STR_LF;
@@ -239,6 +259,59 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         if (fn == "CDBL") {
             // Already double; pass-through
             return argv[0];
+        }
+        if (fn == "LEFT$") {
+            // LEFT$(s$, n)
+            std::string n64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", n64, argv[1]); out << ir << STR_LF; }
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n64); out << ir << STR_LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, size); out << ir << STR_LF; }
+            { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", buf, argv[0], n64); out << ir << STR_LF; }
+            std::string pN = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pN, buf, n64); out << ir << STR_LF; }
+            { std::string ir = std::format("  store i8 0, ptr {}", pN); out << ir << STR_LF; }
+            return buf;
+        }
+        if (fn == "RIGHT$") {
+            // RIGHT$(s$, n)
+            std::string n64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", n64, argv[1]); out << ir << STR_LF; }
+            std::string len = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", len, argv[0]); out << ir << STR_LF; }
+            std::string off = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", off, len, n64); out << ir << STR_LF; }
+            std::string src = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", src, argv[0], off); out << ir << STR_LF; }
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n64); out << ir << STR_LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, size); out << ir << STR_LF; }
+            { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", buf, src, n64); out << ir << STR_LF; }
+            std::string pN = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pN, buf, n64); out << ir << STR_LF; }
+            { std::string ir = std::format("  store i8 0, ptr {}", pN); out << ir << STR_LF; }
+            return buf;
+        }
+        if (fn == "MID$") {
+            // MID$(s$, start [, len]) with 1-based index
+            std::string starti = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", starti, argv[1]); out << ir << STR_LF; }
+            std::string off = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, 1", off, starti); out << ir << STR_LF; }
+            std::string src = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", src, argv[0], off); out << ir << STR_LF; }
+            std::string n64;
+            if (call->args.size() >= 3) {
+                n64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", n64, argv[2]); out << ir << STR_LF; }
+            } else {
+                n64 = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", n64, src); out << ir << STR_LF; }
+            }
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n64); out << ir << STR_LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, size); out << ir << STR_LF; }
+            { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", buf, src, n64); out << ir << STR_LF; }
+            std::string pN = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pN, buf, n64); out << ir << STR_LF; }
+            { std::string ir = std::format("  store i8 0, ptr {}", pN); out << ir << STR_LF; }
+            return buf;
+        }
+        if (fn == "CHR$") {
+            // Allocate 2 bytes and store low 8 bits of numeric arg as char
+            std::string two = nextTemp(); { std::string ir = std::format("  {} = add i64 1, 1", two); out << ir << STR_LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 2)", buf); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr chr$ malloc -> " << ir; log() << m.str() << CH_LF; } }
+            std::string ival = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", ival, argv[0]); out << ir << STR_LF; }
+            std::string b = nextTemp(); { std::string ir = std::format("  {} = trunc i32 {} to i8", b, ival); out << ir << STR_LF; }
+            std::string p0 = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", p0, buf); out << ir << STR_LF; }
+            { std::string ir = std::format("  store i8 {}, ptr {}", b, p0); out << ir << STR_LF; }
+            std::string p1 = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 1", p1, buf); out << ir << STR_LF; }
+            { std::string ir = std::format("  store i8 0, ptr {}", p1); out << ir << STR_LF; }
+            return buf;
         }
         throw CodeGenError("Unknown function call");
     }

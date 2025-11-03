@@ -40,6 +40,7 @@
 #include "basic_compiler/codegen/CodeGenError.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include "basic_compiler/ast/Traits.h"
+#include "basic_compiler/ast/DefFnStmt.h"
 
 namespace gwbasic {
 
@@ -96,6 +97,8 @@ public:
         semLineNumbers_ = r.lineNumbers;
         semCommonVariables_ = r.commonVariables;
         arraySizes_ = r.arrays;
+        userFunctions_ = r.userFunctions;
+        semStringVariables_ = r.stringVariables;
     }
 
 private:
@@ -132,6 +135,10 @@ private:
     std::map<std::string, int> strLiteralId_;
     std::map<std::string, int> arraySizes_{};
     std::map<std::string, std::string> arrayAllocaName_{};
+    // User-defined functions by uppercase name
+    std::map<std::string, const DefFnStmt*> userFunctions_{};
+    // Variables determined as string-typed (by suffix or DEFSTR)
+    std::set<std::string> semStringVariables_{};
     /*
      * Property: lineNumbers_
      * Purpose:
@@ -156,6 +163,8 @@ private:
      *  - Flag indicating whether RND(x) helper function must be emitted.
      */
     bool needsRndHelper_{false};
+    // Inline call-time substitution bindings (stack of name->SSA value)
+    std::vector<std::map<std::string, std::string>> bindingStack_{};
     // Optional semantic input
     /*
      * Property: semProvided_
@@ -276,6 +285,8 @@ private:
     // Expression lowering
     /** Lower an expression to SSA value; returns its name. */
     std::string emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix);
+    // Helper: determine whether an expression is string-typed (for codegen routing)
+    bool isStringExpr(const Expr* e) const;
     /** Lower a comparison expression to an i1 predicate value. */
     std::string emitComparison(std::ostringstream& out, const BinaryExpr* c);
 
@@ -287,6 +298,19 @@ private:
     /** Allocate a stack slot for a variable if not already allocated. */
     void ensureVarAllocated(std::ostringstream& out, const std::string& name);
     void ensureArrayAllocated(std::ostringstream& out, const std::string& name, int length);
+    // Lookup current inline binding for a variable name (if any)
+    bool lookupBinding(const std::string& name, std::string& out) const {
+        for (auto it = bindingStack_.rbegin(); it != bindingStack_.rend(); ++it) {
+            auto f = it->find(name);
+            if (f != it->end()) { out = f->second; return true; }
+        }
+        return false;
+    }
+    // Helper: determine if a variable name is string-typed
+    bool isStringVarNameCG(const std::string& name) const {
+        if (!name.empty() && name.back() == CH_DOLLARSIGN) return true;
+        return semStringVariables_.contains(name);
+    }
 
     // Logging utilities
     /** Stream accessor: codegen-phase logger (ostream sink when disabled). */

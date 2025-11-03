@@ -14,6 +14,7 @@
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/parser/ParseError.h"
 #include "basic_compiler/ast/Traits.h"
+#include "basic_compiler/ast/DefTypeStmt.h"
 
 namespace gwbasic {
 
@@ -260,6 +261,24 @@ private:
     std::unique_ptr<Stmt> parseInput();
     /** Parse LINE INPUT [#n,] var$ */
     std::unique_ptr<Stmt> parseLineInput();
+    /** Parse DEF FNname(param) = expression */
+    std::unique_ptr<Stmt> parseDefFn();
+    /** Parse DEFSTR/DEFINT/DEFSNG/DEFDBL letter range list */
+    std::unique_ptr<Stmt> parseDefType(DefTypeStmt::Kind k);
+    /** Parse DEF SEG [= expr] */
+    std::unique_ptr<Stmt> parseDefSeg();
+    /** Parse BLOAD "file"[,offset] */
+    std::unique_ptr<Stmt> parseBload();
+    /** Parse BSAVE "file",offset,length */
+    std::unique_ptr<Stmt> parseBsave();
+    /** Parse POKE address, value */
+    std::unique_ptr<Stmt> parsePoke();
+    /** Parse CALL address */
+    std::unique_ptr<Stmt> parseCallAbs();
+    /** Parse DEF USR[digits] = expr */
+    std::unique_ptr<Stmt> parseDefUsr();
+    /** Parse CHDIR string-expr */
+    std::unique_ptr<Stmt> parseChdir();
     /**
      * Function: Parser::parseExpression
      * Purpose:

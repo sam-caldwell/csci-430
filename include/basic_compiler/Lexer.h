@@ -113,6 +113,17 @@ private:
         {"AS",        TokenType::KwAs},
         {"OUTPUT",    TokenType::KwOutput},
         {"USING",     TokenType::KwUsing},
+        {"DEF",       TokenType::KwDef},
+        {"DEFINT",    TokenType::KwDefInt},
+        {"DEFSNG",    TokenType::KwDefSng},
+        {"DEFDBL",    TokenType::KwDefDbl},
+        {"DEFSTR",    TokenType::KwDefStr},
+        {"SEG",       TokenType::KwSeg},
+        {"BLOAD",     TokenType::KwBload},
+        {"BSAVE",     TokenType::KwBsave},
+        {"CALL",      TokenType::KwCall},
+        {"POKE",      TokenType::KwPoke},
+        {"CHDIR",     TokenType::KwChdir},
     };
 
     /*
