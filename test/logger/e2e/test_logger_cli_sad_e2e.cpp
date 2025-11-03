@@ -15,18 +15,18 @@ using namespace e2e_helpers;
  */
 TEST(LoggerE2E, CLI_SadPath_InvalidLogTargetsStillRuns) {
   namespace fs = std::filesystem;
-  fs::path buildRoot = fs::current_path() / "build";
-  fs::path bin = buildRoot / "basic_compiler" / "basic_compiler";
+  const fs::path buildRoot = fs::current_path() / "build";
+  const fs::path bin = buildRoot / "basic_compiler" / "basic_compiler";
   ASSERT_TRUE(fs::exists(bin));
 
-  fs::path tmpdir = fs::path("..") / "tmp" / "logger_cli_e2e_sad";
+  const fs::path tmpdir = fs::path("..") / "tmp" / "logger_cli_e2e_sad";
   fs::create_directories(tmpdir);
-  fs::path src = tmpdir / "prog.bas";
+  const fs::path src = tmpdir / "prog.bas";
   // Directories used as log targets (invalid as files)
-  fs::path lexDir = tmpdir / "lexdir";
-  fs::path synDir = tmpdir / "syndir";
-  fs::path semDir = tmpdir / "semdir";
-  fs::path cgdDir = tmpdir / "cgdir";
+  const fs::path lexDir = tmpdir / "lexdir";
+  const fs::path synDir = tmpdir / "syndir";
+  const fs::path semDir = tmpdir / "semdir";
+  const fs::path cgdDir = tmpdir / "cgdir";
   fs::create_directories(lexDir);
   fs::create_directories(synDir);
   fs::create_directories(semDir);

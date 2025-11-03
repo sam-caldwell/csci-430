@@ -22,9 +22,9 @@ static std::string read_all(const fs::path& p) {
  */
 TEST(Logger, ToggleEnabledState) {
   Logger log;
-  fs::path outdir = fs::current_path() / "logger_tests";
+  const fs::path outdir = fs::current_path() / "logger_tests";
   fs::create_directories(outdir);
-  fs::path file = outdir / "toggle.log";
+  const fs::path file = outdir / "toggle.log";
 
   ASSERT_TRUE(log.open(file.string()));
   // Initially disabled

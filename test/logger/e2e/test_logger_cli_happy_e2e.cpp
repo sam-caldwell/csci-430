@@ -15,17 +15,17 @@ using namespace e2e_helpers;
  */
 TEST(LoggerE2E, CLI_HappyPath_ProducesLogs) {
   namespace fs = std::filesystem;
-  fs::path buildRoot = fs::current_path() / "build";
-  fs::path bin = buildRoot / "basic_compiler" / "basic_compiler";
+  const fs::path buildRoot = fs::current_path() / "build";
+  const fs::path bin = buildRoot / "basic_compiler" / "basic_compiler";
   ASSERT_TRUE(fs::exists(bin));
 
-  fs::path tmpdir = fs::path("..") / "tmp" / "logger_cli_e2e_happy";
+  const fs::path tmpdir = fs::path("..") / "tmp" / "logger_cli_e2e_happy";
   fs::create_directories(tmpdir);
-  fs::path src = tmpdir / "prog.bas";
-  fs::path lex = tmpdir / "lex.log";
-  fs::path syn = tmpdir / "syntax.log";
-  fs::path sem = tmpdir / "semantic.log";
-  fs::path cg  = tmpdir / "codegen.log";
+  const fs::path src = tmpdir / "prog.bas";
+  const fs::path lex = tmpdir / "lex.log";
+  const fs::path syn = tmpdir / "syntax.log";
+  const fs::path sem = tmpdir / "semantic.log";
+  const fs::path cg  = tmpdir / "codegen.log";
 
   { std::ofstream f(src); f << "10 PRINT \"X\"\n20 END\n"; }
 

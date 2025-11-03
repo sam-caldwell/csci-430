@@ -22,9 +22,9 @@ static std::string read_all(const fs::path& p) {
  */
 TEST(Logger, AppendMode) {
   Logger log;
-  fs::path outdir = fs::current_path() / "logger_tests";
+  const fs::path outdir = fs::current_path() / "logger_tests";
   fs::create_directories(outdir);
-  fs::path file = outdir / "append.log";
+  const fs::path file = outdir / "append.log";
 
   ASSERT_TRUE(log.open(file.string()));
   log.setEnabled(true);
@@ -43,4 +43,3 @@ TEST(Logger, AppendMode) {
 
   fs::remove(file);
 }
-

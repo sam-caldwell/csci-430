@@ -28,9 +28,9 @@ static std::string read_file(const fs::path& p) {
 TEST(Logger, DisabledDoesNotWrite) {
   Logger log;
   // Ensure a test-local directory under current working dir (which is inside build)
-  fs::path outdir = fs::current_path() / "logger_tests";
+  const fs::path outdir = fs::current_path() / "logger_tests";
   fs::create_directories(outdir);
-  fs::path file = outdir / "disabled.log";
+  const fs::path file = outdir / "disabled.log";
 
   ASSERT_TRUE(log.open(file.string(), /*append=*/false));
   // Default is disabled; writes go to null sink

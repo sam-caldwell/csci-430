@@ -44,5 +44,9 @@ std::ostream& Logger::stream() {
   return null_;
 }
 
-}  // namespace logger
+std::ostream& Logger::stream() const {
+  if (enabled_ && ofs_.is_open()) return ofs_;
+  return null_;
+}
 
+}  // namespace logger

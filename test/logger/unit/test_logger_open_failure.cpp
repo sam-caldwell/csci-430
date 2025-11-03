@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 TEST(Logger, OpenFailureReturnsFalse) {
   logger::Logger log;
   // Attempt to open a directory path as a file (should fail)
-  fs::path dir = fs::current_path();
+  const fs::path dir = fs::current_path();
   bool ok = log.open(dir.string());
   EXPECT_FALSE(ok);
 

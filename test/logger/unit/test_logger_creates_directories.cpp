@@ -15,8 +15,8 @@ namespace fs = std::filesystem;
  */
 TEST(Logger, CreatesParentDirectories) {
   logger::Logger log;
-  fs::path base = fs::current_path() / "logger_tests" / "deep" / "nest";
-  fs::path file = base / "dirs.log";
+  const fs::path base = fs::current_path() / "logger_tests" / "deep" / "nest";
+  const fs::path file = base / "dirs.log";
 
   // Ensure base does not exist beforehand; then open should create it.
   fs::remove_all(base);

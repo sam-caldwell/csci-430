@@ -16,9 +16,8 @@
  *  - void (updates optionals in place when not already set).
  */
 void deriveDefaultLogPaths(const std::string &input,
-                           bool noLogs,
+                           const bool noLogs,
                            std::optional<std::string> &logPath,
                            std::optional<std::string> &lexLogPath,
                            std::optional<std::string> &syntaxLogPath,
                            std::optional<std::string> &semanticLogPath);
-
