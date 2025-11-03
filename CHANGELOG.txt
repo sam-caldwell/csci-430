@@ -80,6 +80,18 @@
               - CALL: added @gwb_call(i64 %addr) helper; current behavior interprets opcode byte 1 at %addr to print "CALLED\n";
                 lowered CALL expr to compute effective address and invoke helper. USR(x) returns argument (identity) for now.
               - Tests: unit (semantics + codegen patterns), integration (presence of stdio calls), E2E (DEF SEG with PEEK/POKE/BSAVE/BLOAD/USR, CALL helper).
+                
+03 Nov 2025 - COLOR statement tests + robust codegen
+            - Implemented unit/integration/e2e tests for COLOR.
+              - Unit: parser variants (0–3 args), semantics numeric-only args, and codegen pattern (uses SGR printf).
+              - Integration: IR contains @.fmt_sgr and @printf usage when COLOR present.
+              - E2E: program using COLOR 2,4 prints ESC[32m and ESC[41m before text.
+            - Fixed IR emission for COLOR to avoid invalid string literal lengths.
+              - Replaced per-color ANSI C-string tables with:
+                - A single SGR format string (@.fmt_sgr = "%c[%dm\0" as byte array).
+                - Foreground/background integer lookup tables mapping PC palette indices to ANSI codes.
+              - Codegen now indexes these tables and calls printf("%c[%dm", 27, code) for fg/bg.
+            - All tests green: make clean configure lint test demo.
 
             - DATA/READ backend
               - Codegen emits @gwb_data (ptr table of string literals) and @gwb_data_idx; READ consumes sequentially,
