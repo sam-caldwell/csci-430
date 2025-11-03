@@ -9,6 +9,7 @@
 #include "clang_path.h"
 #include "run_command.h"
 #include "../helper/tool_exists.h"
+#include "source_root.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
@@ -22,7 +23,7 @@ TEST(E2E, ChainCommand_ExecutesTrigDemo) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found";
     }
-    std::string ir = Compiler::compileFile("demos/chain-test.bas");
+    std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/chain-test.bas").c_str());
     std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_chain";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll"; auto bin = tmp / "program.out"; { std::ofstream f(ll); f << ir; }

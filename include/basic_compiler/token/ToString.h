@@ -68,6 +68,7 @@ inline std::string to_string(const TokenType t) {
         case TokenType::KwBsave: return "BSAVE";
         case TokenType::KwCall: return "CALL";
         case TokenType::KwPoke: return "POKE";
+        case TokenType::KwColor: return "COLOR";
         case TokenType::KwChdir: return "CHDIR";
         case TokenType::Plus: return "+";
         case TokenType::Minus: return "-";

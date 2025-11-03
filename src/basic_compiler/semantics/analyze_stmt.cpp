@@ -31,6 +31,7 @@
 #include "basic_compiler/ast/CallAbsStmt.h"
 #include "basic_compiler/ast/DefUsrStmt.h"
 #include "basic_compiler/ast/ChdirStmt.h"
+#include "basic_compiler/ast/ColorStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -234,6 +235,15 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             throw SemanticError(m.str());
         }
         analyzeExpr(cd->path.get());
+        return;
+    }
+    if (auto cs = dyn_cast<const ColorStmt>(s)) {
+        if (cs->fg && typeOf(cs->fg.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: COLOR fg must be numeric @ " << cs->pos.line << ':' << cs->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (cs->bg && typeOf(cs->bg.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: COLOR bg must be numeric @ " << cs->pos.line << ':' << cs->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (cs->border && typeOf(cs->border.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: COLOR border must be numeric @ " << cs->pos.line << ':' << cs->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (cs->fg) analyzeExpr(cs->fg.get());
+        if (cs->bg) analyzeExpr(cs->bg.get());
+        if (cs->border) analyzeExpr(cs->border.get());
         return;
     }
     if (auto df = dyn_cast<const DefFnStmt>(s)) {

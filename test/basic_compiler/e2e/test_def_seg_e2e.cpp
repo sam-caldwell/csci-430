@@ -25,9 +25,9 @@ TEST(E2E, DEF_SEG) {
         "10 DEF SEG = 0\n"
         "20 POKE 100, 65\n"
         "30 PRINT PEEK(100)\n"
-        "40 BSAVE \"build/mem.bin\", 100, 1\n"
+        "40 BSAVE \"mem.bin\", 100, 1\n"
         "50 POKE 100, 0\n"
-        "60 BLOAD \"build/mem.bin\", 100\n"
+        "60 BLOAD \"mem.bin\", 100\n"
         "70 PRINT PEEK(100)\n"
         "80 PRINT USR(7)\n"
         "90 END\n";

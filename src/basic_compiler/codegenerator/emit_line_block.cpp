@@ -14,6 +14,7 @@
 #include "basic_compiler/ast/CallAbsStmt.h"
 #include "basic_compiler/ast/DefUsrStmt.h"
 #include "basic_compiler/ast/ChdirStmt.h"
+#include "basic_compiler/ast/ColorStmt.h"
 #include <sstream>
 #include <format>
 
@@ -81,6 +82,11 @@ namespace gwbasic {
                             { std::string ir3 = std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr {}, ptr {})", fh, useFmt, sptr); out << ir3 << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt fprintf -> " << ir3; log() << m.str() << CH_LF; } }
                         } else {
                             { std::string ir3 = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", useFmt, sptr); out << ir3 << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt printf -> " << ir3; log() << m.str() << CH_LF; } }
+                            // Mirror to virtual screen using snprintf and helper
+                            std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << STR_LF; }
+                            std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, useFmt, sptr); out << irn << STR_LF; }
+                            std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << STR_LF; }
+                            { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << STR_LF; }
                         }
                     } else {
                         auto val = emitExpr(out, v, "");
@@ -107,6 +113,11 @@ namespace gwbasic {
                             { std::string ir2 = std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr {}, double {})", fh, useFmt2, val); out << ir2 << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt fprintf -> " << ir2; log() << m.str() << CH_LF; } }
                         } else {
                             { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", useFmt2, val); out << ir2 << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt printf -> " << ir2; log() << m.str() << CH_LF; } }
+                            // Mirror to virtual screen using snprintf and helper
+                            std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << STR_LF; }
+                            std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, double {})", n, sbuf, useFmt2, val); out << irn << STR_LF; }
+                            std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << STR_LF; }
+                            { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << STR_LF; }
                         }
                     }
                 }
@@ -353,6 +364,21 @@ namespace gwbasic {
             } else if (auto du = dyn_cast<DefUsrStmt>(st.get())) {
                 // DEF USR is a no-op in this compiler (store ignored)
                 { std::ostringstream m; m << "line " << currentLine_ << " DefUsrStmt (no-op)"; log() << m.str() << CH_LF; }
+            } else if (auto col = dyn_cast<ColorStmt>(st.get())) {
+                // Emit SGR codes via printf("%c[%dm", 27, code); no newline
+                auto emitColor = [&](const std::unique_ptr<Expr>& e, bool isFg){
+                    if (!e) return;
+                    std::string val = emitExpr(out, e.get(), "");
+                    std::string i32v = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", i32v, val); out << ir << STR_LF; }
+                    std::string masked = nextTemp(); { std::string ir = std::format("  {} = and i32 {}, 15", masked, i32v); out << ir << STR_LF; }
+                    std::string idx64 = nextTemp(); { std::string ir = std::format("  {} = sext i32 {} to i64", idx64, masked); out << ir << STR_LF; }
+                    std::string p = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x i32], ptr {}, i64 0, i64 {}", p, (isFg?"@.sgr_fg_tbl":"@.sgr_bg_tbl"), idx64); out << ir << STR_LF; }
+                    std::string code = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr {}", code, p); out << ir << STR_LF; }
+                    std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [7 x i8], ptr @.fmt_sgr, i64 0, i64 0", fmt); out << ir << STR_LF; }
+                    { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 27, i32 {})", fmt, code); out << ir << STR_LF; }
+                };
+                emitColor(col->fg, true);
+                emitColor(col->bg, false);
             } else {
                 throw CodeGenError("Unsupported statement encountered");
             }

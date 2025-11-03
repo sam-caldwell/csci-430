@@ -8,5 +8,7 @@
 80 PRINT "This is yellow on red"
 90 COLOR 7,0
 100 PRINT "Back to gray on black"
-110 END
-
+110 PRINT "SCREEN function demo"
+120 PRINT "ABC"
+130 PRINT SCREEN(7,1), SCREEN(7,2), SCREEN(7,3)
+140 END

@@ -215,6 +215,34 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             { std::string ir = std::format("  {} = uitofp i32 {} to double", res, i32v); out << ir << STR_LF; }
             return res;
         }
+        if (fn == "SCREEN") {
+            // SCREEN(row, col [, z]) -> ASCII code at 1-based (row,col)
+            // Convert to 0-based, clamp to bounds, load from @gwb_screen
+            std::string r64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", r64, argv[0]); out << ir << STR_LF; }
+            std::string c64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", c64, argv[1]); out << ir << STR_LF; }
+            std::string r0 = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, 1", r0, r64); out << ir << STR_LF; }
+            std::string c0 = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, 1", c0, c64); out << ir << STR_LF; }
+            // Clamp row in [0,24]
+            std::string rlo = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", rlo, r0); out << ir << STR_LF; }
+            std::string rsel0 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 0, i64 {}", rsel0, rlo, r0); out << ir << STR_LF; }
+            std::string rhi = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, 24", rhi, rsel0); out << ir << STR_LF; }
+            std::string rsel = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 24, i64 {}", rsel, rhi, rsel0); out << ir << STR_LF; }
+            // Clamp col in [0,79]
+            std::string clo = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", clo, c0); out << ir << STR_LF; }
+            std::string csel0 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 0, i64 {}", csel0, clo, c0); out << ir << STR_LF; }
+            std::string chi = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, 79", chi, csel0); out << ir << STR_LF; }
+            std::string csel = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 79, i64 {}", csel, chi, csel0); out << ir << STR_LF; }
+            std::string r32 = nextTemp(); { std::string ir = std::format("  {} = trunc i64 {} to i32", r32, rsel); out << ir << STR_LF; }
+            std::string c32 = nextTemp(); { std::string ir = std::format("  {} = trunc i64 {} to i32", c32, csel); out << ir << STR_LF; }
+            std::string r80 = nextTemp(); { std::string ir = std::format("  {} = mul i32 {}, 80", r80, r32); out << ir << STR_LF; }
+            std::string idx32 = nextTemp(); { std::string ir = std::format("  {} = add i32 {}, {}", idx32, r80, c32); out << ir << STR_LF; }
+            std::string idx64 = nextTemp(); { std::string ir = std::format("  {} = sext i32 {} to i64", idx64, idx32); out << ir << STR_LF; }
+            std::string p = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [2000 x i8], ptr @gwb_screen, i64 0, i64 {}", p, idx64); out << ir << STR_LF; }
+            std::string b = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", b, p); out << ir << STR_LF; }
+            std::string i32v = nextTemp(); { std::string ir = std::format("  {} = zext i8 {} to i32", i32v, b); out << ir << STR_LF; }
+            { std::string ir = std::format("  {} = uitofp i32 {} to double", res, i32v); out << ir << STR_LF; }
+            return res;
+        }
         if (fn == "PEEK") {
             // addr = seg*16 + arg
             std::string seg = nextTemp(); { std::string ir = "  "; ir += seg; ir += " = load i32, ptr @gwb_seg"; out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " PEEK load seg -> " << ir; log() << m.str() << CH_LF; } }

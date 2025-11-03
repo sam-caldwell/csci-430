@@ -123,6 +123,7 @@ private:
         {"BSAVE",     TokenType::KwBsave},
         {"CALL",      TokenType::KwCall},
         {"POKE",      TokenType::KwPoke},
+        {"COLOR",     TokenType::KwColor},
         {"CHDIR",     TokenType::KwChdir},
     };
 

@@ -9,6 +9,7 @@
 #include "clang_path.h"
 #include "run_command.h"
 #include "../helper/tool_exists.h"
+#include "source_root.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
@@ -20,7 +21,7 @@ using namespace e2e_helpers;
  */
 TEST(E2E, Chain_Common_PassesVariable) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
-    std::string ir = Compiler::compileFile("demos/pass-params.bas");
+    std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/pass-params.bas").c_str());
     std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_chain_common";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "p.ll"; auto bin = tmp / "p.out"; { std::ofstream f(ll); f << ir; }

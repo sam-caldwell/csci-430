@@ -277,6 +277,8 @@ private:
     std::unique_ptr<Stmt> parseCallAbs();
     /** Parse DEF USR[digits] = expr */
     std::unique_ptr<Stmt> parseDefUsr();
+    /** Parse COLOR [fg][,[bg][,[border]]] */
+    std::unique_ptr<Stmt> parseColor();
     /** Parse CHDIR string-expr */
     std::unique_ptr<Stmt> parseChdir();
     /**

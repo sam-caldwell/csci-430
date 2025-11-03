@@ -163,6 +163,7 @@ private:
      *  - Flag indicating whether RND(x) helper function must be emitted.
      */
     bool needsRndHelper_{false};
+    bool needsColor_{false};
     // Inline call-time substitution bindings (stack of name->SSA value)
     std::vector<std::map<std::string, std::string>> bindingStack_{};
     // Optional semantic input

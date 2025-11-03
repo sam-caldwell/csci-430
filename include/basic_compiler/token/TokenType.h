@@ -71,6 +71,7 @@ enum class TokenType {
     KwBsave,
     KwCall,
     KwPoke,
+    KwColor,
     KwChdir,
 
     // Operators / punctuation

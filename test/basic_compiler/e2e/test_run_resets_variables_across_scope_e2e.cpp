@@ -9,6 +9,7 @@
 #include "clang_path.h"
 #include "run_command.h"
 #include "../helper/tool_exists.h"
+#include "source_root.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
@@ -21,7 +22,7 @@ using namespace e2e_helpers;
  */
 TEST(E2E, Run_ResetsVariablesAcrossScope) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
-    std::string ir = Compiler::compileFile("demos/run-pass-vars.bas");
+    std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/run-pass-vars.bas").c_str());
     std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_run_reset";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "p.ll"; auto bin = tmp / "p.out"; { std::ofstream f(ll); f << ir; }
@@ -33,4 +34,3 @@ TEST(E2E, Run_ResetsVariablesAcrossScope) {
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_NE(out.find("0.000000"), std::string::npos);
 }
-

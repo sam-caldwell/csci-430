@@ -30,8 +30,12 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
                 if (!(call->args.size() == 2 || call->args.size() == 3)) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects 2 or 3 args @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             }
         } else if (isBuiltinNum) {
-            int exp = expectedArity(fn);
-            if (static_cast<int>(call->args.size()) != exp) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects " << exp << " arg(s) @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            if (fn == "SCREEN") {
+                if (!(call->args.size() == 2 || call->args.size() == 3)) { std::ostringstream m; m << "ArityError: function 'SCREEN' expects 2 or 3 args @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            } else {
+                int exp = expectedArity(fn);
+                if (static_cast<int>(call->args.size()) != exp) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects " << exp << " arg(s) @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            }
         } else {
             // user function: arity 1
             if (call->args.size() != 1) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects 1 arg @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
