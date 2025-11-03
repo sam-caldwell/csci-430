@@ -9,6 +9,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: Parser.WhileInlineBody
+ * Purpose: Validate parsing of a WHILE loop with an inline body terminated by WEND on the same line.
+ * Components Under Test: Lexer::tokenize; Parser::parseProgram; AST WhileStmt
+ * Expected Behavior: Produces one WhileStmt whose body contains a single PrintStmt.
+ */
 TEST(Parser, WhileInlineBody) {
     std::string src = "10 WHILE I < 3 : PRINT I : WEND\n";
     std::istringstream iss(src);
@@ -23,4 +29,3 @@ TEST(Parser, WhileInlineBody) {
     ASSERT_EQ(ws->body.size(), 1u);
     ASSERT_NE(dynamic_cast<PrintStmt*>(ws->body[0].get()), nullptr);
 }
-

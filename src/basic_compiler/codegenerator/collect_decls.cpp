@@ -18,6 +18,7 @@ void CodeGenerator::collectDecls(const Program& program) {
      *  - builds a line-number to Line* map for later codegen.
      */
     variables_.clear();
+    commonVariables_.clear();
     varAllocaName_.clear();
     strLiteralId_.clear();
     tempCounter_ = 0;
@@ -41,6 +42,7 @@ void CodeGenerator::collectDecls(const Program& program) {
     if (semProvided_) {
         // Seed variables and strings from semantics
         variables_ = semVariables_;
+        commonVariables_ = semCommonVariables_;
         strLiteralId_.clear();
         strCounter_ = 0;
         for (const auto& s : semStrings_) {

@@ -16,5 +16,5 @@ TEST(CodeGenFlow, GosubToMissingTargetIsError) {
         "10 GOSUB 9999\n"
         "20 PRINT 1\n"
         "30 END\n";
-    EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, gwbasic::SemanticError);
+    EXPECT_THROW({ const auto ir = Compiler::compileString(src); (void)ir; }, gwbasic::SemanticError);
 }

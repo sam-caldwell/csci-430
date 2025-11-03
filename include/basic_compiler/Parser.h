@@ -75,6 +75,14 @@ private:
     std::unique_ptr<Stmt> parseWhile();
     /** parseFor: Parse single-line FOR ... NEXT. */
     std::unique_ptr<Stmt> parseFor();
+    /** parseRun: Parse RUN [<line>]. */
+    std::unique_ptr<Stmt> parseRun();
+    /** parseCommon: Parse COMMON var[,var...] */
+    std::unique_ptr<Stmt> parseCommon();
+    /** parseChain: Parse CHAIN ["file"][,line][,ALL] */
+    std::unique_ptr<Stmt> parseChain();
+    /** parseMerge: Parse MERGE "file" (strict filename required). */
+    std::unique_ptr<Stmt> parseMerge();
     /** Expression grammar helpers. */
     std::unique_ptr<Expr> parseExpression();
     std::unique_ptr<Expr> parseComparison();
@@ -86,12 +94,17 @@ private:
 public:
     /** Enable syntax analysis logging to the specified file path. */
     void setSyntaxLogPath(const std::string& path);
+    /** Inform the parser of the source file path for resolving includes. */
+    void setSourcePath(const std::string& path) { sourcePath_ = path; }
 private:
     /** Write a syntax-phase log line if logging is enabled. */
     void logSyntax(const std::string& msg);
 
     /** Return a pretty node name for syntax logging. */
     static const char* nodeName(const Stmt* s);
+
+    // For resolving MERGE/RUN/CHAIN filenames relative to the source
+    std::string sourcePath_{}; // full path to .bas when compiling from file
 };
 
 } // namespace gwbasic

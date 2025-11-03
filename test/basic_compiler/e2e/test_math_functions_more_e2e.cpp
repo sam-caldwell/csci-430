@@ -10,21 +10,18 @@
 #include "basic_compiler/Compiler.h"
 #include "clang_path.h"
 #include "run_command.h"
-#include "tool_exists.h"
+#include "../helper/tool_exists.h"
+#include "../helper/split_lines.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-static std::vector<std::string> splitLines(const std::string& s) {
-    std::vector<std::string> out;
-    std::istringstream iss(s);
-    std::string line;
-    while (std::getline(iss, line)) {
-        if (!line.empty()) out.push_back(line);
-    }
-    return out;
-}
-
+/***
+ * Test: E2E.MoreMathIntrinsicsWork
+ * Purpose: Validate End-to-End (compile + run) behavior for test_math_functions_more_e2e.cpp.
+ * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
+ * Expected Behavior: Program output matches assertions in test.
+ */
 TEST(E2E, MoreMathIntrinsicsWork) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

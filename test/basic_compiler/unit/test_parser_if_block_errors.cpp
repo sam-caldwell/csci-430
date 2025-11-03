@@ -7,6 +7,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: Parser.IfBlock_Error_MissingEndIf
+ * Purpose: Validate that an IF block missing its END IF is rejected.
+ * Components Under Test: Lexer::tokenize; Parser::parseProgram
+ * Expected Behavior: Parsing throws ParseError when an IF block lacks a closing END IF.
+ */
 TEST(Parser, IfBlock_Error_MissingEndIf) {
     std::string src =
         "10 IF A < 5 THEN\n"
@@ -16,20 +22,3 @@ TEST(Parser, IfBlock_Error_MissingEndIf) {
     Parser p(std::move(toks));
     EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);
 }
-
-TEST(Parser, IfBlock_Error_ElseWithoutIf) {
-    std::string src = "10 ELSE\n";
-    Lexer lex(src);
-    auto toks = lex.tokenize();
-    Parser p(std::move(toks));
-    EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);
-}
-
-TEST(Parser, IfBlock_Error_EndIfWithoutIf) {
-    std::string src = "10 END IF\n";
-    Lexer lex(src);
-    auto toks = lex.tokenize();
-    Parser p(std::move(toks));
-    EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);
-}
-

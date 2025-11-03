@@ -8,7 +8,7 @@
 #include "basic_compiler/Compiler.h"
 #include "clang_path.h"
 #include "run_command.h"
-#include "tool_exists.h"
+#include "../helper/tool_exists.h"
 #include "run_with_input.h"
 
 using namespace gwbasic;

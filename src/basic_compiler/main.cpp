@@ -4,10 +4,7 @@
 #include <string>
 #include <optional>
 #include <filesystem>
-#include <cstdlib>
-#include <cctype>
 #include <sstream>
-#include <cstdio>
 
 #include "basic_compiler/Compiler.h"
 #include "basic_compiler/AsmUtils.h"
@@ -15,6 +12,10 @@
 #include "basic_compiler/Usage.h"
 #include "basic_compiler/cli/TakeOptValue.h"
 #include "basic_compiler/cli/TakeOptValues.h"
+
+#ifndef CLANG_PATH
+# error "CLANG_PATH not defined at build time; cannot emit bitcode"
+#endif
 
 /**
  * Function: main
@@ -27,46 +28,44 @@
  *    pipeline with optional phase logs, and optionally materializes IR,
  *    bitcode, assembly, or a linked executable using the configured clang.
  */
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
+
     using gwbasic::cli::takeOptValue; // bring CLI helpers into scope
-    if (argc < 2) { usage(argv[0]); return 2; }
+
+    if (argc < 2) {
+        usage(argv[0]);
+        return 2;
+    }
 
     // Handle help in first position
     if (std::string first = argv[1]; first == "-h" || first == "--help") {
-        usage(argv[0]); return 0;
+        usage(argv[0]);
+        return 0;
     }
 
     std::string input = argv[1];
     // Helper to detect clang's default target triple (for aligning IR)
     auto detectDefaultTriple = []() -> std::string {
-#ifdef CLANG_PATH
         std::string triple;
         // Ask clang how it will invoke cc1 for IR, and parse the -triple it uses
-        std::string cmd = std::string(CLANG_PATH) + " -### -S -x ir - -o /dev/null 2>&1";
-        FILE* pipe = popen(cmd.c_str(), "r");
-        if (pipe) {
+        const std::string cmd = std::string(CLANG_PATH) + " -### -S -x ir - -o /dev/null 2>&1";
+        if (FILE *pipe = popen(cmd.c_str(), "r")) {
             char buf[256];
             std::string out;
-            while (size_t n = fread(buf, 1, sizeof(buf), pipe)) out.append(buf, buf + n);
+            while (const size_t n = fread(buf, 1, sizeof(buf), pipe)) out.append(buf, buf + n);
             pclose(pipe);
             // Find -triple "..."
-            auto pos = out.find("\"-triple\"");
-            if (pos != std::string::npos) {
-                auto q1 = out.find('"', pos + 9);
-                if (q1 != std::string::npos) {
-                    auto q2 = out.find('"', q1 + 1);
-                    if (q2 != std::string::npos && q2 > q1 + 1) {
+            if (const auto pos = out.find("\"-triple\""); pos != std::string::npos) {
+                if (const auto q1 = out.find('"', pos + 9); q1 != std::string::npos) {
+                    if (const auto q2 = out.find('"', q1 + 1); q2 != std::string::npos && q2 > q1 + 1) {
                         triple = out.substr(q1 + 1, q2 - (q1 + 1));
                     }
                 }
             }
         }
         return triple;
-#else
-        return std::string();
-#endif
     };
-    auto withTripleHeader = [](const std::string& ir, const std::string& triple) -> std::string {
+    auto withTripleHeader = [](const std::string &ir, const std::string &triple) -> std::string {
         if (triple.empty()) return ir;
         if (ir.find("target triple =") != std::string::npos) return ir;
         std::ostringstream out;
@@ -82,14 +81,21 @@ int main(int argc, char** argv) {
     std::optional<std::string> lexLogPath;
     std::optional<std::string> syntaxLogPath;
     std::optional<std::string> semanticLogPath;
+    bool noLogs = false;
     for (int i = 2; i < argc; ++i) {
         std::string a = argv[i];
 
         // Outputs
-        if (takeOptValue(a, "--bc", i, argc, argv, outBC)) continue;     // LLVM bitcode (.bc)
-        if (takeOptValue(a, {"-ll", "--ll"}, i, argc, argv, outLL)) continue;   // LLVM IR text (.ll)
-        if (takeOptValue(a, "-o", i, argc, argv, outBIN)) continue;      // Native binary (...overkill)
-        if (takeOptValue(a, "--asm", i, argc, argv, outASM)) continue;   // Assembly (.asm: arm64? amd64?)
+        if (takeOptValue(a, "--bc", i, argc, argv, outBC)) continue; // LLVM bitcode (.bc)
+        if (takeOptValue(a, {"-ll", "--ll"}, i, argc, argv, outLL)) continue; // LLVM IR text (.ll)
+        if (takeOptValue(a, "-o", i, argc, argv, outBIN)) continue; // Native binary (...overkill)
+        if (takeOptValue(a, "--asm", i, argc, argv, outASM)) continue; // Assembly (.asm: arm64? amd64?)
+
+        // Custom flags
+        if (a == "--no-logs") {
+            noLogs = true;
+            continue;
+        }
 
         // Target triple + logs
         if (takeOptValue(a, "--target", i, argc, argv, targetTriple)) continue;
@@ -114,31 +120,41 @@ int main(int argc, char** argv) {
     }
     if (targetTriple && !isSupportedTargetTriple(*targetTriple)) {
         std::cerr << "Error: unsupported target triple: " << *targetTriple
-                  << " (supported: x86_64 or arm64/aarch64 on Linux/macOS)\n";
+                << " (supported: x86_64 or arm64/aarch64 on Linux/macOS)\n";
         return 2;
     }
     try {
-        if (!logPath) {
+        if (!noLogs && !logPath) {
             std::filesystem::path p = input;
             p.replace_extension(".codegen.log");
             logPath = p.string();
         }
-        if (!lexLogPath) {
-            std::filesystem::path p = input; p.replace_extension(".lex.log"); lexLogPath = p.string();
+        if (!noLogs && !lexLogPath) {
+            std::filesystem::path p = input;
+            p.replace_extension(".lex.log");
+            lexLogPath = p.string();
         }
-        if (!syntaxLogPath) {
-            std::filesystem::path p = input; p.replace_extension(".syntax.log"); syntaxLogPath = p.string();
+        if (!noLogs && !syntaxLogPath) {
+            std::filesystem::path p = input;
+            p.replace_extension(".syntax.log");
+            syntaxLogPath = p.string();
         }
-        if (!semanticLogPath) {
-            std::filesystem::path p = input; p.replace_extension(".semantic.log"); semanticLogPath = p.string();
+        if (!noLogs && !semanticLogPath) {
+            std::filesystem::path p = input;
+            p.replace_extension(".semantic.log");
+            semanticLogPath = p.string();
         }
-
-        std::string ir = gwbasic::Compiler::compileFileWithPhaseLogs(
-            input,
-            *lexLogPath,
-            *syntaxLogPath,
-            *semanticLogPath,
-            *logPath);
+        std::string ir;
+        if (!noLogs) {
+            ir = gwbasic::Compiler::compileFileWithPhaseLogs(
+                input,
+                *lexLogPath,
+                *syntaxLogPath,
+                *semanticLogPath,
+                *logPath);
+        } else {
+            ir = gwbasic::Compiler::compileFile(input);
+        }
         const std::string chosenTriple = targetTriple.value_or(detectDefaultTriple());
         const std::string irWithTriple = withTripleHeader(ir, chosenTriple);
 
@@ -147,7 +163,6 @@ int main(int argc, char** argv) {
             out << irWithTriple;
         }
         if (outBC) {
-#ifdef CLANG_PATH
             std::filesystem::path llTmp;
             if (outLL) {
                 llTmp = *outLL;
@@ -159,18 +174,12 @@ int main(int argc, char** argv) {
             std::ostringstream oss;
             oss << CLANG_PATH << " -c -emit-llvm -x ir \"" << llTmp.string() << "\" -o \"" << *outBC << "\"";
             std::string cmd = oss.str();
-            int ec = std::system(cmd.c_str());
-            if (ec != 0) {
+            if (int ec = std::system(cmd.c_str()); ec != 0) {
                 std::cerr << "clang failed assembling bitcode: " << cmd << "\n";
                 return 1;
             }
-#else
-            std::cerr << "CLANG_PATH not defined at build time; cannot emit bitcode" << "\n";
-            return 1;
-#endif
         }
         if (outBIN) {
-#ifdef CLANG_PATH
             std::filesystem::path llTmp;
             if (outLL) {
                 llTmp = *outLL;
@@ -184,24 +193,18 @@ int main(int argc, char** argv) {
             if (!chosenTriple.empty()) oss << "-target \"" << chosenTriple << "\" ";
             oss << '"' << llTmp.string() << "\" -o \"" << *outBIN << "\"";
             // Link math library where required
-            #if defined(__APPLE__)
+#if defined(__APPLE__)
             // libSystem provides libm; no extra flag needed
-            #else
+#else
             oss << " -lm";
-            #endif
+#endif
             std::string cmd = oss.str();
-            int ec = std::system(cmd.c_str());
-            if (ec != 0) {
+            if (int ec = std::system(cmd.c_str()); ec != 0) {
                 std::cerr << "clang failed linking executable: " << cmd << "\n";
                 return 1;
             }
-#else
-            std::cerr << "CLANG_PATH not defined at build time; cannot emit executable" << "\n";
-            return 1;
-#endif
         }
         if (outASM) {
-#ifdef CLANG_PATH
             std::filesystem::path llTmp;
             if (outLL) {
                 llTmp = *outLL;
@@ -218,14 +221,14 @@ int main(int argc, char** argv) {
             std::string triple = targetTriple.value_or(detectDefaultTriple());
             if (!isSupportedTargetTriple(triple)) {
                 std::cerr << "Error: unsupported target triple for assembly: " << triple
-                          << " (supported: x86_64 or arm64/aarch64 on Linux/macOS)\n";
+                        << " (supported: x86_64 or arm64/aarch64 on Linux/macOS)\n";
                 return 2;
             }
             std::ostringstream oss;
-            oss << CLANG_PATH << " -S -x ir -target " << triple << " \"" << llTmp.string() << "\" -o \"" << *outASM << "\"";
+            oss << CLANG_PATH << " -S -x ir -target " << triple << " \"" << llTmp.string() << "\" -o \"" << *outASM <<
+                    "\"";
             std::string cmd = oss.str();
-            int ec = std::system(cmd.c_str());
-            if (ec != 0) {
+            if (int ec = std::system(cmd.c_str()); ec != 0) {
                 std::cerr << "clang failed generating assembly: " << cmd << "\n";
                 return 1;
             }
@@ -234,11 +237,13 @@ int main(int argc, char** argv) {
                 auto srcName = std::filesystem::path(input).filename().string();
                 std::string os = "unknown";
                 std::string arch = triple;
-                auto dash = triple.find('-');
-                if (dash != std::string::npos) arch = triple.substr(0, dash);
-                std::string lowerTriple = triple; for (auto& c : lowerTriple) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+                if (auto dash = triple.find('-'); dash != std::string::npos)
+                    arch = triple.substr(0, dash);
+                std::string lowerTriple = triple;
+                for (auto &c: lowerTriple) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
                 if (lowerTriple.find("linux") != std::string::npos) os = "linux";
-                else if (lowerTriple.find("macos") != std::string::npos || lowerTriple.find("darwin") != std::string::npos) os = "macos";
+                else if (lowerTriple.find("macos") != std::string::npos || lowerTriple.find("darwin") !=
+                         std::string::npos) os = "macos";
                 // Choose a comment leader appropriate to the assembler dialect
                 std::string commentLeader = asmCommentLeaderForTriple(triple);
                 std::ifstream inAsm(*outASM);
@@ -246,22 +251,18 @@ int main(int argc, char** argv) {
                 inAsm.close();
                 std::ofstream outAsm(*outASM, std::ios::trunc);
                 outAsm << commentLeader << " Source: " << srcName
-                       << " | Target: os=" << os << ", cpu=" << arch
-                       << " (triple=" << triple << ")\n";
+                        << " | Target: os=" << os << ", cpu=" << arch
+                        << " (triple=" << triple << ")\n";
                 outAsm << body;
-            } catch (const std::exception& ex) {
+            } catch (const std::exception &ex) {
                 std::cerr << "warning: failed to prepend ASM header: " << ex.what() << "\n";
             }
-#else
-            std::cerr << "CLANG_PATH not defined at build time; cannot emit assembly" << "\n";
-            return 1;
-#endif
         }
         if (!outLL && !outBC && !outBIN && !outASM) {
             std::cout << irWithTriple;
         }
         return 0;
-    } catch (const std::exception& ex) {
+    } catch (const std::exception &ex) {
         std::cerr << "Error: " << ex.what() << "\n";
         return 1;
     }

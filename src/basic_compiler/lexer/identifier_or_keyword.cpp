@@ -44,6 +44,11 @@ Token Lexer::identifierOrKeyword() {
     if (upper == "RANDOMIZE") return Token{TokenType::KwRandomize, buf, startLine, startCol};
     if (upper == "WHILE") return Token{TokenType::KwWhile, buf, startLine, startCol};
     if (upper == "WEND") return Token{TokenType::KwWend, buf, startLine, startCol};
+    if (upper == "RUN") return Token{TokenType::KwRun, buf, startLine, startCol};
+    if (upper == "COMMON") return Token{TokenType::KwCommon, buf, startLine, startCol};
+    if (upper == "ALL") return Token{TokenType::KwAll, buf, startLine, startCol};
+    if (upper == "CHAIN") return Token{TokenType::KwChain, buf, startLine, startCol};
+    if (upper == "MERGE") return Token{TokenType::KwMerge, buf, startLine, startCol};
     if (upper == "REM") { // treat as comment to EOL
         skipToEOL();
         return Token{TokenType::NewLine, "\n", startLine, startCol};

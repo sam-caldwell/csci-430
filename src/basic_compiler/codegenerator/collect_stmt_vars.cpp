@@ -52,6 +52,14 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
     } else if (const auto rz = dyn_cast<const RandomizeStmt>(s)) {
         if (rz->seed) collectExprVars(rz->seed.get());
         { std::ostringstream m; m << "Randomize @ " << rz->pos.line << ':' << rz->pos.col; logSem(m.str()); }
+    } else if (const auto cs = dyn_cast<const CommonStmt>(s)) {
+        for (const auto& n : cs->names) {
+            variables_.insert(n);
+            commonVariables_.insert(n);
+            { std::ostringstream m; m << "Common " << n << " @ " << cs->pos.line << ':' << cs->pos.col; logSem(m.str()); }
+        }
+    } else if (dyn_cast<const MergeStmt>(s)) {
+        // MERGE is a compile-time directive; codegen no-op
     }
 }
 

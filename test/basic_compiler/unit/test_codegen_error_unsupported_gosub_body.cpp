@@ -1,11 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-/*
- * Test Suite: CodeGen Error (unsupported in GOSUB body)
- * Purpose: Ensure unsupported statements encountered during inlined GOSUB
- *          emission trigger CodeGenError.
- * Components Under Test: CodeGenerator emitSubroutineInline.
- * Expected Behavior: generate() throws CodeGenError.
- */
+
 #include <gtest/gtest.h>
 #include <memory>
 #include "basic_compiler/codegen/CodeGenerator.h"
@@ -14,7 +8,19 @@
 using namespace gwbasic;
 
 namespace { struct DummyStmt : Stmt {}; }
-
+/*
+ * Test Suite: CodeGen Error (unsupported in GOSUB body)
+ * Purpose: Ensure unsupported statements encountered during inlined GOSUB
+ *          emission trigger CodeGenError.
+ * Components Under Test: CodeGenerator emitSubroutineInline.
+ * Expected Behavior: generate() throws CodeGenError.
+ */
+/***
+ * Test: CodeGenErrors.UnsupportedStatementInGosubBody
+ * Purpose: Validate CodeGen rejects unsupported statements inside inlined GOSUB bodies.
+ * Components Under Test: CodeGenerator (emitSubroutineInline/generate)
+ * Expected Behavior: generate() throws CodeGenError when encountering unsupported stmt.
+ */
 TEST(CodeGenErrors, UnsupportedStatementInGosubBody) {
     Program p;
     {
@@ -32,4 +38,3 @@ TEST(CodeGenErrors, UnsupportedStatementInGosubBody) {
     CodeGenerator gen;
     EXPECT_THROW({ (void)gen.generate(p); }, CodeGenError);
 }
-

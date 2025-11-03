@@ -28,6 +28,7 @@ public:
         std::set<std::string> variables;
         std::set<std::string> stringLiterals;
         std::set<int> lineNumbers;
+        std::set<std::string> commonVariables;
     };
 
     SemanticAnalyzer() = default;
@@ -48,6 +49,7 @@ private:
     std::set<std::string> vars_;
     std::set<std::string> strings_;
     std::set<int> lines_;
+    std::set<std::string> common_;
     bool logEnabled_{false};
     std::ofstream log_;
     int currentLine_{0};

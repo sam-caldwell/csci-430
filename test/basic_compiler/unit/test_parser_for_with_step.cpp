@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Test Suite: Parser FOR (STEP)
  * Purpose: Verify optional STEP expression is parsed when present.
  * Components Under Test: Parser parseFor, expression parsing.
- * Expected Behavior: ForStmt.step is present and matches parsed expression.
+ * Expected Behavior: ForStmt.step is present and matches the parsed expression.
  */
 TEST(Parser, ForWithStep) {
     std::string src = "10 FOR I = 1 TO 10 STEP 2 : NEXT I\n";

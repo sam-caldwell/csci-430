@@ -35,6 +35,10 @@ template <> struct NodeKindTraits<NodeKind::EndStmt>     { static constexpr cons
 template <> struct NodeKindTraits<NodeKind::RandomizeStmt> { static constexpr const char* pretty = "RandomizeStmt"; };
 template <> struct NodeKindTraits<NodeKind::WhileStmt>    { static constexpr const char* pretty = "WhileStmt"; };
 template <> struct NodeKindTraits<NodeKind::WendStmt>     { static constexpr const char* pretty = "WendStmt"; };
+template <> struct NodeKindTraits<NodeKind::RunStmt>      { static constexpr const char* pretty = "RunStmt"; };
+template <> struct NodeKindTraits<NodeKind::CommonStmt>   { static constexpr const char* pretty = "CommonStmt"; };
+template <> struct NodeKindTraits<NodeKind::ChainStmt>    { static constexpr const char* pretty = "ChainStmt"; };
+template <> struct NodeKindTraits<NodeKind::MergeStmt>    { static constexpr const char* pretty = "MergeStmt"; };
 
 // Map a runtime NodeKind to a human-readable pretty name
 inline const char* prettyName(NodeKind k) {
@@ -63,6 +67,10 @@ inline const char* prettyName(NodeKind k) {
         case NodeKind::RandomizeStmt: return NodeKindTraits<NodeKind::RandomizeStmt>::pretty;
         case NodeKind::WhileStmt: return NodeKindTraits<NodeKind::WhileStmt>::pretty;
         case NodeKind::WendStmt: return NodeKindTraits<NodeKind::WendStmt>::pretty;
+        case NodeKind::RunStmt: return NodeKindTraits<NodeKind::RunStmt>::pretty;
+        case NodeKind::CommonStmt: return NodeKindTraits<NodeKind::CommonStmt>::pretty;
+        case NodeKind::ChainStmt: return NodeKindTraits<NodeKind::ChainStmt>::pretty;
+        case NodeKind::MergeStmt: return NodeKindTraits<NodeKind::MergeStmt>::pretty;
     }
     return "Node";
 }

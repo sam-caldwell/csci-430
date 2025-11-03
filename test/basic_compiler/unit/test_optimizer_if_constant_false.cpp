@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Expected Behavior: No branch to target; subsequent PRINT remains.
  */
 TEST(OptimizerIf, ConstantFalseRemoved) {
-    const char* src =
+    const auto src =
         "10 IF 2 < 1 THEN 100\n"
         "20 PRINT 5\n"
         "30 END\n";

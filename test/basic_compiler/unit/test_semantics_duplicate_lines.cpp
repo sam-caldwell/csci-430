@@ -15,6 +15,6 @@ TEST(Semantics, DuplicateLineNumbersError) {
     const auto src =
         "10 PRINT 1\n"
         "10 END\n";
-    EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
+    EXPECT_THROW({ const auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
 

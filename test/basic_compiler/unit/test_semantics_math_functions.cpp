@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: SemanticsMath.SqrtRequiresOneNumericArg
+ * Purpose: Validate that SQR enforces exactly one numeric argument.
+ * Components Under Test: Compiler::compileString; Semantics (intrinsic arity/type checks)
+ * Expected Behavior: Throws SemanticError for zero args and for a string argument.
+ */
 TEST(SemanticsMath, SqrtRequiresOneNumericArg) {
     // Too few args
     const auto src1 =
@@ -18,4 +24,3 @@ TEST(SemanticsMath, SqrtRequiresOneNumericArg) {
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src2); (void)ir; }, SemanticError);
 }
-

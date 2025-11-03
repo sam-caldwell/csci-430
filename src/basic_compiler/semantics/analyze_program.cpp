@@ -18,8 +18,7 @@ SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
         lines_.insert(line.number);
     }
     for (const auto& line : program.lines) analyzeLine(line);
-    Result r; r.variables = vars_; r.stringLiterals = strings_; r.lineNumbers = lines_; return r;
+    Result r; r.variables = vars_; r.stringLiterals = strings_; r.lineNumbers = lines_; r.commonVariables = common_; return r;
 }
 
 } // namespace gwbasic
-

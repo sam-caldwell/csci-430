@@ -42,6 +42,11 @@ inline std::string to_string(TokenType t) {
         case TokenType::KwRandomize: return "RANDOMIZE";
         case TokenType::KwWhile: return "WHILE";
         case TokenType::KwWend: return "WEND";
+        case TokenType::KwRun: return "RUN";
+        case TokenType::KwCommon: return "COMMON";
+        case TokenType::KwAll: return "ALL";
+        case TokenType::KwChain: return "CHAIN";
+        case TokenType::KwMerge: return "MERGE";
         case TokenType::Plus: return "+";
         case TokenType::Minus: return "-";
         case TokenType::Star: return "*";

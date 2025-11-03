@@ -8,7 +8,7 @@
 using namespace gwbasic;
 /*
  * Test Suite: Parser Error (missing '=')
- * Purpose: Ensure the parser reports an error when '=' is missing in assignment.
+ * Purpose: Ensure the parser reports an error when '=' is missing in the assignment.
  * Components Under Test: Parser parseAssignOrLet error path.
  * Expected Behavior: Parsing throws/indicates error for invalid assignment.
  */

@@ -14,6 +14,8 @@
 #include "basic_compiler/ast/StringExpr.h"
 #include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
+#include "basic_compiler/ast/CommonStmt.h"
+#include "basic_compiler/ast/ChainStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -116,6 +118,26 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         enterScope();
         for (const auto& bs : w->body) analyzeStmt(bs.get());
         exitScope();
+        return;
+    }
+    if (auto c = dyn_cast<const CommonStmt>(s)) {
+        for (const auto& n : c->names) {
+            declare(n);
+            common_.insert(n);
+            std::ostringstream m; m << "Common " << n << " @ " << c->pos.line << ':' << c->pos.col; log(m.str());
+        }
+        return;
+    }
+    if (auto ch = dyn_cast<const ChainStmt>(s)) {
+        if (ch->targetLine.has_value() && !lines_.contains(*ch->targetLine)) {
+            if (strictControlFlow_) {
+                std::ostringstream err; err << "ControlFlowError: missing CHAIN target line " << *ch->targetLine << " @ " << ch->pos.line << ':' << ch->pos.col; log(err.str());
+                throw SemanticError(err.str());
+            } else {
+                std::ostringstream w; w << "Warning: CHAIN missing target line " << *ch->targetLine << " @ " << ch->pos.line << ':' << ch->pos.col; log(w.str());
+            }
+        }
+        log("Chain");
         return;
     }
 }

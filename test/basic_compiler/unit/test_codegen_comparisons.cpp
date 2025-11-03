@@ -3,13 +3,9 @@
 #include <gtest/gtest.h>
 #include <string>
 #include "basic_compiler/Compiler.h"
+#include "../helper/compile_single_line_print.h"
 
 using namespace gwbasic;
-
-static std::string compileSingleLinePrint(const std::string& expr) {
-    const std::string src = "10 PRINT " + expr + "\n20 END\n";
-    return Compiler::compileString(src);
-}
 
 /*
  * Test Suite: CodeGen Comparisons

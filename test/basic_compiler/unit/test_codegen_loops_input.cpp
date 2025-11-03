@@ -27,5 +27,3 @@ TEST(CodeGenLoopsInput, ForLoopDefaultStepLabelsAndOps) {
     EXPECT_NE(ir.find(" = fcmp ole double"), std::string::npos); // inclusive end
     EXPECT_NE(ir.find(" = fadd double"), std::string::npos);     // increment
 }
-
-// Single-test-per-file policy: additional cases moved to dedicated files.

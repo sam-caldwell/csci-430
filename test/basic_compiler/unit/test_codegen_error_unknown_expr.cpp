@@ -1,11 +1,4 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-/*
- * Test Suite: CodeGen Error (unknown expression)
- * Purpose: Ensure printing an unknown expression kind triggers CodeGenError.
- * Components Under Test: CodeGenerator emitExpr.
- * Expected Behavior: generate() throws CodeGenError when encountering
- *          a PrintStmt with a non-supported Expr type.
- */
 #include <gtest/gtest.h>
 #include <memory>
 #include "basic_compiler/codegen/CodeGenerator.h"
@@ -13,8 +6,14 @@
 
 using namespace gwbasic;
 
-namespace { struct DummyExpr : Expr {}; }
-
+namespace { struct DummyExpr final : Expr {}; }
+/*
+ * Test Suite: CodeGen Error (unknown expression)
+ * Purpose: Ensure printing an unknown expression kind triggers CodeGenError.
+ * Components Under Test: CodeGenerator emitExpr.
+ * Expected Behavior: generate() throws CodeGenError when encountering
+ *          a PrintStmt with a non-supported Expr type.
+ */
 TEST(CodeGenErrors, UnknownExpressionKind) {
     Program p;
     Line l; l.number = 10;

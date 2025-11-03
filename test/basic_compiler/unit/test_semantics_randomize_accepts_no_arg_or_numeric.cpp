@@ -5,16 +5,21 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: SemanticsRandomize.AcceptsNoArgOrNumeric
+ * Purpose: Validate that RANDOMIZE accepts either no argument or a numeric seed.
+ * Components Under Test: Compiler::compileString; Semantics (argument type checking)
+ * Expected Behavior: Compilation succeeds for bare RANDOMIZE and RANDOMIZE 123.
+ */
 TEST(SemanticsRandomize, AcceptsNoArgOrNumeric) {
     const auto src1 =
         "10 RANDOMIZE\n"
         "20 END\n";
-    std::string ir1 = Compiler::compileString(src1);
+    const std::string ir1 = Compiler::compileString(src1);
     ASSERT_NE(ir1.size(), 0u);
     const auto src2 =
         "10 RANDOMIZE 123\n"
         "20 END\n";
-    std::string ir2 = Compiler::compileString(src2);
+    const std::string ir2 = Compiler::compileString(src2);
     ASSERT_NE(ir2.size(), 0u);
 }
-

@@ -12,6 +12,10 @@
 #include "basic_compiler/ast/IfBlockStmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/ast/WendStmt.h"
+#include "basic_compiler/ast/RunStmt.h"
+#include "basic_compiler/ast/CommonStmt.h"
+#include "basic_compiler/ast/ChainStmt.h"
+#include "basic_compiler/ast/MergeStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -34,6 +38,9 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
     if (match(TokenType::KwIf)) { auto n = parseIf(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwWhile)) { auto n = parseWhile(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwFor)) { auto n = parseFor(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwCommon)) { auto n = parseCommon(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwChain)) { auto n = parseChain(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwMerge)) { auto n = parseMerge(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwGoto)) {
         if (!check(TokenType::Integer)) throw ParseError("Expected line number after GOTO");
         int target = std::stoi(peek().lexeme);
@@ -64,6 +71,7 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
         }
         return make_node<RandomizeStmt>({startTok.line, startTok.col}, std::move(seed));
     }
+    if (match(TokenType::KwRun)) { auto n = parseRun(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwElse)) {
         return make_node<ElseStmt>({startTok.line, startTok.col});
     }

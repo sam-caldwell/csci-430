@@ -7,11 +7,17 @@
 #include "basic_compiler/Compiler.h"
 #include "clang_path.h"
 #include "run_command.h"
-#include "tool_exists.h"
+#include "../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/***
+ * Test: E2E.WhileInline_CountsUp
+ * Purpose: Validate End-to-End (compile + run) behavior for test_while_inline_e2e.cpp.
+ * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
+ * Expected Behavior: Program output matches assertions in test.
+ */
 TEST(E2E, WhileInline_CountsUp) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     std::string src =

@@ -30,6 +30,10 @@
 #include "basic_compiler/ast/ReturnStmt.h"
 #include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
+#include "basic_compiler/ast/RunStmt.h"
+#include "basic_compiler/ast/CommonStmt.h"
+#include "basic_compiler/ast/ChainStmt.h"
+#include "basic_compiler/ast/MergeStmt.h"
 #include "basic_compiler/codegen/CodeGenError.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include "basic_compiler/ast/Traits.h"
@@ -61,6 +65,7 @@ public:
         semVariables_ = r.variables;
         semStrings_ = r.stringLiterals;
         semLineNumbers_ = r.lineNumbers;
+        semCommonVariables_ = r.commonVariables;
     }
 
 private:
@@ -79,6 +84,8 @@ private:
     std::set<std::string> semVariables_{};
     std::set<std::string> semStrings_{};
     std::set<int> semLineNumbers_{};
+    std::set<std::string> semCommonVariables_{};
+    std::set<std::string> commonVariables_{};
 
     // Phase logging
     bool logEnabled_{false};

@@ -45,6 +45,11 @@ enum class TokenType {
     KwRandomize,
     KwWhile,
     KwWend,
+    KwRun,
+    KwCommon,
+    KwAll,
+    KwMerge,
+    KwChain,
 
     // Operators / punctuation
     Plus,

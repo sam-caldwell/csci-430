@@ -49,7 +49,11 @@ TEST(Lexer, AllRecognizedTokens) {
         // float literal
         "150 LET F = 1.23\n"
         // END
-        "160 END\n";
+        "160 END\n"
+        // COMMON (decl-list)
+        "170 COMMON A, B\n"
+        // ALL keyword (appears in CHAIN syntax; lex only)
+        "180 ALL\n";
 
     std::istringstream iss(src);
     Lexer lex(iss);
@@ -94,6 +98,8 @@ TEST(Lexer, AllRecognizedTokens) {
         TokenType::RParen,
         TokenType::Colon,
         TokenType::Comma,
+        TokenType::KwCommon,
+        TokenType::KwAll,
     };
 
     for (auto tt : expected) {

@@ -6,10 +6,15 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: SemanticsMathDomains.SqrtOfNegativeArithmeticConstantErrors
+ * Purpose: Validate domain checking rejects SQR of a negative arithmetic constant expression.
+ * Components Under Test: Compiler::compileString; Semantics (intrinsic domain checks)
+ * Expected Behavior: Compilation throws SemanticError for SQR(-5+3).
+ */
 TEST(SemanticsMathDomains, SqrtOfNegativeArithmeticConstantErrors) {
     const auto src =
         "10 PRINT SQR(-5+3)\n"
         "20 END\n";
     EXPECT_THROW({ const auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
-

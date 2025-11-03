@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: CodeGenRandomize.EmitsSrandWhenNumeric
+ * Purpose: Validate CodeGen lowering for RANDOMIZE when given a numeric seed.
+ * Components Under Test: Compiler; CodeGenerator (IR for RANDOMIZE seeding)
+ * Expected Behavior: IR declares and calls @srand48(i64) for a numeric seed.
+ */
 TEST(CodeGenRandomize, EmitsSrandWhenNumeric) {
     const auto src =
         "10 RANDOMIZE 7\n"
@@ -14,4 +20,3 @@ TEST(CodeGenRandomize, EmitsSrandWhenNumeric) {
     EXPECT_NE(ir.find("declare void @srand48(i64)"), std::string::npos);
     EXPECT_NE(ir.find("call void @srand48(i64"), std::string::npos);
 }
-

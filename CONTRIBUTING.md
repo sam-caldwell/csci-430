@@ -32,6 +32,7 @@ Build artifacts are written under `build/`. The compiler binary is `build/basic_
 - Keep warnings at zero; do not introduce new build or demo warnings.
 - Tests should be deterministic and fast; skip E2E gracefully when `clang` is unavailable 
   (see existing tests for patterns).
+- Use docstrings for all functions/classes/methods and tests
 
 ## Tests
 

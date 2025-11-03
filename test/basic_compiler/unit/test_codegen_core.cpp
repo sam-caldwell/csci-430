@@ -24,5 +24,3 @@ TEST(CodeGenCore, EmptyProgramHeaderAndExit) {
     EXPECT_NE(ir.find("define i32 @main()"), std::string::npos);
     EXPECT_NE(ir.find("  ret i32 0\n}\n"), std::string::npos);
 }
-
-// Single-test-per-file policy: additional cases moved to dedicated files.
