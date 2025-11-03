@@ -3,20 +3,19 @@
 #include <sstream>
 
 namespace gwbasic {
-
+/*
+ * Function: Lexer::tokenize
+ * Inputs:
+ *  - none (operates over the entire provided source string)
+ * Outputs:
+ *  - std::vector<Token>: Complete token stream including NewLine tokens
+ *    and a final EndOfFile marker
+ * Theory of operation:
+ *  - Iteratively skips whitespace/comments, classifies the next lexeme
+ *    as number, identifier/keyword, string, or operator/punctuation, and
+ *    appends corresponding tokens, tracking source positions.
+ */
 std::vector<Token> Lexer::tokenize() {
-    /*
-     * Function: Lexer::tokenize
-     * Inputs:
-     *  - none (operates over the entire provided source string)
-     * Outputs:
-     *  - std::vector<Token>: Complete token stream including NewLine tokens
-     *    and a final EndOfFile marker
-     * Theory of operation:
-     *  - Iteratively skips whitespace/comments, classifies the next lexeme
-     *    as number, identifier/keyword, string, or operator/punctuation, and
-     *    appends corresponding tokens, tracking source positions.
-     */
     std::vector<Token> tokens;
     while (!atEnd()) {
         skipWhitespace();

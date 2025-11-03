@@ -86,6 +86,8 @@ private:
     std::set<int> semLineNumbers_{};
     std::set<std::string> semCommonVariables_{};
     std::set<std::string> commonVariables_{};
+    // COMMON variables in effect before a given line number
+    std::map<int, std::set<std::string>> commonBeforeLine_{};
 
     // Phase logging
     bool logEnabled_{false};

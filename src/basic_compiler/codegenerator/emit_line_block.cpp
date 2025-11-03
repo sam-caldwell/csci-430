@@ -305,8 +305,12 @@ namespace gwbasic {
             } else if (auto ch = dyn_cast<ChainStmt>(st.get())) {
                 // CHAIN: reset non-preserved variables and branch to target/first line
                 if (!ch->all) {
+                    // Preserve only variables declared COMMON before this line
+                    const auto itCBL = commonBeforeLine_.find(line.number);
+                    const std::set<std::string> emptySet;
+                    const std::set<std::string>& preserve = (itCBL == commonBeforeLine_.end()) ? emptySet : itCBL->second;
                     for (const auto &v: variables_) {
-                        if (commonVariables_.contains(v)) continue; // preserve COMMON
+                        if (preserve.contains(v)) continue; // preserve caller's COMMON only
                         auto it = varAllocaName_.find(v);
                         if (it == varAllocaName_.end()) continue;
                         std::string ir = "  store double 0.0, ptr ";
