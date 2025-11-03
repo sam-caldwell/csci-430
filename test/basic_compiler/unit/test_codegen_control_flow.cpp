@@ -1,4 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
+
+#include <gtest/gtest.h>
+#include <string>
+#include "basic_compiler/Compiler.h"
+
+using namespace gwbasic;
+
 /*
  * Test Suite: CodeGen Control Flow
  * Purpose: Verify lowering for IF/THEN, GOTO, and GOSUB inlining with
@@ -9,12 +16,6 @@
  *          GOTO emits an unconditional branch; GOSUB expands inline with
  *          entry/cont labels; missing target GOSUB falls through to return.
  */
-#include <gtest/gtest.h>
-#include <string>
-#include "basic_compiler/Compiler.h"
-
-using namespace gwbasic;
-
 TEST(CodeGenFlow, IfThenComparisonGeneratesBranch) {
     const auto src =
         "10 IF 1 < 2 THEN 100\n"
@@ -28,5 +29,3 @@ TEST(CodeGenFlow, IfThenComparisonGeneratesBranch) {
     EXPECT_NE(ir.find("label %line100"), std::string::npos);
     EXPECT_NE(ir.find("line10_cont1:"), std::string::npos);
 }
-
-// Single-test-per-file policy: additional cases moved to dedicated files.

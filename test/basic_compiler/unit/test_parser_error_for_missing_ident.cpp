@@ -10,7 +10,7 @@ using namespace gwbasic;
  * Test Suite: Parser Error (FOR missing ident)
  * Purpose: Ensure parser requires an induction variable name in FOR.
  * Components Under Test: Parser parseFor.
- * Expected Behavior: Parsing indicates an error when identifier is absent.
+ * Expected Behavior: Parsing indicates an error when the identifier is absent.
  */
 TEST(Parser, ErrorForMissingIdentifier) {
     std::string src = "10 FOR = 1 TO 2 : NEXT\n"; // no variable name after FOR

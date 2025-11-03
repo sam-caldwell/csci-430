@@ -1,17 +1,11 @@
 # File: Makefile.d/integration_tests.mk
 #
-# Purpose: Run integration tests after unit tests.
+# Purpose: Run integration tests via CTest in parallel (after unit).
 #
 # Targets:
-#  - integration: Executes the basic_compiler_integration_tests binary.
+#  - integration: Executes CTest tests with label 'integration' using $(NUM_CPUS) jobs.
 integration: unit
-	@echo "[integration] Running integration tests..."
+	@echo "[integration] Running integration tests (ctest, -j$(NUM_CPUS))..."
 	@set -e; \
-	INT_BIN="$(BUILD_DIR)/basic_compiler_integration_tests"; \
-	if [ -x "$$INT_BIN" ]; then \
-	  echo "-- $$INT_BIN"; \
-	  "$$INT_BIN"; \
-    else \
-      echo "Integration tests binary not found: $$INT_BIN"; \
-      exit 2; \
-    fi
+	  CTEST_PARALLEL_LEVEL="$(NUM_CPUS)" \
+	  ctest --test-dir "$(BUILD_DIR)" --output-on-failure -L integration -j "$(NUM_CPUS)"

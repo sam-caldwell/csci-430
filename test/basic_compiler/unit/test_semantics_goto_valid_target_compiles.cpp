@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: Semantics.GotoValidTargetCompiles
+ * Purpose: Validate that GOTO to an existing line compiles successfully.
+ * Components Under Test: Compiler::compileString; Semantics (control-flow resolution)
+ * Expected Behavior: Compilation succeeds; IR contains the source label for line10.
+ */
 TEST(Semantics, GotoValidTargetCompiles) {
     const auto src =
         "10 GOTO 30\n"
@@ -14,4 +20,3 @@ TEST(Semantics, GotoValidTargetCompiles) {
     std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("line10:"), std::string::npos);
 }
-

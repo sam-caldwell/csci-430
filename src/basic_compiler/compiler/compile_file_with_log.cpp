@@ -22,6 +22,7 @@ std::string Compiler::compileFileWithLog(const std::string& path, const std::str
     Lexer lex(in);
     auto tokens = lex.tokenize();
     Parser parser(std::move(tokens));
+    parser.setSourcePath(path);
     auto program = parser.parseProgram();
     CodeGenerator gen;
     gen.setLogPath(logPath);

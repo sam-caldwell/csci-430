@@ -6,6 +6,14 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: CodeGenMathExt.RndCintCsngCdbl
+ * Purpose: Validate CodeGen lowering for RND, CINT, CSNG, and CDBL intrinsics.
+ * Components Under Test: Compiler; CodeGenerator (IR for RND/CINT/CSNG/CDBL)
+ * Expected Behavior: RND calls gwb_rnd helper; CINT declares and calls round(double);
+ *                    CSNG emits fptrunc (double->float) and fpext (float->double);
+ *                    CDBL compiles as a no-op cast to double (no special pattern asserted).
+ */
 TEST(CodeGenMathExt, RndCintCsngCdbl) {
     const auto src =
         "10 PRINT RND(1)\n"

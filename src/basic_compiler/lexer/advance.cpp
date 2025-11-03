@@ -14,9 +14,9 @@ namespace gwbasic {
  *    and beginning-of-line flag when encountering a newline.
  */
 char Lexer::advance() {
-    if (atEnd()) return '\0';
+    if (atEnd()) return CH_NULL;
     const char c = src_[pos_++];
-    if (c == '\n') {
+    if (c == CH_LF) {
         line_++;
         col_ = 1;
         bol_ = true;

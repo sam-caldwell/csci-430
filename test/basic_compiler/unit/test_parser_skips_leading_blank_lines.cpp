@@ -7,6 +7,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: Parser.SkipsLeadingBlankLines
+ * Purpose: Validate that leading blank lines are ignored before the first program line.
+ * Components Under Test: Lexer::tokenize; Parser::parseProgram
+ * Expected Behavior: Parses a single line with number 10 despite leading newlines.
+ */
 TEST(Parser, SkipsLeadingBlankLines) {
     const std::string src = "\n\n10 END\n\n";
     Lexer lex(src);
@@ -16,4 +22,3 @@ TEST(Parser, SkipsLeadingBlankLines) {
     ASSERT_EQ(prog.lines.size(), 1u);
     EXPECT_EQ(prog.lines.front().number, 10);
 }
-

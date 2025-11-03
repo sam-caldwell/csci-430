@@ -4,6 +4,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Lexer::escapeForLog
+ * Inputs:
+ *  - s: Raw string to escape for logging
+ * Outputs:
+ *  - std::string: Escaped string with common control chars rendered
+ * Theory of operation:
+ *  - Iterates characters, escapes backslash, quotes, and control codes as
+ *    C-style sequences; leaves printable ASCII unchanged.
+ */
 std::string Lexer::escapeForLog(const std::string& s) {
     std::string out;
     out.reserve(s.size());
@@ -15,7 +25,7 @@ std::string Lexer::escapeForLog(const std::string& s) {
             case '\t': out += "\\t"; break;
             case '"':  out += "\\\""; break;
             default:
-                if (ch < 0x20 || ch == 0x7F) {
+                if (ch < CH_SPACE || ch == CH_DEL) {
                     char buf[5];
                     std::snprintf(buf, sizeof(buf), "\\x%02X", ch);
                     out += buf;
@@ -28,4 +38,3 @@ std::string Lexer::escapeForLog(const std::string& s) {
 }
 
 } // namespace gwbasic
-

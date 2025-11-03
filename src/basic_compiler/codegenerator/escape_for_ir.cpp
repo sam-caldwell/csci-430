@@ -20,7 +20,7 @@ std::string CodeGenerator::escapeForIR(const std::string& s) {
         switch (c) {
             case '\\': out += "\\5C"; break;
             case '"': out += "\\22"; break;
-            case '\n': out += "\\0A"; break;
+            case CH_LF: out += "\\0A"; break;
             case '\t': out += "\\09"; break;
             case '\r': out += "\\0D"; break;
             default:

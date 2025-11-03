@@ -8,7 +8,7 @@
 using namespace gwbasic;
 /*
  * Test Suite: Parser Error (FOR missing NEXT)
- * Purpose: Ensure inline FOR body requires a trailing NEXT in same line.
+ * Purpose: Ensure inline FOR body requires a trailing NEXT in the same line.
  * Components Under Test: Parser parseFor.
  * Expected Behavior: Error is reported if NEXT is missing.
  */

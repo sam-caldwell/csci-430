@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: CodeGenMathMore.IntFixSgn
+ * Purpose: Validate CodeGen lowering for INT, FIX, and SGN intrinsics.
+ * Components Under Test: Compiler; CodeGenerator (IR for INT/FIX/SGN)
+ * Expected Behavior: INT uses floor, FIX emits fptosi/sitofp, SGN emits compares and add.
+ */
 TEST(CodeGenMathMore, IntFixSgn) {
     const auto src =
         "10 PRINT INT(1.9)\n"
@@ -25,4 +31,3 @@ TEST(CodeGenMathMore, IntFixSgn) {
     EXPECT_NE(ir.find(" = fcmp ogt double"), std::string::npos);
     EXPECT_NE(ir.find(" = fcmp olt double"), std::string::npos);
 }
-

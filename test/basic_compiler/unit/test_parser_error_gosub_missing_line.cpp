@@ -10,7 +10,7 @@ using namespace gwbasic;
  * Test Suite: Parser Error (GOSUB missing line)
  * Purpose: Ensure GOSUB requires a numeric line target.
  * Components Under Test: Parser parseStatement for GOSUB.
- * Expected Behavior: Error reported when line number is absent.
+ * Expected Behavior: Error reported when the line number is absent.
  */
 TEST(Parser, ErrorGosubMissingLine) {
     std::string src = "10 GOSUB\n";

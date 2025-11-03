@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: CodeGenMathMore.TrigLogExpCalls
+ * Purpose: Validate CodeGen lowering for SIN, COS, TAN, ATN, LOG, and EXP intrinsics.
+ * Components Under Test: Compiler; CodeGenerator (IR for trig/log/exp intrinsics)
+ * Expected Behavior: IR declares and calls @sin, @cos, @tan, @atan, @log, and @exp (double).
+ */
 TEST(CodeGenMathMore, TrigLogExpCalls) {
     const auto src =
         "10 PRINT SIN(0)\n"
@@ -29,4 +35,3 @@ TEST(CodeGenMathMore, TrigLogExpCalls) {
     EXPECT_NE(ir.find("declare double @exp(double)"), std::string::npos);
     EXPECT_NE(ir.find("call double @exp(double 1.0)"), std::string::npos);
 }
-

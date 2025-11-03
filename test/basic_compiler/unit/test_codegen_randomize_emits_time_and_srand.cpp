@@ -6,6 +6,13 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: CodeGenRandomize.EmitsTimeAndSrandWhenNoArg
+ * Purpose: Validate CodeGen lowering for RANDOMIZE with no argument (default seeding).
+ * Components Under Test: Compiler; CodeGenerator (IR for RANDOMIZE default seed)
+ * Expected Behavior: IR declares and calls time(ptr null) to obtain a seed;
+ *                    IR declares @srand48(i64) for seeding.
+ */
 TEST(CodeGenRandomize, EmitsTimeAndSrandWhenNoArg) {
     const auto src =
         "10 RANDOMIZE\n"
@@ -15,4 +22,3 @@ TEST(CodeGenRandomize, EmitsTimeAndSrandWhenNoArg) {
     EXPECT_NE(ir.find("call i64 @time(ptr null)"), std::string::npos);
     EXPECT_NE(ir.find("declare void @srand48(i64)"), std::string::npos);
 }
-

@@ -7,11 +7,16 @@
 #include "basic_compiler/Compiler.h"
 #include "clang_path.h"
 #include "run_command.h"
-#include "tool_exists.h"
+#include "../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
-
+/***
+ * Test: E2E.WhileMultiline_CountsUp
+ * Purpose: Validate End-to-End (compile + run) behavior for test_while_multiline_e2e.cpp.
+ * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
+ * Expected Behavior: Program output matches assertions in test.
+ */
 TEST(E2E, WhileMultiline_CountsUp) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     std::string src =
@@ -36,4 +41,3 @@ TEST(E2E, WhileMultiline_CountsUp) {
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_NE(out.find("1.000000\n2.000000\n3.000000\n"), std::string::npos);
 }
-

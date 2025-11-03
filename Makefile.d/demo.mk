@@ -12,7 +12,21 @@
 #  - Uses the built basic_compiler CLI and infers a portable target triple.
 #
 # Build demo programs into build/demos/<name>/
-DEMO_SRCS := demos/factorial.bas demos/trig.bas demos/trig-multi-line-loop.bas demos/sqrt.bas demos/fibonacci.bas
+DEMO_SRCS := demos/factorial.bas \
+	demos/trig.bas \
+	demos/trig-multi-line-loop.bas \
+	demos/sqrt.bas \
+	demos/fibonacci.bas \
+	demos/run-test.bas \
+	demos/chain-test.bas \
+	demos/merge-test.bas \
+	demos/pass-params.bas \
+	demos/use-passed-params.bas \
+	demos/pass-params-all.bas \
+	demos/use-passed-params-all.bas \
+	demos/chain-level2.bas \
+	demos/chain-level3.bas \
+	demos/chain-level4.bas
 demo:
 	@set -e; \
 	BUILD_ROOT="./build"; \
@@ -42,7 +56,7 @@ demo:
 	  CGN="$$OUT_DIR/$$BN.codegen.log"; \
 	  mkdir -p "$$OUT_DIR"; \
 	  echo "Compiling $$SRC -> $$OUT_DIR (target=$$TRIPLE)"; \
-	  "$$COMPILER_BIN" "$$SRC" --ll "$$LL" --bc "$$BC" -o "$$BIN" --asm "$$ASM" \
-	    $$TGT_ARG --lex-log "$$LEX" --syntax-log "$$SYN" --semantic-log "$$SEM" --log "$$CGN"; \
+  "$$COMPILER_BIN" "$$SRC" --no-logs --ll "$$LL" --bc "$$BC" -o "$$BIN" --asm "$$ASM" \
+    $$TGT_ARG; \
 	done; \
 	echo "Demo artifacts written under $$BUILD_ROOT/demos";

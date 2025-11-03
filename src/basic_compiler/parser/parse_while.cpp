@@ -5,12 +5,18 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseWhile
+ * Inputs:
+ *  - none (consumes tokens from the parser state)
+ * Outputs:
+ *  - std::unique_ptr<Stmt>: WhileStmt node (inline or multiline)
+ * Theory of operation:
+ *  - Parses a comparison condition, collects body statements until WEND on
+ *    the same line or returns early for multiline loops; sets inlineWend when
+ *    WEND appears inline.
+ */
 std::unique_ptr<Stmt> Parser::parseWhile() {
-    /*
-     * Single-line WHILE ... WEND
-     *  - Parse comparison expression as condition
-     *  - Collect statements until WEND on the same line
-     */
     auto cond = parseComparison();
     int l = peek().line, c = peek().col;
     auto node = make_node<WhileStmt>({l, c}, std::move(cond));

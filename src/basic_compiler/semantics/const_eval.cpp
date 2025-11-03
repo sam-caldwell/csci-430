@@ -8,6 +8,17 @@
 
 namespace gwbasic {
 
+/*
+ * Function: SemanticAnalyzer::constEval
+ * Inputs:
+ *  - e: Expression to evaluate
+ *  - out: Reference to receive constant value
+ * Outputs:
+ *  - bool: true if the expression evaluated to a constant number
+ * Theory of operation:
+ *  - Attempts constant folding for numbers, unary +/- and arithmetic/
+ *    comparison binary operations recursively; returns false otherwise.
+ */
 bool SemanticAnalyzer::constEval(const Expr* e, double& out) const {
     if (!e) return false;
     if (auto n = dyn_cast<const NumberExpr>(e)) { out = n->value; return true; }

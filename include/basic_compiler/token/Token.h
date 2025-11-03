@@ -27,7 +27,7 @@ struct Token {
     int col{1};
 
     Token() = default;
-    Token(TokenType t, std::string lx, int ln, int cl)
+    Token(const TokenType t, std::string lx, int ln, int cl)
         : type(t), lexeme(std::move(lx)), line(ln), col(cl) {}
 };
 

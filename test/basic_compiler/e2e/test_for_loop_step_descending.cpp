@@ -7,7 +7,7 @@
 #include "basic_compiler/Compiler.h"
 #include "clang_path.h"
 #include "run_command.h"
-#include "tool_exists.h"
+#include "../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
@@ -15,6 +15,8 @@ using namespace e2e_helpers;
 /*
  * Test Suite: E2E For Loop (descending)
  * Purpose: Validate FOR with STEP -1 iterates downward inclusively.
+ * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
+ * Expected Behavior: Program output matches assertions in test.
  */
 TEST(E2E, ForLoopDescendingCounts) {
     if (!toolExists(CLANG_PATH)) {
@@ -43,4 +45,3 @@ TEST(E2E, ForLoopDescendingCounts) {
     std::ostringstream r2; r2 << '"' << bin.string() << '"'; std::string out = runCommand(r2.str());
     ASSERT_NE(out.find("5.000000\n4.000000\n3.000000\n2.000000\n1.000000\n"), std::string::npos);
 }
-

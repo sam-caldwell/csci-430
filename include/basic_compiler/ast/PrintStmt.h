@@ -24,6 +24,10 @@ struct PrintStmt : ASTLeaf<NodeKind::PrintStmt, Stmt> {
     // Backward-compatible single value; additional items in 'more'
     std::unique_ptr<Expr> value;
     std::vector<std::unique_ptr<Expr>> more;
+    // Optional: channel (PRINT #n, ...). -1 means stdout
+    int channel{-1};
+    // Optional: format expression from PRINT USING ... (string expr)
+    std::unique_ptr<Expr> format;
 
     explicit PrintStmt(std::unique_ptr<Expr> v) : ASTLeaf(), value(std::move(v)) {}
     explicit PrintStmt(std::vector<std::unique_ptr<Expr>> v) : ASTLeaf() {

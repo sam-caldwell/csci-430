@@ -42,9 +42,25 @@ enum class TokenType {
     KwGosub,
     KwReturn,
     KwInput,
+    KwData,
+    KwRead,
+    KwRestore,
+    KwWrite,
+    KwLine,
     KwRandomize,
     KwWhile,
     KwWend,
+    KwRun,
+    KwCommon,
+    KwAll,
+    KwMerge,
+    KwChain,
+    KwDim,
+    KwOpen,
+    KwClose,
+    KwAs,
+    KwOutput,
+    KwUsing,
 
     // Operators / punctuation
     Plus,
@@ -61,6 +77,7 @@ enum class TokenType {
     RParen,
     Colon,
     Comma,
+    Hash,
 };
 
 } // namespace gwbasic

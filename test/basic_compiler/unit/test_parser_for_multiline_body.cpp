@@ -25,10 +25,10 @@ TEST(Parser, ForNextMultilineBody) {
     Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
-    auto prog = p.parseProgram();
-    ASSERT_EQ(prog.lines.size(), 1u);
-    ASSERT_EQ(prog.lines[0].statements.size(), 1u);
-    auto* fs = dynamic_cast<ForStmt*>(prog.lines[0].statements[0].get());
+    auto [lines] = p.parseProgram();
+    ASSERT_EQ(lines.size(), 1u);
+    ASSERT_EQ(lines[0].statements.size(), 1u);
+    auto* fs = dynamic_cast<ForStmt*>(lines[0].statements[0].get());
     ASSERT_NE(fs, nullptr);
     EXPECT_FALSE(fs->inlineNext);
     EXPECT_EQ(fs->var, "I");

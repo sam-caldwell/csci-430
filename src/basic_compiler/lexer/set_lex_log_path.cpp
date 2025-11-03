@@ -15,10 +15,8 @@ namespace gwbasic {
  *    token produced during tokenize() is appended to this file.
  */
 void Lexer::setLexLogPath(const std::string& path) {
-    if (lexLog_.is_open()) lexLog_.close();
-    lexLog_.open(path, std::ios::out | std::ios::trunc);
-    lexLogEnabled_ = lexLog_.is_open();
+    lexLogger_.open(path, /*append=*/false);
+    lexLogger_.setEnabled(true);
 }
 
 } // namespace gwbasic
-

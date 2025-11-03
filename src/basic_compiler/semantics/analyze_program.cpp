@@ -5,6 +5,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: SemanticAnalyzer::analyze
+ * Inputs:
+ *  - program: Parsed Program AST
+ * Outputs:
+ *  - SemanticAnalyzer::Result: Collected vars/strings/lines/common names
+ * Theory of operation:
+ *  - Resets state, validates unique line numbers, analyzes each line's
+ *    statements, and returns aggregated semantic information.
+ */
 SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
     scopes_.clear(); scopes_.emplace_back();
     vars_.clear(); strings_.clear(); lines_.clear();
@@ -12,14 +22,13 @@ SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
     std::unordered_set<int> seen;
     for (const auto& line : program.lines) {
         if (!seen.insert(line.number).second) {
-            std::ostringstream err; err << "ControlFlowError: duplicate line number " << line.number; log(err.str());
+            std::ostringstream err; err << "ControlFlowError: duplicate line number " << line.number; log() << err.str() << '\n';
             throw SemanticError(err.str());
         }
         lines_.insert(line.number);
     }
     for (const auto& line : program.lines) analyzeLine(line);
-    Result r; r.variables = vars_; r.stringLiterals = strings_; r.lineNumbers = lines_; return r;
+    Result r; r.variables = vars_; r.stringLiterals = strings_; r.lineNumbers = lines_; r.commonVariables = common_; r.arrays = arrays_; return r;
 }
 
 } // namespace gwbasic
-

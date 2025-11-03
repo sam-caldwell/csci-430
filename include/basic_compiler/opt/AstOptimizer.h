@@ -26,7 +26,7 @@ namespace gwbasic {
 class AstOptimizer {
 public:
     /**
-     * Method: optimize
+     * Function: AstOptimizer::optimize
      * Purpose:
      *  - Apply statement- and expression-level simplifications to a program.
      * Inputs:
@@ -39,7 +39,7 @@ public:
 
 private:
     /**
-     * Method: optExpr
+     * Function: AstOptimizer::optExpr
      * Purpose:
      *  - Simplify an expression tree via constant folding and algebraic
      *    identities. Eliminates unary plus and folds unary minus for
@@ -51,13 +51,38 @@ private:
      */
     static std::unique_ptr<Expr> optExpr(std::unique_ptr<Expr> e);
 
-    /** Determine whether the expression equals numeric 0.0. */
+    /**
+     * Function: AstOptimizer::isZero
+     * Purpose:
+     *  - Determine whether an expression is the numeric constant 0.0.
+     * Inputs:
+     *  - e: Expression node to test (may be null)
+     * Outputs:
+     *  - bool: true if 'e' is a NumberExpr with value 0.0
+     */
     static bool isZero(const Expr* e);
 
-    /** Determine whether expression equals numeric 1.0. */
+    /**
+     * Function: AstOptimizer::isOne
+     * Purpose:
+     *  - Determine whether an expression is the numeric constant 1.0.
+     * Inputs:
+     *  - e: Expression node to test (may be null)
+     * Outputs:
+     *  - bool: true if 'e' is a NumberExpr with value 1.0
+     */
     static bool isOne(const Expr* e) ;
 
-    /** Extract numeric value if `e` is a NumberExpr; returns success. */
+    /**
+     * Function: AstOptimizer::asNumber
+     * Purpose:
+     *  - Extract a numeric value when the expression is a NumberExpr.
+     * Inputs:
+     *  - e: Expression node to inspect
+     *  - out: Reference to receive the numeric value
+     * Outputs:
+     *  - bool: true if 'e' is NumberExpr and 'out' was set; false otherwise
+     */
     static bool asNumber(const Expr* e, double& out);
 };
 

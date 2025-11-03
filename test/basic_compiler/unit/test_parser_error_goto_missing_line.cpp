@@ -10,7 +10,7 @@ using namespace gwbasic;
  * Test Suite: Parser Error (GOTO missing line)
  * Purpose: Ensure GOTO requires a numeric line target.
  * Components Under Test: Parser parseStatement for GOTO.
- * Expected Behavior: Error reported when line number is absent.
+ * Expected Behavior: Error reported when the line number is absent.
  */
 TEST(Parser, ErrorGotoMissingLine) {
     std::string src = "10 GOTO\n";

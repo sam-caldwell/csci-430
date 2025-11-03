@@ -9,6 +9,13 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: Parser.IfBlock_ThenOnly_Multiline
+ * Purpose: Validate parsing of a multiline IF ... THEN block without an ELSE.
+ * Components Under Test: Lexer::tokenize; Parser::parseProgram; AST IfBlockStmt
+ * Expected Behavior: Produces one IfBlockStmt with an empty elseBody and a thenBody
+ *                    containing a single PrintStmt.
+ */
 TEST(Parser, IfBlock_ThenOnly_Multiline) {
     std::string src =
         "10 IF A < 5 THEN\n"
@@ -18,13 +25,12 @@ TEST(Parser, IfBlock_ThenOnly_Multiline) {
     Lexer lex(iss);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
-    auto prog = p.parseProgram();
-    ASSERT_EQ(prog.lines.size(), 1u);
-    ASSERT_EQ(prog.lines[0].statements.size(), 1u);
-    auto* ib = dynamic_cast<IfBlockStmt*>(prog.lines[0].statements[0].get());
+    auto [lines] = p.parseProgram();
+    ASSERT_EQ(lines.size(), 1u);
+    ASSERT_EQ(lines[0].statements.size(), 1u);
+    auto* ib = dynamic_cast<IfBlockStmt*>(lines[0].statements[0].get());
     ASSERT_NE(ib, nullptr);
     ASSERT_EQ(ib->elseBody.size(), 0u);
     ASSERT_EQ(ib->thenBody.size(), 1u);
     ASSERT_NE(dynamic_cast<PrintStmt*>(ib->thenBody[0].get()), nullptr);
 }
-

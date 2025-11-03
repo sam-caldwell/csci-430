@@ -53,3 +53,21 @@
               - Makefile.d/demo.mk updated to build new demos.
             - Tooling/build: All targets green.
               - Verified 'make clean configure lint test build demo' succeeds.
+            - Improved tests for scoping to ensure our semantic analysis is correct.
+            - Constants + codegen cleanup:
+              - Centralized character/string constants in include/basic_compiler/Chars.h
+                (CH_SPACE, CH_DEL, CH_LF, CH_TAB, CH_CR, CH_SINGLE_QUOTE, CH_NULL, CH_DOLLARSIGN;
+                 STR_LF, STR_DBL_QUOTE, STR_SPACE, STR_PERCENT) and wired Lexer/CodeGenerator to use them.
+              - Replaced scattered literals in codegen/logging: '$'→CH_DOLLARSIGN, '\n'→CH_LF, "\n"→STR_LF.
+              - Adopted std::format for IR assembly to reduce string concatenation noise in:
+                ensure_array_allocated.cpp, ensure_var_allocated.cpp, emit_expr.cpp, emit_line_block.cpp,
+                emit_for.cpp, emit_while.cpp, emit_if_block.cpp, emit_subroutine_inline.cpp (and related paths).
+            - Coverage and pipeline:
+              - Coverage metric set to lines with COVERAGE_MIN=100 retained. Expanded include set to parser
+                (node_name.cpp, consume.cpp) while continuing to exclude codegenerator/ from gating.
+              - Ensured the sequence 'make clean configure lint test demo coverage' runs green; when run under
+                parallel make, discovered 'clean' conflicts, so recommend sequential invocation for pipeline.
+            - Semantics tests:
+              - Added tiny AST-driven unit tests to exercise intrinsic helper paths indirectly via analyze()
+                (unknown function errors, arity mismatch, LOG with comparison arg, SQR negative constant).
+              - Keeps public API boundaries intact; no private hooks needed. All tests pass.

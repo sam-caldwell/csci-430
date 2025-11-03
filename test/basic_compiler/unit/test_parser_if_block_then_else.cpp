@@ -9,6 +9,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: Parser.IfBlock_ThenElse_Multiline
+ * Purpose: Validate Parser behavior for test_parser_if_block_then_else.cpp.
+ * Components Under Test: Lexer; Parser (specific parse function)
+ * Expected Behavior: AST or parse errors match expectations.
+ */
 TEST(Parser, IfBlock_ThenElse_Multiline) {
     std::string src =
         "10 IF A < 5 THEN\n"
@@ -19,14 +25,13 @@ TEST(Parser, IfBlock_ThenElse_Multiline) {
     Lexer lex(src);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
-    auto prog = p.parseProgram();
-    ASSERT_EQ(prog.lines.size(), 1u);
-    ASSERT_EQ(prog.lines[0].statements.size(), 1u);
-    auto* ib = dynamic_cast<IfBlockStmt*>(prog.lines[0].statements[0].get());
+    auto [lines] = p.parseProgram();
+    ASSERT_EQ(lines.size(), 1u);
+    ASSERT_EQ(lines[0].statements.size(), 1u);
+    auto* ib = dynamic_cast<IfBlockStmt*>(lines[0].statements[0].get());
     ASSERT_NE(ib, nullptr);
     ASSERT_EQ(ib->thenBody.size(), 1u);
     ASSERT_EQ(ib->elseBody.size(), 1u);
     ASSERT_NE(dynamic_cast<PrintStmt*>(ib->thenBody[0].get()), nullptr);
     ASSERT_NE(dynamic_cast<PrintStmt*>(ib->elseBody[0].get()), nullptr);
 }
-

@@ -44,6 +44,12 @@ public:
             case NodeKind::RandomizeStmt:
             case NodeKind::WhileStmt:
             case NodeKind::WendStmt:
+            case NodeKind::RunStmt:
+            case NodeKind::CommonStmt:
+            case NodeKind::ChainStmt:
+            case NodeKind::MergeStmt:
+            case NodeKind::DimStmt:
+            case NodeKind::ArrayAssignStmt:
                 return true;
             default:
                 return false;

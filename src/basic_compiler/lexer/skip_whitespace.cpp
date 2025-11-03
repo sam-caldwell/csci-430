@@ -15,12 +15,8 @@ namespace gwbasic {
  */
 void Lexer::skipWhitespace() {
     while (!atEnd()) {
-        const char c = peek();
-        if (c == ' ' || c == '\t' || c == '\r') {
-            advance();
-            continue;
-        }
-        if (c == '\'') { // comment until end of line
+        skipWhile([](const char c){ return c == CH_SPACE || c == CH_TAB || c == CH_CR; });
+        if (peek() == CH_SINGLE_QUOTE) { // comment until end of line
             skipToEOL();
             continue;
         }

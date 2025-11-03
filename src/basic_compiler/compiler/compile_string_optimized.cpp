@@ -5,6 +5,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Compiler::compileStringOptimized
+ * Inputs:
+ *  - source: GW-BASIC program text
+ * Outputs:
+ *  - std::string: Optimized LLVM IR (.ll) for the program
+ * Theory of operation:
+ *  - Tokenizes and parses the source, applies AST optimizations, runs
+ *    semantics, and generates IR with a default triple header.
+ */
 std::string Compiler::compileStringOptimized(const std::string& source) {
     Lexer lex(source);
     auto tokens = lex.tokenize();

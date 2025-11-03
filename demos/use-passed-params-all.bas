@@ -1,0 +1,2 @@
+10 PRINT Y
+20 END

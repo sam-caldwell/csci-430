@@ -12,8 +12,14 @@
 
 using namespace gwbasic;
 
-namespace { struct DummyStmt : Stmt {}; }
+namespace { struct DummyStmt final : Stmt {}; }
 
+/***
+ * Test: CodeGenErrors.UnsupportedStatementInForBody
+ * Purpose: Validate CodeGen rejects unsupported statements inside a FOR body.
+ * Components Under Test: CodeGenerator (emitFor/generate)
+ * Expected Behavior: generate() throws CodeGenError when encountering unsupported stmt.
+ */
 TEST(CodeGenErrors, UnsupportedStatementInForBody) {
     Program p;
     Line l; l.number = 10;
@@ -30,4 +36,3 @@ TEST(CodeGenErrors, UnsupportedStatementInForBody) {
     CodeGenerator gen;
     EXPECT_THROW({ (void)gen.generate(p); }, CodeGenError);
 }
-

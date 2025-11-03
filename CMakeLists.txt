@@ -24,3 +24,9 @@ include(cmake/projects.cmake)
 
 # Generate CMakePresets.json to guide IDEs to build/cmake-build-<config>
 include(cmake/GeneratePresets.cmake)
+
+# Linter target (clang-tidy via CMake)
+include(cmake/linter.cmake)
+
+# Coverage target (llvm-cov via CMake)
+include(cmake/Coverage.cmake)

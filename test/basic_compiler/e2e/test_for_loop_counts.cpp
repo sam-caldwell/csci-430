@@ -8,14 +8,14 @@
 #include "basic_compiler/Compiler.h"
 #include "clang_path.h"
 #include "run_command.h"
-#include "tool_exists.h"
+#include "../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 /*
  * Test Suite: E2E For Loop Counts
  * Purpose: Validate FOR/NEXT iteration behavior end-to-end by compiling
- *          and executing a program that prints 1..N.
+ *          and executing a program that prints 1...N.
  * Components Under Test: Full compiler pipeline; FOR lowering; clang.
  * Expected Behavior: Program prints numbers 1 through 5, each on its own line.
  */

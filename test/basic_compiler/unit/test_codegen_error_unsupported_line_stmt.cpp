@@ -1,10 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-/*
- * Test Suite: CodeGen Error (unsupported stmt in line)
- * Purpose: Ensure an unsupported Stmt in a line triggers CodeGenError.
- * Components Under Test: CodeGenerator emitLineBlock.
- * Expected Behavior: generate() throws CodeGenError.
- */
+
 #include <gtest/gtest.h>
 #include <memory>
 #include "basic_compiler/codegen/CodeGenerator.h"
@@ -13,7 +8,12 @@
 using namespace gwbasic;
 
 namespace { struct DummyStmt final : Stmt {}; }
-
+/*
+ * Test Suite: CodeGen Error (unsupported stmt in line)
+ * Purpose: Ensure an unsupported Stmt in a line triggers CodeGenError.
+ * Components Under Test: CodeGenerator emitLineBlock.
+ * Expected Behavior: generate() throws CodeGenError.
+ */
 TEST(CodeGenErrors, UnsupportedStatementInLineBlock) {
     Program p;
     Line l; l.number = 10;

@@ -4,20 +4,21 @@
 
 namespace gwbasic {
 
+/*
+ * Function: CodeGenerator::collectDecls
+ * Inputs:
+ *  - program: AST to be compiled
+ * Outputs:
+ *  - void (initializes internal maps/sets and prepares line ordering)
+ * Theory of operation:
+ *  - Clear internal state,
+ *  - Scan all lines/statements to populate the sets of variables and string literals,
+ *  - Records and sorts line numbers and
+ *  - builds a line-number to Line* map for later codegen.
+ */
 void CodeGenerator::collectDecls(const Program& program) {
-    /*
-     * Function: CodeGenerator::collectDecls
-     * Inputs:
-     *  - program: AST to be compiled
-     * Outputs:
-     *  - void (initializes internal maps/sets and prepares line ordering)
-     * Theory of operation:
-     *  - Clear internal state,
-     *  - Scan all lines/statements to populate the sets of variables and string literals,
-     *  - Records and sorts line numbers and
-     *  - builds a line-number to Line* map for later codegen.
-     */
     variables_.clear();
+    commonVariables_.clear();
     varAllocaName_.clear();
     strLiteralId_.clear();
     tempCounter_ = 0;
@@ -25,6 +26,7 @@ void CodeGenerator::collectDecls(const Program& program) {
     lineNumbers_.clear();
     lineMap_.clear();
     needsRndHelper_ = false;
+    commonBeforeLine_.clear();
 
     for (const auto& line : program.lines) {
         lineNumbers_.push_back(line.number);
@@ -38,9 +40,26 @@ void CodeGenerator::collectDecls(const Program& program) {
     std::ranges::sort(lineNumbers_);
     lineNumbers_.erase(std::ranges::unique(lineNumbers_).begin(), lineNumbers_.end());
 
+    // Build mapping of COMMON variables that are in effect before each line
+    {
+        std::set<std::string> accumCommon;
+        for (int ln : lineNumbers_) {
+            // Record snapshot of COMMON seen before this line
+            commonBeforeLine_[ln] = accumCommon;
+            const auto* lptr = lineMap_[ln];
+            if (!lptr) continue;
+            for (const auto& st : lptr->statements) {
+                if (const auto cs = dyn_cast<const CommonStmt>(st.get())) {
+                    for (const auto& n : cs->names) accumCommon.insert(n);
+                }
+            }
+        }
+    }
+
     if (semProvided_) {
         // Seed variables and strings from semantics
         variables_ = semVariables_;
+        commonVariables_ = semCommonVariables_;
         strLiteralId_.clear();
         strCounter_ = 0;
         for (const auto& s : semStrings_) {

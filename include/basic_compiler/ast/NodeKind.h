@@ -35,6 +35,20 @@ enum class NodeKind {
     RandomizeStmt,
     WhileStmt,
     WendStmt,
+    RunStmt,
+    CommonStmt,
+    ChainStmt,
+    MergeStmt,
+    DimStmt,
+    ArrayAssignStmt,
+    OpenStmt,
+    CloseStmt,
+    DataStmt,
+    ReadStmt,
+    RestoreStmt,
+    WriteStmt,
+    FileInputStmt,
+    LineInputStmt,
 };
 
 } // namespace gwbasic

@@ -12,6 +12,10 @@
 #include "basic_compiler/ast/IfBlockStmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/ast/WendStmt.h"
+#include "basic_compiler/ast/RunStmt.h"
+#include "basic_compiler/ast/CommonStmt.h"
+#include "basic_compiler/ast/ChainStmt.h"
+#include "basic_compiler/ast/MergeStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -34,6 +38,17 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
     if (match(TokenType::KwIf)) { auto n = parseIf(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwWhile)) { auto n = parseWhile(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwFor)) { auto n = parseFor(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwCommon)) { auto n = parseCommon(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwDim)) { auto n = parseDim(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwOpen)) { auto n = parseOpen(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwClose)) { auto n = parseClose(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwData)) { auto n = parseData(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwRead)) { auto n = parseRead(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwRestore)) { auto n = parseRestore(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwWrite)) { auto n = parseWrite(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwLine)) { consume(TokenType::KwInput, "INPUT"); auto n = parseLineInput(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwChain)) { auto n = parseChain(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwMerge)) { auto n = parseMerge(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwGoto)) {
         if (!check(TokenType::Integer)) throw ParseError("Expected line number after GOTO");
         int target = std::stoi(peek().lexeme);
@@ -47,12 +62,7 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
         return make_node<GosubStmt>({startTok.line, startTok.col}, target);
     }
     if (match(TokenType::KwReturn)) { return make_node<ReturnStmt>({startTok.line, startTok.col}); }
-    if (match(TokenType::KwInput)) {
-        if (!check(TokenType::Identifier)) throw ParseError("Expected variable name after INPUT");
-        std::string name = peek().lexeme;
-        advance();
-        return make_node<InputStmt>({startTok.line, startTok.col}, name);
-    }
+    if (match(TokenType::KwInput)) { auto n = parseInput(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwRandomize)) {
         std::unique_ptr<Expr> seed;
         // Optional expression if the next token can start an expression
@@ -64,6 +74,7 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
         }
         return make_node<RandomizeStmt>({startTok.line, startTok.col}, std::move(seed));
     }
+    if (match(TokenType::KwRun)) { auto n = parseRun(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwElse)) {
         return make_node<ElseStmt>({startTok.line, startTok.col});
     }

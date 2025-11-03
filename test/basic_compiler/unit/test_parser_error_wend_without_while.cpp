@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: Parser.ErrorWendWithoutWhile
+ * Purpose: Validate that a WEND without a matching WHILE is rejected.
+ * Components Under Test: Lexer::tokenize; Parser::parseProgram
+ * Expected Behavior: Parsing throws ParseError when encountering WEND without WHILE.
+ */
 TEST(Parser, ErrorWendWithoutWhile) {
     std::string src = "10 WEND\n";
     Lexer lex(src);
@@ -13,4 +19,3 @@ TEST(Parser, ErrorWendWithoutWhile) {
     Parser p(std::move(toks));
     EXPECT_THROW({ auto prog = p.parseProgram(); (void)prog; }, ParseError);
 }
-

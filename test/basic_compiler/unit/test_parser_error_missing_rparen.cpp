@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 /*
- * Test Suite: Parser Error (missing ')')
+ * Test Suite: Parser Error (missing ')'
  * Purpose: Ensure unmatched opening parenthesis triggers an error.
  * Components Under Test: Parser parseExpression/parseFactor.
  * Expected Behavior: Parsing fails when right parenthesis is missing.
