@@ -55,7 +55,7 @@ jobs:
           make demo -j2
 
   coverage:
-    name: Make Coverage & Publish Badge
+    name: Make Coverage
     runs-on: ubuntu-latest
     needs: build
 
@@ -95,13 +95,3 @@ jobs:
           GENERATOR: Ninja
         run: |
           make coverage
-
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: build/cmake-build-debug/coverage/lcov.info
-          name: codecov-coverage
-          fail_ci_if_error: true
-          verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
