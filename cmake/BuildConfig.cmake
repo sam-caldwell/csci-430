@@ -24,6 +24,32 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic>")
 endif()
 
+# On macOS with Homebrew LLVM, prefer linking against Homebrew's libc++ runtime.
+# This avoids ABI mismatches (e.g., missing std::__1::__hash_memory) when
+# headers come from Homebrew but the linker picks the system dylibs.
+if(APPLE AND CMAKE_CXX_COMPILER MATCHES "/opt/homebrew/opt/llvm/bin/clang\+\+|/usr/local/opt/llvm/bin/clang\+\+")
+  get_filename_component(_clang_bin_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+  get_filename_component(_llvm_root "${_clang_bin_dir}" DIRECTORY)
+  set(_llvm_lib "${_llvm_root}/lib")
+  set(_llvm_lib_cxx "${_llvm_root}/lib/c++")
+  # Add library search path and runtime rpath for Homebrew LLVM libs
+  if(EXISTS "${_llvm_lib}")
+    add_link_options("-L${_llvm_lib}")
+    add_link_options("-Wl,-rpath,${_llvm_lib}")
+    # Explicitly prefer libc++ and c++abi from the same toolchain if present
+    if(EXISTS "${_llvm_lib}/libc++.dylib")
+      add_link_options("${_llvm_lib}/libc++.dylib")
+    endif()
+    if(EXISTS "${_llvm_lib}/libc++abi.dylib")
+      add_link_options("${_llvm_lib}/libc++abi.dylib")
+    endif()
+  endif()
+  if(EXISTS "${_llvm_lib_cxx}")
+    add_link_options("-L${_llvm_lib_cxx}")
+    add_link_options("-Wl,-rpath,${_llvm_lib_cxx}")
+  endif()
+endif()
+
 # Enforce out-of-source build directory under build/
 # Disallow top-level cmake-build-* directories (e.g., cmake-build-debug)
 get_filename_component(_csci430_bin_name "${CMAKE_BINARY_DIR}" NAME)
