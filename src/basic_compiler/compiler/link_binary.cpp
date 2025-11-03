@@ -18,6 +18,18 @@ int linkBinary(const std::filesystem::path &llTmp, const std::string &outBIN, co
     std::ostringstream oss;
     oss << clangPath << ' ';
     if (!triple.empty()) oss << "-target \"" << triple << "\" ";
+    // On macOS when using Homebrew clang, ensure the SDK sysroot is provided so
+    // libSystem and related system libs are discoverable.
+    std::string lowerTriple = triple;
+    for (auto &c : lowerTriple) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    const bool targetingDarwin = (!lowerTriple.empty()) &&
+                                 (lowerTriple.find("darwin") != std::string::npos ||
+                                  lowerTriple.find("macos") != std::string::npos ||
+                                  lowerTriple.find("macosx") != std::string::npos);
+    if (targetingDarwin) {
+        // Defer SDK path resolution to xcrun at runtime (works on GitHub macOS runners).
+        oss << "-isysroot $(xcrun --sdk macosx --show-sdk-path) ";
+    }
     oss << '"' << llTmp.string() << "\" -o \"" << outBIN << "\"";
 #if defined(__APPLE__)
     // libSystem provides libm; no extra flag needed

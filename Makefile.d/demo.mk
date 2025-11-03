@@ -34,8 +34,8 @@ demo:
 	if [ ! -x "$$COMPILER_BIN" ]; then echo "Compiler not found: $$COMPILER_BIN"; exit 2; fi; \
 	UNAMES=$$(uname -s); ARCH=$$(uname -m); TRIPLE=""; \
 	if [ "$$UNAMES" = "Darwin" ]; then \
-	  if [ "$$ARCH" = "arm64" ]; then TRIPLE=arm64-darwin-macos; \
-	  elif [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-darwin-macos; fi; \
+	  if [ "$$ARCH" = "arm64" ]; then TRIPLE=arm64-apple-macosx; \
+	  elif [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-apple-macosx; fi; \
 	elif [ "$$UNAMES" = "Linux" ]; then \
 	  if [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-linux-gnu; \
 	  elif [ "$$ARCH" = "aarch64" ] || [ "$$ARCH" = "arm64" ]; then \
