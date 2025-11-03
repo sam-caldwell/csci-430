@@ -16,12 +16,13 @@ namespace gwbasic {
 Token Lexer::number() {
     const int startLine = line_;
     const int startCol = col_;
-    std::string buf;
     bool seenDot = false;
-    while (std::isdigit(peek()) || (!seenDot && peek() == '.')) {
-        if (peek() == '.') seenDot = true;
-        buf.push_back(advance());
-    }
+    auto buf = scanWhile([&](char ch) {
+        const unsigned char uch = static_cast<unsigned char>(ch);
+        if (std::isdigit(uch)) return true;
+        if (!seenDot && ch == '.') { seenDot = true; return true; }
+        return false;
+    });
     if (seenDot) return Token{TokenType::Float, buf, startLine, startCol};
     return Token{TokenType::Integer, buf, startLine, startCol};
 }

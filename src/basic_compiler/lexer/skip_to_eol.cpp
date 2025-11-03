@@ -13,7 +13,7 @@ namespace gwbasic {
  *  - Consumes characters until a newline or end-of-input is reached.
  */
 void Lexer::skipToEOL() {
-    while (!atEnd() && peek() != '\n') advance();
+    skipWhile([](char c){ return c != '\n'; });
 }
 
 } // namespace gwbasic

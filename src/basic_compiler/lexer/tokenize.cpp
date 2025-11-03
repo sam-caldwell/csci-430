@@ -24,9 +24,7 @@ std::vector<Token> Lexer::tokenize() {
         char c = peek();
         if (c == '\n') {
             advance();
-            Token t(TokenType::NewLine, "\n", line_ - 1, 1);
-            tokens.emplace_back(t);
-            logToken(t);
+            emitFixed<TokenType::NewLine>(tokens, "\n", line_ - 1, 1);
             bol_ = true;
             continue;
         }
@@ -55,48 +53,23 @@ std::vector<Token> Lexer::tokenize() {
         int tline = line_;
         int tcol = col_;
         switch (c) {
-            case '+': advance(); { Token t(TokenType::Plus, "+", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
-            case '-': advance(); { Token t(TokenType::Minus, "-", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
-            case '*': advance(); { Token t(TokenType::Star, "*", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
-            case '/': advance(); { Token t(TokenType::Slash, "/", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
-            case '(': advance(); { Token t(TokenType::LParen, "(", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
-            case ')': advance(); { Token t(TokenType::RParen, ")", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
-            case ':': advance(); { Token t(TokenType::Colon, ":", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
-            case ',': advance(); { Token t(TokenType::Comma, ",", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
-            case '=': advance(); { Token t(TokenType::Assign, "=", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
+            case '+': advance(); emitFixed<TokenType::Plus>(tokens, "+", tline, tcol); break;
+            case '-': advance(); emitFixed<TokenType::Minus>(tokens, "-", tline, tcol); break;
+            case '*': advance(); emitFixed<TokenType::Star>(tokens, "*", tline, tcol); break;
+            case '/': advance(); emitFixed<TokenType::Slash>(tokens, "/", tline, tcol); break;
+            case '(': advance(); emitFixed<TokenType::LParen>(tokens, "(", tline, tcol); break;
+            case ')': advance(); emitFixed<TokenType::RParen>(tokens, ")", tline, tcol); break;
+            case ':': advance(); emitFixed<TokenType::Colon>(tokens, ":", tline, tcol); break;
+            case ',': advance(); emitFixed<TokenType::Comma>(tokens, ",", tline, tcol); break;
+            case '=': advance(); emitFixed<TokenType::Assign>(tokens, "=", tline, tcol); break;
             case '<':
                 advance();
-                if (peek() == '=') {
-                    advance();
-                    Token t(TokenType::LessEqual, "<=", tline, tcol);
-                    tokens.emplace_back(t);
-                    logToken(t);
-                }
-                else if (peek() == '>') {
-                    advance();
-                    Token t(TokenType::NotEqual, "<>", tline, tcol);
-                    tokens.emplace_back(t);
-                    logToken(t);
-                }
-                else {
-                    Token t(TokenType::Less, "<", tline, tcol);
-                    tokens.emplace_back(t);
-                    logToken(t);
-                }
+                if (peek() == '>') { advance(); emitFixed<TokenType::NotEqual>(tokens, "<>", tline, tcol); }
+                else { emitPairOrSingle<TokenType::Less, TokenType::LessEqual, '='>(tokens, "<", "<=", tline, tcol); }
                 break;
             case '>':
                 advance();
-                if (peek() == '=') {
-                    advance();
-                    Token t(TokenType::GreaterEqual, ">=", tline, tcol);
-                    tokens.emplace_back(t);
-                    logToken(t);
-                }
-                else {
-                    Token t(TokenType::Greater, ">", tline, tcol);
-                    tokens.emplace_back(t);
-                    logToken(t);
-                }
+                emitPairOrSingle<TokenType::Greater, TokenType::GreaterEqual, '='>(tokens, ">", ">=", tline, tcol);
                 break;
             default: {
                 std::ostringstream oss;
@@ -106,11 +79,7 @@ std::vector<Token> Lexer::tokenize() {
         }
         bol_ = false;
     }
-    {
-        Token t(TokenType::EndOfFile, "", line_, col_);
-        tokens.emplace_back(t);
-        logToken(t);
-    }
+    emitFixed<TokenType::EndOfFile>(tokens, "", line_, col_);
     // Ensure end-of-input path in advance() is covered (no-op when at end)
     if (atEnd()) (void)advance();
     return tokens;

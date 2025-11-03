@@ -7,26 +7,11 @@
 #include <vector>
 #include <stdexcept>
 #include <fstream>
+#include <string_view>
 #include "basic_compiler/token/Token.h"
+#include "basic_compiler/LexError.h"
 
 namespace gwbasic {
-
-/**
- * LexError: Exception for lexical analysis failures.
- *
- * Purpose:
- *  - Signal unexpected characters or malformed literals.
- *
- * Inputs:
- *  - std::runtime_error::what(): error message.
- *
- * Outputs:
- *  - Exception object thrown by Lexer.
- */
-class LexError final : public std::runtime_error {
-public:
-    using std::runtime_error::runtime_error;
-};
 
 /**
  * Lexer: Converts a GW-BASIC source string into a token stream.
@@ -87,6 +72,122 @@ public:
     void setLexLogPath(const std::string& path);
 
 private:
+    // Compile-time keyword table (REM is handled specially as a comment)
+    inline static constexpr struct { std::string_view kw; TokenType tt; } kKeywords_[] = {
+        {"LET",       TokenType::KwLet},
+        {"PRINT",     TokenType::KwPrint},
+        {"IF",        TokenType::KwIf},
+        {"THEN",      TokenType::KwThen},
+        {"ELSE",      TokenType::KwElse},
+        {"GOTO",      TokenType::KwGoto},
+        {"END",       TokenType::KwEnd},
+        // REM intentionally omitted (treated as comment)
+        {"FOR",       TokenType::KwFor},
+        {"TO",        TokenType::KwTo},
+        {"STEP",      TokenType::KwStep},
+        {"NEXT",      TokenType::KwNext},
+        {"GOSUB",     TokenType::KwGosub},
+        {"RETURN",    TokenType::KwReturn},
+        {"INPUT",     TokenType::KwInput},
+        {"RANDOMIZE", TokenType::KwRandomize},
+        {"WHILE",     TokenType::KwWhile},
+        {"WEND",      TokenType::KwWend},
+        {"RUN",       TokenType::KwRun},
+        {"COMMON",    TokenType::KwCommon},
+        {"ALL",       TokenType::KwAll},
+        {"MERGE",     TokenType::KwMerge},
+        {"CHAIN",     TokenType::KwChain},
+    };
+
+    /*
+     * Function: Lexer::lookupKeyword
+     * Purpose:
+     *  - Map an uppercase identifier to a keyword token type.
+     * Inputs:
+     *  - upper: Uppercase candidate identifier
+     * Outputs:
+     *  - TokenType: Matching keyword type, or Identifier if not matched.
+     */
+    static TokenType lookupKeyword(std::string_view upper) {
+        for (auto&& e : kKeywords_) if (e.kw == upper) return e.tt;
+        return TokenType::Identifier;
+    }
+
+    /*
+     * Template: Lexer::scanWhile
+     * Purpose:
+     *  - Accumulate characters while a predicate over the current char holds,
+     *    consuming input via advance().
+     * Inputs:
+     *  - pred(char)->bool: predicate deciding whether to continue scanning
+     * Outputs:
+     *  - std::string: collected characters
+     */
+    template <class Pred>
+    std::string scanWhile(Pred&& pred) {
+        std::string out;
+        while (!atEnd() && pred(peek())) out.push_back(advance());
+        return out;
+    }
+
+    /*
+     * Template: Lexer::skipWhile
+     * Purpose:
+     *  - Consume characters while a predicate over the current char holds.
+     * Inputs:
+     *  - pred(char)->bool: predicate deciding whether to continue skipping
+     * Outputs:
+     *  - void (advances internal cursor)
+     */
+    template <class Pred>
+    void skipWhile(Pred&& pred) {
+        while (!atEnd() && pred(peek())) advance();
+    }
+
+    /*
+     * Template: Lexer::emitFixed
+     * Purpose:
+     *  - Construct, append and log a token with a fixed lexeme.
+     * Inputs:
+     *  - out: token destination vector
+     *  - lex: fixed lexeme as a null-terminated char array
+     *  - line/col: source position to assign
+     * Outputs:
+     *  - void (pushes token and logs it)
+     */
+    template <TokenType TT, size_t N>
+    void emitFixed(std::vector<Token>& out, const char (&lex)[N], const int line, const int col) {
+        Token t{TT, std::string(lex, N - 1), line, col};
+        out.emplace_back(t);
+        logToken(t);
+    }
+
+    /*
+     * Template: Lexer::emitPairOrSingle
+     * Purpose:
+     *  - After consuming the first character of an operator, emit a two-char
+     *    operator when the next character matches, otherwise emit the single
+     *    operator.
+     * Inputs:
+     *  - out: token destination vector
+     *  - singleLex/pairLex: lexemes for single and pair operators
+     *  - line/col: source position to assign
+     * Notes:
+     *  - Assumes caller already consumed the first character with advance().
+     */
+    template <TokenType Single, TokenType Pair, char Next, size_t N1, size_t N2>
+    void emitPairOrSingle(std::vector<Token>& out,
+                          const char (&singleLex)[N1],
+                          const char (&pairLex)[N2],
+                          int line, int col) {
+        if (peek() == Next) {
+            advance();
+            emitFixed<Pair>(out, pairLex, line, col);
+        } else {
+            emitFixed<Single>(out, singleLex, line, col);
+        }
+    }
+
     /*
      * Property: src_
      * Purpose:
@@ -119,14 +220,14 @@ private:
      * Purpose:
      *  - 1-based current column within the current line.
      * Notes:
-     *  - Reset to 1 on newline; incremented on other characters.
+     *  - Reset to 1 on the newline; incremented on other characters.
      */
     int col_{1};
 
     /*
      * Property: bol_
      * Purpose:
-     *  - Beginning-of-line indicator (true before first non-newline char).
+     *  - Beginning-of-line indicator (true before the first non-newline char).
      * Notes:
      *  - Used for optional line number handling and diagnostics alignment.
      */
