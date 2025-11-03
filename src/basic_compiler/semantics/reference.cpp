@@ -18,9 +18,9 @@ namespace gwbasic {
 void SemanticAnalyzer::reference(const std::string& name, const SourcePos& pos) {
     if (!isDeclared(name)) {
         declare(name);
-        std::ostringstream m; m << "VarImplicitDecl " << name << " @ " << pos.line << ':' << pos.col; log(m.str());
+        log() << "VarImplicitDecl " << name << " @ " << pos.line << ':' << pos.col << '\n';
     } else {
-        std::ostringstream m; m << "VarRef " << name << " @ " << pos.line << ':' << pos.col; log(m.str());
+        log() << "VarRef " << name << " @ " << pos.line << ':' << pos.col << '\n';
     }
 }
 

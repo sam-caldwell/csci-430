@@ -28,11 +28,14 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
     if (dyn_cast<const NumberExpr>(e)) return ValueType::Number;
     if (dyn_cast<const StringExpr>(e)) return ValueType::String;
     if (dyn_cast<const CallExpr>(e)) return ValueType::Number;
-    if (auto v = dyn_cast<const VarExpr>(e)) { (void)v; return ValueType::Number; }
+    if (auto v = dyn_cast<const VarExpr>(e)) {
+        if (!v->name.empty() && v->name.back() == '$') return ValueType::String;
+        return ValueType::Number;
+    }
     if (auto u = dyn_cast<const UnaryExpr>(e)) {
         auto t = typeOf(u->inner.get());
         if (t == ValueType::String) {
-            std::ostringstream m; m << "TypeError: unary '" << u->op << "' not applicable to string @ " << u->pos.line << ':' << u->pos.col; log(m.str());
+            std::ostringstream m; m << "TypeError: unary '" << u->op << "' not applicable to string @ " << u->pos.line << ':' << u->pos.col; log() << m.str() << '\n';
             throw SemanticError(m.str());
         }
         return ValueType::Number;
@@ -42,11 +45,19 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
         auto rt = typeOf(b->rhs.get());
         switch (b->op) {
             case BinaryOp::Add:
+                if (lt == ValueType::String || rt == ValueType::String) {
+                    if (lt != ValueType::String || rt != ValueType::String) {
+                        std::ostringstream m; m << "TypeError: cannot concatenate string with number @ " << e->pos.line << ':' << e->pos.col; log() << m.str() << '\n';
+                        throw SemanticError(m.str());
+                    }
+                    return ValueType::String;
+                }
+                [[fallthrough]];
             case BinaryOp::Sub:
             case BinaryOp::Mul:
             case BinaryOp::Div:
                 if (lt == ValueType::String || rt == ValueType::String) {
-                    std::ostringstream m; m << "TypeError: arithmetic on string @ " << e->pos.line << ':' << e->pos.col; log(m.str());
+                    std::ostringstream m; m << "TypeError: arithmetic on string @ " << e->pos.line << ':' << e->pos.col; log() << m.str() << '\n';
                     throw SemanticError(m.str());
                 }
                 return ValueType::Number;
@@ -58,7 +69,7 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
             case BinaryOp::Ge:
                 if (lt == ValueType::String || rt == ValueType::String) {
                     if (lt != rt) {
-                        std::ostringstream m; m << "TypeError: cannot compare string with number @ " << e->pos.line << ':' << e->pos.col; log(m.str());
+                        std::ostringstream m; m << "TypeError: cannot compare string with number @ " << e->pos.line << ':' << e->pos.col; log() << m.str() << '\n';
                         throw SemanticError(m.str());
                     }
                     return ValueType::Number;

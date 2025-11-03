@@ -20,10 +20,11 @@ Token Lexer::identifierOrKeyword() {
      */
     const int startLine = line_;
     const int startCol = col_;
-    const auto buf = scanWhile([](const char ch){
+    auto buf = scanWhile([](const char ch){
         const auto uch = static_cast<unsigned char>(ch);
         return std::isalnum(uch) != 0 || ch == '_';
     });
+    if (peek() == '$' || peek() == '%' || peek() == '!' || peek() == '#') buf.push_back(advance());
 
     std::string upper;
     upper.reserve(buf.size());

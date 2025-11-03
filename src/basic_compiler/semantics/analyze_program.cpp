@@ -22,13 +22,13 @@ SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
     std::unordered_set<int> seen;
     for (const auto& line : program.lines) {
         if (!seen.insert(line.number).second) {
-            std::ostringstream err; err << "ControlFlowError: duplicate line number " << line.number; log(err.str());
+            std::ostringstream err; err << "ControlFlowError: duplicate line number " << line.number; log() << err.str() << '\n';
             throw SemanticError(err.str());
         }
         lines_.insert(line.number);
     }
     for (const auto& line : program.lines) analyzeLine(line);
-    Result r; r.variables = vars_; r.stringLiterals = strings_; r.lineNumbers = lines_; r.commonVariables = common_; return r;
+    Result r; r.variables = vars_; r.stringLiterals = strings_; r.lineNumbers = lines_; r.commonVariables = common_; r.arrays = arrays_; return r;
 }
 
 } // namespace gwbasic

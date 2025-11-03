@@ -18,16 +18,28 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
      *    otherwise parses an expression and returns a PrintStmt for numeric
      *    output.
      */
+    int l = peek().line, c = peek().col;
+    int channel = -1;
+    // Optional: PRINT # n ,
+    if (match(TokenType::Hash)) {
+        if (!check(TokenType::Integer)) throw ParseError("Expected channel number after '#'");
+        channel = std::stoi(peek().lexeme); advance();
+        if (match(TokenType::Comma)) {}
+    }
+    // Optional: USING formatExpr ,
+    std::unique_ptr<Expr> fmt;
+    if (match(TokenType::KwUsing)) {
+        fmt = parseExpression();
+        if (match(TokenType::Comma)) {}
+    }
     // Parse one or more expressions separated by commas
     std::vector<std::unique_ptr<Expr>> items;
-    int l = peek().line, c = peek().col;
-    // First expression (string literal or general expression)
     items.push_back(parseExpression());
-    // Additional items separated by commas
-    while (match(TokenType::Comma)) {
-        items.push_back(parseExpression());
-    }
-    return make_node<PrintStmt>({l, c}, std::move(items));
+    while (match(TokenType::Comma)) items.push_back(parseExpression());
+    auto node = make_node<PrintStmt>({l, c}, std::move(items));
+    node->channel = channel;
+    node->format = std::move(fmt);
+    return node;
 }
 
 } // namespace gwbasic

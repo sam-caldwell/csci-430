@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <fstream>
+#include "logger/Logger.h"
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/RTTI.h"
@@ -68,24 +69,8 @@ private:
      */
     size_t pos_{0};
 
-    // Syntax logging
-    /*
-     * Property: syntaxLogEnabled_
-     * Purpose:
-     *  - Toggle for writing human-readable syntax logs.
-     * Notes:
-     *  - Controlled via setSyntaxLogPath(); guards logSyntax().
-     */
-    bool syntaxLogEnabled_{false};
-
-    /*
-     * Property: syntaxLog_
-     * Purpose:
-     *  - Output stream used to persist syntax-phase diagnostics.
-     * Notes:
-     *  - Opened/truncated by setSyntaxLogPath().
-     */
-    std::ofstream syntaxLog_;
+    // Syntax-phase logging via ostream-based logger
+    logger::Logger syntaxLogger_{};
 
     /**
      * Function: Parser::peek
@@ -257,6 +242,24 @@ private:
      *  - Stmt: MergeStmt node
      */
     std::unique_ptr<Stmt> parseMerge();
+    /** Parse DIM name '(' length ')' (1-D arrays only). */
+    std::unique_ptr<Stmt> parseDim();
+    /** Parse OPEN filename FOR (INPUT|OUTPUT) AS #n */
+    std::unique_ptr<Stmt> parseOpen();
+    /** Parse CLOSE #n */
+    std::unique_ptr<Stmt> parseClose();
+    /** Parse DATA item[,item...] */
+    std::unique_ptr<Stmt> parseData();
+    /** Parse READ var[,var...] */
+    std::unique_ptr<Stmt> parseRead();
+    /** Parse RESTORE */
+    std::unique_ptr<Stmt> parseRestore();
+    /** Parse WRITE [#n,] expr[,expr...] */
+    std::unique_ptr<Stmt> parseWrite();
+    /** Parse INPUT with optional #n, varlist or simple INPUT var */
+    std::unique_ptr<Stmt> parseInput();
+    /** Parse LINE INPUT [#n,] var$ */
+    std::unique_ptr<Stmt> parseLineInput();
     /**
      * Function: Parser::parseExpression
      * Purpose:
@@ -318,6 +321,8 @@ public:
      *  - void (opens/truncates the file and enables logging)
      */
     void setSyntaxLogPath(const std::string& path);
+    // Stream accessor: syntax-phase logger (ostream sink when disabled)
+    std::ostream& syntax() { return syntaxLogger_.stream(); }
     /**
      * Function: Parser::setSourcePath
      * Purpose:
@@ -329,16 +334,7 @@ public:
      */
     void setSourcePath(const std::string& path) { sourcePath_ = path; }
 private:
-    /**
-     * Function: Parser::logSyntax
-     * Purpose:
-     *  - Write a syntax-phase log line if logging is enabled.
-     * Inputs:
-     *  - msg: Text to append to the log
-     * Outputs:
-     *  - void (writes when syntaxLogEnabled_ and file is open)
-     */
-    void logSyntax(const std::string& msg);
+    // No logSyntax() helper; use syntax() << ... << '\n' directly.
 
     /**
      * Function: Parser::nodeName
@@ -351,7 +347,6 @@ private:
      */
     static const char* nodeName(const Stmt* s);
 
-    // For resolving MERGE/RUN/CHAIN filenames relative to the source
     /*
      * Property: sourcePath_
      * Purpose:

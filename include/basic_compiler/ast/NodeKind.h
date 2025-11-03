@@ -39,6 +39,16 @@ enum class NodeKind {
     CommonStmt,
     ChainStmt,
     MergeStmt,
+    DimStmt,
+    ArrayAssignStmt,
+    OpenStmt,
+    CloseStmt,
+    DataStmt,
+    ReadStmt,
+    RestoreStmt,
+    WriteStmt,
+    FileInputStmt,
+    LineInputStmt,
 };
 
 } // namespace gwbasic

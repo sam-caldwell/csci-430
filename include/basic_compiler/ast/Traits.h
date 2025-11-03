@@ -39,6 +39,16 @@ template <> struct NodeKindTraits<NodeKind::RunStmt>      { static constexpr con
 template <> struct NodeKindTraits<NodeKind::CommonStmt>   { static constexpr const char* pretty = "CommonStmt"; };
 template <> struct NodeKindTraits<NodeKind::ChainStmt>    { static constexpr const char* pretty = "ChainStmt"; };
 template <> struct NodeKindTraits<NodeKind::MergeStmt>    { static constexpr const char* pretty = "MergeStmt"; };
+template <> struct NodeKindTraits<NodeKind::DimStmt>      { static constexpr const char* pretty = "DimStmt"; };
+template <> struct NodeKindTraits<NodeKind::ArrayAssignStmt> { static constexpr const char* pretty = "ArrayAssignStmt"; };
+template <> struct NodeKindTraits<NodeKind::OpenStmt>       { static constexpr const char* pretty = "OpenStmt"; };
+template <> struct NodeKindTraits<NodeKind::CloseStmt>      { static constexpr const char* pretty = "CloseStmt"; };
+template <> struct NodeKindTraits<NodeKind::DataStmt>       { static constexpr const char* pretty = "DataStmt"; };
+template <> struct NodeKindTraits<NodeKind::ReadStmt>       { static constexpr const char* pretty = "ReadStmt"; };
+template <> struct NodeKindTraits<NodeKind::RestoreStmt>    { static constexpr const char* pretty = "RestoreStmt"; };
+template <> struct NodeKindTraits<NodeKind::WriteStmt>      { static constexpr const char* pretty = "WriteStmt"; };
+template <> struct NodeKindTraits<NodeKind::FileInputStmt>  { static constexpr const char* pretty = "FileInputStmt"; };
+template <> struct NodeKindTraits<NodeKind::LineInputStmt>  { static constexpr const char* pretty = "LineInputStmt"; };
 
 // Map a runtime NodeKind to a human-readable pretty name
 inline const char* prettyName(NodeKind k) {
@@ -71,6 +81,16 @@ inline const char* prettyName(NodeKind k) {
         case NodeKind::CommonStmt: return NodeKindTraits<NodeKind::CommonStmt>::pretty;
         case NodeKind::ChainStmt: return NodeKindTraits<NodeKind::ChainStmt>::pretty;
         case NodeKind::MergeStmt: return NodeKindTraits<NodeKind::MergeStmt>::pretty;
+        case NodeKind::DimStmt: return NodeKindTraits<NodeKind::DimStmt>::pretty;
+        case NodeKind::ArrayAssignStmt: return NodeKindTraits<NodeKind::ArrayAssignStmt>::pretty;
+        case NodeKind::OpenStmt: return NodeKindTraits<NodeKind::OpenStmt>::pretty;
+        case NodeKind::CloseStmt: return NodeKindTraits<NodeKind::CloseStmt>::pretty;
+        case NodeKind::DataStmt: return NodeKindTraits<NodeKind::DataStmt>::pretty;
+        case NodeKind::ReadStmt: return NodeKindTraits<NodeKind::ReadStmt>::pretty;
+        case NodeKind::RestoreStmt: return NodeKindTraits<NodeKind::RestoreStmt>::pretty;
+        case NodeKind::WriteStmt: return NodeKindTraits<NodeKind::WriteStmt>::pretty;
+        case NodeKind::FileInputStmt: return NodeKindTraits<NodeKind::FileInputStmt>::pretty;
+        case NodeKind::LineInputStmt: return NodeKindTraits<NodeKind::LineInputStmt>::pretty;
     }
     return "Node";
 }

@@ -102,7 +102,7 @@ public:
     /**
      * Function: Compiler::compileFileWithPhaseLogs
      * Purpose:
-     *  - Compile source file with phase logs (lexer, syntax, semantics,
+     *  - Compile a source file with phase logs (lexer, syntax, semantics,
      *    and optional codegen log).
      * Inputs:
      *  - path: Path to .bas source file
@@ -152,14 +152,12 @@ private:
         if (FILE* pipe = popen(cmd, "r")) {
             char buf[256];
             std::string out;
-            while (size_t n = fread(buf, 1, sizeof(buf), pipe)) out.append(buf, buf + n);
+            while (const size_t n = fread(buf, 1, sizeof(buf), pipe)) out.append(buf, buf + n);
             pclose(pipe);
-            auto pos = out.find("\"-triple\"");
-            if (pos != std::string::npos) {
-                auto q1 = out.find('"', pos + 9);
-                if (q1 != std::string::npos) {
-                    auto q2 = out.find('"', q1 + 1);
-                    if (q2 != std::string::npos && q2 > q1 + 1) triple = out.substr(q1 + 1, q2 - (q1 + 1));
+            if (const auto pos = out.find("\"-triple\""); pos != std::string::npos) {
+                if (const auto q1 = out.find('"', pos + 9); q1 != std::string::npos) {
+                    if (const auto q2 = out.find('"', q1 + 1); q2 != std::string::npos && q2 > q1 + 1)
+                        triple = out.substr(q1 + 1, q2 - (q1 + 1));
                 }
             }
         }

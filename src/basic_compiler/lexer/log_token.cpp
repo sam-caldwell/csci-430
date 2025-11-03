@@ -16,19 +16,18 @@ namespace gwbasic {
  *    most tokens except EOF/NEWLINE where lexeme text is not useful.
  */
 void Lexer::logToken(const Token& t) {
-    if (!lexLogEnabled_ || !lexLog_.is_open()) return;
-    lexLog_ << "token" << CH_SPACE << to_string(t.type) << CH_SPACE << "@" << CH_SPACE << t.line << ":" << t.col;
+    log() << "token" << CH_SPACE << to_string(t.type) << CH_SPACE << "@" << CH_SPACE << t.line << ":" << t.col;
     switch (t.type) {
         case TokenType::EndOfFile:
         case TokenType::NewLine:
             break;
         default: {
             const std::string esc = escapeForLog(t.lexeme);
-            lexLog_ << CH_SPACE << STR_DBL_QUOTE << esc << STR_DBL_QUOTE;
+            log() << CH_SPACE << STR_DBL_QUOTE << esc << STR_DBL_QUOTE;
             break;
         }
     }
-    lexLog_ << "\n";
+    log() << "\n";
 }
 
 } // namespace gwbasic

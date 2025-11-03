@@ -26,7 +26,7 @@ struct ChainStmt : ASTLeaf<NodeKind::ChainStmt, Stmt> {
     std::optional<int> targetLine;
     bool all{false};
     ChainStmt() = default;
-    ChainStmt(std::optional<std::string> f, std::optional<int> ln, bool a)
+    ChainStmt(std::optional<std::string> f, const std::optional<int> ln, const bool a)
         : ASTLeaf(), filename(std::move(f)), targetLine(ln), all(a) {}
 };
 

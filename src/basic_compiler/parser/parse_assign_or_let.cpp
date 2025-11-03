@@ -2,6 +2,7 @@
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/make_node.h"
 #include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/ArrayAssignStmt.h"
 
 namespace gwbasic {
 
@@ -23,6 +24,14 @@ std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
     std::string name = peek().lexeme;
     int l = peek().line, c = peek().col;
     advance();
+    // Array element assignment A(expr) = ...
+    if (match(TokenType::LParen)) {
+        auto idx = parseExpression();
+        consume(TokenType::RParen, ")");
+        consume(TokenType::Assign, "'='");
+        auto expr = parseExpression();
+        return make_node<ArrayAssignStmt>({l, c}, name, std::move(idx), std::move(expr));
+    }
     consume(TokenType::Assign, "'='");
     auto expr = parseExpression();
     return make_node<AssignStmt>({l, c}, name, std::move(expr));

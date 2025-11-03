@@ -7,6 +7,8 @@
 #include <vector>
 #include <stdexcept>
 #include <fstream>
+#include "logger/Logger.h"
+#include "basic_compiler/Chars.h"
 #include <string_view>
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/LexError.h"
@@ -72,18 +74,6 @@ public:
     void setLexLogPath(const std::string& path);
 
 private:
-    // Common ASCII characters/constants
-    static constexpr char CH_SPACE         = 0x20;  // ' '
-    static constexpr char CH_DEL           = 0x7F;  // DEL
-    static constexpr char CH_LF            = '\n';
-    static constexpr char CH_TAB           = '\t';
-    static constexpr char CH_CR            = '\r';
-    static constexpr char CH_SINGLE_QUOTE  = '\'';
-    static constexpr char CH_NULL          = '\0';
-
-    // Common string fragments
-    static constexpr char STR_LF[]         = "\n";
-    static constexpr char STR_DBL_QUOTE[]  = "\"";
 
     // Keyword spellings used in special cases
     static constexpr std::string_view KW_REM = "REM";
@@ -105,6 +95,11 @@ private:
         {"GOSUB",     TokenType::KwGosub},
         {"RETURN",    TokenType::KwReturn},
         {"INPUT",     TokenType::KwInput},
+        {"DATA",      TokenType::KwData},
+        {"READ",      TokenType::KwRead},
+        {"RESTORE",   TokenType::KwRestore},
+        {"WRITE",     TokenType::KwWrite},
+        {"LINE",      TokenType::KwLine},
         {"RANDOMIZE", TokenType::KwRandomize},
         {"WHILE",     TokenType::KwWhile},
         {"WEND",      TokenType::KwWend},
@@ -113,6 +108,12 @@ private:
         {"ALL",       TokenType::KwAll},
         {"MERGE",     TokenType::KwMerge},
         {"CHAIN",     TokenType::KwChain},
+        {"DIM",       TokenType::KwDim},
+        {"OPEN",      TokenType::KwOpen},
+        {"CLOSE",     TokenType::KwClose},
+        {"AS",        TokenType::KwAs},
+        {"OUTPUT",    TokenType::KwOutput},
+        {"USING",     TokenType::KwUsing},
     };
 
     /*
@@ -124,8 +125,8 @@ private:
      * Outputs:
      *  - TokenType: Matching keyword type, or Identifier if not matched.
      */
-    static TokenType lookupKeyword(std::string_view upper) {
-        for (auto&& e : kKeywords_) if (e.kw == upper) return e.tt;
+    static TokenType lookupKeyword(const std::string_view upper) {
+        for (const auto&[kw, tt] : kKeywords_) if (kw == upper) return tt;
         return TokenType::Identifier;
     }
 
@@ -352,24 +353,8 @@ private:
      */
     void skipToEOL();
 
-    // Lexical logging
-    /*
-     * Property: lexLogEnabled_
-     * Purpose:
-     *  - Controls whether lexical tokens are written to the log.
-     * Notes:
-     *  - Enabled via setLexLogPath(); false disables logging fast-path.
-     */
-    bool lexLogEnabled_{false};
-
-    /*
-     * Property: lexLog_
-     * Purpose:
-     *  - Output stream used to record tokenization events.
-     * Notes:
-     *  - Opened/truncated in setLexLogPath(); checked before writes.
-     */
-    std::ofstream lexLog_;
+    // Lexical logging via ostream-based logger
+    logger::Logger lexLogger_{};
 
     /*
      * Function: Lexer::logToken
@@ -382,6 +367,8 @@ private:
      *  - void (writes a line to the log file if open)
      */
     void logToken(const Token& t);
+    // Stream accessor for lex logging
+    std::ostream& log() { return lexLogger_.stream(); }
 
     /*
      * Function: Lexer::escapeForLog

@@ -28,11 +28,8 @@ Line Parser::parseLine() {
         auto st = parseStatement();
         line.statements.push_back(std::move(st));
         const auto& last = line.statements.back();
-        {
-            std::ostringstream m;
-            m << "line " << line.number << ' ' << nodeName(last.get()) << " @ " << last->pos.line << ':' << last->pos.col;
-            logSyntax(m.str());
-        }
+        syntax() << "line " << line.number << ' ' << nodeName(last.get())
+                 << " @ " << last->pos.line << ':' << last->pos.col << '\n';
         if (match(TokenType::Colon)) continue;
         if (check(TokenType::NewLine)) break;
     }

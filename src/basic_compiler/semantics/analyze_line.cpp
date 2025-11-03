@@ -15,7 +15,7 @@ namespace gwbasic {
  */
 void SemanticAnalyzer::analyzeLine(const Line& line) {
     currentLine_ = line.number;
-    std::ostringstream m; m << "Line " << currentLine_; log(m.str());
+    log() << "Line " << currentLine_ << '\n';
     for (const auto& st : line.statements) analyzeStmt(st.get());
 }
 

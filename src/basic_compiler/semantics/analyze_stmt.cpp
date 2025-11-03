@@ -16,6 +16,12 @@
 #include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/ast/CommonStmt.h"
 #include "basic_compiler/ast/ChainStmt.h"
+#include "basic_compiler/ast/DimStmt.h"
+#include "basic_compiler/ast/ArrayAssignStmt.h"
+#include "basic_compiler/ast/OpenStmt.h"
+#include "basic_compiler/ast/DataStmt.h"
+#include "basic_compiler/ast/ReadStmt.h"
+#include "basic_compiler/ast/WriteStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -38,8 +44,14 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     }
     if (auto a = dyn_cast<const AssignStmt>(s)) {
         reference(a->name, a->pos);
-        if (typeOf(a->value.get()) == ValueType::String) {
-            std::ostringstream m; m << "TypeError: cannot assign string to numeric var '" << a->name << "' @ " << a->pos.line << ':' << a->pos.col; log(m.str());
+        auto vt = typeOf(a->value.get());
+        const bool varIsString = (!a->name.empty() && a->name.back() == '$');
+        if (varIsString && vt != ValueType::String) {
+            std::ostringstream m; m << "TypeError: cannot assign number to string var '" << a->name << "' @ " << a->pos.line << ':' << a->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        if (!varIsString && vt == ValueType::String) {
+            std::ostringstream m; m << "TypeError: cannot assign string to numeric var '" << a->name << "' @ " << a->pos.line << ':' << a->pos.col; log() << m.str() << '\n';
             throw SemanticError(m.str());
         }
         analyzeExpr(a->value.get());
@@ -47,26 +59,67 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     }
     if (auto i = dyn_cast<const IfStmt>(s)) {
         if (typeOf(i->cond.get()) == ValueType::String) {
-            std::ostringstream m; m << "TypeError: IF condition cannot be string @ " << i->pos.line << ':' << i->pos.col; log(m.str());
+            std::ostringstream m; m << "TypeError: IF condition cannot be string @ " << i->pos.line << ':' << i->pos.col; log() << m.str() << '\n';
             throw SemanticError(m.str());
         }
         analyzeExpr(i->cond.get());
         if (!lines_.contains(i->targetLine)) {
             if (strictControlFlow_) {
-                std::ostringstream err; err << "ControlFlowError: missing IF target line " << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log(err.str());
+                std::ostringstream err; err << "ControlFlowError: missing IF target line " << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log() << err.str() << '\n';
                 throw SemanticError(err.str());
             } else {
-                std::ostringstream w; w << "Warning: IF missing target line " << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log(w.str());
+                std::ostringstream w; w << "Warning: IF missing target line " << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log() << w.str() << '\n';
             }
         }
-        std::ostringstream m; m << "IfThen target=" << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log(m.str());
+        std::ostringstream m; m << "IfThen target=" << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log() << m.str() << '\n';
         return;
     }
-    if (auto ib = dyn_cast<const IfBlockStmt>(s)) {
-        if (typeOf(ib->cond.get()) == ValueType::String) {
-            std::ostringstream m; m << "TypeError: IF condition cannot be string @ " << ib->pos.line << ':' << ib->pos.col; log(m.str());
-            throw SemanticError(m.str());
+    if (auto d = dyn_cast<const DimStmt>(s)) {
+        declare(d->name);
+        if (d->length <= 0) { std::ostringstream m; m << "TypeError: DIM length must be positive @ " << d->pos.line << ':' << d->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        arrays_[d->name] = d->length;
+        std::ostringstream m; m << "Dim " << d->name << "(" << d->length << ")"; log() << m.str() << '\n';
+        return;
+    }
+    if (auto aa = dyn_cast<const ArrayAssignStmt>(s)) {
+        // Require array declared
+        if (!arrays_.contains(aa->name)) { std::ostringstream m; m << "TypeError: array '" << aa->name << "' not DIM'd @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (typeOf(aa->index.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: array index must be numeric @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (typeOf(aa->value.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: cannot assign string into numeric array @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(aa->index.get());
+        analyzeExpr(aa->value.get());
+        return;
+    }
+    if (auto op = dyn_cast<const OpenStmt>(s)) {
+        // Minimal validation of channel
+        if (op->channel < 1 || op->channel > 16) { std::ostringstream m; m << "IOError: channel out of range @ " << op->pos.line << ':' << op->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(op->filename.get());
+        return;
+    }
+    if (auto cl = dyn_cast<const CloseStmt>(s)) {
+        if (cl->channel < 1 || cl->channel > 16) { std::ostringstream m; m << "IOError: channel out of range @ " << cl->pos.line << ':' << cl->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        return;
+    }
+    if (auto d = dyn_cast<const DataStmt>(s)) {
+        std::ostringstream m; m << "Data count=" << d->items.size(); log() << m.str() << '\n';
+        return;
+    }
+    if (auto rd = dyn_cast<const ReadStmt>(s)) {
+        for (const auto& t : rd->targets) {
+            if (t.index) {
+                if (!arrays_.contains(t.name)) { std::ostringstream m; m << "TypeError: array '" << t.name << "' not DIM'd @ " << rd->pos.line << ':' << rd->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                if (typeOf(t.index.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: READ index must be numeric @ " << rd->pos.line << ':' << rd->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                analyzeExpr(t.index.get());
+            } else {
+                reference(t.name, rd->pos);
+            }
         }
+        return;
+    }
+    if (dyn_cast<const RestoreStmt>(s)) { log() << "Restore" << '\n'; return; }
+    if (auto wr = dyn_cast<const WriteStmt>(s)) { for (const auto& e : wr->items) analyzeExpr(e.get()); return; }
+    if (auto ib = dyn_cast<const IfBlockStmt>(s)) {
+        if (typeOf(ib->cond.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: IF condition cannot be string @ " << ib->pos.line << ':' << ib->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(ib->cond.get());
         enterScope();
         for (const auto& st : ib->thenBody) analyzeStmt(st.get());
@@ -80,10 +133,10 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     }
     if (auto f = dyn_cast<const ForStmt>(s)) {
         reference(f->var, f->pos);
-        std::ostringstream m; m << "For var=" << f->var << " @ " << f->pos.line << ':' << f->pos.col; log(m.str());
-        if (typeOf(f->start.get()) == ValueType::String) { std::ostringstream err; err << "TypeError: FOR start must be numeric @ " << f->pos.line << ':' << f->pos.col; log(err.str()); throw SemanticError(err.str()); }
-        if (typeOf(f->end.get()) == ValueType::String) { std::ostringstream err; err << "TypeError: FOR end must be numeric @ " << f->pos.line << ':' << f->pos.col; log(err.str()); throw SemanticError(err.str()); }
-        if (f->step && typeOf(f->step.get()) == ValueType::String) { std::ostringstream err; err << "TypeError: FOR step must be numeric @ " << f->pos.line << ':' << f->pos.col; log(err.str()); throw SemanticError(err.str()); }
+        std::ostringstream m; m << "For var=" << f->var << " @ " << f->pos.line << ':' << f->pos.col; log() << m.str() << '\n';
+        if (typeOf(f->start.get()) == ValueType::String) { std::ostringstream err; err << "TypeError: FOR start must be numeric @ " << f->pos.line << ':' << f->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
+        if (typeOf(f->end.get()) == ValueType::String) { std::ostringstream err; err << "TypeError: FOR end must be numeric @ " << f->pos.line << ':' << f->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
+        if (f->step && typeOf(f->step.get()) == ValueType::String) { std::ostringstream err; err << "TypeError: FOR step must be numeric @ " << f->pos.line << ':' << f->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
         analyzeExpr(f->start.get());
         analyzeExpr(f->end.get());
         analyzeExpr(f->step.get());
@@ -94,34 +147,34 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     }
     if (auto in = dyn_cast<const InputStmt>(s)) { reference(in->name, in->pos); return; }
     if (auto g = dyn_cast<const GotoStmt>(s)) {
-        std::ostringstream m; m << "Goto target=" << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log(m.str());
+        std::ostringstream m; m << "Goto target=" << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << m.str() << '\n';
         if (!lines_.contains(g->targetLine)) {
-            if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing GOTO target line " << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log(err.str()); throw SemanticError(err.str()); }
-            else { std::ostringstream w; w << "Warning: GOTO missing target line " << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log(w.str()); }
+            if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing GOTO target line " << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
+            else { std::ostringstream w; w << "Warning: GOTO missing target line " << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << w.str() << '\n'; }
         }
         return;
     }
     if (auto gs = dyn_cast<const GosubStmt>(s)) {
-        std::ostringstream m; m << "Gosub target=" << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log(m.str());
+        std::ostringstream m; m << "Gosub target=" << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log() << m.str() << '\n';
         if (!lines_.contains(gs->targetLine)) {
-            if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing GOSUB target line " << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log(err.str()); throw SemanticError(err.str()); }
-            else { std::ostringstream w; w << "Warning: GOSUB missing target line " << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log(w.str()); }
+            if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing GOSUB target line " << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
+            else { std::ostringstream w; w << "Warning: GOSUB missing target line " << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log() << w.str() << '\n'; }
         }
         return;
     }
-    if (dyn_cast<const ReturnStmt>(s)) { log("Return"); return; }
-    if (dyn_cast<const EndStmt>(s)) { log("End"); return; }
+    if (dyn_cast<const ReturnStmt>(s)) { log() << "Return" << '\n'; return; }
+    if (dyn_cast<const EndStmt>(s)) { log() << "End" << '\n'; return; }
     if (auto rz = dyn_cast<const RandomizeStmt>(s)) {
-        log("Randomize");
+        log() << "Randomize" << '\n';
         if (rz->seed) {
-            if (typeOf(rz->seed.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: RANDOMIZE requires numeric seed @ " << rz->pos.line << ':' << rz->pos.col; log(m.str()); throw SemanticError(m.str()); }
+            if (typeOf(rz->seed.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: RANDOMIZE requires numeric seed @ " << rz->pos.line << ':' << rz->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             analyzeExpr(rz->seed.get());
         }
         return;
     }
     if (auto w = dyn_cast<const WhileStmt>(s)) {
         if (typeOf(w->cond.get()) == ValueType::String) {
-            std::ostringstream m; m << "TypeError: WHILE condition cannot be string @ " << w->pos.line << ':' << w->pos.col; log(m.str());
+            std::ostringstream m; m << "TypeError: WHILE condition cannot be string @ " << w->pos.line << ':' << w->pos.col; log() << m.str() << '\n';
             throw SemanticError(m.str());
         }
         analyzeExpr(w->cond.get());
@@ -134,20 +187,20 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         for (const auto& n : c->names) {
             declare(n);
             common_.insert(n);
-            std::ostringstream m; m << "Common " << n << " @ " << c->pos.line << ':' << c->pos.col; log(m.str());
+            std::ostringstream m; m << "Common " << n << " @ " << c->pos.line << ':' << c->pos.col; log() << m.str() << '\n';
         }
         return;
     }
     if (auto ch = dyn_cast<const ChainStmt>(s)) {
         if (ch->targetLine.has_value() && !lines_.contains(*ch->targetLine)) {
             if (strictControlFlow_) {
-                std::ostringstream err; err << "ControlFlowError: missing CHAIN target line " << *ch->targetLine << " @ " << ch->pos.line << ':' << ch->pos.col; log(err.str());
+                std::ostringstream err; err << "ControlFlowError: missing CHAIN target line " << *ch->targetLine << " @ " << ch->pos.line << ':' << ch->pos.col; log() << err.str() << '\n';
                 throw SemanticError(err.str());
             } else {
-                std::ostringstream w; w << "Warning: CHAIN missing target line " << *ch->targetLine << " @ " << ch->pos.line << ':' << ch->pos.col; log(w.str());
+                std::ostringstream w; w << "Warning: CHAIN missing target line " << *ch->targetLine << " @ " << ch->pos.line << ':' << ch->pos.col; log() << w.str() << '\n';
             }
         }
-        log("Chain");
+        log() << "Chain" << '\n';
         return;
     }
 }

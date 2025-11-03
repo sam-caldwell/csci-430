@@ -19,7 +19,7 @@ void SemanticAnalyzer::declare(const std::string& name) {
     if (scopes_.empty()) scopes_.emplace_back();
     scopes_.front().insert(name);
     vars_.insert(name);
-    std::ostringstream m; m << "VarDecl " << name; log(m.str());
+    log() << "VarDecl " << name << '\n';
 }
 
 } // namespace gwbasic

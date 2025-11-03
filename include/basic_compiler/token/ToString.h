@@ -16,7 +16,7 @@ namespace gwbasic {
  * Outputs:
  *  - std::string: Short name (e.g., "PRINT", "+", "IDENT")
  */
-inline std::string to_string(TokenType t) {
+inline std::string to_string(const TokenType t) {
     switch (t) {
         case TokenType::EndOfFile: return "EOF";
         case TokenType::NewLine: return "NEWLINE";
@@ -39,6 +39,11 @@ inline std::string to_string(TokenType t) {
         case TokenType::KwGosub: return "GOSUB";
         case TokenType::KwReturn: return "RETURN";
         case TokenType::KwInput: return "INPUT";
+        case TokenType::KwData: return "DATA";
+        case TokenType::KwRead: return "READ";
+        case TokenType::KwRestore: return "RESTORE";
+        case TokenType::KwWrite: return "WRITE";
+        case TokenType::KwLine: return "LINE";
         case TokenType::KwRandomize: return "RANDOMIZE";
         case TokenType::KwWhile: return "WHILE";
         case TokenType::KwWend: return "WEND";
@@ -46,6 +51,12 @@ inline std::string to_string(TokenType t) {
         case TokenType::KwCommon: return "COMMON";
         case TokenType::KwAll: return "ALL";
         case TokenType::KwChain: return "CHAIN";
+        case TokenType::KwDim: return "DIM";
+        case TokenType::KwOpen: return "OPEN";
+        case TokenType::KwClose: return "CLOSE";
+        case TokenType::KwAs: return "AS";
+        case TokenType::KwOutput: return "OUTPUT";
+        case TokenType::KwUsing: return "USING";
         case TokenType::KwMerge: return "MERGE";
         case TokenType::Plus: return "+";
         case TokenType::Minus: return "-";
@@ -61,6 +72,7 @@ inline std::string to_string(TokenType t) {
         case TokenType::RParen: return ")";
         case TokenType::Colon: return ":";
         case TokenType::Comma: return ",";
+        case TokenType::Hash: return "#";
     }
     return "?";
 }

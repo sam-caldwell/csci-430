@@ -2,10 +2,12 @@
 #pragma once
 
 #include <set>
+#include <map>
 #include <string>
 #include <unordered_set>
 #include <vector>
 #include <fstream>
+#include "logger/Logger.h"
 
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/Expr.h"
@@ -39,6 +41,7 @@ public:
         std::set<std::string> stringLiterals;
         std::set<int> lineNumbers;
         std::set<std::string> commonVariables;
+        std::map<std::string,int> arrays; // 1-D arrays name->length
     };
 
     SemanticAnalyzer() = default;
@@ -53,9 +56,8 @@ public:
      *  - void (opens/truncates file; toggles logEnabled_)
      */
     void setLogPath(const std::string& path) {
-        if (log_.is_open()) log_.close();
-        log_.open(path, std::ios::out | std::ios::trunc);
-        logEnabled_ = log_.is_open();
+        logger_.open(path, /*append=*/false);
+        logger_.setEnabled(true);
     }
 
     /*
@@ -118,20 +120,10 @@ private:
      *  - Set of variables appearing in COMMON declarations.
      */
     std::set<std::string> common_;
+    std::map<std::string,int> arrays_;
 
-    /*
-     * Property: logEnabled_
-     * Purpose:
-     *  - Enable/disable logging to 'log_'.
-     */
-    bool logEnabled_{false};
-
-    /*
-     * Property: log_
-     * Purpose:
-     *  - Output stream for semantic-phase logs.
-     */
-    std::ofstream log_;
+    // Logging via ostream-based logger
+    logger::Logger logger_{};
 
     /*
      * Property: currentLine_
@@ -152,14 +144,14 @@ private:
      * Purpose:
      *  - Push a new lexical scope onto the stack and log the event.
      */
-    void enterScope() { scopes_.emplace_back(); log("ScopeEnter"); }
+    void enterScope() { scopes_.emplace_back(); log() << "ScopeEnter" << '\n'; }
 
     /**
      * Function: SemanticAnalyzer::exitScope
      * Purpose:
      *  - Pop the current scope if not global and log the event.
      */
-    void exitScope() { if (scopes_.size() > 1) scopes_.pop_back(); log("ScopeExit"); }
+    void exitScope() { if (scopes_.size() > 1) scopes_.pop_back(); log() << "ScopeExit" << '\n'; }
 
     /**
      * Function: SemanticAnalyzer::isDeclared
@@ -191,12 +183,8 @@ private:
      */
     void reference(const std::string& name, const SourcePos& pos);
 
-    /**
-     * Function: SemanticAnalyzer::log
-     * Purpose:
-     *  - Append a line to the semantic log when enabled.
-     */
-    void log(const std::string& msg) { if (logEnabled_ && log_.is_open()) log_ << msg << '\n'; }
+    // Stream accessor for integration symmetry with other phases
+    std::ostream& log() { return logger_.stream(); }
 
     /**
      * Function: SemanticAnalyzer::analyzeLine

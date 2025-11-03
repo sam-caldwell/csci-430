@@ -7,6 +7,8 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include "logger/Logger.h"
+#include "basic_compiler/Chars.h"
 
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/RTTI.h"
@@ -21,6 +23,7 @@
 #include "basic_compiler/ast/ForStmt.h"
 #include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/OpenStmt.h"
 #include "basic_compiler/ast/InputStmt.h"
 #include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/IfBlockStmt.h"
@@ -92,6 +95,7 @@ public:
         semStrings_ = r.stringLiterals;
         semLineNumbers_ = r.lineNumbers;
         semCommonVariables_ = r.commonVariables;
+        arraySizes_ = r.arrays;
     }
 
 private:
@@ -126,6 +130,8 @@ private:
      *  - Map string literal value to a unique id used for global names.
      */
     std::map<std::string, int> strLiteralId_;
+    std::map<std::string, int> arraySizes_{};
+    std::map<std::string, std::string> arrayAllocaName_{};
     /*
      * Property: lineNumbers_
      * Purpose:
@@ -194,44 +200,14 @@ private:
      *    drive CHAIN scoping behavior.
      */
     std::map<int, std::set<std::string>> commonBeforeLine_{};
+    // DATA items as string literal ids in program order
+    std::vector<int> dataLiteralIds_{};
 
-    // Phase logging
-    /*
-     * Property: logEnabled_
-     * Purpose:
-     *  - Toggle for codegen-phase logging to 'logFile_'.
-     */
-    bool logEnabled_{false};
-    /*
-     * Property: logPath_
-     * Purpose:
-     *  - Destination path for codegen log file.
-     */
-    std::string logPath_{};
-    /*
-     * Property: logFile_
-     * Purpose:
-     *  - Output stream for codegen-phase logs.
-     */
-    std::ofstream logFile_;
-    /*
-     * Property: semLogEnabled_
-     * Purpose:
-     *  - Toggle for semantic-collection logging to 'semLogFile_'.
-     */
-    bool semLogEnabled_{false};
-    /*
-     * Property: semLogPath_
-     * Purpose:
-     *  - Destination path for semantic log file.
-     */
-    std::string semLogPath_{};
-    /*
-     * Property: semLogFile_
-     * Purpose:
-     *  - Output stream for semantic-collection logs.
-     */
-    std::ofstream semLogFile_;
+    // Phase logging via ostream-based logger
+    logger::Logger codegenLogger_{};
+    logger::Logger semLogger_{};
+    // Optional: a syntax logger accessor exists for unified interface
+    logger::Logger syntaxLogger_{};
 
     // Naming helpers
     /**
@@ -310,16 +286,15 @@ private:
     const Line* findLine(int line) const;
     /** Allocate a stack slot for a variable if not already allocated. */
     void ensureVarAllocated(std::ostringstream& out, const std::string& name);
+    void ensureArrayAllocated(std::ostringstream& out, const std::string& name, int length);
 
     // Logging utilities
-    /** Append a line to the codegen log if enabled. */
-    void log(const std::string& msg) {
-        if (logEnabled_ && logFile_.is_open()) logFile_ << msg << "\n";
-    }
-    /** Append a line to the semantic collection log if enabled. */
-    void logSem(const std::string& msg) {
-        if (semLogEnabled_ && semLogFile_.is_open()) semLogFile_ << msg << "\n";
-    }
+    /** Stream accessor: codegen-phase logger (ostream sink when disabled). */
+    std::ostream& log() { return codegenLogger_.stream(); }
+    /** Stream accessor: semantics-phase logger (ostream sink when disabled). */
+    std::ostream& logSem() { return semLogger_.stream(); }
+    /** Stream accessor: syntax-phase logger (unused here; provided for interface parity). */
+    std::ostream& syntax() { return syntaxLogger_.stream(); }
     /** Human-readable name for a Stmt node kind (for logging). */
     static const char* nodeName(const Stmt* s) { return prettyName(s ? s->getKind() : NodeKind::AbstractStmt); }
     /** Human-readable name for an Expr node kind (for logging). */
@@ -334,10 +309,8 @@ public:
      *  - path: Destination file path for codegen logs
      */
     void setLogPath(const std::string& path) {
-        logPath_ = path;
-        logEnabled_ = true;
-        if (logFile_.is_open()) logFile_.close();
-        logFile_.open(logPath_, std::ios::out | std::ios::trunc);
+        codegenLogger_.open(path, /*append=*/false);
+        codegenLogger_.setEnabled(true);
     }
     /**
      * Function: CodeGenerator::setSemanticLogPath
@@ -347,10 +320,8 @@ public:
      *  - path: Destination file path for semantic logs
      */
     void setSemanticLogPath(const std::string& path) {
-        semLogPath_ = path;
-        semLogEnabled_ = true;
-        if (semLogFile_.is_open()) semLogFile_.close();
-        semLogFile_.open(semLogPath_, std::ios::out | std::ios::trunc);
+        semLogger_.open(path, /*append=*/false);
+        semLogger_.setEnabled(true);
     }
 };
 

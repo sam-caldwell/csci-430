@@ -14,9 +14,8 @@ namespace gwbasic {
  *    internal flag when the file is open.
  */
 void Parser::setSyntaxLogPath(const std::string& path) {
-    if (syntaxLog_.is_open()) syntaxLog_.close();
-    syntaxLog_.open(path, std::ios::out | std::ios::trunc);
-    syntaxLogEnabled_ = syntaxLog_.is_open();
+    syntaxLogger_.open(path, /*append=*/false);
+    syntaxLogger_.setEnabled(true);
 }
 
 } // namespace gwbasic
