@@ -1,0 +1,530 @@
+(*
+  GW-BASIC EBNF Grammar
+
+  Source of truth: “GW-BASIC User's Guide and Reference” (Microsoft, 1987)
+  as mirrored at https://hwiegman.home.xs4all.nl/gw-man
+
+  Notes and conventions:
+  - Keywords are case-insensitive in GW-BASIC; they are written here in UPPERCASE for clarity.
+  - Whitespace may appear between tokens except where explicitly disallowed by GW-BASIC syntax.
+  - Square brackets [ … ] denote optional items; braces { … } denote zero-or-more repetition.
+  - Parentheses ( … ) denote grouping; vertical bar | denotes alternation.
+  - String literals are enclosed in double quotes ("..."); embedded quotes use doubled quotes "".
+  - Numeric literals include decimal, scientific (E/D exponent), hexadecimal (&H...), and octal (&O... or &...).
+  - Line numbers are decimal (1–5 digits typically); exact numeric range is not encoded here.
+  - GW-BASIC allows multiple statements on a line separated by ':' (colon).
+  - This grammar aims to be comprehensive, but some device- and hardware-specific options are grouped.
+  - For full semantics and device-specific value ranges, refer to the manual sections linked above.
+*)
+
+
+program         = { line } ;
+
+line            = line-number , [ spaces ] , [ statement-list ] , [ spaces ] ;
+
+line-number     = decimal-digit , { decimal-digit } ;  (* typically 1–5 digits; 0..65535 practical range *)
+
+statement-list  = statement , { ":" , statement } ;
+
+statement       = rem-statement
+                | let-statement
+                | midassign-statement
+                | if-statement
+                | for-statement
+                | next-statement
+                | while-statement
+                | wend-statement
+                | goto-statement
+                | gosub-statement
+                | return-statement
+                | on-goto-statement
+                | on-gosub-statement
+                | on-error-goto-statement
+                | resume-statement
+                | stop-statement
+                | end-statement
+                | randomize-statement
+                | dim-statement
+                | erase-statement
+                | option-base-statement
+                | def-type-statement
+                | def-seg-statement
+                | def-usr-statement
+                | def-fn-statement
+                | data-statement
+                | read-statement
+                | restore-statement
+                | swap-statement
+                | lset-statement
+                | rset-statement
+                | input-statement
+                | input-line-statement
+                | input-file-statement
+                | input-line-file-statement
+                | print-statement
+                | print-using-statement
+                | print-file-statement
+                | print-using-file-statement
+                | write-statement
+                | write-file-statement
+                | lprint-statement
+                | lprint-using-statement
+                | open-statement
+                | open-com-statement
+                | comn-statement
+                | close-statement
+                | field-statement
+                | get-file-statement
+                | put-file-statement
+                | get-graphics-statement
+                | put-graphics-statement
+                | name-statement
+                | kill-statement
+                | mkdir-statement
+                | rmdir-statement
+                | chdir-statement
+                | files-command
+                | lock-statement
+                | unlock-statement
+                | line-input-statement  (* synonym of input-line-statement *)
+                | locate-statement
+                | width-statement
+                | screen-statement
+                | color-statement
+                | palette-statement
+                | cls-statement
+                | pset-statement
+                | preset-statement
+                | line-graphics-statement
+                | circle-statement
+                | paint-statement
+                | draw-statement
+                | view-statement
+                | view-print-statement
+                | window-statement
+                | beep-statement
+                | sound-statement
+                | play-statement
+                | key-statement
+                | keyn-statement
+                | on-event-statement
+                | pen-statement
+                | strig-statement
+                | timer-onoff-statement
+                | tron-command
+                | troff-command
+                | cont-command
+                | run-command
+                | system-command
+                | load-command
+                | save-command
+                | merge-command
+                | bload-command
+                | bsave-command
+                | new-command
+                | delete-command
+                | list-command
+                | llist-command
+                | auto-command
+                | renum-command
+                | edit-command
+                | pcopy-command
+                | clear-command
+                | reset-command
+                | shell-statement
+                | environ-statement
+                | error-statement
+                | out-statement
+                | wait-statement
+                | poke-statement
+                | call-statement
+                | chain-statement
+                | common-statement
+                | ioctl-statement       (* IOCTL; IOCTL$ parsed as a function *)
+                | rem-inline            (* apostrophe comment form *)
+                | assignment-statement  (* implicit LET *)
+                ;
+
+
+(* ----- Comments ----- *)
+rem-statement   = "REM" , { not-eol-char } ;
+rem-inline      = "'" , { not-eol-char } ;
+
+
+(* ----- Assignments and variables ----- *)
+let-statement   = "LET" , lvalue , "=" , expression ;
+
+assignment-statement = lvalue , "=" , expression ;
+
+(* MID$ assignment form, per manual MID$ Statement *)
+midassign-statement = "MID$" , "(" , string-variable , "," , numeric-expression , [ "," , numeric-expression ] , ")" , "=" , string-expression ;
+
+lvalue          = variable | array-element | field-variable ;
+
+variable        = identifier ;           (* may include type-suffix; see identifier rule *)
+string-variable = identifier , "$" ;
+num-variable    = identifier , [ "%" | "!" | "#" ] ;
+
+array-element   = identifier , "(" , subscript-list , ")" ;
+subscript-list  = numeric-expression , { "," , numeric-expression } ;
+
+field-variable  = identifier , "$" ;    (* left/right-set target from FIELD/LSET/RSET *)
+
+
+(* ----- Control flow ----- *)
+if-statement    = "IF" , expression , [ "," ] ,
+                  ( "THEN" , then-target , [ [ "," ] , "ELSE" , else-target ]
+                  | "GOTO" , line-number , [ [ "," ] , "ELSE" , else-target ] ) ;
+
+then-target     = inline-statement-list | line-number | ( "GOTO" , line-number ) ;
+else-target     = inline-statement-list | line-number | ( "GOTO" , line-number ) ;
+
+inline-statement-list = statement , { ":" , statement } ;  (* must be on the same logical line in GW-BASIC *)
+
+for-statement   = "FOR" , variable , "=" , numeric-expression , "TO" , numeric-expression , [ "STEP" , numeric-expression ] ;
+next-statement  = "NEXT" , [ variable , { "," , variable } ] ;
+
+while-statement = "WHILE" , expression ;
+wend-statement  = "WEND" ;
+
+goto-statement  = "GOTO" , line-number ;
+gosub-statement = "GOSUB" , line-number ;
+return-statement= "RETURN" , [ line-number ] ;  (* nonlocal RETURN form allowed per event trapping notes *)
+
+on-goto-statement = "ON" , numeric-expression , "GOTO" , line-number , { "," , line-number } ;
+on-gosub-statement= "ON" , numeric-expression , "GOSUB" , line-number , { "," , line-number } ;
+
+on-error-goto-statement = "ON" , "ERROR" , "GOTO" , ( "0" | line-number ) ;
+resume-statement = "RESUME" , [ "0" | "NEXT" | line-number ] ;
+
+stop-statement  = "STOP" ;
+end-statement   = "END" ;
+
+randomize-statement = "RANDOMIZE" , [ numeric-expression ] ;
+
+
+(* ----- Declarations and typing ----- *)
+dim-statement   = "DIM" , dim-item , { "," , dim-item } ;
+dim-item        = identifier , "(" , dim-bounds , ")" ;
+dim-bounds      = numeric-expression , { "," , numeric-expression } ;  (* up to 255 dims *)
+
+erase-statement = "ERASE" , identifier , { "," , identifier } ;
+
+option-base-statement = "OPTION" , "BASE" , ( "0" | "1" ) ;
+
+def-type-statement = ( "DEFINT" | "DEFSNG" | "DEFDBL" | "DEFSTR" ) , def-letter-groups ;
+def-letter-groups   = def-letter-group , { "," , def-letter-group } ;
+def-letter-group    = letter | ( letter , "-" , letter ) ;
+
+def-seg-statement = "DEF" , "SEG" , [ "=" , numeric-expression ] ;
+def-usr-statement = "DEF" , "USR" , [ decimal-digit ] , "=" , numeric-expression ;
+
+def-fn-statement  = "DEF" , "FN" , fn-name , [ "(" , def-fn-params , ")" ] , "=" , expression ;
+fn-name           = identifier , [ "$" | "%" | "!" | "#" ] ;
+def-fn-params     = identifier , { "," , identifier } ;
+
+
+(* ----- Data statements ----- *)
+data-statement   = "DATA" , data-item , { "," , data-item } ;
+data-item        = numeric-literal | data-string ;
+data-string      = string-literal | unquoted-data-string ;
+(* Unquoted strings in DATA: permitted unless containing comma/colon/leading or trailing blanks. *)
+unquoted-data-string = unquoted-data-char , { unquoted-data-char } ;
+unquoted-data-char   = ? any character except comma, colon, leading/trailing space or control chars ? ;
+
+read-statement   = "READ" , variable-ref , { "," , variable-ref } ;
+restore-statement= "RESTORE" , [ line-number ] ;
+
+variable-ref     = variable | array-element ;
+
+swap-statement   = "SWAP" , variable-ref , "," , variable-ref ;
+
+lset-statement   = "LSET" , string-variable , "=" , string-expression ;
+rset-statement   = "RSET" , string-variable , "=" , string-expression ;
+
+
+(* ----- Input/Output (console, printer, files) ----- *)
+input-statement      = "INPUT" , [ ";" ] , [ prompt , ( ";" | "," ) ] , variable-ref , { "," , variable-ref } ;
+input-line-statement = "LINE" , "INPUT" , [ ";" ] , [ prompt , ( ";" | "," ) ] , string-variable ;
+
+input-file-statement      = "INPUT#" , file-channel , "," , variable-ref , { "," , variable-ref } ;
+input-line-file-statement = "LINE" , "INPUT#" , file-channel , "," , string-variable ;
+
+print-statement     = ( "PRINT" | "?" ) , [ print-list ] , [ ";" ] ;
+print-using-statement = "PRINT" , "USING" , string-expression , ";" , print-using-list , [ ";" ] ;
+
+print-file-statement = "PRINT#" , file-channel , "," , ( [ print-list ] | ( "USING" , string-expression , ";" , print-using-list ) ) , [ ";" ] ;
+print-using-file-statement = "PRINT#" , file-channel , "," , "USING" , string-expression , ";" , print-using-list , [ ";" ] ;
+
+write-statement     = "WRITE" , [ write-list ] ;
+write-file-statement= "WRITE#" , file-channel , "," , write-list ;
+
+lprint-statement    = "LPRINT" , [ print-list ] , [ ";" ] ;
+lprint-using-statement = "LPRINT" , "USING" , string-expression , ";" , print-using-list , [ ";" ] ;
+
+print-list       = print-item , { ( "," | ";" | spaces ) , [ print-item ] } ;
+print-item       = expression | tab-call | spc-call ;
+tab-call         = "TAB" , "(" , numeric-expression , ")" ;
+spc-call         = "SPC" , "(" , numeric-expression , ")" ;
+
+print-using-list = expression , { ";" , expression } ;
+write-list       = expression , { "," , expression } ;
+
+prompt           = string-expression ;
+
+file-channel     = [ "#" ] , numeric-expression ;   (* Examples show #n; both forms accepted by manual pages *)
+
+open-statement   = "OPEN" , ( open-legacy | open-modern ) ;
+open-legacy      = mode-string , "," , [ "#" ] , numeric-expression , "," , filename , [ "," , record-length ] ;
+open-modern      = filename , [ "FOR" , open-mode ] , [ "ACCESS" , open-access ] , [ open-lock ] , "AS" , [ "#" ] , numeric-expression , [ "LEN" , "=" , record-length ] ;
+
+mode-string      = string-expression ;  (* "O","I","R","A"; see manual for meanings *)
+filename         = string-expression ;
+record-length    = numeric-expression ;
+
+open-mode        = "INPUT" | "OUTPUT" | "APPEND" | "RANDOM" ;
+open-access      = "READ" | "WRITE" | "READ WRITE" ;
+open-lock        = "SHARED" | "LOCK READ" | "LOCK WRITE" | "LOCK READ WRITE" ;  (* consolidated; OEM variants may differ *)
+
+open-com-statement = "OPEN" , com-spec , "AS" , [ "#" ] , numeric-expression , [ "LEN" , "=" , numeric-expression ] ;
+com-spec        = string-literal ,  (* e.g., "COM1:1200,N,8,1,RS,CS1000,DS1000,CD0,LF,PE"; see manual for full options *)
+                  { } ;            (* Syntax and ranges are device-specific; delegate to manual *)
+
+comn-statement   = "COM" , "(" , numeric-expression , ")" , ( "ON" | "OFF" | "STOP" ) ;
+
+close-statement = "CLOSE" , [ file-channel , { "," , file-channel } ] ;
+
+field-statement = "FIELD" , file-channel , "," , numeric-expression , "AS" , string-variable ,
+                  { "," , numeric-expression , "AS" , string-variable } ;
+
+get-file-statement = "GET" , file-channel , [ "," , numeric-expression ] ;
+put-file-statement = "PUT" , file-channel , [ "," , numeric-expression ] ;
+
+get-graphics-statement = "GET" , "(" , numeric-expression , "," , numeric-expression , ")" , "-" ,
+                         "(" , numeric-expression , "," , numeric-expression , ")" , "," , variable-ref ;
+put-graphics-statement = "PUT" , "(" , numeric-expression , "," , numeric-expression , ")" , "," , variable-ref , [ "," , put-action ] ;
+put-action      = "PSET" | "PRESET" | "AND" | "OR" | "XOR" ;
+
+name-statement  = "NAME" , string-expression , "AS" , string-expression ;
+kill-statement  = "KILL" , string-expression ;
+mkdir-statement = "MKDIR" , string-expression ;
+rmdir-statement = "RMDIR" , string-expression ;
+chdir-statement = "CHDIR" , string-expression ;
+files-command   = "FILES" , [ string-expression ] ;
+
+lock-statement  = "LOCK" , file-channel , [ "," , numeric-expression , "TO" , numeric-expression ] ;
+unlock-statement= "UNLOCK" , file-channel , [ "," , numeric-expression , "TO" , numeric-expression ] ;
+
+
+(* ----- Text/graphics screen control ----- *)
+locate-statement = "LOCATE" , numeric-expression , [ "," , numeric-expression , [ "," , numeric-expression , [ "," , numeric-expression , [ "," , numeric-expression ] ] ] ] ;
+
+width-statement  = "WIDTH" , ( numeric-expression | string-expression , "," , numeric-expression ) ;
+
+screen-statement = "SCREEN" , numeric-expression , [ "," , numeric-expression , [ "," , numeric-expression , [ "," , numeric-expression ] ] ] ;
+
+color-statement  = "COLOR" , color-args ;
+color-args       = expression , [ "," , expression , [ "," , expression ] ] ;
+
+palette-statement= "PALETTE" , ( expression , [ "," , expression ] | "USING" , expression ) ;
+
+cls-statement    = "CLS" , [ numeric-expression ] ;
+
+pset-statement   = "PSET" , "(" , numeric-expression , "," , numeric-expression , ")" , [ "," , expression ] ;
+preset-statement = "PRESET" , "(" , numeric-expression , "," , numeric-expression , ")" , [ "," , expression ] ;
+
+line-graphics-statement = "LINE" , [ "(" , numeric-expression , "," , numeric-expression , ")" ] , "-" ,
+                          "(" , numeric-expression , "," , numeric-expression , ")" ,
+                          [ "," , [ expression ] , [ "," , ( "B" | "BF" ) ] , [ "," , expression ] ] ;
+
+circle-statement = "CIRCLE" , "(" , numeric-expression , "," , numeric-expression , ")" ,
+                   "," , numeric-expression ,
+                   [ "," , [ expression ] , [ "," , [ expression ] , [ "," , [ expression ] ] ] ] ;
+
+paint-statement  = "PAINT" , "(" , numeric-expression , "," , numeric-expression , ")" ,
+                   [ "," , expression , [ "," , expression , [ "," , expression ] ] ] ;
+
+draw-statement   = "DRAW" , string-expression ;
+
+view-statement   = "VIEW" , [ [ "SCREEN" ] , "(" , numeric-expression , "," , numeric-expression , ")" , "-" ,
+                              "(" , numeric-expression , "," , numeric-expression , ")" ,
+                              [ "," , [ numeric-expression ] , [ "," , [ numeric-expression ] ] ] ] ;
+view-print-statement = "VIEW" , "PRINT" , [ numeric-expression , "TO" , numeric-expression ] ;
+
+window-statement = "WINDOW" , [ [ "SCREEN" ] , "(" , numeric-expression , "," , numeric-expression , ")" , "-" ,
+                                "(" , numeric-expression , "," , numeric-expression , ")" ] ;
+
+
+(* ----- Sound ----- *)
+beep-statement   = "BEEP" ;
+sound-statement  = "SOUND" , numeric-expression , "," , numeric-expression ;
+play-statement   = "PLAY" , string-expression ;
+
+
+(* ----- Keyboard, events, pen, joysticks, timer ----- *)
+key-statement    = "KEY" , ( "ON" | "OFF" | "LIST" | numeric-expression , "," , string-expression
+                             | numeric-expression , "," , "CHR$" , "(" , numeric-expression , ")" , "+" , "CHR$" , "(" , numeric-expression , ")" ) ;
+
+keyn-statement   = "KEY" , "(" , numeric-expression , ")" , ( "ON" | "OFF" | "STOP" ) ;
+
+on-event-statement = "ON" , event-spec , "GOSUB" , ( "0" | line-number ) ;
+event-spec       = "COM" , "(" , numeric-expression , ")"
+                 | "KEY" , "(" , numeric-expression , ")"
+                 | "PEN"
+                 | "PLAY" , "(" , numeric-expression , ")"
+                 | "STRIG" , "(" , numeric-expression , ")"
+                 | "TIMER" , "(" , numeric-expression , ")" ;
+
+pen-statement    = "PEN" , ( "ON" | "OFF" | "STOP" ) ;
+strig-statement  = "STRIG" , ( "ON" | "OFF" | "STOP" | "(" , numeric-expression , ")" , ( "ON" | "OFF" | "STOP" ) ) ;
+
+timer-onoff-statement = "TIMER" , ( "ON" | "OFF" | "STOP" ) ;
+
+
+(* ----- Tracing and control commands (direct mode also allowed) ----- *)
+tron-command     = "TRON" ;
+troff-command    = "TROFF" ;
+cont-command     = "CONT" ;
+run-command      = "RUN" , ( [ line-number , [ "," , "R" ] ]
+                            | string-expression , [ "," , "R" ]
+                            | /* empty */ ) ;
+system-command   = "SYSTEM" ;
+load-command     = "LOAD" , string-expression , [ ",R" ] ;
+save-command     = "SAVE" , string-expression , [ ",A" | ",P" ] ;
+merge-command    = "MERGE" , string-expression ;
+auto-command     = "AUTO" , ( [ line-number ] , [ "," , numeric-expression ]
+                             | "." , [ "," , numeric-expression ]
+                             | /* empty */ ) ;
+renum-command    = "RENUM" , [ numeric-expression ] , [ "," , numeric-expression ] , [ "," , numeric-expression ] ;
+edit-command     = "EDIT" , ( line-number | "." ) ;
+
+bload-command    = "BLOAD" , filename , [ "," , numeric-expression ] ;
+bsave-command    = "BSAVE" , filename , "," , numeric-expression , "," , numeric-expression ;
+new-command      = "NEW" ;
+delete-command   = "DELETE" , ( line-ref
+                              | line-ref , "-" , line-ref
+                              | line-ref , "-" ) ;
+list-command     = "LIST" , [ ( line-ref | line-ref , "-" , line-ref | line-ref , "-" ) ] ;
+llist-command    = "LLIST" , [ ( line-ref | line-ref , "-" , line-ref | line-ref , "-" ) ] ;
+pcopy-command    = "PCOPY" , numeric-expression , "," , numeric-expression ;
+clear-command    = "CLEAR" , [ numeric-expression , [ "," , numeric-expression , [ "," , numeric-expression ] ] ] ;
+reset-command    = "RESET" ;
+shell-statement  = "SHELL" , [ string-expression ] ;
+environ-statement= "ENVIRON" , string-expression ;
+
+
+(* ----- Errors and low-level I/O ----- *)
+error-statement  = "ERROR" , numeric-expression ;
+out-statement    = "OUT" , numeric-expression , "," , numeric-expression ;
+wait-statement   = "WAIT" , numeric-expression , "," , numeric-expression , [ "," , numeric-expression ] ;
+poke-statement   = "POKE" , numeric-expression , "," , numeric-expression ;
+call-statement   = "CALL" , num-variable , [ "(" , call-arg-list , ")" ] ;
+call-arg-list    = call-arg , { "," , call-arg } ;
+call-arg         = variable-ref | numeric-literal | string-literal ;
+chain-statement  = "CHAIN" , [ "MERGE" ] , string-expression ,
+                   [ "," , [ line-number ] , [ "," , [ "ALL" ] , [ "," , "DELETE" , delete-range ] ] ] ;
+delete-range     = line-ref , [ "-" , line-ref ] ;
+common-statement = "COMMON" , [ "SHARED" ] , variable-ref , { "," , variable-ref } ;
+ioctl-statement  = "IOCTL" , file-channel , "," , string-expression ;
+
+
+(* ----- Expressions ----- *)
+expression       = logical-expression ;
+
+logical-expression = relational-expression , { ( "AND" | "OR" | "XOR" | "EQV" | "IMP" ) , relational-expression } ;
+
+relational-expression = additive-expression , [ rel-op , additive-expression ] ;
+rel-op           = "=" | "<>" | "<" | ">" | "<=" | ">=" ;
+
+additive-expression = multiplicative-expression , { ( "+" | "-" ) , multiplicative-expression } ;
+
+multiplicative-expression = exponent-expression , { ( "*" | "/" | "\\" | "MOD" ) , exponent-expression } ;
+
+exponent-expression = unary-expression , { "^" , unary-expression } ;  (* right-associative in semantics *)
+
+unary-expression = [ unary-op ] , primary ;
+unary-op         = "+" | "-" | "NOT" ;
+
+primary          = number
+                 | string-literal
+                 | function-call
+                 | variable-ref
+                 | "(" , expression , ")" ;
+
+numeric-expression = expression ;  (* subtype: evaluates to numeric *)
+string-expression  = expression ;  (* subtype: evaluates to string  *)
+
+function-call    = fn-like ;
+fn-like          = ( builtin-fn | user-fn ) ;
+
+user-fn          = "FN" , fn-name , [ "(" , arg-list , ")" ] ;
+builtin-fn       = identifier , "(" , [ arg-list ] , ")" ;  (* e.g., SIN(x), INSTR(a$,b$) etc. See manual for full list *)
+arg-list         = expression , { "," , expression } ;
+
+
+(* ----- Literals and identifiers ----- *)
+number           = numeric-literal ;
+
+numeric-literal  = decimal-literal , [ numeric-type-suffix ] , [ exponent-part ]
+                 | decimal-int , exponent-part , [ numeric-type-suffix ]
+                 | hex-literal
+                 | oct-literal ;
+
+decimal-literal  = decimal-int , [ "." , [ digits ] ]
+                 | "." , digits ;
+
+decimal-int      = [ "+" | "-" ] , digits ;
+digits           = decimal-digit , { decimal-digit } ;
+decimal-digit    = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+exponent-part    = ( "E" | "D" ) , [ "+" | "-" ] , digits ;  (* E=single, D=double exponent notation *)
+numeric-type-suffix = "!" | "#" ;  (* single or double precision constant suffix *)
+
+hex-literal      = "&H" , hex-digit , { hex-digit } ;
+hex-digit        = "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"A"|"B"|"C"|"D"|"E"|"F" ;
+
+oct-literal      = ( "&O" | "&" ) , oct-digit , { oct-digit } ;
+oct-digit        = "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7" ;
+
+string-literal   = '"' , { string-char } , '"' ;
+string-char      = string-char-noquote | '"' '"' ;  (* doubled quotes for embedded ")
+string-char-noquote = ? any character except '"' and end-of-line ? ;
+
+identifier       = letter , { letter | decimal-digit | "." } , [ type-suffix ] ;
+letter           = "A"|"B"|"C"|"D"|"E"|"F"|"G"|"H"|"I"|"J"|"K"|"L"|"M"
+                 | "N"|"O"|"P"|"Q"|"R"|"S"|"T"|"U"|"V"|"W"|"X"|"Y"|"Z" ;
+type-suffix      = "%" | "!" | "#" | "$" ;
+
+spaces           = { space } ;
+space            = ? space or tab ? ;
+not-eol-char     = ? any character except end-of-line ? ;
+
+line-ref         = line-number | "." ;   (* in direct-mode commands, '.' denotes current line *)
+
+
+(* ----- Reserved words (non-exhaustive list, for reference only) ----- *)
+(*
+  Statements/commands: AUTO, BEEP, BLOAD, BSAVE, CALL, CHAIN, CHDIR, CIRCLE, CLEAR,
+  CLOSE, CLS, COLOR, COM, COMMON, CONT, DATA, DATE$, DEF FN, DEFDBL, DEFINT, DEFSNG,
+  DEFSTR, DEF SEG, DEF USR, DELETE, DIM, DRAW, EDIT, END, ENVIRON, ERASE, ERDEV,
+  ERROR, FIELD, FILES, FOR, GET (file/graphics), GOSUB, GOTO, IF, INPUT, INPUT#,
+  INKEY$, INP, IOCTL, IOCTL$, KEY, KEY(n), KILL, LET, LINE, LINE INPUT, LINE INPUT#,
+  LIST, LLIST, LOAD, LOCATE, LOCK, LPRINT, LPRINT USING, LSET, MERGE, MID$ (as stmt),
+  MKDIR, NAME, NEW, NEXT, ON ERROR GOTO, ON ... GOTO/GOSUB, ON COM/KEY/PEN/PLAY/STRIG/TIMER,
+  OPEN, OPEN "COMn:", OPTION BASE, OUT, PAINT, PALETTE, PCOPY, PEEK, PEN, PLAY,
+  PMAP, POINT, POKE, POS, PRESET, PSET, PRINT, PRINT USING, PRINT#, PRINT# USING,
+  PUT (file/graphics), RANDOMIZE, READ, REM / ', RENUM, RESET, RESTORE, RESUME,
+  RETURN, RMDIR, RSET, RUN, SAVE, SCREEN, SGN, SHELL, SOUND, SPC, SQR, STOP, STRIG,
+  STRING$, SWAP, SYSTEM, TAB, TAN, TIME$, TIMER, TRON, TROFF, UNLOCK, USR, VIEW,
+  VIEW PRINT, WAIT, WHILE, WEND, WIDTH, WINDOW, WRITE, WRITE#
+
+  Functions: ABS, ASC, ATN, CDBL, CHR$, CINT, CSNG, COS, CSRLIN, CVD, CVI, CVS,
+  DATE$, ENVIRON$, EOF, EXP, EXTERR, FIX, FRE, HEX$, INKEY$, INP, INPUT$, INSTR,
+  INT, IOCTL$, LEFT$, LEN, LOC, LOF, LOG, LPOS, MID$, MKD$, MKI$, MKS$, OCT$,
+  PEEK, PEN, PLAY(n), PMAP, POINT, POS, RIGHT$, RND, SCREEN, SGN, SIN, SPACE$,
+  SPC, SQR, STICK, STR$, STRING$, TAB, TAN, TIME$, TIMER, USR, VAL, VARPTR,
+  VARPTR$, etc. See manual for full details and device limitations.
+*)
+
+
+(* End of GW-BASIC EBNF *)
