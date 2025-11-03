@@ -67,14 +67,37 @@ std::vector<Token> Lexer::tokenize() {
             case '=': advance(); { Token t(TokenType::Assign, "=", tline, tcol); tokens.emplace_back(t); logToken(t); } break;
             case '<':
                 advance();
-                if (peek() == '=') { advance(); Token t(TokenType::LessEqual, "<=", tline, tcol); tokens.emplace_back(t); logToken(t); }
-                else if (peek() == '>') { advance(); Token t(TokenType::NotEqual, "<>", tline, tcol); tokens.emplace_back(t); logToken(t); }
-                else { Token t(TokenType::Less, "<", tline, tcol); tokens.emplace_back(t); logToken(t); }
+                if (peek() == '=') {
+                    advance();
+                    Token t(TokenType::LessEqual, "<=", tline, tcol);
+                    tokens.emplace_back(t);
+                    logToken(t);
+                }
+                else if (peek() == '>') {
+                    advance();
+                    Token t(TokenType::NotEqual, "<>", tline, tcol);
+                    tokens.emplace_back(t);
+                    logToken(t);
+                }
+                else {
+                    Token t(TokenType::Less, "<", tline, tcol);
+                    tokens.emplace_back(t);
+                    logToken(t);
+                }
                 break;
             case '>':
                 advance();
-                if (peek() == '=') { advance(); Token t(TokenType::GreaterEqual, ">=", tline, tcol); tokens.emplace_back(t); logToken(t); }
-                else { Token t(TokenType::Greater, ">", tline, tcol); tokens.emplace_back(t); logToken(t); }
+                if (peek() == '=') {
+                    advance();
+                    Token t(TokenType::GreaterEqual, ">=", tline, tcol);
+                    tokens.emplace_back(t);
+                    logToken(t);
+                }
+                else {
+                    Token t(TokenType::Greater, ">", tline, tcol);
+                    tokens.emplace_back(t);
+                    logToken(t);
+                }
                 break;
             default: {
                 std::ostringstream oss;
@@ -84,7 +107,11 @@ std::vector<Token> Lexer::tokenize() {
         }
         bol_ = false;
     }
-    { Token t(TokenType::EndOfFile, "", line_, col_); tokens.emplace_back(t); logToken(t); }
+    {
+        Token t(TokenType::EndOfFile, "", line_, col_);
+        tokens.emplace_back(t);
+        logToken(t);
+    }
     // Ensure end-of-input path in advance() is covered (no-op when at end)
     if (atEnd()) (void)advance();
     return tokens;
