@@ -9,6 +9,10 @@
 
 using namespace e2e_helpers;
 
+/***
+ * Test: LoggerE2E.CLI_HappyPath_ProducesLogs
+ * Purpose: Run CLI with log flags and verify log files are created with content.
+ */
 TEST(LoggerE2E, CLI_HappyPath_ProducesLogs) {
   namespace fs = std::filesystem;
   fs::path buildRoot = fs::current_path() / "build";

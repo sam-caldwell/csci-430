@@ -5,7 +5,6 @@
 #include <istream>
 #include <sstream>
 #include <vector>
-#include <stdexcept>
 #include <fstream>
 #include "logger/Logger.h"
 #include "basic_compiler/Chars.h"

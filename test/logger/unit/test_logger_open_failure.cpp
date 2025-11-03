@@ -9,6 +9,10 @@
 
 namespace fs = std::filesystem;
 
+/***
+ * Test: Logger.OpenFailureReturnsFalse
+ * Purpose: Opening a directory path should fail and writes are discarded.
+ */
 TEST(Logger, OpenFailureReturnsFalse) {
   logger::Logger log;
   // Attempt to open a directory path as a file (should fail)
@@ -20,4 +24,3 @@ TEST(Logger, OpenFailureReturnsFalse) {
   log.setEnabled(true);
   log() << "this should be discarded" << '\n';
 }
-

@@ -1,5 +1,5 @@
-// File: test/logger/unit/test_logger_toggle_and_append.cpp
-// Purpose: Verify toggling enabled state and append behavior.
+// File: test/logger/unit/test_logger_append_mode.cpp
+// Purpose: Verify append mode preserves existing content and appends new lines.
 
 #include <gtest/gtest.h>
 #include <filesystem>
@@ -17,30 +17,30 @@ static std::string read_all(const fs::path& p) {
 }
 
 /***
- * Test: Logger.ToggleEnabledState
- * Purpose: Ensure toggling enabled state discards/accepts writes accordingly.
+ * Test: Logger.AppendMode
+ * Purpose: Ensure reopening a file in append mode preserves existing content.
  */
-TEST(Logger, ToggleEnabledState) {
+TEST(Logger, AppendMode) {
   Logger log;
   fs::path outdir = fs::current_path() / "logger_tests";
   fs::create_directories(outdir);
-  fs::path file = outdir / "toggle.log";
+  fs::path file = outdir / "append.log";
 
   ASSERT_TRUE(log.open(file.string()));
-  // Initially disabled
-  log() << "discard this" << '\n';
-
   log.setEnabled(true);
-  log() << "keep this" << '\n';
+  log() << "first" << '\n';
+  log.close();
 
-  log.setEnabled(false);
-  log() << "discard this too" << '\n';
-
+  // Reopen in append and write more
+  ASSERT_TRUE(log.open(file.string(), /*append=*/true));
+  log.setEnabled(true);
+  log() << "second" << '\n';
   log.close();
 
   ASSERT_TRUE(fs::exists(file));
   std::string contents = read_all(file);
-  EXPECT_EQ(contents, std::string("keep this\n"));
+  EXPECT_EQ(contents, std::string("first\nsecond\n"));
 
   fs::remove(file);
 }
+

@@ -10,6 +10,10 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: LoggerIntegration.CompilerPhaseLogsProduceContent
+ * Purpose: Ensure Compiler phase logs produce output via Logger integration.
+ */
 TEST(LoggerIntegration, CompilerPhaseLogsProduceContent) {
   namespace fs = std::filesystem;
   std::string src =
@@ -24,11 +28,20 @@ TEST(LoggerIntegration, CompilerPhaseLogsProduceContent) {
   fs::path sem = outdir / "semantic.log";
   fs::path cg  = outdir / "codegen.log";
 
-  std::string ir = Compiler::compileStringWithPhaseLogs(src, lex.string(), syn.string(), sem.string(), cg.string());
+  std::string ir = Compiler::compileStringWithPhaseLogs(
+      src,
+      lex.string(),
+      syn.string(),
+      sem.string(),
+      cg.string()
+  );
   EXPECT_NE(ir.find("define i32 @main()"), std::string::npos);
 
   auto slurp = [](const fs::path& p) {
-    std::ifstream in(p); return std::string((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    std::ifstream in(p); return std::string(
+        std::istreambuf_iterator<char>(in),
+        std::istreambuf_iterator<char>()
+    );
   };
   ASSERT_TRUE(fs::exists(lex));
   ASSERT_TRUE(fs::exists(syn));
@@ -40,4 +53,3 @@ TEST(LoggerIntegration, CompilerPhaseLogsProduceContent) {
   EXPECT_NE(slurp(sem).find("VarDecl"), std::string::npos);
   EXPECT_NE(slurp(cg).find("entry ->"), std::string::npos);
 }
-

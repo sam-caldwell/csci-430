@@ -21,6 +21,10 @@ static std::string read_file(const fs::path& p) {
   return s;
 }
 
+/***
+ * Test: Logger.DisabledDoesNotWrite
+ * Purpose: Ensure that when disabled, logger discards writes and file remains empty.
+ */
 TEST(Logger, DisabledDoesNotWrite) {
   Logger log;
   // Ensure a test-local directory under current working dir (which is inside build)
@@ -42,25 +46,3 @@ TEST(Logger, DisabledDoesNotWrite) {
   // Cleanup
   fs::remove(file);
 }
-
-TEST(Logger, EnabledWritesContent) {
-  Logger log;
-  fs::path outdir = fs::current_path() / "logger_tests";
-  fs::create_directories(outdir);
-  fs::path file = outdir / "enabled.log";
-
-  ASSERT_TRUE(log.open(file.string()));
-  log.setEnabled(true);
-  log() << "line one" << '\n';
-  log().flush();
-  log() << "line two: " << 42 << '\n';
-  log.close();
-
-  ASSERT_TRUE(fs::exists(file));
-  std::string contents = read_file(file);
-  EXPECT_EQ(contents, std::string("line one\nline two: 42\n"));
-
-  // Cleanup
-  fs::remove(file);
-}
-
