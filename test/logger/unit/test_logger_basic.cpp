@@ -11,16 +11,6 @@
 namespace fs = std::filesystem;
 using logger::Logger;
 
-static std::string read_file(const fs::path& p) {
-  std::ifstream in(p);
-  std::string s, line;
-  while (std::getline(in, line)) {
-    s += line;
-    s.push_back('\n');
-  }
-  return s;
-}
-
 /***
  * Test: Logger.DisabledDoesNotWrite
  * Purpose: Ensure that when disabled, logger discards writes and file remains empty.
