@@ -14,6 +14,7 @@ file(GLOB_RECURSE BASIC_COMPILER_CORE_SOURCES CONFIGURE_DEPENDS
 
 add_library(basic_compiler_lib STATIC ${BASIC_COMPILER_CORE_SOURCES})
 target_include_directories(basic_compiler_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(basic_compiler_lib PRIVATE logger_lib)
 
 # Ensure hello_world builds first as a bootstrap sanity check
 add_dependencies(basic_compiler_lib hello_world)
@@ -21,6 +22,7 @@ add_dependencies(basic_compiler_lib hello_world)
 # Build the CLI as a project with IR/BC artifacts for all sources (auto-discovered plus main)
 build_project(basic_compiler ${BASIC_COMPILER_CORE_SOURCES} ${PROJECT_SOURCE_DIR}/src/basic_compiler/main.cpp)
 target_include_directories(basic_compiler PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(basic_compiler PRIVATE logger_lib)
 
 # Enforce hello_world to build before the compiler and its IR/BC artifacts
 add_dependencies(basic_compiler hello_world)
