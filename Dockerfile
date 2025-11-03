@@ -11,6 +11,7 @@ RUN apt-get update && \
       build-essential \
       cmake \
       ninja-build \
+      shellcheck \
       clang \
       llvm \
       llvm-dev \
