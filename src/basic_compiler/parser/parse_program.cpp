@@ -102,16 +102,16 @@ Program Parser::parseProgram() {
                 // Append to the innermost open block's body
                 auto& top = stack.back();
                 if (top.kind == BlockEntry::Kind::ForK) {
-                    if (auto nestedF = dyn_cast<ForStmt>(st.get())) {
+                    if (isa<ForStmt>(st.get())) {
                         // Move into FOR body first
                         top.f->body.push_back(std::move(st));
                         auto* newF = dyn_cast<ForStmt>(top.f->body.back().get());
                         if (!newF->inlineNext) stack.push_back(BlockEntry::For(newF));
-                    } else if (auto nestedIf = dyn_cast<IfBlockStmt>(st.get())) {
+                    } else if (isa<IfBlockStmt>(st.get())) {
                         top.f->body.push_back(std::move(st));
                         auto* newI = dyn_cast<IfBlockStmt>(top.f->body.back().get());
                         stack.push_back(BlockEntry::If(newI));
-                    } else if (auto nestedW = dyn_cast<WhileStmt>(st.get())) {
+                    } else if (isa<WhileStmt>(st.get())) {
                         top.f->body.push_back(std::move(st));
                         auto* newW = dyn_cast<WhileStmt>(top.f->body.back().get());
                         if (!newW->inlineWend) stack.push_back(BlockEntry::While(newW));
@@ -119,17 +119,17 @@ Program Parser::parseProgram() {
                         top.f->body.push_back(std::move(st));
                     }
                 } else if (top.kind == BlockEntry::Kind::IfK) { // IfK
-                    if (auto nestedF = dyn_cast<ForStmt>(st.get())) {
+                    if (isa<ForStmt>(st.get())) {
                         if (!top.ifInElse) top.ib->thenBody.push_back(std::move(st));
                         else top.ib->elseBody.push_back(std::move(st));
                         auto* newF = dyn_cast<ForStmt>((top.ifInElse ? top.ib->elseBody.back().get() : top.ib->thenBody.back().get()));
                         if (!newF->inlineNext) stack.push_back(BlockEntry::For(newF));
-                    } else if (auto nestedIf = dyn_cast<IfBlockStmt>(st.get())) {
+                    } else if (isa<IfBlockStmt>(st.get())) {
                         if (!top.ifInElse) top.ib->thenBody.push_back(std::move(st));
                         else top.ib->elseBody.push_back(std::move(st));
                         auto* newI = dyn_cast<IfBlockStmt>((top.ifInElse ? top.ib->elseBody.back().get() : top.ib->thenBody.back().get()));
                         stack.push_back(BlockEntry::If(newI));
-                    } else if (auto nestedW = dyn_cast<WhileStmt>(st.get())) {
+                    } else if (isa<WhileStmt>(st.get())) {
                         if (!top.ifInElse) top.ib->thenBody.push_back(std::move(st));
                         else top.ib->elseBody.push_back(std::move(st));
                         auto* newW = dyn_cast<WhileStmt>((top.ifInElse ? top.ib->elseBody.back().get() : top.ib->thenBody.back().get()));
@@ -139,15 +139,15 @@ Program Parser::parseProgram() {
                         else top.ib->elseBody.push_back(std::move(st));
                     }
                 } else { // WhileK
-                    if (auto nestedF = dyn_cast<ForStmt>(st.get())) {
+                    if (isa<ForStmt>(st.get())) {
                         top.w->body.push_back(std::move(st));
                         auto* newF = dyn_cast<ForStmt>(top.w->body.back().get());
                         if (!newF->inlineNext) stack.push_back(BlockEntry::For(newF));
-                    } else if (auto nestedIf = dyn_cast<IfBlockStmt>(st.get())) {
+                    } else if (isa<IfBlockStmt>(st.get())) {
                         top.w->body.push_back(std::move(st));
                         auto* newI = dyn_cast<IfBlockStmt>(top.w->body.back().get());
                         stack.push_back(BlockEntry::If(newI));
-                    } else if (auto nestedW = dyn_cast<WhileStmt>(st.get())) {
+                    } else if (isa<WhileStmt>(st.get())) {
                         top.w->body.push_back(std::move(st));
                         auto* newW = dyn_cast<WhileStmt>(top.w->body.back().get());
                         if (!newW->inlineWend) stack.push_back(BlockEntry::While(newW));
@@ -157,15 +157,15 @@ Program Parser::parseProgram() {
                 }
             } else {
                 // Not inside a block: new top-level statement
-                if (auto fs = dyn_cast<ForStmt>(st.get())) {
+                if (isa<ForStmt>(st.get())) {
                     out.statements.push_back(std::move(st));
                     auto* fsPtr = dyn_cast<ForStmt>(out.statements.back().get());
                     if (!fsPtr->inlineNext) stack.push_back(BlockEntry::For(fsPtr));
-                } else if (auto ib = dyn_cast<IfBlockStmt>(st.get())) {
+                } else if (isa<IfBlockStmt>(st.get())) {
                     out.statements.push_back(std::move(st));
                     auto* ibPtr = dyn_cast<IfBlockStmt>(out.statements.back().get());
                     stack.push_back(BlockEntry::If(ibPtr));
-                } else if (auto wb = dyn_cast<WhileStmt>(st.get())) {
+                } else if (isa<WhileStmt>(st.get())) {
                     out.statements.push_back(std::move(st));
                     auto* wbPtr = dyn_cast<WhileStmt>(out.statements.back().get());
                     if (!wbPtr->inlineWend) stack.push_back(BlockEntry::While(wbPtr));
