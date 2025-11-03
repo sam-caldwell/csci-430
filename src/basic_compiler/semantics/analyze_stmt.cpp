@@ -184,6 +184,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         return;
     }
     if (auto bl = dyn_cast<const BloadStmt>(s)) {
+        log() << "Warning: unsafe BLOAD at line " << bl->pos.line << '\n';
         if (!dyn_cast<StringExpr>(bl->filename.get())) {
             std::ostringstream m; m << "TypeError: BLOAD filename must be string @ " << bl->pos.line << ':' << bl->pos.col; log() << m.str() << '\n';
             throw SemanticError(m.str());
@@ -196,6 +197,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         return;
     }
     if (auto bs = dyn_cast<const BsaveStmt>(s)) {
+        log() << "Warning: unsafe BSAVE at line " << bs->pos.line << '\n';
         if (!dyn_cast<StringExpr>(bs->filename.get())) { std::ostringstream m; m << "TypeError: BSAVE filename must be string @ " << bs->pos.line << ':' << bs->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(bs->filename.get());
         if (typeOf(bs->offset.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: BSAVE offset must be numeric @ " << bs->pos.line << ':' << bs->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
@@ -205,6 +207,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         return;
     }
     if (auto pk = dyn_cast<const PokeStmt>(s)) {
+        log() << "Warning: unsafe POKE at line " << pk->pos.line << '\n';
         if (typeOf(pk->address.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: POKE address must be numeric @ " << pk->pos.line << ':' << pk->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         if (typeOf(pk->value.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: POKE value must be numeric @ " << pk->pos.line << ':' << pk->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(pk->address.get());
@@ -212,17 +215,20 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         return;
     }
     if (auto ca = dyn_cast<const CallAbsStmt>(s)) {
+        log() << "Warning: unsafe CALL at line " << ca->pos.line << '\n';
         if (typeOf(ca->address.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CALL address must be numeric @ " << ca->pos.line << ':' << ca->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(ca->address.get());
         return;
     }
     if (auto du = dyn_cast<const DefUsrStmt>(s)) {
+        log() << "Warning: unsafe DEF USR at line " << du->pos.line << '\n';
         if (typeOf(du->address.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: DEF USR address must be numeric @ " << du->pos.line << ':' << du->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(du->address.get());
         log() << "DefUsr" << '\n';
         return;
     }
     if (auto cd = dyn_cast<const ChdirStmt>(s)) {
+        log() << "Warning: unsafe CHDIR at line " << cd->pos.line << '\n';
         if (typeOf(cd->path.get()) != ValueType::String) {
             std::ostringstream m; m << "TypeError: CHDIR requires string path @ " << cd->pos.line << ':' << cd->pos.col; log() << m.str() << '\n';
             throw SemanticError(m.str());

@@ -62,6 +62,11 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
                 }
             }
         }
+        // Warnings for unsafe numeric builtins
+        if (isBuiltinNum) {
+            if (fn == "PEEK") { log() << "Warning: unsafe PEEK at line " << call->pos.line << '\n'; }
+            if (fn == "USR")  { log() << "Warning: unsafe USR at line "  << call->pos.line << '\n'; }
+        }
         // Per-argument type checks
         if (isBuiltinStr) {
             if (fn == "CHR$") {
