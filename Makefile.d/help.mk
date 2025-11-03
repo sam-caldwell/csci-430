@@ -21,6 +21,7 @@ help:
 	@printf "  %-12s %s\n" "unit"     "Run unit tests"
 	@printf "  %-12s %s\n" "version"  "Show versions for CMake, Clang/LLVM, Ninja, OS, CPU, Xcode"
 	@printf "  %-12s %s\n" "zip"      "Archive repository into $(ZIP_NAME), excluding build/ and VCS/IDE files"
+	@printf "  %-12s %s\n" "build/linux" "Build + run Docker (Ubuntu) to validate full pipeline"
 	@echo
 	@echo "Overridable variables (current values):"
 	@printf "  %-14s = %s\n" "BUILD_DIR" "$(BUILD_DIR)"
