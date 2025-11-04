@@ -19,16 +19,19 @@ DEMO_SRCS := demos/factorial.bas \
 	demos/fibonacci.bas \
 	demos/run-test.bas \
 	demos/chain-test.bas \
-	demos/merge-test.bas \
-	demos/pass-params.bas \
-	demos/use-passed-params.bas \
-	demos/pass-params-all.bas \
-	demos/use-passed-params-all.bas \
 	demos/chain-level2.bas \
 	demos/chain-level3.bas \
 	demos/chain-level4.bas \
+	demos/merge-test.bas \
+	demos/pass-params.bas \
+	demos/use-passed-params.bas \
+	demos/run-pass-vars.bas \
+	demos/variable-state-test.bas \
+	demos/pass-params-all.bas \
+	demos/use-passed-params-all.bas \
 	demos/data-arrays-strings-integers-and-floats.bas \
-	demos/working-with-color.bas
+	demos/working-with-color.bas \
+	demos/graphics-circle.bas
 demo:
 	@set -e; \
 	BUILD_ROOT="./build"; \
