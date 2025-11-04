@@ -254,7 +254,7 @@ private:
     /** Parse READ var[,var...] */
     std::unique_ptr<Stmt> parseRead();
     /** Parse RESTORE */
-    std::unique_ptr<Stmt> parseRestore();
+    std::unique_ptr<Stmt> parseRestore() const;
     /** Parse WRITE [#n,] expr[,expr...] */
     std::unique_ptr<Stmt> parseWrite();
     /** Parse INPUT with optional #n, varlist or simple INPUT var */
