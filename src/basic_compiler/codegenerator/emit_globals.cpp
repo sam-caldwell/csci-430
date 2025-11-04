@@ -15,10 +15,15 @@ namespace gwbasic {
  *    global arrays with unnamed_addr for efficient addressing.
  */
 void CodeGenerator::emitGlobals(std::ostringstream& out) {
+    // Printf format strings:
+    //  - For the last item in a PRINT list, append a newline ("%f\n" / "%s\n").
+    //  - For non-last items, do not append any extra spacing. Any spacing
+    //    should come from the program's string literals so tests can assert
+    //    exact output (avoids unexpected double spaces).
     out << "@.fmt_num = private unnamed_addr constant [4 x i8] c\"%f\\0A\\00\"" << STR_LF
         << "@.fmt_str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"" << STR_LF
-        << "@.fmt_num_sp = private unnamed_addr constant [4 x i8] c\"%f\\20\\00\"" << STR_LF // "%f "
-        << "@.fmt_str_sp = private unnamed_addr constant [4 x i8] c\"%s\\20\\00\"" << STR_LF // "%s "
+        << "@.fmt_num_sp = private unnamed_addr constant [3 x i8] c\"%f\\00\"" << STR_LF // no trailing space
+        << "@.fmt_str_sp = private unnamed_addr constant [3 x i8] c\"%s\\00\"" << STR_LF // no trailing space
         << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"" << STR_LF
         << "@.mode_r = private unnamed_addr constant [2 x i8] c\"r\\00\"" << STR_LF
         << "@.mode_w = private unnamed_addr constant [2 x i8] c\"w\\00\"" << STR_LF
@@ -46,9 +51,7 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@.sgr_bg_tbl = private unnamed_addr constant [16 x i32] [i32 40, i32 44, i32 42, i32 46, i32 41, i32 45, i32 43, i32 47, i32 100, i32 104, i32 102, i32 106, i32 101, i32 105, i32 103, i32 107]" << STR_LF << STR_LF;
     // Graphics environment variables and readiness flag
     out << "@.env_display = private unnamed_addr constant [8 x i8] c\"DISPLAY\\00\"" << STR_LF
-        << "@.env_wayland = private unnamed_addr constant [15 x i8] c\"WAYLAND_DISPLAY\\00\"" << STR_LF
-        << "@.env_enable_gfx = private unnamed_addr constant [18 x i8] c\"GWBASIC_ENABLE_GFX\\00\"" << STR_LF
-        << "@.env_disable_gfx = private unnamed_addr constant [19 x i8] c\"GWBASIC_DISABLE_GFX\\00\"" << STR_LF
+        << "@.env_wayland = private unnamed_addr constant [16 x i8] c\"WAYLAND_DISPLAY\\00\"" << STR_LF
         << "@gwb_gfx_ready = global i1 false" << STR_LF << STR_LF;
     // Virtual screen state for SCREEN(row,col[,z])
     // - 80x25 character buffer, row-major, 0-based indices internally
