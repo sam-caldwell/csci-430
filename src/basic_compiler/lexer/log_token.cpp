@@ -16,7 +16,7 @@ namespace gwbasic {
  *    most tokens except EOF/NEWLINE where lexeme text is not useful.
  */
 void Lexer::logToken(const Token& t) {
-    // Use chained logging pattern: single stream chain for the whole line
+    // Use a chained logging pattern: single stream chain for the whole line
     auto& L = log();
     L << "token" << CH_SPACE << to_string(t.type) << CH_SPACE << "@" << CH_SPACE << t.line << ":" << t.col;
     switch (t.type) {

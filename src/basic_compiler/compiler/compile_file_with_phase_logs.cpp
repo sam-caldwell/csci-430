@@ -42,25 +42,25 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     return Compiler::addDefaultTripleIfMissing(gen.generate(program));
 }
 
+/*
+ * Function: Compiler::compileFileWithPhaseLogs
+ * Inputs:
+ *  - path: Filesystem path to a GW-BASIC source file
+ *  - lexLogPath: Destination for lexical phase log
+ *  - syntaxLogPath: Destination for syntax phase log
+ *  - semanticLogPath: Destination for semantic phase log
+ *  - codegenLogPath: Destination for code generation log
+ * Outputs:
+ *  - std::string: LLVM IR text for the compiled program
+ * Theory of operation:
+ *  - Reads file contents and forwards to compileStringWithPhaseLogs() so
+ *    string- and file-based flows share identical behavior and logging.
+ */
 std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
                                                const std::string& lexLogPath,
                                                const std::string& syntaxLogPath,
                                                const std::string& semanticLogPath,
                                                const std::string& codegenLogPath) {
-    /*
-     * Function: Compiler::compileFileWithPhaseLogs
-     * Inputs:
-     *  - path: Filesystem path to a GW-BASIC source file
-     *  - lexLogPath: Destination for lexical phase log
-     *  - syntaxLogPath: Destination for syntax phase log
-     *  - semanticLogPath: Destination for semantic phase log
-     *  - codegenLogPath: Destination for code generation log
-     * Outputs:
-     *  - std::string: LLVM IR text for the compiled program
-     * Theory of operation:
-     *  - Reads file contents and forwards to compileStringWithPhaseLogs() so
-     *    string- and file-based flows share identical behavior and logging.
-     */
     std::ifstream in(path);
     if (!in) throw std::runtime_error(std::string("Unable to open input file: ").append(path));
     // Non-recursive import resolver with an explicit LIFO stack

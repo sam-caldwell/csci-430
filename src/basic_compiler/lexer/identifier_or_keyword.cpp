@@ -2,22 +2,18 @@
 #include "basic_compiler/Lexer.h"
 
 namespace gwbasic {
-
-// Note: identifierOrKeyword() is only entered when tokenize() has already
-// verified the first character is alphabetic. No separate isIdentStart() is
-// required here, so we only keep isIdentChar() below.
-
+/*
+ * Function: Lexer::identifierOrKeyword
+ * Inputs:
+ *  - none (reads from current position)
+ * Outputs:
+ *  - Token: Identifier or specific keyword token with text and location
+ * Theory of operation:
+ *  - Accumulates alphanumeric/underscore characters, uppercases a copy
+ *    to compare against known GW-BASIC keywords; otherwise returns IDENT.
+ */
 Token Lexer::identifierOrKeyword() {
-    /*
-     * Function: Lexer::identifierOrKeyword
-     * Inputs:
-     *  - none (reads from current position)
-     * Outputs:
-     *  - Token: Identifier or specific keyword token with text and location
-     * Theory of operation:
-     *  - Accumulates alphanumeric/underscore characters, uppercases a copy
-     *    to compare against known GW-BASIC keywords; otherwise returns IDENT.
-     */
+
     const int startLine = line_;
     const int startCol = col_;
     auto buf = scanWhile([](const char ch){
