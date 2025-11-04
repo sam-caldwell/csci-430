@@ -15,7 +15,7 @@ namespace gwbasic {
  * Theory of operation:
  *  - Checks for BinaryExpr and matches against Eq/Ne/Lt/Le/Gt/Ge ops.
  */
-bool SemanticAnalyzer::isComparisonExpr(const Expr* e) const {
+bool SemanticAnalyzer::isComparisonExpr(const Expr* e) {
     if (auto b = dyn_cast<const BinaryExpr>(e)) {
         switch (b->op) {
             case BinaryOp::Eq:
