@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseCommon
+ * Purpose:
+ *  - Parse COMMON var[,var...]
+ * Inputs:
+ *  - none (assumes 'COMMON' was matched by caller)
+ * Outputs:
+ *  - CommonStmt: list of variable names
+ */
 std::unique_ptr<Stmt> Parser::parseCommon() {
     /*
      * Function: Parser::parseCommon
@@ -26,4 +35,3 @@ std::unique_ptr<Stmt> Parser::parseCommon() {
 }
 
 } // namespace gwbasic
-

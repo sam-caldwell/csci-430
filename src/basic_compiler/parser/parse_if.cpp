@@ -6,6 +6,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseIf
+ * Purpose:
+ *  - Parse IF <cond> THEN <line> (single-line) or IF ... THEN (block)
+ * Inputs:
+ *  - none (assumes 'IF' was matched by caller)
+ * Outputs:
+ *  - IfStmt or IfBlockStmt depending on form
+ */
 std::unique_ptr<Stmt> Parser::parseIf() {
     /*
      * Function: Parser::parseIf

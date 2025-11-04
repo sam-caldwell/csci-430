@@ -4,6 +4,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseLine
+ * Purpose:
+ *  - Parse a numbered BASIC source line into a Line AST node.
+ * Inputs:
+ *  - none (expects current token is a line number)
+ * Outputs:
+ *  - Line: line number and list of parsed statements
+ */
 Line Parser::parseLine() {
     /*
      * Function: Parser::parseLine

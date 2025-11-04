@@ -8,6 +8,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseDefFn
+ * Purpose:
+ *  - Parse DEF FNname(param) = expression
+ * Inputs:
+ *  - none (assumes 'DEF' was matched by caller)
+ * Outputs:
+ *  - DefFnStmt: function name, parameter, and body expression
+ */
 std::unique_ptr<Stmt> Parser::parseDefFn() {
     /*
      * Function: Parser::parseDefFn
@@ -39,4 +48,3 @@ std::unique_ptr<Stmt> Parser::parseDefFn() {
 }
 
 } // namespace gwbasic
-

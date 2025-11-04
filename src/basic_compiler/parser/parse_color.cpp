@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseColor
+ * Purpose:
+ *  - Parse COLOR [fg][,[bg][,[border]]]
+ * Inputs:
+ *  - none (assumes 'COLOR' was matched by caller)
+ * Outputs:
+ *  - ColorStmt: optional foreground, background, and border expressions
+ */
 std::unique_ptr<Stmt> Parser::parseColor() {
     // COLOR [fg][,[bg][,[border]]]
     std::unique_ptr<Expr> fg, bg, br;
@@ -26,4 +35,3 @@ std::unique_ptr<Stmt> Parser::parseColor() {
 }
 
 } // namespace gwbasic
-

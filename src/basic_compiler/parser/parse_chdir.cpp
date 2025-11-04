@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseChdir
+ * Purpose:
+ *  - Parse CHDIR <string-expr>
+ * Inputs:
+ *  - none (assumes 'CHDIR' was matched by caller)
+ * Outputs:
+ *  - ChdirStmt: directory path expression
+ */
 std::unique_ptr<Stmt> Parser::parseChdir() {
     // CHDIR <string-expr>
     auto p = parseExpression();
@@ -12,4 +21,3 @@ std::unique_ptr<Stmt> Parser::parseChdir() {
 }
 
 } // namespace gwbasic
-

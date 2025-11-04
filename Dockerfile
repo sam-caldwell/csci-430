@@ -16,9 +16,7 @@ RUN apt-get update && \
       llvm \
       llvm-dev \
       git && \
-    # Ensure coverage + libc++ toolchain runtimes are present for the host LLVM version.
     bash -lc 'set -eux; \
-      # Try to detect the major Clang version; default to 18 if unknown.
       LLVMV=$([ -x /usr/bin/clang ] && /usr/bin/clang -dumpversion 2>/dev/null | sed -E "s/\..*//" || echo 18); \
       echo "Detected Clang major version: ${LLVMV}"; \
       found=0; \

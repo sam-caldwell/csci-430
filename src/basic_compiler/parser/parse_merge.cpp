@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseMerge
+ * Purpose:
+ *  - Parse MERGE "file"
+ * Inputs:
+ *  - none (assumes 'MERGE' was matched by caller)
+ * Outputs:
+ *  - MergeStmt: filename string (as written)
+ */
 std::unique_ptr<Stmt> Parser::parseMerge() {
     /*
      * Function: Parser::parseMerge
@@ -16,4 +25,3 @@ std::unique_ptr<Stmt> Parser::parseMerge() {
 }
 
 } // namespace gwbasic
-

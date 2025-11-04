@@ -6,6 +6,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseAssignOrLet
+ * Purpose:
+ *  - Parse assignment statements with optional leading LET keyword.
+ * Inputs:
+ *  - none (assumes current token is LET or Identifier)
+ * Outputs:
+ *  - AssignStmt or ArrayAssignStmt depending on presence of '(index)'
+ */
 std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
     /*
      * Function: Parser::parseAssignOrLet

@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseDefSeg
+ * Purpose:
+ *  - Parse DEF SEG [= expr]
+ * Inputs:
+ *  - none (assumes 'DEF SEG' tokens were matched by caller)
+ * Outputs:
+ *  - DefSegStmt: optional expression representing segment value
+ */
 std::unique_ptr<Stmt> Parser::parseDefSeg() {
     // We have already consumed DEF and SEG before calling here.
     std::unique_ptr<Expr> v;
@@ -15,4 +24,3 @@ std::unique_ptr<Stmt> Parser::parseDefSeg() {
 }
 
 } // namespace gwbasic
-

@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseComparison
+ * Purpose:
+ *  - Parse comparison expressions (=, <>, <, <=, >, >=).
+ * Inputs:
+ *  - none
+ * Outputs:
+ *  - Expr: expression node with comparison precedence
+ */
 std::unique_ptr<Expr> Parser::parseComparison() {
     /*
      * Function: Parser::parseComparison

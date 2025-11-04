@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseFactor
+ * Purpose:
+ *  - Parse multiplicative expressions (*, /) with left associativity.
+ * Inputs:
+ *  - none
+ * Outputs:
+ *  - Expr: expression node
+ */
 std::unique_ptr<Expr> Parser::parseFactor() {
     /*
      * Function: Parser::parseFactor

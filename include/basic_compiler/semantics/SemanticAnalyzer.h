@@ -261,7 +261,7 @@ private:
      * Outputs:
      *  - bool: true if constant value was produced
      */
-    bool constEval(const Expr* e, double& out) const;
+    static bool constEval(const Expr* e, double& out);
 
     // Function utilities
     /**

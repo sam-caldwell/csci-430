@@ -10,6 +10,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parsePrimary
+ * Purpose:
+ *  - Parse literals, identifiers (variables/calls), or parenthesized expressions.
+ * Inputs:
+ *  - none
+ * Outputs:
+ *  - Expr: NumberExpr, StringExpr, VarExpr, CallExpr, or nested expression
+ */
 std::unique_ptr<Expr> Parser::parsePrimary() {
     /*
      * Function: Parser::parsePrimary

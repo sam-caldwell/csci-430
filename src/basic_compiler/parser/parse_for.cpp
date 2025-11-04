@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseFor
+ * Purpose:
+ *  - Parse FOR var = start TO end [STEP step] with inline or multi-line body.
+ * Inputs:
+ *  - none (assumes 'FOR' was matched by caller)
+ * Outputs:
+ *  - ForStmt: variable, bounds, optional step, and optional inline body
+ */
 std::unique_ptr<Stmt> Parser::parseFor() {
     /*
      * Function: Parser::parseFor
