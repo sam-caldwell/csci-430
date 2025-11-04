@@ -9,6 +9,12 @@ using namespace gwbasic;
  * Test: Integration.CALL_IRContainsHelper
  * Purpose: Ensure CALL emits the helper definition and an invocation.
  */
+/*
+Test: Integration.CALL_IRContainsHelper
+Inputs: BASIC snippet compiled through multiple stages
+Code under test: Parser + Semantics + Codegen integration
+Expected behavior: Emitted IR/state contains expected constructs and values
+*/
 TEST(Integration, CALL_IRContainsHelper) {
     const char* src =
         "10 POKE 100,1\n"

@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Test: Parser.OpenCloseParsesFileOps
  * Purpose: Ensure OPEN ... FOR INPUT AS #n and CLOSE #n parse correctly.
  */
+/*
+Test: Parser.OpenCloseParsesFileOps
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, OpenCloseParsesFileOps) {
     std::string src = "10 OPEN \"out.txt\" FOR INPUT AS #3\n20 CLOSE #3\n";
     std::istringstream iss(src);

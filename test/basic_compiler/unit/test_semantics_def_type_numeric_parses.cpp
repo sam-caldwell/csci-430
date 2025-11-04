@@ -9,6 +9,12 @@ using namespace gwbasic;
  * Test: SemanticsDefType.NumericDefsParse
  * Purpose: Ensure DEFINT/DEFSNG/DEFDBL parse and programs compile.
  */
+/*
+Test: SemanticsDefType.NumericDefsParse
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsDefType, NumericDefsParse) {
     const char* src =
         "10 DEFINT A-C\n"

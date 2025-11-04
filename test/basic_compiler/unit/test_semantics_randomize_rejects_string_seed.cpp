@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (argument type checking)
  * Expected Behavior: Compilation throws SemanticError for RANDOMIZE "A".
  */
+/*
+Test: SemanticsRandomize.RejectsStringSeed
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsRandomize, RejectsStringSeed) {
     const auto src =
         "10 RANDOMIZE \"A\"\n"

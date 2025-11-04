@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseAssignOrLet error path.
  * Expected Behavior: Parsing throws/indicates error for invalid assignment.
  */
+/*
+Test: Parser.ErrorAssignMissingEquals
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorAssignMissingEquals) {
     std::string src = "10 LET A 1\n"; // missing '='
     std::istringstream iss(src);

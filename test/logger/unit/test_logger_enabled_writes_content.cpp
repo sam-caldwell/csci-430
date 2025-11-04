@@ -25,6 +25,12 @@ static std::string read_file(const fs::path& p) {
  * Test: Logger.EnabledWritesContent
  * Purpose: Ensure that enabling the logger causes content to be written to disk.
  */
+/*
+Test: Logger.EnabledWritesContent
+Inputs: Filesystem paths, log messages, toggles
+Code under test: Logger component
+Expected behavior: Creates directories, writes/appends as expected, handles errors
+*/
 TEST(Logger, EnabledWritesContent) {
   Logger log;
   const fs::path outdir = fs::current_path() / "logger_tests";

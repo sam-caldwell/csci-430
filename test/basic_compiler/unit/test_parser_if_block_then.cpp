@@ -16,6 +16,12 @@ using namespace gwbasic;
  * Expected Behavior: Produces one IfBlockStmt with an empty elseBody and a thenBody
  *                    containing a single PrintStmt.
  */
+/*
+Test: Parser.IfBlock_ThenOnly_Multiline
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, IfBlock_ThenOnly_Multiline) {
     std::string src =
         "10 IF A < 5 THEN\n"

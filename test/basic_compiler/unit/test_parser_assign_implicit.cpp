@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer; Parser parseAssignOrLet.
  * Expected Behavior: Single AssignStmt with identifier A assigned numeric literal.
  */
+/*
+Test: Parser.AssignImplicitWithoutLet
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, AssignImplicitWithoutLet) {
     std::string src = "10 A = 42\n";
     std::istringstream iss(src);

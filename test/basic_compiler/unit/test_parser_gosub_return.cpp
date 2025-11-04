@@ -15,6 +15,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseStatement for GOSUB/RETURN.
  * Expected Behavior: AST contains GosubStmt and corresponding ReturnStmt.
  */
+/*
+Test: Parser.GosubAndReturn
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, GosubAndReturn) {
     std::string src = "10 GOSUB 300\n20 RETURN\n";
     std::istringstream iss(src);

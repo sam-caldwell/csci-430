@@ -15,6 +15,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram; AST WhileStmt
  * Expected Behavior: Produces one WhileStmt with inlineWend=false and a body containing a single PrintStmt.
  */
+/*
+Test: Parser.WhileMultilineBody
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, WhileMultilineBody) {
     std::string src =
         "10 WHILE I < 3\n"

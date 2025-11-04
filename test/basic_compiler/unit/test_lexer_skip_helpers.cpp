@@ -15,6 +15,12 @@ using namespace gwbasic;
  *                    the next non-comment char is reachable after one advance;
  *                    without a newline, the lexer reports end-of-file.
  */
+/*
+Test: Lexer.SkipToEOL_CoversNewlineAndEOF
+Inputs: Raw source text and helper inputs
+Code under test: Lexer/tokenization and helpers
+Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
+*/
 TEST(Lexer, SkipToEOL_CoversNewlineAndEOF) {
     // Case 1: comment with newline present
     {

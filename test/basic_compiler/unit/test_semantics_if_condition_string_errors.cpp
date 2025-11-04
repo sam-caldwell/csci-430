@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (type checking)
  * Expected Behavior: Compilation throws SemanticError when the IF condition is a string ("A").
  */
+/*
+Test: Semantics.IfConditionStringErrors
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(Semantics, IfConditionStringErrors) {
     const auto src =
         "10 IF \"A\" THEN 20\n"

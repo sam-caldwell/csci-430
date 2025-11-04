@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Expected Behavior: Constant comparisons print 1.0 or 0.0 with no fcmp
  *          emitted in the final IR.
  */
+/*
+Test: OptimizerCmp.ConstantComparisonsFoldToNumbers
+Inputs: See test body
+Code under test: Relevant module(s) under test
+Expected behavior: Asserts expected results/behavior described in test
+*/
 TEST(OptimizerCmp, ConstantComparisonsFoldToNumbers) {
     auto ir = Compiler::compileStringOptimized("10 PRINT 1=1\n20 PRINT 1<>2\n30 PRINT 1<2\n40 PRINT 2<=2\n50 PRINT 3>2\n60 PRINT 3>=3\n70 END\n");
     EXPECT_NE(ir.find(", double 1.0)"), std::string::npos); // there should be many

@@ -21,6 +21,12 @@ namespace {
  * Expected Behavior: Throws on IF with non-comparison condition; unsupported
  *          statements in line/GOSUB/FOR bodies; unknown expression in PRINT.
  */
+/*
+Test: CodeGenErrors.IfConditionMustBeComparison
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenErrors, IfConditionMustBeComparison) {
     const auto src =
         "10 IF 1 + 2 THEN 20\n"

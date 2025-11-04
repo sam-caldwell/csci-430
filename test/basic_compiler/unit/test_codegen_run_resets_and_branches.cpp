@@ -11,6 +11,12 @@ using namespace gwbasic;
  *          specified line label.
  * Components Under Test: CodeGenerator emitLineBlock (RunStmt lowering).
  */
+/*
+Test: CodeGenRun.RunWithTarget_ResetsAndBranches
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenRun, RunWithTarget_ResetsAndBranches) {
     const auto src =
         "10 LET A = 1 : LET B = 2\n"

@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram
  * Expected Behavior: Parsing throws ParseError when an IF block lacks a closing END IF.
  */
+/*
+Test: Parser.IfBlock_Error_MissingEndIf
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, IfBlock_Error_MissingEndIf) {
     std::string src =
         "10 IF A < 5 THEN\n"

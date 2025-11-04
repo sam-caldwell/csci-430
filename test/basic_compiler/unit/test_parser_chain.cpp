@@ -16,6 +16,12 @@ using namespace gwbasic;
  * Expected Behavior: Produces a single ChainStmt with filename "PROG", no target line,
  *                    and the ALL flag unset.
  */
+/*
+Test: Parser.Chain_WithFile_Parses
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, Chain_WithFile_Parses) {
     std::string src = "10 CHAIN \"PROG\"\n";
     std::istringstream iss(src);

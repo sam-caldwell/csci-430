@@ -16,6 +16,12 @@ using namespace gwbasic;
  * Purpose: Validate multi-line FOR body folding across lines until NEXT.
  * Expected Behavior: ForStmt spans multiple lines and captures inner statements.
  */
+/*
+Test: Parser.ForNextMultilineBody
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ForNextMultilineBody) {
     std::string src =
         "10 FOR I = 1 TO 3\n"

@@ -16,6 +16,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFor/parseStatement sequencing.
  * Expected Behavior: ForStmt contains expected sequence of body statements.
  */
+/*
+Test: Parser.ForNextInlineBody
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ForNextInlineBody) {
     std::string src = "10 FOR I = 1 TO 3 : PRINT I : NEXT I\n";
     std::istringstream iss(src);

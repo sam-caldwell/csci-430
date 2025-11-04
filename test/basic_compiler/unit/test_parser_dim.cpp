@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Test: Parser.DimParsesArrayDeclaration
  * Purpose: Ensure DIM A(10) parses into DimStmt with correct name/length.
  */
+/*
+Test: Parser.DimParsesArrayDeclaration
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, DimParsesArrayDeclaration) {
     std::string src = "10 DIM A(10)\n";
     std::istringstream iss(src);

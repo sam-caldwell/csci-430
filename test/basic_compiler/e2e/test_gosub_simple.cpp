@@ -18,6 +18,12 @@ using namespace e2e_helpers;
  * Components Under Test: Full compiler pipeline; GOSUB inlining; clang.
  * Expected Behavior: Output order is main1, sub, main2 as printed by program.
  */
+/*
+Test: E2E.GosubSimple
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, GosubSimple) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

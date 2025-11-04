@@ -22,19 +22,19 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseStatement
+ * Inputs:
+ *  - none (examines current token)
+ * Outputs:
+ *  - std::unique_ptr<Stmt>: Parsed statement node
+ * Theory of operation:
+ *  - Dispatches based on the next token to the appropriate parse method
+ *    (PRINT, assignment/LET, IF, FOR, GOTO, GOSUB/RETURN, INPUT, END),
+ *    building the corresponding AST node or throwing on unexpected input.
+ */
 std::unique_ptr<Stmt> Parser::parseStatement() {
     Token startTok = peek();
-    /*
-     * Function: Parser::parseStatement
-     * Inputs:
-     *  - none (examines current token)
-     * Outputs:
-     *  - std::unique_ptr<Stmt>: Parsed statement node
-     * Theory of operation:
-     *  - Dispatches based on the next token to the appropriate parse method
-     *    (PRINT, assignment/LET, IF, FOR, GOTO, GOSUB/RETURN, INPUT, END),
-     *    building the corresponding AST node or throwing on unexpected input.
-     */
     if (match(TokenType::KwPrint)) { auto n = parsePrint(); n->pos = {startTok.line, startTok.col}; return n; }
     if (check(TokenType::KwLet) || check(TokenType::Identifier)) { auto n = parseAssignOrLet(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwIf)) { auto n = parseIf(); n->pos = {startTok.line, startTok.col}; return n; }
@@ -88,8 +88,8 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
         // Optional expression if the next token can start an expression
         // Accept: number, string? (we'll reject type in semantics), identifier, '('
         if (!(check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile))) {
-            // If the next token is THEN (from IF context), or other stmt starter, we should not parse; but within parseStatement
-            // we are at a statement boundary, so proceed
+            // If the next token is THEN (from IF context), or other stmt starter, we should not parse; but within
+            // parseStatement we are at a statement boundary, so proceed
             seed = parseExpression();
         }
         return make_node<RandomizeStmt>({startTok.line, startTok.col}, std::move(seed));

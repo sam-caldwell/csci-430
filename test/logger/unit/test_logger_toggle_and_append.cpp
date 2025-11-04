@@ -20,6 +20,12 @@ static std::string read_all(const fs::path& p) {
  * Test: Logger.ToggleEnabledState
  * Purpose: Ensure toggling enabled state discards/accepts writes accordingly.
  */
+/*
+Test: Logger.ToggleEnabledState
+Inputs: Filesystem paths, log messages, toggles
+Code under test: Logger component
+Expected behavior: Creates directories, writes/appends as expected, handles errors
+*/
 TEST(Logger, ToggleEnabledState) {
   Logger log;
   const fs::path outdir = fs::current_path() / "logger_tests";

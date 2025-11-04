@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFor.
  * Expected Behavior: Parsing indicates an error when the identifier is absent.
  */
+/*
+Test: Parser.ErrorForMissingIdentifier
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorForMissingIdentifier) {
     std::string src = "10 FOR = 1 TO 2 : NEXT\n"; // no variable name after FOR
     std::istringstream iss(src);

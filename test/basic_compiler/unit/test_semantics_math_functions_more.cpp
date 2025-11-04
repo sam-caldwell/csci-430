@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (function/intrinsic resolution)
  * Expected Behavior: Compilation throws SemanticError for FOO(1).
  */
+/*
+Test: SemanticsMathMore.UnknownFunctionErrors
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsMathMore, UnknownFunctionErrors) {
     const auto src =
         "10 PRINT FOO(1)\n"

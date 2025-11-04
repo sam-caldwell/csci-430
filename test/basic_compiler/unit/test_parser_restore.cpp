@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Test: Parser.RestoreParses
  * Purpose: Ensure RESTORE parses into RestoreStmt.
  */
+/*
+Test: Parser.RestoreParses
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, RestoreParses) {
     std::string src = "10 RESTORE\n";
     std::istringstream iss(src);

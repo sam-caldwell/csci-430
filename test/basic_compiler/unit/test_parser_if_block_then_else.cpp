@@ -15,6 +15,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer; Parser (specific parse function)
  * Expected Behavior: AST or parse errors match expectations.
  */
+/*
+Test: Parser.IfBlock_ThenElse_Multiline
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, IfBlock_ThenElse_Multiline) {
     std::string src =
         "10 IF A < 5 THEN\n"

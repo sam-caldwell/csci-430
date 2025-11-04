@@ -20,6 +20,12 @@ using namespace e2e_helpers;
  * Components Under Test: Compiler (compileFile), Clang driver, runtime output
  * Expected Behavior: Callee prints 0.000000 for X after RUN.
  */
+/*
+Test: E2E.Run_ResetsVariablesAcrossScope
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, Run_ResetsVariablesAcrossScope) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/run-pass-vars.bas").c_str());

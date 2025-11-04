@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseIf.
  * Expected Behavior: Parser reports error when THEN keyword is missing.
  */
+/*
+Test: Parser.ErrorIfMissingThen
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorIfMissingThen) {
     std::string src = "10 IF A < 10 50\n"; // missing THEN keyword
     std::istringstream iss(src);

@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Expected Behavior: Expression 1 + 2*3 folds to 7.0; IR still prints via printf;
  *                    no "= fmul double 2.0, 3.0" nor generic "= fadd double" appear.
  */
+/*
+Test: OptimizerExpr.ConstantFoldingArithmetic
+Inputs: See test body
+Code under test: Relevant module(s) under test
+Expected behavior: Asserts expected results/behavior described in test
+*/
 TEST(OptimizerExpr, ConstantFoldingArithmetic) {
     // 1 + 2 * 3 => 7.0, no fmul/fadd for constants
     const auto src = "10 PRINT 1 + 2 * 3\n20 END\n";

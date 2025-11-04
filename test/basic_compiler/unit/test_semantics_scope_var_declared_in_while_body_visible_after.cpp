@@ -16,6 +16,12 @@ using namespace gwbasic;
  * Expected Behavior: Semantic analysis declares variable W so it is usable on a later line
  *                    (result variables contain "W").
  */
+/*
+Test: SemanticsScope.VarDeclaredInWhileBodyVisibleAfter
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsScope, VarDeclaredInWhileBodyVisibleAfter) {
     const std::string src =
         "10 LET C = 1\n"

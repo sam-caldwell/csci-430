@@ -15,6 +15,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFactor/parenthesized expressions.
  * Expected Behavior: AST nests BinaryExpr/UnaryExpr as dictated by parens.
  */
+/*
+Test: Parser.ExprNestedParentheses
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ExprNestedParentheses) {
     // A = (1 + (2 * (3 + 4)))
     std::string src = "10 LET A = (1 + (2 * (3 + 4)))\n";

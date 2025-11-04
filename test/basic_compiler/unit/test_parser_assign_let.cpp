@@ -16,6 +16,12 @@ using namespace gwbasic;
  * Expected Behavior: Program has one AssignStmt with name A and value
  *          represented as BinaryExpr(Add, 1, BinaryExpr(Mul, 2, 3)).
  */
+/*
+Test: Parser.AssignWithLetAndPrecedence
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, AssignWithLetAndPrecedence) {
     std::string src = "10 LET A = 1+2*3\n";
     std::istringstream iss(src);

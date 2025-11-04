@@ -5,6 +5,12 @@
 #include "basic_compiler/Compiler.h"
 
 using namespace gwbasic;
+/*
+Test: CodeGenCHDIR.EmitsChdirCallAndDecl
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 
 TEST(CodeGenCHDIR, EmitsChdirCallAndDecl) {
     const char* src =

@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Expected Behavior: Recognizes and materializes \n, \t, \" and \\ escapes; for an
  *                    unknown escape (e.g., \q), emits the literal character ("q").
  */
+/*
+Test: Lexer.StringLiteral_KnownAndUnknownEscapes
+Inputs: Raw source text and helper inputs
+Code under test: Lexer/tokenization and helpers
+Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
+*/
 TEST(Lexer, StringLiteral_KnownAndUnknownEscapes) {
     // Known escapes: \n, \t, quote, backslash
     {

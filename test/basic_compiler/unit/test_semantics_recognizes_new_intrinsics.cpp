@@ -11,6 +11,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (intrinsic recognition)
  * Expected Behavior: Compilation succeeds and produces non-empty IR for code using these intrinsics.
  */
+/*
+Test: SemanticsMathExt.RecognizesNewIntrinsics
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsMathExt, RecognizesNewIntrinsics) {
     const auto src =
         "10 PRINT RND(1)\n"

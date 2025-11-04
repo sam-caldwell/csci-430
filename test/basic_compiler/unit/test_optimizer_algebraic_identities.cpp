@@ -11,6 +11,12 @@ using namespace gwbasic;
  * Components Under Test: AstOptimizer::optExpr.
  * Expected Behavior: Expressions simplify; x*0 prints 0.0.
  */
+/*
+Test: OptimizerExpr.AlgebraicIdentities
+Inputs: See test body
+Code under test: Relevant module(s) under test
+Expected behavior: Asserts expected results/behavior described in test
+*/
 TEST(OptimizerExpr, AlgebraicIdentities) {
     auto ir = Compiler::compileStringOptimized(
         "10 LET X = 42\n"

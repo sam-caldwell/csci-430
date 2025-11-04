@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (control-flow resolution)
  * Expected Behavior: Compilation succeeds; IR contains the source label for line10.
  */
+/*
+Test: Semantics.GotoValidTargetCompiles
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(Semantics, GotoValidTargetCompiles) {
     const auto src =
         "10 GOTO 30\n"

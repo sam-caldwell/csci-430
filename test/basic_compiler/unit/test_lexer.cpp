@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Expected Behavior: Sequence includes integer, identifiers, operators,
  *          keywords, and a NewLine token.
  */
+/*
+Test: Lexer.BasicTokens
+Inputs: Raw source text and helper inputs
+Code under test: Lexer/tokenization and helpers
+Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
+*/
 TEST(Lexer, BasicTokens) {
     std::string src = R"(10 LET A = 1+2*3
 20 PRINT "Hello"

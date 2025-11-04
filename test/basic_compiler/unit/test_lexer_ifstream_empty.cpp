@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Purpose: Ensure Lexer(std::ifstream) handles an empty file and still
  *          produces a terminal EndOfFile token.
  */
+/*
+Test: Lexer.IfstreamHandlesEmptyFile
+Inputs: Raw source text and helper inputs
+Code under test: Lexer/tokenization and helpers
+Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
+*/
 TEST(Lexer, IfstreamHandlesEmptyFile) {
     // Arrange: create an empty file under build/tmp
     // Use ../tmp relative to the build dir so files land under build/tmp

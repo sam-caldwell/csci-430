@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Test: Parser.WriteParsesWithChannel
  * Purpose: Ensure WRITE #n, expr, expr parses with channel and items.
  */
+/*
+Test: Parser.WriteParsesWithChannel
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, WriteParsesWithChannel) {
     std::string src = "10 WRITE #2, 1, 2+3\n";
     std::istringstream iss(src);

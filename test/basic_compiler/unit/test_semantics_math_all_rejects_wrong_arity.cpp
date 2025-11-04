@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (intrinsic arity checking)
  * Expected Behavior: Compilation throws SemanticError for calls with no args and with two args.
  */
+/*
+Test: SemanticsMathAll.RejectsWrongArityZeroAndTwo
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsMathAll, RejectsWrongArityZeroAndTwo) {
     static const std::vector<std::string> kFns = {
         "SQR","SQRT","ABS","SIN","COS","TAN","ATN","LOG","EXP",

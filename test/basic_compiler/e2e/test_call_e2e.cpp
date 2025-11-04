@@ -17,6 +17,12 @@ using namespace e2e_helpers;
  * Test: E2E.CALL_PrintsWhenOpcode1
  * Purpose: POKE opcode 1 at address and CALL it; runtime prints "CALLED".
  */
+/*
+Test: E2E.CALL_PrintsWhenOpcode1
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, CALL_PrintsWhenOpcode1) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

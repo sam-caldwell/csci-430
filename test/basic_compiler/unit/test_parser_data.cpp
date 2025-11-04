@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Test: Parser.DataParsesLiteralList
  * Purpose: Ensure DATA parses comma-separated string and numeric literals.
  */
+/*
+Test: Parser.DataParsesLiteralList
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, DataParsesLiteralList) {
     std::string src = "10 DATA \"X\", 3.14, 42\n";
     std::istringstream iss(src);

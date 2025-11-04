@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram
  * Expected Behavior: Parses a single line with number 10 despite leading newlines.
  */
+/*
+Test: Parser.SkipsLeadingBlankLines
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, SkipsLeadingBlankLines) {
     const std::string src = "\n\n10 END\n\n";
     Lexer lex(src);

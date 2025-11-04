@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Test: Parser.ReadParsesTargets
  * Purpose: Ensure READ parses variables and array element targets.
  */
+/*
+Test: Parser.ReadParsesTargets
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ReadParsesTargets) {
     std::string src = "10 READ A, B, C(2)\n";
     std::istringstream iss(src);

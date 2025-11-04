@@ -9,6 +9,12 @@ using namespace gwbasic;
  * Test: Integration.MemIO_IRContainsFileCalls
  * Purpose: Ensure BSAVE/BLOAD emit expected libc calls in IR.
  */
+/*
+Test: Integration.MemIO_IRContainsFileCalls
+Inputs: BASIC snippet compiled through multiple stages
+Code under test: Parser + Semantics + Codegen integration
+Expected behavior: Emitted IR/state contains expected constructs and values
+*/
 TEST(Integration, MemIO_IRContainsFileCalls) {
     const char* src =
         "10 DEF SEG=0\n"

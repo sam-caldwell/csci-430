@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseStatement for GOSUB.
  * Expected Behavior: Error reported when the line number is absent.
  */
+/*
+Test: Parser.ErrorGosubMissingLine
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorGosubMissingLine) {
     std::string src = "10 GOSUB\n";
     std::istringstream iss(src);

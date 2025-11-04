@@ -10,6 +10,12 @@ using namespace gwbasic;
  * Test: SemanticsDefFn.ParamTypeErrors
  * Purpose: Validate that DEF FN enforces parameter type at call sites.
  */
+/*
+Test: SemanticsDefFn.ParamTypeErrors
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsDefFn, ParamTypeErrors) {
     // String param expected, numeric provided
     const char* src1 =

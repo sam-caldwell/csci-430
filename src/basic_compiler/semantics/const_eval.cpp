@@ -19,12 +19,11 @@ namespace gwbasic {
  *  - Attempts constant folding for numbers, unary +/- and arithmetic/
  *    comparison binary operations recursively; returns false otherwise.
  */
-bool SemanticAnalyzer::constEval(const Expr* e, double& out) const {
+bool SemanticAnalyzer::constEval(const Expr* e, double& out) {
     if (!e) return false;
-    if (auto n = dyn_cast<const NumberExpr>(e)) { out = n->value; return true; }
-    if (auto u = dyn_cast<const UnaryExpr>(e)) {
-        double v;
-        if (constEval(u->inner.get(), v)) {
+    if (const auto n = dyn_cast<const NumberExpr>(e)) { out = n->value; return true; }
+    if (const auto u = dyn_cast<const UnaryExpr>(e)) {
+        if (double v; constEval(u->inner.get(), v)) {
             if (u->op == '+') { out = v; return true; }
             if (u->op == '-') { out = -v; return true; }
         }

@@ -20,6 +20,12 @@ static SemanticAnalyzer::Result analyze_src(const std::string& src) {
  * Test: SemanticsIntrinsics.UnknownFunction_RaisesError
  * Purpose: Ensure unknown function name causes a semantic error.
  */
+/*
+Test: SemanticsIntrinsics.UnknownFunction_RaisesError
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsIntrinsics, UnknownFunction_RaisesError) {
     const std::string src = "10 PRINT FOO(1)\n";
     EXPECT_THROW({ (void)analyze_src(src); }, SemanticError);

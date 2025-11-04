@@ -18,6 +18,12 @@ using namespace e2e_helpers;
  * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
  * Expected Behavior: Program output matches assertions in test.
  */
+/*
+Test: E2E.ForLoopSadPath_NegativeStepStartLessThanEnd
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, ForLoopSadPath_NegativeStepStartLessThanEnd) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found, skipping E2E."; }
     std::string src = R"(10 FOR I = 1 TO 5 STEP -1

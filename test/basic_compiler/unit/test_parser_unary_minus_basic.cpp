@@ -16,6 +16,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseUnary.
  * Expected Behavior: UnaryExpr with op '-' wrapping inner NumberExpr/VarExpr.
  */
+/*
+Test: Parser.UnaryMinusBasic
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, UnaryMinusBasic) {
     // A = -1 + 2  => Add( Unary(-,1), 2 )
     std::string src = "10 LET A = -1 + 2\n";

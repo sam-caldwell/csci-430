@@ -18,7 +18,8 @@ namespace gwbasic {
  */
 std::unique_ptr<Stmt> Parser::parseWhile() {
     auto cond = parseComparison();
-    int l = peek().line, c = peek().col;
+    const int l = peek().line;
+    int c = peek().col;
     auto node = make_node<WhileStmt>({l, c}, std::move(cond));
     while (!check(TokenType::KwWend)) {
         if (check(TokenType::NewLine) || atEnd()) {

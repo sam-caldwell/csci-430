@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram
  * Expected Behavior: Parsing throws ParseError when encountering WEND without WHILE.
  */
+/*
+Test: Parser.ErrorWendWithoutWhile
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorWendWithoutWhile) {
     std::string src = "10 WEND\n";
     Lexer lex(src);

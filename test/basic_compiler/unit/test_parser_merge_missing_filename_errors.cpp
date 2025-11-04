@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram
  * Expected Behavior: Parsing throws ParseError when MERGE lacks a filename operand.
  */
+/*
+Test: Parser.Merge_MissingFilename_Errors
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, Merge_MissingFilename_Errors) {
     std::string src = "10 MERGE\n";
     std::istringstream iss(src);

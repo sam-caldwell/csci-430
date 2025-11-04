@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::stringLiteral
  * Expected Behavior: Parsing throws LexError for an unterminated/invalid escape at EOF.
  */
+/*
+Test: Lexer.StringLiteral_TrailingBackslashAtEOF_Throws
+Inputs: Raw source text and helper inputs
+Code under test: Lexer/tokenization and helpers
+Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
+*/
 TEST(Lexer, StringLiteral_TrailingBackslashAtEOF_Throws) {
     // A trailing backslash before EOF should result in an unterminated string error
     std::string src = "\"Trailing\\"; // opens quote, backslash, then EOF

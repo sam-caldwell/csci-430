@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Test: Parser.LineInputParsesWithAndWithoutChannel
  * Purpose: Ensure LINE INPUT [#n,] var$ parses; channel optional.
  */
+/*
+Test: Parser.LineInputParsesWithAndWithoutChannel
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, LineInputParsesWithAndWithoutChannel) {
     {
         std::string src = "10 LINE INPUT A$\n";

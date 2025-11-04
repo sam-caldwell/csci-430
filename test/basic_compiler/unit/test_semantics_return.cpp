@@ -10,6 +10,12 @@ using namespace gwbasic;
  * Test Suite: Semantics RETURN handling
  * Purpose: Exercise the ReturnStmt path in semantic analyzer.
  */
+/*
+Test: Semantics.ReturnStatementCompiles
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(Semantics, ReturnStatementCompiles) {
     const auto src =
         "10 RETURN\n"

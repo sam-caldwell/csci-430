@@ -13,6 +13,12 @@ using namespace e2e_helpers;
  * Test: LoggerE2E.CLI_SadPath_InvalidLogTargetsStillRuns
  * Purpose: Verify CLI runs and emits IR even when log paths are directories.
  */
+/*
+Test: LoggerE2E.CLI_SadPath_InvalidLogTargetsStillRuns
+Inputs: Filesystem paths, log messages, toggles
+Code under test: Logger component
+Expected behavior: Creates directories, writes/appends as expected, handles errors
+*/
 TEST(LoggerE2E, CLI_SadPath_InvalidLogTargetsStillRuns) {
   namespace fs = std::filesystem;
   const fs::path buildRoot = fs::current_path() / "build";

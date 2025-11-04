@@ -11,6 +11,12 @@ using namespace gwbasic;
  * Components Under Test: CodeGenerator emitLineBlock.
  * Expected Behavior: line10 contains a br label %line200.
  */
+/*
+Test: CodeGenFlow.GotoBranchesToTarget
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenFlow, GotoBranchesToTarget) {
     const auto src =
         "10 GOTO 200\n"

@@ -15,6 +15,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram; AST RunStmt
  * Expected Behavior: Produces a single RunStmt with targetLine unset.
  */
+/*
+Test: Parser.Run_WithFile_Parses
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, Run_WithFile_Parses) {
     std::string src = "10 RUN \"demo.bas\"\n";
     std::istringstream iss(src);

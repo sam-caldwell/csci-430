@@ -15,6 +15,12 @@ using namespace gwbasic;
  * Expected Behavior: Semantic analysis declares variable W so it is usable on a later line
  *                    (result variables contain "W").
  */
+/*
+Test: SemanticsScope.VarDeclaredInWhileWithinIfVisibleAfter
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsScope, VarDeclaredInWhileWithinIfVisibleAfter) {
     const std::string src =
         "10 IF 1 < 2 THEN\n"

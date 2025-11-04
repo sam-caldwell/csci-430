@@ -20,6 +20,12 @@ static SemanticAnalyzer::Result analyze_src(const std::string& src) {
  * Test: SemanticsIntrinsics.ArityError_ZeroArgs
  * Purpose: Verify SQR with zero arguments is rejected by arity checks.
  */
+/*
+Test: SemanticsIntrinsics.ArityError_ZeroArgs
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsIntrinsics, ArityError_ZeroArgs) {
     const std::string src = "10 PRINT SQR()\n";
     EXPECT_THROW({ (void)analyze_src(src); }, SemanticError);

@@ -2,10 +2,18 @@
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/make_node.h"
 #include "basic_compiler/ast/OpenStmt.h"
-#include "basic_compiler/ast/CloseStmt.h"
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseOpen
+ * Purpose:
+ *  - Parse the OPEN statement: OPEN <string-expr> FOR (INPUT|OUTPUT) AS #<channel>
+ * Inputs:
+ *  - none (assumes 'OPEN' was matched by caller)
+ * Outputs:
+ *  - OpenStmt: captures filename expression, file mode, and channel number
+ */
 std::unique_ptr<Stmt> Parser::parseOpen() {
     // OPEN <string-expr> FOR (INPUT|OUTPUT) AS # <Integer>
     int l = peek().line, c = peek().col;
@@ -20,15 +28,6 @@ std::unique_ptr<Stmt> Parser::parseOpen() {
     if (!check(TokenType::Integer)) throw ParseError("Expected channel number after '#'");
     int ch = std::stoi(peek().lexeme); advance();
     return make_node<OpenStmt>({l, c}, std::move(fname), mode, ch);
-}
-
-std::unique_ptr<Stmt> Parser::parseClose() {
-    // CLOSE # <Integer>
-    int l = peek().line, c = peek().col;
-    consume(TokenType::Hash, "#");
-    if (!check(TokenType::Integer)) throw ParseError("Expected channel number after '#'");
-    int ch = std::stoi(peek().lexeme); advance();
-    return make_node<CloseStmt>({l, c}, ch);
 }
 
 } // namespace gwbasic

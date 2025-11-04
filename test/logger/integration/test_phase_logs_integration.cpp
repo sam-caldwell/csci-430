@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Test: LoggerIntegration.CompilerPhaseLogsProduceContent
  * Purpose: Ensure Compiler phase logs produce output via Logger integration.
  */
+/*
+Test: LoggerIntegration.CompilerPhaseLogsProduceContent
+Inputs: Filesystem paths, log messages, toggles
+Code under test: Logger component
+Expected behavior: Creates directories, writes/appends as expected, handles errors
+*/
 TEST(LoggerIntegration, CompilerPhaseLogsProduceContent) {
   namespace fs = std::filesystem;
   const std::string src =

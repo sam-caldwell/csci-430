@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (intrinsic domain/type checks)
  * Expected Behavior: Compilation throws SemanticError for LOG(1<2).
  */
+/*
+Test: SemanticsMathDomains.LogOfComparisonErrors
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsMathDomains, LogOfComparisonErrors) {
     const auto src =
         "10 PRINT LOG(1<2)\n"

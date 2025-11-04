@@ -16,6 +16,12 @@ using namespace e2e_helpers;
  * Test Suite: E2E For Loop (sad paths)
  * Purpose: Validate loops with a mismatched direction and bounds do not execute.
  */
+/*
+Test: E2E.ForLoopSadPath_PositiveStepStartGreaterThanEnd
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, ForLoopSadPath_PositiveStepStartGreaterThanEnd) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found, skipping E2E."; }
     std::string src = R"(10 FOR I = 5 TO 1 STEP 1

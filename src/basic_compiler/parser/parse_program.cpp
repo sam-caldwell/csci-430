@@ -10,17 +10,17 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseProgram
+ * Inputs:
+ *  - none (consumes internal token stream)
+ * Outputs:
+ *  - Program: AST containing ordered lines with statements
+ * Theory of operation:
+ *  - Skips leading blank lines; repeatedly parses a numbered line until
+ *    EndOfFile, producing the program AST.
+ */
 Program Parser::parseProgram() {
-    /*
-     * Function: Parser::parseProgram
-     * Inputs:
-     *  - none (consumes internal token stream)
-     * Outputs:
-     *  - Program: AST containing ordered lines with statements
-     * Theory of operation:
-     *  - Skips leading blank lines; repeatedly parses a numbered line until
-     *    EndOfFile, producing the program AST.
-     */
     Program prog;
     while (!atEnd()) {
         while (match(TokenType::NewLine)) {}
@@ -46,11 +46,11 @@ Program Parser::parseProgram() {
         static BlockEntry While(WhileStmt* p) { BlockEntry b; b.kind = Kind::WhileK; b.w = p; return b; }
     };
     std::vector<BlockEntry> stack;
-    for (auto& line : prog.lines) {
-        Line out; out.number = line.number;
-        for (auto& st : line.statements) {
+    for (auto&[number, statements] : prog.lines) {
+        Line out; out.number = number;
+        for (auto& st : statements) {
             // Handle structural markers regardless of context
-            if (auto nx = dyn_cast<NextStmt>(st.get())) {
+            if (const auto nx = dyn_cast<NextStmt>(st.get())) {
                 // Find innermost FOR in the stack
                 int idx = -1;
                 for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
@@ -65,7 +65,7 @@ Program Parser::parseProgram() {
                 stack.erase(stack.begin() + idx);
                 continue;
             }
-            if (auto els = dyn_cast<ElseStmt>(st.get())) {
+            if (const auto els = dyn_cast<ElseStmt>(st.get())) {
                 (void)els;
                 // Toggle else for innermost IF
                 int idx = -1;
@@ -77,7 +77,7 @@ Program Parser::parseProgram() {
                 stack[idx].ifInElse = true;
                 continue;
             }
-            if (auto ei = dyn_cast<EndIfStmt>(st.get())) {
+            if (const auto ei = dyn_cast<EndIfStmt>(st.get())) {
                 (void)ei;
                 // Close innermost IF
                 int idx = -1;
@@ -88,7 +88,7 @@ Program Parser::parseProgram() {
                 stack.erase(stack.begin() + idx);
                 continue;
             }
-            if (auto we = dyn_cast<WendStmt>(st.get())) {
+            if (const auto we = dyn_cast<WendStmt>(st.get())) {
                 (void)we;
                 int idx = -1;
                 for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
@@ -99,78 +99,68 @@ Program Parser::parseProgram() {
                 continue;
             }
 
-            const bool inAnyBlock = !stack.empty();
-            if (inAnyBlock) {
+            if (const bool inAnyBlock = !stack.empty()) {
                 // Append to the innermost open block's body
-                auto& top = stack.back();
-                if (top.kind == BlockEntry::Kind::ForK) {
+                if (const auto&[kind, f, ib, w, ifInElse] = stack.back(); kind == BlockEntry::Kind::ForK) {
                     if (isa<ForStmt>(st.get())) {
                         // Move into FOR body first
-                        top.f->body.push_back(std::move(st));
-                        auto* newF = dyn_cast<ForStmt>(top.f->body.back().get());
-                        if (!newF->inlineNext) stack.push_back(BlockEntry::For(newF));
+                        f->body.push_back(std::move(st));
+                        if (auto* newF = dyn_cast<ForStmt>(f->body.back().get()); !newF->inlineNext) stack.push_back(BlockEntry::For(newF));
                     } else if (isa<IfBlockStmt>(st.get())) {
-                        top.f->body.push_back(std::move(st));
-                        auto* newI = dyn_cast<IfBlockStmt>(top.f->body.back().get());
+                        f->body.push_back(std::move(st));
+                        auto* newI = dyn_cast<IfBlockStmt>(f->body.back().get());
                         stack.push_back(BlockEntry::If(newI));
                     } else if (isa<WhileStmt>(st.get())) {
-                        top.f->body.push_back(std::move(st));
-                        auto* newW = dyn_cast<WhileStmt>(top.f->body.back().get());
-                        if (!newW->inlineWend) stack.push_back(BlockEntry::While(newW));
+                        f->body.push_back(std::move(st));
+                        if (auto* newW = dyn_cast<WhileStmt>(f->body.back().get()); !newW->inlineWend) stack.push_back(BlockEntry::While(newW));
                     } else {
-                        top.f->body.push_back(std::move(st));
+                        f->body.push_back(std::move(st));
                     }
-                } else if (top.kind == BlockEntry::Kind::IfK) { // IfK
+                } else if (kind == BlockEntry::Kind::IfK) { // IfK
                     if (isa<ForStmt>(st.get())) {
-                        if (!top.ifInElse) top.ib->thenBody.push_back(std::move(st));
-                        else top.ib->elseBody.push_back(std::move(st));
-                        auto* newF = dyn_cast<ForStmt>((top.ifInElse ? top.ib->elseBody.back().get() : top.ib->thenBody.back().get()));
-                        if (!newF->inlineNext) stack.push_back(BlockEntry::For(newF));
+                        if (!ifInElse) ib->thenBody.push_back(std::move(st));
+                        else ib->elseBody.push_back(std::move(st));
+                        if (auto* newF = dyn_cast<ForStmt>((ifInElse ? ib->elseBody.back().get() : ib->thenBody.back().get())); !newF->inlineNext) stack.push_back(BlockEntry::For(newF));
                     } else if (isa<IfBlockStmt>(st.get())) {
-                        if (!top.ifInElse) top.ib->thenBody.push_back(std::move(st));
-                        else top.ib->elseBody.push_back(std::move(st));
-                        auto* newI = dyn_cast<IfBlockStmt>((top.ifInElse ? top.ib->elseBody.back().get() : top.ib->thenBody.back().get()));
+                        if (!ifInElse) ib->thenBody.push_back(std::move(st));
+                        else ib->elseBody.push_back(std::move(st));
+                        auto* newI = dyn_cast<IfBlockStmt>((ifInElse ? ib->elseBody.back().get() : ib->thenBody.back().get()));
                         stack.push_back(BlockEntry::If(newI));
                     } else if (isa<WhileStmt>(st.get())) {
-                        if (!top.ifInElse) top.ib->thenBody.push_back(std::move(st));
-                        else top.ib->elseBody.push_back(std::move(st));
-                        auto* newW = dyn_cast<WhileStmt>((top.ifInElse ? top.ib->elseBody.back().get() : top.ib->thenBody.back().get()));
-                        if (!newW->inlineWend) stack.push_back(BlockEntry::While(newW));
+                        if (!ifInElse) ib->thenBody.push_back(std::move(st));
+                        else ib->elseBody.push_back(std::move(st));
+                        if (auto* newW = dyn_cast<WhileStmt>((ifInElse ? ib->elseBody.back().get() : ib->thenBody.back().get())); !newW->inlineWend) stack.push_back(BlockEntry::While(newW));
                     } else {
-                        if (!top.ifInElse) top.ib->thenBody.push_back(std::move(st));
-                        else top.ib->elseBody.push_back(std::move(st));
+                        if (!ifInElse) ib->thenBody.push_back(std::move(st));
+                        else ib->elseBody.push_back(std::move(st));
                     }
                 } else { // WhileK
                     if (isa<ForStmt>(st.get())) {
-                        top.w->body.push_back(std::move(st));
-                        auto* newF = dyn_cast<ForStmt>(top.w->body.back().get());
-                        if (!newF->inlineNext) stack.push_back(BlockEntry::For(newF));
+                        w->body.push_back(std::move(st));
+                        if (auto* newF = dyn_cast<ForStmt>(w->body.back().get()); !newF->inlineNext) stack.push_back(BlockEntry::For(newF));
                     } else if (isa<IfBlockStmt>(st.get())) {
-                        top.w->body.push_back(std::move(st));
-                        auto* newI = dyn_cast<IfBlockStmt>(top.w->body.back().get());
+                        w->body.push_back(std::move(st));
+                        auto* newI = dyn_cast<IfBlockStmt>(w->body.back().get());
                         stack.push_back(BlockEntry::If(newI));
                     } else if (isa<WhileStmt>(st.get())) {
-                        top.w->body.push_back(std::move(st));
-                        auto* newW = dyn_cast<WhileStmt>(top.w->body.back().get());
-                        if (!newW->inlineWend) stack.push_back(BlockEntry::While(newW));
+                        w->body.push_back(std::move(st));
+                        if (auto* newW = dyn_cast<WhileStmt>(w->body.back().get()); !newW->inlineWend) stack.push_back(BlockEntry::While(newW));
                     } else {
-                        top.w->body.push_back(std::move(st));
+                        w->body.push_back(std::move(st));
                     }
                 }
             } else {
                 // Not inside a block: new top-level statement
                 if (isa<ForStmt>(st.get())) {
                     out.statements.push_back(std::move(st));
-                    auto* fsPtr = dyn_cast<ForStmt>(out.statements.back().get());
-                    if (!fsPtr->inlineNext) stack.push_back(BlockEntry::For(fsPtr));
+                    if (auto* fsPtr = dyn_cast<ForStmt>(out.statements.back().get()); !fsPtr->inlineNext) stack.push_back(BlockEntry::For(fsPtr));
                 } else if (isa<IfBlockStmt>(st.get())) {
                     out.statements.push_back(std::move(st));
                     auto* ibPtr = dyn_cast<IfBlockStmt>(out.statements.back().get());
                     stack.push_back(BlockEntry::If(ibPtr));
                 } else if (isa<WhileStmt>(st.get())) {
                     out.statements.push_back(std::move(st));
-                    auto* wbPtr = dyn_cast<WhileStmt>(out.statements.back().get());
-                    if (!wbPtr->inlineWend) stack.push_back(BlockEntry::While(wbPtr));
+                    if (auto* wbPtr = dyn_cast<WhileStmt>(out.statements.back().get()); !wbPtr->inlineWend) stack.push_back(BlockEntry::While(wbPtr));
                 } else if (isa<ElseStmt>(st.get())) {
                     throw ParseError("ELSE without matching IF");
                 } else if (isa<EndIfStmt>(st.get())) {

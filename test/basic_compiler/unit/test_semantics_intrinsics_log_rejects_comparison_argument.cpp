@@ -20,6 +20,12 @@ static SemanticAnalyzer::Result analyze_src(const std::string& src) {
  * Test: SemanticsIntrinsics.LogRejectsComparisonArgument
  * Purpose: Ensure LOG rejects boolean/comparison argument expressions.
  */
+/*
+Test: SemanticsIntrinsics.LogRejectsComparisonArgument
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsIntrinsics, LogRejectsComparisonArgument) {
     const std::string src = "10 PRINT LOG(1>0)\n";
     EXPECT_THROW({ (void)analyze_src(src); }, SemanticError);

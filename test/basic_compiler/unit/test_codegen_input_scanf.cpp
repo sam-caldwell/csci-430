@@ -11,6 +11,12 @@ using namespace gwbasic;
  * Components Under Test: CodeGenerator emitLineBlock; ensureVarAllocated.
  * Expected Behavior: GEP on @.fmt_in and call to @scanf present in IR.
  */
+/*
+Test: CodeGenLoopsInput.InputStatementScanf
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenLoopsInput, InputStatementScanf) {
     const auto src =
         "10 INPUT X\n"

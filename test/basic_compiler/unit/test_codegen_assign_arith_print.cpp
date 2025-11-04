@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Expected Behavior: Presence of fmul/fadd/fdiv/fsub, fcmp+uitofp, and
  *          printf with @.fmt_num; variables allocated and zero-initialized.
  */
+/*
+Test: CodeGenCore.AssignAndArithmeticAndPrint
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenCore, AssignAndArithmeticAndPrint) {
     const auto src =
         "10 LET X = 1 + 2 * 3\n"

@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Expected Behavior: True conditions emit an unconditional branch to target
  *          without fcmp; false conditions remove the branch entirely.
  */
+/*
+Test: OptimizerIf.ConstantTrueBecomesGoto
+Inputs: See test body
+Code under test: Relevant module(s) under test
+Expected behavior: Asserts expected results/behavior described in test
+*/
 TEST(OptimizerIf, ConstantTrueBecomesGoto) {
     const char* src =
         "10 IF 1 < 2 THEN 100\n"

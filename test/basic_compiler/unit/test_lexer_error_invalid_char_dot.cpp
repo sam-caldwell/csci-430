@@ -14,6 +14,12 @@ using namespace gwbasic;
  *
  * Sad path: a standalone '.' is not a valid token and should throw.
  */
+/*
+Test: Lexer.InvalidCharDotThrows
+Inputs: Raw source text and helper inputs
+Code under test: Lexer/tokenization and helpers
+Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
+*/
 TEST(Lexer, InvalidCharDotThrows) {
     std::string src = "10 LET A = .\n"; // '.' is not recognized (outside a number)
     std::istringstream iss(src);

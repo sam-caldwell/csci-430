@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Expected Behavior: Presence of @.str.N constants with expected escapes,
  *          and GEP to @.fmt_str for string printing.
  */
+/*
+Test: CodeGenStrings.EscapesCommonCharactersInGlobals
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenStrings, EscapesCommonCharactersInGlobals) {
     // Include tab, newline, quote and backslash: A\tB\nC\"\\D
     const auto src = "10 PRINT \"A\\tB\\nC\\\"\\\\D\"\n20 END\n";

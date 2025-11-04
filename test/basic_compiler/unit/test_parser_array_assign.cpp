@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Test: Parser.ArrayAssignmentParses
  * Purpose: Ensure A(3)=4 parses into ArrayAssignStmt with index/value.
  */
+/*
+Test: Parser.ArrayAssignmentParses
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ArrayAssignmentParses) {
     std::string src = "10 LET A(3) = 4\n";
     std::istringstream iss(src);

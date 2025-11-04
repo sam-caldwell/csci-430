@@ -21,6 +21,12 @@ using namespace e2e_helpers;
  * Components Under Test: Compiler (compileFile), clang driver, runtime output
  * Expected Behavior: Output contains color codes and corresponding text lines.
  */
+/*
+Test: E2E.ColorDemo_PrintsExpectedAnsiAndText
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, ColorDemo_PrintsExpectedAnsiAndText) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

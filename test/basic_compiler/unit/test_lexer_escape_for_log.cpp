@@ -16,6 +16,12 @@ using namespace gwbasic;
  *                    tab, and quote; emits hex (\\x..) for control/DEL; preserves
  *                    printable characters.
  */
+/*
+Test: Lexer.EscapeForLog_CoversAllBranches
+Inputs: Raw source text and helper inputs
+Code under test: Lexer/tokenization and helpers
+Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
+*/
 TEST(Lexer, EscapeForLog_CoversAllBranches) {
     // Include: backslash, newline, carriage return, tab, quote, control chars and printable
     std::string in;
