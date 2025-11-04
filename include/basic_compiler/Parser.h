@@ -285,6 +285,8 @@ private:
     std::unique_ptr<Stmt> parseScreen();
     /** Parse CIRCLE x, y, r */
     std::unique_ptr<Stmt> parseCircle();
+    /** Parse CLEAR */
+    std::unique_ptr<Stmt> parseClear();
     /**
      * Function: Parser::parseExpression
      * Purpose:

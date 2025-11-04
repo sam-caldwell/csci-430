@@ -125,6 +125,7 @@ private:
         {"POKE",      TokenType::KwPoke},
         {"COLOR",     TokenType::KwColor},
         {"CHDIR",     TokenType::KwChdir},
+        {"CLEAR",     TokenType::KwClear},
     };
 
     /*
