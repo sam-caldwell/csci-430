@@ -7,8 +7,10 @@
 using namespace gwbasic;
 
 /*
- * Test Suite: CodeGen String Comparisons
- * Purpose: Cover strcmp/icmp paths in emit_comparison
+ * Test: CodeGenStrings.StringComparisonsUseStrcmp
+ * Inputs: Program compares string literals with = and <, then PRINT.
+ * Code under test: Compiler::compileString() comparison emission for strings.
+ * Expected behavior: IR references @strcmp and prints numeric result.
  */
 TEST(CodeGenStrings, StringComparisonsUseStrcmp) {
     const auto src =
@@ -20,4 +22,3 @@ TEST(CodeGenStrings, StringComparisonsUseStrcmp) {
     EXPECT_NE(ir.find("@.fmt_num"), std::string::npos);
     EXPECT_NE(ir.find("@strcmp"), std::string::npos);
 }
-

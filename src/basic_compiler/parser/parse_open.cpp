@@ -2,6 +2,7 @@
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/make_node.h"
 #include "basic_compiler/ast/OpenStmt.h"
+#include "basic_compiler/ast/CloseStmt.h"
 
 namespace gwbasic {
 
@@ -31,4 +32,3 @@ std::unique_ptr<Stmt> Parser::parseClose() {
 }
 
 } // namespace gwbasic
-

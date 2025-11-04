@@ -13,6 +13,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/*
+ * Test: E2E.SCREEN_ReturnsAsciiAfterPrint
+ * Inputs: Program that prints "ABC" then prints SCREEN(1,1..3).
+ * Code under test: Virtual screen buffer + SCREEN() runtime semantics E2E.
+ * Expected behavior: Outputs 65,66,67 after printing ABC (ASCII for A,B,C).
+ */
 TEST(E2E, SCREEN_ReturnsAsciiAfterPrint) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -40,4 +46,3 @@ TEST(E2E, SCREEN_ReturnsAsciiAfterPrint) {
     ASSERT_NE(out.find("66.000000"), std::string::npos);
     ASSERT_NE(out.find("67.000000"), std::string::npos);
 }
-

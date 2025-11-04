@@ -7,6 +7,12 @@
 
 using namespace gwbasic;
 
+/*
+ * Test: Parser.ColorStatementParsesVariants
+ * Inputs: Three COLOR statements with 1, 2, and 3 arguments.
+ * Code under test: Lexer/Parser building ColorStmt nodes.
+ * Expected behavior: Each line parses to ColorStmt with expected optional args.
+ */
 TEST(Parser, ColorStatementParsesVariants) {
     std::string src =
         "10 COLOR 2\n"
@@ -31,4 +37,3 @@ TEST(Parser, ColorStatementParsesVariants) {
     EXPECT_NE(c3->bg, nullptr);
     EXPECT_NE(c3->border, nullptr);
 }
-

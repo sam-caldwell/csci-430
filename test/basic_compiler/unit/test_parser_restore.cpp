@@ -4,7 +4,7 @@
 #include <string>
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/Parser.h"
-#include "basic_compiler/ast/ReadStmt.h"
+#include "basic_compiler/ast/RestoreStmt.h"
 
 using namespace gwbasic;
 
@@ -23,4 +23,3 @@ TEST(Parser, RestoreParses) {
     auto* rs = dynamic_cast<RestoreStmt*>(lines[0].statements[0].get());
     ASSERT_NE(rs, nullptr);
 }
-

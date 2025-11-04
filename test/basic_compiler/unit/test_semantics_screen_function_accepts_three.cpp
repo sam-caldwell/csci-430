@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-static SemanticAnalyzer::Result analyze_src(const std::string& src) {
+static SemanticAnalyzer::Result analyze_src3(const std::string& src) {
     Lexer lex(src);
     auto toks = lex.tokenize();
     Parser p(std::move(toks));
@@ -17,12 +17,13 @@ static SemanticAnalyzer::Result analyze_src(const std::string& src) {
 }
 
 /*
- * Test: SemanticsScreen.Accepts_Two_Args
- * Inputs: SCREEN(1,1)
+ * Test: SemanticsScreen.Accepts_Three_Args
+ * Inputs: SCREEN(1,1,0)
  * Code under test: Lexer, Parser, SemanticAnalyzer for SCREEN arity/type.
- * Expected behavior: No semantic error for 2 numeric args.
+ * Expected behavior: No semantic error when 3rd arg present and numeric.
  */
-TEST(SemanticsScreen, Accepts_Two_Args) {
-    const std::string src = "10 X=SCREEN(1,1)\n";
-    EXPECT_NO_THROW({ (void)analyze_src(src); });
+TEST(SemanticsScreen, Accepts_Three_Args) {
+    const std::string src = "10 X=SCREEN(1,1,0)\n";
+    EXPECT_NO_THROW({ (void)analyze_src3(src); });
 }
+

@@ -11,7 +11,12 @@ namespace gwbasic {
     /**
      * Type: WriteStmt
      * Purpose:
-     *  - WRITE [#n,] expr[, expr...]
+     *  - WRITE [#n,] expr[, expr...] — print CSV-like values to a channel.
+     * Inputs:
+     *  - channel: Optional channel (-1 means stdout)
+     *  - items: Expressions to write
+     * Outputs:
+     *  - Concrete Stmt node; codegen emits formatted writes per item
      */
     struct WriteStmt : ASTLeaf<NodeKind::WriteStmt, Stmt> {
         int channel{-1};
@@ -24,32 +29,5 @@ namespace gwbasic {
         }
     };
 
-    /**
-     * Type: FileInputStmt
-     * Purpose:
-     *  - INPUT #n, var[, var...]
-     */
-    struct FileInputStmt : ASTLeaf<NodeKind::FileInputStmt, Stmt> {
-        int channel{1};
-        std::vector<std::string> variables; // names only; array targets not yet supported here
-        FileInputStmt() = default;
-
-        explicit FileInputStmt(const int ch, std::vector<std::string> vars) : ASTLeaf(), channel(ch),
-                                                                        variables(std::move(vars)) {
-        }
-    };
-
-    /**
-     * Type: LineInputStmt
-     * Purpose:
-     *  - LINE INPUT [#n,] var$ (reads a whole line)
-     */
-    struct LineInputStmt : ASTLeaf<NodeKind::LineInputStmt, Stmt> {
-        int channel{-1}; // -1 = stdin
-        std::string name; // must be string variable
-        LineInputStmt() = default;
-
-        LineInputStmt(const int ch, std::string n) : ASTLeaf(), channel(ch), name(std::move(n)) {
-        }
-    };
+    // FileInputStmt and LineInputStmt moved to their own headers.
 } // namespace gwbasic

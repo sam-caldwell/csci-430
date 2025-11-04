@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/*
+ * Test: CodeGenStringFuncs.EmitsStrncpyAndMalloc
+ * Inputs: Program using LEFT$, RIGHT$, MID$ variations.
+ * Code under test: Compiler::compileString() IR generation for string funcs.
+ * Expected behavior: IR declares @strncpy and allocates buffers via @malloc.
+ */
 TEST(CodeGenStringFuncs, EmitsStrncpyAndMalloc) {
     const char* src =
         "10 PRINT LEFT$(\"HELLO\",2)\n"
@@ -18,4 +24,3 @@ TEST(CodeGenStringFuncs, EmitsStrncpyAndMalloc) {
     ASSERT_NE(ir.find("call ptr @malloc(i64"), std::string::npos);
     ASSERT_NE(ir.find("call ptr @strncpy(ptr"), std::string::npos);
 }
-

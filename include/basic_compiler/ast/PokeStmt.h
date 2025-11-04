@@ -8,7 +8,16 @@
 
 namespace gwbasic {
 
-// Note: this is an unsafe statement
+/**
+ * Type: PokeStmt
+ * Purpose:
+ *  - POKE address, value — write a byte into memory (unsafe).
+ * Inputs:
+ *  - address: Numeric address expression
+ *  - value: Numeric byte value expression
+ * Outputs:
+ *  - Concrete Stmt node; semantics validate numeric types and log unsafe usage
+ */
 struct PokeStmt final : ASTLeaf<NodeKind::PokeStmt, Stmt> {
     std::unique_ptr<Expr> address;
     std::unique_ptr<Expr> value;
@@ -16,4 +25,3 @@ struct PokeStmt final : ASTLeaf<NodeKind::PokeStmt, Stmt> {
 };
 
 } // namespace gwbasic
-

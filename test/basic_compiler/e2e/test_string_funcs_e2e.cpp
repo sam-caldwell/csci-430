@@ -15,6 +15,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/*
+ * Test: E2E.StringFuncs_Work
+ * Inputs: Program exercising LEFT$, RIGHT$, MID$ and printing results.
+ * Code under test: End-to-end compile/link/run of string intrinsics.
+ * Expected behavior: Output contains expected substrings and lengths per test.
+ */
 TEST(E2E, StringFuncs_Work) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -49,4 +55,3 @@ TEST(E2E, StringFuncs_Work) {
     EXPECT_EQ(lines[2], std::string("ELLO"));
     EXPECT_EQ(lines[3], std::string("EL"));
 }
-

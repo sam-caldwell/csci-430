@@ -5,6 +5,12 @@
 
 using namespace gwbasic;
 
+/*
+ * Test: Integration.COLOR_IRContainsSgrFormatAndPrintf
+ * Inputs: Program with COLOR statement only.
+ * Code under test: Compiler::compileString() IR generation for COLOR.
+ * Expected behavior: IR defines @.fmt_sgr and references @printf for SGR.
+ */
 TEST(Integration, COLOR_IRContainsSgrFormatAndPrintf) {
     const char* src =
         "10 COLOR 2,4\n"

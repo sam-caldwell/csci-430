@@ -13,11 +13,17 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/*
+ * Test: E2E.COLOR_SetsAnsiCodes
+ * Inputs: BASIC program with COLOR 2,4 and PRINT "X".
+ * Code under test: Compiler::compileString -> clang link -> runCommand execution.
+ * Expected behavior: Program output includes ESC[32m and ESC[41m sequences.
+ */
 TEST(E2E, COLOR_SetsAnsiCodes) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
     }
-    const char* src =
+    const auto src =
         "10 COLOR 2,4\n"
         "20 PRINT \"X\"\n"
         "30 END\n";
@@ -39,4 +45,3 @@ TEST(E2E, COLOR_SetsAnsiCodes) {
     ASSERT_NE(out.find("\033[32m"), std::string::npos);
     ASSERT_NE(out.find("\033[41m"), std::string::npos);
 }
-

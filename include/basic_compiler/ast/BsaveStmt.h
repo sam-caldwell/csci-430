@@ -8,6 +8,17 @@
 
 namespace gwbasic {
 
+/**
+ * Type: BsaveStmt
+ * Purpose:
+ *  - BSAVE filename, offset, length — save memory to a binary file (unsafe).
+ * Inputs:
+ *  - filename: String expression naming the file
+ *  - offset: Numeric start address expression
+ *  - length: Numeric byte-count expression
+ * Outputs:
+ *  - Concrete Stmt node; semantics validate types and log unsafe usage
+ */
 struct BsaveStmt final : ASTLeaf<NodeKind::BsaveStmt, Stmt> {
     std::unique_ptr<Expr> filename; // string expr
     std::unique_ptr<Expr> offset;   // numeric
@@ -17,4 +28,3 @@ struct BsaveStmt final : ASTLeaf<NodeKind::BsaveStmt, Stmt> {
 };
 
 } // namespace gwbasic
-

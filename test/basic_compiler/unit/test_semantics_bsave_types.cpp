@@ -7,14 +7,15 @@
 using namespace gwbasic;
 
 /*
- * Test: SemanticsCALL.RequiresNumericAddress
- * Inputs: CALL "X"
- * Code under test: Compiler::compileString() + semantic validation for CALL.
- * Expected behavior: SemanticError thrown due to non-numeric call address.
+ * Test: SemanticsMemIO.BsaveTypes
+ * Inputs: BSAVE "f", "X", 10 (non-numeric address)
+ * Code under test: Compiler::compileString() + semantic checks for BSAVE.
+ * Expected behavior: SemanticError thrown due to invalid type for address.
  */
-TEST(SemanticsCALL, RequiresNumericAddress) {
+TEST(SemanticsMemIO, BsaveTypes) {
     const char* src =
-        "10 CALL \"X\"\n"
+        "10 BSAVE \"f\", \"X\", 10\n"
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
+

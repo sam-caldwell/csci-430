@@ -5,6 +5,7 @@
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/OpenStmt.h"
+#include "basic_compiler/ast/CloseStmt.h"
 
 using namespace gwbasic;
 
@@ -30,4 +31,3 @@ TEST(Parser, OpenCloseParsesFileOps) {
     ASSERT_NE(cl, nullptr);
     EXPECT_EQ(cl->channel, 3);
 }
-

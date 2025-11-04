@@ -8,6 +8,12 @@
 
 using namespace gwbasic;
 
+/*
+ * Test: Integration.UnsafeFeatureWarnings_AppearInSemanticLog
+ * Inputs: Program using CALL/DEF USR/USR/BLOAD/BSAVE/POKE/PEEK/CHDIR.
+ * Code under test: Compiler::compileStringWithPhaseLogs semantic warning emission.
+ * Expected behavior: Semantic log contains warnings for each unsafe feature.
+ */
 TEST(Integration, UnsafeFeatureWarnings_AppearInSemanticLog) {
     namespace fs = std::filesystem;
     const char* src =
@@ -38,4 +44,3 @@ TEST(Integration, UnsafeFeatureWarnings_AppearInSemanticLog) {
     EXPECT_NE(log.find("Warning: unsafe PEEK"), std::string::npos);
     EXPECT_NE(log.find("Warning: unsafe CHDIR"), std::string::npos);
 }
-

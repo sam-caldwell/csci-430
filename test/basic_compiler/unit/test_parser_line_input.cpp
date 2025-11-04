@@ -5,7 +5,7 @@
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/InputStmt.h"
-#include "basic_compiler/ast/WriteStmt.h"
+#include "basic_compiler/ast/LineInputStmt.h"
 
 using namespace gwbasic;
 

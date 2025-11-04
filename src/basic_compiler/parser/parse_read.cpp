@@ -2,6 +2,7 @@
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/make_node.h"
 #include "basic_compiler/ast/ReadStmt.h"
+#include "basic_compiler/ast/RestoreStmt.h"
 
 namespace gwbasic {
 
@@ -29,4 +30,3 @@ std::unique_ptr<Stmt> Parser::parseRestore() {
 }
 
 } // namespace gwbasic
-

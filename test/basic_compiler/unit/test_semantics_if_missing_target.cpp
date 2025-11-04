@@ -8,7 +8,10 @@
 using namespace gwbasic;
 
 /*
- * Test Suite: Semantics IF target validation
+ * Test: Semantics.IfMissingTargetErrors
+ * Inputs: IF ... THEN 9999 where 9999 is not a program line.
+ * Code under test: Compiler::compileString() semantic validation of branch targets.
+ * Expected behavior: SemanticError thrown for missing label target.
  */
 TEST(Semantics, IfMissingTargetErrors) {
     const auto src =
@@ -16,4 +19,3 @@ TEST(Semantics, IfMissingTargetErrors) {
         "20 END\n";
     EXPECT_THROW({ const auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
-

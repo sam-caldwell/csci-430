@@ -5,6 +5,12 @@
 
 using namespace gwbasic;
 
+/*
+ * Test: Integration.StringFuncs_IRContainsStrncpy
+ * Inputs: Program using LEFT$, RIGHT$, MID$ to print substrings.
+ * Code under test: Compiler::compileString() IR generation for string funcs.
+ * Expected behavior: Generated IR references @strncpy to implement substrings.
+ */
 TEST(Integration, StringFuncs_IRContainsStrncpy) {
     const char* src =
         "10 PRINT LEFT$(\"HELLO\",2)\n"
@@ -15,4 +21,3 @@ TEST(Integration, StringFuncs_IRContainsStrncpy) {
     ASSERT_FALSE(ir.empty());
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);
 }
-

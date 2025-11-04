@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/*
+ * Test: CodeGenBuiltins.CHR_EmitsMallocAndStores
+ * Inputs: PRINT CHR$(65)
+ * Code under test: Compiler::compileString() codegen for CHR$.
+ * Expected behavior: IR allocates 2 bytes (char + NUL) via malloc and stores.
+ */
 TEST(CodeGenBuiltins, CHR_EmitsMallocAndStores) {
     const char* src =
         "10 PRINT CHR$(65)\n"
@@ -13,12 +19,3 @@ TEST(CodeGenBuiltins, CHR_EmitsMallocAndStores) {
     std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("call ptr @malloc(i64 2)"), std::string::npos);
 }
-
-TEST(CodeGenBuiltins, ASC_LoadsFirstByte) {
-    const char* src =
-        "10 PRINT ASC(\"C\")\n"
-        "20 END\n";
-    std::string ir = Compiler::compileString(src);
-    ASSERT_NE(ir.find("load i8, ptr"), std::string::npos);
-}
-

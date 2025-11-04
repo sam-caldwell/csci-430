@@ -8,6 +8,17 @@
 
 namespace gwbasic {
 
+/**
+ * Type: ColorStmt
+ * Purpose:
+ *  - COLOR fg[, bg[, border]] — set text colors (emitted via ANSI SGR).
+ * Inputs:
+ *  - fg: Foreground color numeric expression (optional)
+ *  - bg: Background color numeric expression (optional)
+ *  - border: Border color numeric expression (optional)
+ * Outputs:
+ *  - Concrete Stmt node; codegen emits printf with SGR sequences
+ */
 struct ColorStmt final : ASTLeaf<NodeKind::ColorStmt, Stmt> {
     std::unique_ptr<Expr> fg;
     std::unique_ptr<Expr> bg;
@@ -17,4 +28,3 @@ struct ColorStmt final : ASTLeaf<NodeKind::ColorStmt, Stmt> {
 };
 
 } // namespace gwbasic
-

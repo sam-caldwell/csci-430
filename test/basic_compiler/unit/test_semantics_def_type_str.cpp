@@ -8,6 +8,9 @@ using namespace gwbasic;
 
 /*
  * Test: SemanticsDefType.DEFSTR_MakesPlainVarString
+ * Inputs: DEFSTR A; assign string; then assign numeric (error case).
+ * Code under test: Compiler::compileString() + semantics for DEFSTR typing.
+ * Expected behavior: Valid string assignment passes; numeric assignment errors.
  */
 TEST(SemanticsDefType, DEFSTR_MakesPlainVarString) {
     const char* src_ok =
@@ -24,17 +27,3 @@ TEST(SemanticsDefType, DEFSTR_MakesPlainVarString) {
         "30 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src_err); (void)ir; }, SemanticError);
 }
-
-/*
- * Test: SemanticsDefType.SuffixOverridesDEFSTR
- */
-TEST(SemanticsDefType, SuffixOverridesDEFSTR) {
-    const char* src =
-        "10 DEFSTR C\n"
-        "20 LET C% = 3\n"
-        "30 PRINT C%\n"
-        "40 END\n";
-    const std::string ir = Compiler::compileString(src);
-    ASSERT_FALSE(ir.empty());
-}
-

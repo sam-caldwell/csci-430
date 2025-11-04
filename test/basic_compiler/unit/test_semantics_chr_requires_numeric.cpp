@@ -7,14 +7,15 @@
 using namespace gwbasic;
 
 /*
- * Test: SemanticsCALL.RequiresNumericAddress
- * Inputs: CALL "X"
- * Code under test: Compiler::compileString() + semantic validation for CALL.
- * Expected behavior: SemanticError thrown due to non-numeric call address.
+ * Test: SemanticsBuiltins.CHR_Dollar_RequiresNumericArg
+ * Inputs: CHR$("A")
+ * Code under test: Compiler::compileString() + semantics for CHR$.
+ * Expected behavior: SemanticError thrown for non-numeric argument.
  */
-TEST(SemanticsCALL, RequiresNumericAddress) {
+TEST(SemanticsBuiltins, CHR_Dollar_RequiresNumericArg) {
     const char* src =
-        "10 CALL \"X\"\n"
+        "10 PRINT CHR$(\"A\")\n"
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
+

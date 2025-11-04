@@ -6,17 +6,15 @@
 
 using namespace gwbasic;
 
+/*
+ * Test: SemanticsBuiltins.ASC_RequiresStringArg
+ * Inputs: ASC called with numeric literal instead of string.
+ * Code under test: Compiler::compileString() + semantics for ASC.
+ * Expected behavior: SemanticError thrown for wrong argument type.
+ */
 TEST(SemanticsBuiltins, ASC_RequiresStringArg) {
     const char* src =
         "10 PRINT ASC(42)\n"
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
-
-TEST(SemanticsBuiltins, CHR_Dollar_RequiresNumericArg) {
-    const char* src =
-        "10 PRINT CHR$(\"A\")\n"
-        "20 END\n";
-    EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
-}
-

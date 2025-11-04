@@ -2,6 +2,8 @@
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/make_node.h"
 #include "basic_compiler/ast/WriteStmt.h"
+#include "basic_compiler/ast/FileInputStmt.h"
+#include "basic_compiler/ast/LineInputStmt.h"
 #include "basic_compiler/ast/InputStmt.h"
 
 namespace gwbasic {

@@ -8,11 +8,18 @@
 
 namespace gwbasic {
 
-// DEF SEG [= expr] — sets default memory segment for PEEK/POKE/etc. (no-op here)
+/**
+ * Type: DefSegStmt
+ * Purpose:
+ *  - DEF SEG [= expr] — set default memory segment for memory ops (no-op in this compiler).
+ * Inputs:
+ *  - value: Optional numeric segment expression (null = restore default)
+ * Outputs:
+ *  - Concrete Stmt node; semantics validate type when present
+ */
 struct DefSegStmt : ASTLeaf<NodeKind::DefSegStmt, Stmt> {
     std::unique_ptr<Expr> value; // null means restore default
     explicit DefSegStmt(std::unique_ptr<Expr> v) : ASTLeaf(), value(std::move(v)) {}
 };
 
 } // namespace gwbasic
-

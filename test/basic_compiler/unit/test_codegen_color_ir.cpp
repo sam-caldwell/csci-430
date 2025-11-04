@@ -6,7 +6,12 @@
 
 using namespace gwbasic;
 
-// Purpose: Verify COLOR emits SGR printf usage instead of static tables.
+/*
+ * Test: CodeGenColor.EmitsSgrPrintf
+ * Inputs: Program with COLOR 2,4
+ * Code under test: Compiler::compileString() IR generation for COLOR.
+ * Expected behavior: IR references @.fmt_sgr and @printf for SGR output.
+ */
 TEST(CodeGenColor, EmitsSgrPrintf) {
     const char* src =
         "10 COLOR 2,4\n"
@@ -18,4 +23,3 @@ TEST(CodeGenColor, EmitsSgrPrintf) {
     ASSERT_NE(ir.find("call i32 (ptr, ...) @printf(ptr %"), std::string::npos);
     ASSERT_NE(ir.find(", i32 27, i32"), std::string::npos);
 }
-

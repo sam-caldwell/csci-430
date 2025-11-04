@@ -7,14 +7,15 @@
 using namespace gwbasic;
 
 /*
- * Test: SemanticsCALL.RequiresNumericAddress
- * Inputs: CALL "X"
- * Code under test: Compiler::compileString() + semantic validation for CALL.
- * Expected behavior: SemanticError thrown due to non-numeric call address.
+ * Test: SemanticsColor.BorderMustBeNumeric
+ * Inputs: COLOR 1,2,"C"
+ * Code under test: Compiler::compileString() + semantics for COLOR.
+ * Expected behavior: SemanticError thrown for non-numeric border color.
  */
-TEST(SemanticsCALL, RequiresNumericAddress) {
+TEST(SemanticsColor, BorderMustBeNumeric) {
     const char* src =
-        "10 CALL \"X\"\n"
+        "10 COLOR 1,2,\"C\"\n"
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
+

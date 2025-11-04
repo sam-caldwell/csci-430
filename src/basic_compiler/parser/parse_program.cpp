@@ -3,6 +3,8 @@
 #include "basic_compiler/ast/ForStmt.h"
 #include "basic_compiler/ast/NextStmt.h"
 #include "basic_compiler/ast/IfBlockStmt.h"
+#include "basic_compiler/ast/ElseStmt.h"
+#include "basic_compiler/ast/EndIfStmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/ast/WendStmt.h"
 

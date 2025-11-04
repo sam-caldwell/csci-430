@@ -8,6 +8,9 @@ using namespace gwbasic;
 
 /*
  * Test: SemanticsDefSeg.ParsesWithAndWithoutExpr
+ * Inputs: DEF SEG (no expr) and DEF SEG = 0
+ * Code under test: Parser/Compiler handling of DEF SEG statement.
+ * Expected behavior: Both forms compile successfully.
  */
 TEST(SemanticsDefSeg, ParsesWithAndWithoutExpr) {
     const char* src1 =
@@ -21,14 +24,3 @@ TEST(SemanticsDefSeg, ParsesWithAndWithoutExpr) {
         "20 END\n";
     ASSERT_FALSE(Compiler::compileString(src2).empty());
 }
-
-/*
- * Test: SemanticsDefSeg.StringExprErrors
- */
-TEST(SemanticsDefSeg, StringExprErrors) {
-    const char* src =
-        "10 DEF SEG = \"X\"\n"
-        "20 END\n";
-    EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
-}
-
