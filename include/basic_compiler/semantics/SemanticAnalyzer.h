@@ -249,7 +249,7 @@ private:
      * Purpose:
      *  - Identify whether an expression is a comparison operation.
      */
-    bool isComparisonExpr(const Expr* e) const;
+    static bool isComparisonExpr(const Expr* e);
 
     /**
      * Function: SemanticAnalyzer::constEval
