@@ -59,6 +59,8 @@ template <> struct NodeKindTraits<NodeKind::CallAbsStmt>    { static constexpr a
 template <> struct NodeKindTraits<NodeKind::DefUsrStmt>     { static constexpr auto pretty = "DefUsrStmt"; };
 template <> struct NodeKindTraits<NodeKind::ChdirStmt>      { static constexpr auto pretty = "ChdirStmt"; };
 template <> struct NodeKindTraits<NodeKind::ColorStmt>      { static constexpr auto pretty = "ColorStmt"; };
+template <> struct NodeKindTraits<NodeKind::ScreenStmt>     { static constexpr auto pretty = "ScreenStmt"; };
+template <> struct NodeKindTraits<NodeKind::CircleStmt>     { static constexpr auto pretty = "CircleStmt"; };
 
 // Map a runtime NodeKind to a human-readable pretty name
 inline auto prettyName(const NodeKind k) {
@@ -111,6 +113,8 @@ inline auto prettyName(const NodeKind k) {
         case NodeKind::DefUsrStmt: return NodeKindTraits<NodeKind::DefUsrStmt>::pretty;
         case NodeKind::ChdirStmt: return NodeKindTraits<NodeKind::ChdirStmt>::pretty;
         case NodeKind::ColorStmt: return NodeKindTraits<NodeKind::ColorStmt>::pretty;
+        case NodeKind::ScreenStmt: return NodeKindTraits<NodeKind::ScreenStmt>::pretty;
+        case NodeKind::CircleStmt: return NodeKindTraits<NodeKind::CircleStmt>::pretty;
     }
     return "Node";
 }

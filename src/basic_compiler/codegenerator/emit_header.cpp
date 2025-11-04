@@ -87,6 +87,11 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "ret:" << STR_LF
         << "  ret void" << STR_LF
         << "}" << STR_LF << STR_LF;
+    // Stub graphics initializer used by SCREEN statement (no-op for now)
+    out << "define void @gwb_graphics_init(i32 %mode) {" << STR_LF
+        << "entry:" << STR_LF
+        << "  ret void" << STR_LF
+        << "}" << STR_LF << STR_LF;
     // Helper: write a buffer of bytes to the virtual screen, updating cursor
     // - Advances column/row, wraps at 80x25, handles '\n' by CR+LF behavior
     out << "define void @gwb_screen_write(ptr %buf, i64 %len) {" << STR_LF

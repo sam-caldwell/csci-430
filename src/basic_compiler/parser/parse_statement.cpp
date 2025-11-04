@@ -35,6 +35,28 @@ namespace gwbasic {
  */
 std::unique_ptr<Stmt> Parser::parseStatement() {
     Token startTok = peek();
+    // Special-case: SCREEN statement is introduced by identifier 'SCREEN' not a keyword,
+    // and must be handled before generic Identifier-based assignment parsing.
+    if (check(TokenType::Identifier)) {
+        std::string up = peek().lexeme;
+        for (auto &ch: up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+        if (up == "SCREEN") {
+            // Distinguish function SCREEN(…) vs. statement SCREEN …
+            if (peekNext().type != TokenType::LParen) {
+                advance();
+                auto n = parseScreen();
+                n->pos = {startTok.line, startTok.col};
+                return n;
+            }
+        }
+        if (up == "CIRCLE") {
+            // CIRCLE is a statement (no '(' function form)
+            advance();
+            auto n = parseCircle();
+            n->pos = {startTok.line, startTok.col};
+            return n;
+        }
+    }
     if (match(TokenType::KwPrint)) { auto n = parsePrint(); n->pos = {startTok.line, startTok.col}; return n; }
     if (check(TokenType::KwLet) || check(TokenType::Identifier)) { auto n = parseAssignOrLet(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwIf)) { auto n = parseIf(); n->pos = {startTok.line, startTok.col}; return n; }

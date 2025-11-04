@@ -34,6 +34,8 @@
 #include "basic_compiler/ast/DefUsrStmt.h"
 #include "basic_compiler/ast/ChdirStmt.h"
 #include "basic_compiler/ast/ColorStmt.h"
+#include "basic_compiler/ast/ScreenStmt.h"
+#include "basic_compiler/ast/CircleStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -246,6 +248,28 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         if (cs->fg) analyzeExpr(cs->fg.get());
         if (cs->bg) analyzeExpr(cs->bg.get());
         if (cs->border) analyzeExpr(cs->border.get());
+        return;
+    }
+    if (auto sc = dyn_cast<const ScreenStmt>(s)) {
+        // All provided arguments must be numeric expressions if present
+        if (sc->mode && typeOf(sc->mode.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: SCREEN mode must be numeric @ " << sc->pos.line << ':' << sc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (sc->colorSwitch && typeOf(sc->colorSwitch.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: SCREEN colorswitch must be numeric @ " << sc->pos.line << ':' << sc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (sc->aPage && typeOf(sc->aPage.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: SCREEN apage must be numeric @ " << sc->pos.line << ':' << sc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (sc->vPage && typeOf(sc->vPage.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: SCREEN vpage must be numeric @ " << sc->pos.line << ':' << sc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (sc->mode) analyzeExpr(sc->mode.get());
+        if (sc->colorSwitch) analyzeExpr(sc->colorSwitch.get());
+        if (sc->aPage) analyzeExpr(sc->aPage.get());
+        if (sc->vPage) analyzeExpr(sc->vPage.get());
+        log() << "Screen" << '\n';
+        return;
+    }
+    if (auto cc = dyn_cast<const CircleStmt>(s)) {
+        if (typeOf(cc->x.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE x must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (typeOf(cc->y.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE y must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (typeOf(cc->r.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE r must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(cc->x.get());
+        analyzeExpr(cc->y.get());
+        analyzeExpr(cc->r.get());
         return;
     }
     if (auto df = dyn_cast<const DefFnStmt>(s)) {

@@ -15,6 +15,7 @@
 #include "basic_compiler/ast/DefUsrStmt.h"
 #include "basic_compiler/ast/ChdirStmt.h"
 #include "basic_compiler/ast/ColorStmt.h"
+#include "basic_compiler/ast/ScreenStmt.h"
 #include <sstream>
 #include <format>
 
@@ -379,6 +380,16 @@ namespace gwbasic {
                 };
                 emitColor(col->fg, true);
                 emitColor(col->bg, false);
+            } else if (auto sc = dyn_cast<ScreenStmt>(st.get())) {
+                // SCREEN [mode][,[cs][,[apage][,vpage]]]
+                // For now, emit a call to a stub initializer with the mode (default 0)
+                std::string modei32 = "0"; // as i32 literal by default
+                if (sc->mode) {
+                    std::string mv = emitExpr(out, sc->mode.get(), "");
+                    std::string i32v = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", i32v, mv); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " Screen fptosi -> " << ir; log() << m.str() << CH_LF; } }
+                    modei32 = i32v;
+                }
+                { std::string ir = std::format("  call void @gwb_graphics_init(i32 {})", modei32); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " Screen init -> " << ir; log() << m.str() << CH_LF; } }
             } else {
                 throw CodeGenError("Unsupported statement encountered");
             }

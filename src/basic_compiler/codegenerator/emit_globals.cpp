@@ -44,6 +44,12 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@.sgr_fg_tbl = private unnamed_addr constant [16 x i32] [i32 30, i32 34, i32 32, i32 36, i32 31, i32 35, i32 33, i32 37, i32 90, i32 94, i32 92, i32 96, i32 91, i32 95, i32 93, i32 97]" << STR_LF
         // PC palette to ANSI SGR mapping (background)
         << "@.sgr_bg_tbl = private unnamed_addr constant [16 x i32] [i32 40, i32 44, i32 42, i32 46, i32 41, i32 45, i32 43, i32 47, i32 100, i32 104, i32 102, i32 106, i32 101, i32 105, i32 103, i32 107]" << STR_LF << STR_LF;
+    // Graphics environment variables and readiness flag
+    out << "@.env_display = private unnamed_addr constant [8 x i8] c\"DISPLAY\\00\"" << STR_LF
+        << "@.env_wayland = private unnamed_addr constant [15 x i8] c\"WAYLAND_DISPLAY\\00\"" << STR_LF
+        << "@.env_enable_gfx = private unnamed_addr constant [18 x i8] c\"GWBASIC_ENABLE_GFX\\00\"" << STR_LF
+        << "@.env_disable_gfx = private unnamed_addr constant [19 x i8] c\"GWBASIC_DISABLE_GFX\\00\"" << STR_LF
+        << "@gwb_gfx_ready = global i1 false" << STR_LF << STR_LF;
     // Virtual screen state for SCREEN(row,col[,z])
     // - 80x25 character buffer, row-major, 0-based indices internally
     // - current cursor position used by PRINT mirroring logic

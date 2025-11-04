@@ -281,6 +281,10 @@ private:
     std::unique_ptr<Stmt> parseColor();
     /** Parse CHDIR string-expr */
     std::unique_ptr<Stmt> parseChdir();
+    /** Parse SCREEN [mode][,[colorswitch][,[apage][,vpage]]] */
+    std::unique_ptr<Stmt> parseScreen();
+    /** Parse CIRCLE x, y, r */
+    std::unique_ptr<Stmt> parseCircle();
     /**
      * Function: Parser::parseExpression
      * Purpose:
