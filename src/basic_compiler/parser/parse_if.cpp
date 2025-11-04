@@ -8,25 +8,17 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseIf
- * Purpose:
- *  - Parse IF <cond> THEN <line> (single-line) or IF ... THEN (block)
  * Inputs:
- *  - none (assumes 'IF' was matched by caller)
+ *  - none (assumes IF already consumed)
  * Outputs:
- *  - IfStmt or IfBlockStmt depending on form
+ *  - IfStmt (single-line THEN <line>) or IfBlockStmt (multi-line)
+ * Theory of operation:
+ *  - Parses comparison expression and THEN.
+ *    If the next token is a line number, produce IfStmt.
+ *    Otherwise, treat it as a multi-line IF block to be folded later.
  */
 std::unique_ptr<Stmt> Parser::parseIf() {
-    /*
-     * Function: Parser::parseIf
-     * Inputs:
-     *  - none (assumes IF already consumed)
-     * Outputs:
-     *  - IfStmt (single-line THEN <line>) or IfBlockStmt (multi-line)
-     * Theory of operation:
-     *  - Parses comparison expression and THEN.
-     *    If next token is a line number, produce IfStmt.
-     *    Otherwise, treat as multi-line IF block to be folded later.
-     */
+
     auto cond = parseComparison();
     int l = peek().line, c = peek().col;
     consume(TokenType::KwThen, "THEN");

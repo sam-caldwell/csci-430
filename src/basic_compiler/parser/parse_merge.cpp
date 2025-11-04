@@ -15,10 +15,6 @@ namespace gwbasic {
  *  - MergeStmt: filename string (as written)
  */
 std::unique_ptr<Stmt> Parser::parseMerge() {
-    /*
-     * Function: Parser::parseMerge
-     * Strict grammar: MERGE "file"
-     */
     if (!check(TokenType::String)) throw ParseError("Expected filename string after MERGE");
     std::string file = peek().lexeme; advance();
     return make_node<MergeStmt>({peek().line, peek().col}, std::move(file));

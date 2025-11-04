@@ -10,7 +10,7 @@ namespace gwbasic {
  * Purpose:
  *  - Parse WRITE [#n,] expr[,expr...]
  * Inputs:
- *  - none (assumes 'WRITE' was matched by caller)
+ *  - none (assumes 'WRITE' matched by caller)
  * Outputs:
  *  - WriteStmt: optional channel number and list of expressions to output
  */

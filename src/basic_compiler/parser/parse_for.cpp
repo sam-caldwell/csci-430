@@ -7,27 +7,18 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseFor
- * Purpose:
- *  - Parse FOR var = start TO end [STEP step] with inline or multi-line body.
  * Inputs:
- *  - none (assumes 'FOR' was matched by caller)
+ *  - none (assumes FOR already consumed)
  * Outputs:
- *  - ForStmt: variable, bounds, optional step, and optional inline body
+ *  - ForStmt: loop construct with optional STEP and body
+ * Theory of operation:
+ *  - Parses induction variable, start expression, TO end expression,
+ *    optional STEP, then collects statements until NEXT on the same line.
+ *    If end-of-line is reached before NEXT, treat as a multi-line FOR;
+ *    the parser will fold subsequent lines into the body during
+ *    parseProgram restructuring.
  */
 std::unique_ptr<Stmt> Parser::parseFor() {
-    /*
-     * Function: Parser::parseFor
-     * Inputs:
-     *  - none (assumes FOR already consumed)
-     * Outputs:
-     *  - ForStmt: loop construct with optional STEP and body
-     * Theory of operation:
-     *  - Parses induction variable, start expression, TO end expression,
-     *    optional STEP, then collects statements until NEXT on the same line.
-     *    If end-of-line is reached before NEXT, treat as a multi-line FOR;
-     *    the parser will fold subsequent lines into the body during
-     *    parseProgram restructuring.
-     */
     if (!check(TokenType::Identifier)) throw ParseError("Expected variable name after FOR");
     std::string var = peek().lexeme;
     int l = peek().line, c = peek().col;

@@ -16,16 +16,6 @@ namespace gwbasic {
  *  - AssignStmt or ArrayAssignStmt depending on presence of '(index)'
  */
 std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
-    /*
-     * Function: Parser::parseAssignOrLet
-     * Inputs:
-     *  - none (optionally consumes LET, then expects identifier)
-     * Outputs:
-     *  - AssignStmt: assignment to a variable from a parsed expression
-     * Theory of operation:
-     *  - Optionally consumes LET, requires an Identifier, an '=' token, then
-     *    parses an expression and constructs an assignment statement.
-     */
     if (match(TokenType::KwLet)) {
         // proceed to identifier
     }

@@ -12,21 +12,12 @@ namespace gwbasic {
  * Function: Parser::parseDefFn
  * Purpose:
  *  - Parse DEF FNname(param) = expression
- * Inputs:
- *  - none (assumes 'DEF' was matched by caller)
- * Outputs:
- *  - DefFnStmt: function name, parameter, and body expression
+ * Notes:
+ *  - We accept function identifiers that begin with "FN" (case-insensitive),
+ *    optionally ending with a type suffix ('$','!','%','#'). The suffix, if
+ *    present, is stored as part of the function name.
  */
 std::unique_ptr<Stmt> Parser::parseDefFn() {
-    /*
-     * Function: Parser::parseDefFn
-     * Purpose:
-     *  - Parse DEF FNname(param) = expression
-     * Notes:
-     *  - We accept function identifiers that begin with "FN" (case-insensitive),
-     *    optionally ending with a type suffix ('$','!','%','#'). The suffix, if
-     *    present, is stored as part of the function name.
-     */
     if (!check(TokenType::Identifier)) throw ParseError("Expected FNname after DEF");
     std::string fn = peek().lexeme;
     advance();

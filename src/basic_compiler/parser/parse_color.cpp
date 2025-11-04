@@ -10,7 +10,7 @@ namespace gwbasic {
  * Purpose:
  *  - Parse COLOR [fg][,[bg][,[border]]]
  * Inputs:
- *  - none (assumes 'COLOR' was matched by caller)
+ *  - none (assumes 'COLOR' matched by caller)
  * Outputs:
  *  - ColorStmt: optional foreground, background, and border expressions
  */

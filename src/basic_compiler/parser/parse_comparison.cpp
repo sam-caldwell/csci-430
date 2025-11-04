@@ -15,16 +15,6 @@ namespace gwbasic {
  *  - Expr: expression node with comparison precedence
  */
 std::unique_ptr<Expr> Parser::parseComparison() {
-    /*
-     * Function: Parser::parseComparison
-     * Inputs:
-     *  - none
-     * Outputs:
-     *  - Expr: expression tree with comparison operators at this precedence
-     * Theory of operation:
-     *  - Parses a term, then folds zero or more relational operators (=, <>,
-     *    <, <=, >, >=) with right operands as BinaryExpr nodes.
-     */
     auto left = parseTerm();
     while (true) {
         if (match(TokenType::Assign)) { auto right = parseTerm(); left = std::make_unique<BinaryExpr>(BinaryOp::Eq, std::move(left), std::move(right)); }

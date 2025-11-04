@@ -8,7 +8,7 @@ namespace gwbasic {
 /*
  * Function: Parser::parseBsave
  * Purpose:
- *  - Parse BSAVE "filename",offset,length
+ *  - Parse BSAVE "filename", offset, length
  * Inputs:
  *  - none (assumes 'BSAVE' was matched by caller)
  * Outputs:

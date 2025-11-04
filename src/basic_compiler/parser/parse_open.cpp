@@ -10,16 +10,17 @@ namespace gwbasic {
  * Purpose:
  *  - Parse the OPEN statement: OPEN <string-expr> FOR (INPUT|OUTPUT) AS #<channel>
  * Inputs:
- *  - none (assumes 'OPEN' was matched by caller)
+ *  - none (assumes 'OPEN' matched by caller)
  * Outputs:
  *  - OpenStmt: captures filename expression, file mode, and channel number
  */
 std::unique_ptr<Stmt> Parser::parseOpen() {
+    const int l = peek().line;
     // OPEN <string-expr> FOR (INPUT|OUTPUT) AS # <Integer>
-    int l = peek().line, c = peek().col;
+    const int c = peek().col;
     auto fname = parseExpression();
     consume(TokenType::KwFor, "FOR");
-    FileMode mode = FileMode::Input;
+    auto mode = FileMode::Input;
     if (match(TokenType::KwInput)) mode = FileMode::Input;
     else if (match(TokenType::KwOutput)) mode = FileMode::Output;
     else throw ParseError("Expected INPUT or OUTPUT after FOR in OPEN");

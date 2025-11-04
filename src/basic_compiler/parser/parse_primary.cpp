@@ -12,24 +12,15 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parsePrimary
- * Purpose:
- *  - Parse literals, identifiers (variables/calls), or parenthesized expressions.
  * Inputs:
  *  - none
  * Outputs:
- *  - Expr: NumberExpr, StringExpr, VarExpr, CallExpr, or nested expression
+ *  - Expr: a number, string, variable, or parenthesized expression
+ * Theory of operation:
+ *  - Recognizes literal tokens, identifiers, or '(' expression ')';
+ *    throws ParseError for any unexpected token.
  */
 std::unique_ptr<Expr> Parser::parsePrimary() {
-    /*
-     * Function: Parser::parsePrimary
-     * Inputs:
-     *  - none
-     * Outputs:
-     *  - Expr: a number, string, variable, or parenthesized expression
-     * Theory of operation:
-     *  - Recognizes literal tokens, identifiers, or '(' expression ')';
-     *    throws ParseError for any unexpected token.
-     */
     if (check(TokenType::Integer) || check(TokenType::Float)) {
         int l = peek().line, c = peek().col;
         double v = std::stod(peek().lexeme);

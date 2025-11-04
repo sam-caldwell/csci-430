@@ -6,24 +6,15 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseLine
- * Purpose:
- *  - Parse a numbered BASIC source line into a Line AST node.
  * Inputs:
- *  - none (expects current token is a line number)
+ *  - none (expects current token to be a line number)
  * Outputs:
- *  - Line: line number and list of parsed statements
+ *  - Line: AST node with line number and parsed statements
+ * Theory of operation:
+ *  - Reads a leading Integer token as the line number, then parses one or
+ *    more statements separated by ':' until a newline or EOF is reached.
  */
 Line Parser::parseLine() {
-    /*
-     * Function: Parser::parseLine
-     * Inputs:
-     *  - none (expects current token to be a line number)
-     * Outputs:
-     *  - Line: AST node with line number and parsed statements
-     * Theory of operation:
-     *  - Reads a leading Integer token as the line number, then parses one or
-     *    more statements separated by ':' until a newline or EOF is reached.
-     */
     Line line;
     if (!check(TokenType::Integer)) {
         std::ostringstream oss;

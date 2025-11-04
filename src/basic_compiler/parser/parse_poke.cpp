@@ -10,7 +10,7 @@ namespace gwbasic {
  * Purpose:
  *  - Parse POKE address, value
  * Inputs:
- *  - none (assumes 'POKE' was matched by caller)
+ *  - none (assumes 'POKE' matched by caller)
  * Outputs:
  *  - PokeStmt: address and value expressions
  */

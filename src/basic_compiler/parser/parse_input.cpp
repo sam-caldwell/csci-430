@@ -11,7 +11,7 @@ namespace gwbasic {
  * Purpose:
  *  - Parse INPUT [#n,] var[,var...] or bare console INPUT var
  * Inputs:
- *  - none (assumes 'INPUT' was matched by caller)
+ *  - none (assumes 'INPUT' matched by caller)
  * Outputs:
  *  - FileInputStmt when a channel is specified; otherwise InputStmt
  */

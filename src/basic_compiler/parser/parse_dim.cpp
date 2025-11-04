@@ -10,7 +10,7 @@ namespace gwbasic {
  * Purpose:
  *  - Parse DIM name(length)
  * Inputs:
- *  - none (assumes 'DIM' was matched by caller)
+ *  - none (assumes 'DIM' matched by caller)
  * Outputs:
  *  - DimStmt: array name and length
  */
