@@ -1,4 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
+#include <string>
+
 #include "basic_compiler/compiler/FileOpenError.h"
 
 namespace gwbasic {
@@ -11,8 +13,7 @@ namespace gwbasic {
  * Inputs:
  *  - path: Filesystem path that could not be opened
  */
-FileOpenError::FileOpenError(const std::string& path)
+FileOpenError::FileOpenError(const std::string_view path)
     : std::runtime_error(std::string("Unable to open input file: ").append(path)) {}
 
 } // namespace gwbasic
-
