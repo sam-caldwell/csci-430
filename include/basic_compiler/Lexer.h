@@ -192,6 +192,21 @@ private:
     }
 
     /*
+     * Function: Lexer::emitToken
+     * Purpose:
+     *  - Push a pre-constructed token into the output vector and log it.
+     * Inputs:
+     *  - out: token destination vector
+     *  - t: token to emit (by const ref)
+     * Outputs:
+     *  - void (pushes token and logs it)
+     */
+    void emitToken(std::vector<Token>& out, const Token& t) {
+        out.emplace_back(t);
+        logToken(t);
+    }
+
+    /*
      * Template: Lexer::emitPairOrSingle
      * Purpose:
      *  - After consuming the first character of an operator, emit a two-char
@@ -392,6 +407,12 @@ private:
      *  - std::string: Escaped representation suitable for logs
      */
     static std::string escapeForLog(const std::string& s);
+
+    // Lightweight helpers used by tokenize() to reduce branching
+    bool tryEmitNewline(std::vector<Token>& out);
+    bool tryEmitPrimary(std::vector<Token>& out);
+    void emitHexLiteral(std::vector<Token>& out, int line, int col);
+    bool tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, char c);
 };
 
 } // namespace gwbasic
