@@ -2,6 +2,7 @@
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/ArrayAssignStmt.h"
+#include "basic_compiler/ast/MidAssignStmt.h"
 #include <sstream>
 #include <format>
 
@@ -44,6 +45,55 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
             } else {
                 storeNumberToVar(out, asg->name, val);
             }
+            } else if (auto mid = dyn_cast<MidAssignStmt>(st.get())) {
+                std::string dest;
+                std::string storePtr;
+                if (mid->index) {
+                    const int len = arraySizes_[mid->name];
+                    ensureStringArrayAllocated(out, mid->name, len);
+                    std::string base = arrayAllocaName_[mid->name];
+                    std::string idxReg = emitExpr(out, mid->index.get(), entryLabel);
+                    std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
+                    std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; }
+                    storePtr = elem;
+                    dest = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", dest, elem); out << ir << Symbols::LF; }
+                } else {
+                    ensureVarAllocated(out, mid->name);
+                    dest = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", dest, varAllocaName_[mid->name]); out << ir << Symbols::LF; }
+                    storePtr = varAllocaName_[mid->name];
+                }
+                std::string startD = emitExpr(out, mid->start.get(), entryLabel);
+                std::string startI = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", startI, startD); out << ir << Symbols::LF; }
+                std::string off = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, 1", off, startI); out << ir << Symbols::LF; }
+                std::string dlen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", dlen, dest); out << ir << Symbols::LF; }
+                std::string dsize = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", dsize, dlen); out << ir << Symbols::LF; }
+                std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, dsize); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", buf, dest); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store ptr {}, ptr {}", buf, storePtr); out << ir << Symbols::LF; }
+                dest = buf;
+                std::string src = emitExpr(out, mid->value.get(), entryLabel);
+                std::string slen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", slen, src); out << ir << Symbols::LF; }
+                std::string n = slen;
+                if (mid->len) {
+                    std::string lenD = emitExpr(out, mid->len.get(), entryLabel);
+                    n = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", n, lenD); out << ir << Symbols::LF; }
+                }
+                std::string negOff = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", negOff, off); out << ir << Symbols::LF; }
+                std::string geLen = nextTemp(); { std::string ir = std::format("  {} = icmp sge i64 {}, {}", geLen, off, dlen); out << ir << Symbols::LF; }
+                std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, negOff, geLen); out << ir << Symbols::LF; }
+                std::string doLbl = entryLabel + std::string("_mid_do_") + std::to_string(++localContCounter);
+                std::string endLbl2 = entryLabel + std::string("_mid_end_") + std::to_string(localContCounter);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", bad, endLbl2, doLbl); out << ir << Symbols::LF; }
+                out << doLbl << ":" << Symbols::LF;
+                std::string avail = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", avail, dlen, off); out << ir << Symbols::LF; }
+                std::string n_lt_av = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", n_lt_av, n, avail); out << ir << Symbols::LF; }
+                std::string m1 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 {}, i64 {}", m1, n_lt_av, n, avail); out << ir << Symbols::LF; }
+                std::string m1_lt_s = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", m1_lt_s, m1, slen); out << ir << Symbols::LF; }
+                std::string m2 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 {}, i64 {}", m2, m1_lt_s, m1, slen); out << ir << Symbols::LF; }
+                std::string dst = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", dst, dest, off); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", dst, src, m2); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  br label %{}", endLbl2); out << ir << Symbols::LF; }
+                out << endLbl2 << ":" << Symbols::LF;
             } else if (auto pr = dyn_cast<PrintStmt>(st.get())) {
                 std::vector<const Expr*> items;
                 if (pr->value) items.push_back(pr->value.get());

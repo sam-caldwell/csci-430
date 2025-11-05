@@ -358,6 +358,7 @@ private:
     /** Allocate a stack slot for a variable if not already allocated. */
     void ensureVarAllocated(std::ostringstream& out, const std::string& name);
     void ensureArrayAllocated(std::ostringstream& out, const std::string& name, int length);
+    void ensureStringArrayAllocated(std::ostringstream& out, const std::string& name, int length);
     /** Sanitize BASIC variable name into a valid local IR identifier */
     static std::string sanitizeLocal(const std::string& name);
     /** Emit casts+store to assign a computed double to a typed variable */
@@ -383,6 +384,7 @@ private:
         if (!name.empty() && name.back() == Symbols::DOLLARSIGN.first()) return true;
         return semStringVariables_.contains(name);
     }
+    bool isStringArrayNameCG(const std::string& name) const { return isStringVarNameCG(name); }
 
     // Logging utilities
     /** Stream accessor: codegen-phase logger (ostream sink when disabled). */

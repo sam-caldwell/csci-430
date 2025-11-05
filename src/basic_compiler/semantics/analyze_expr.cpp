@@ -15,6 +15,16 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
     if (!e) return;
     if (auto v = dyn_cast<const VarExpr>(e)) { reference(v->name, v->pos); return; }
     if (auto call = dyn_cast<const CallExpr>(e)) {
+        // Array element reference: A(i) or A$(i)
+        if (arrays_.contains(call->callee)) {
+            if (call->args.size() != 1) {
+                std::ostringstream m; m << "ArityError: array '" << call->callee << "' expects one index @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n';
+                throw SemanticError(m.str());
+            }
+            if (typeOf(call->args[0].get()) == ValueType::String) { std::ostringstream m; m << "TypeError: array index must be numeric @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            analyzeExpr(call->args[0].get());
+            return;
+        }
         std::string fn = call->callee; for (auto& ch : fn) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
         // Built-in intrinsics
         const bool isBuiltinNum = isKnownNumericFunction(fn);

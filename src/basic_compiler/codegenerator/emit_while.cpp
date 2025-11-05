@@ -6,6 +6,7 @@
 #include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/StopStmt.h"
 #include "basic_compiler/ast/SystemStmt.h"
+#include "basic_compiler/ast/MidAssignStmt.h"
 #include <sstream>
 #include <format>
 #include <cmath>
@@ -54,6 +55,55 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             } else {
                 storeNumberToVar(out, asg->name, val);
             }
+        } else if (auto mid = dyn_cast<MidAssignStmt>(s.get())) {
+            std::string dest;
+            std::string storePtr;
+            if (mid->index) {
+                const int len = arraySizes_[mid->name];
+                ensureStringArrayAllocated(out, mid->name, len);
+                std::string base = arrayAllocaName_[mid->name];
+                std::string idxReg = emitExpr(out, mid->index.get(), currLineLabel);
+                std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; }
+                storePtr = elem;
+                dest = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", dest, elem); out << ir << Symbols::LF; }
+            } else {
+                ensureVarAllocated(out, mid->name);
+                dest = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", dest, varAllocaName_[mid->name]); out << ir << Symbols::LF; }
+                storePtr = varAllocaName_[mid->name];
+            }
+            std::string startD = emitExpr(out, mid->start.get(), currLineLabel);
+            std::string startI = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", startI, startD); out << ir << Symbols::LF; }
+            std::string off = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, 1", off, startI); out << ir << Symbols::LF; }
+            std::string dlen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", dlen, dest); out << ir << Symbols::LF; }
+            std::string dsize = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", dsize, dlen); out << ir << Symbols::LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, dsize); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", buf, dest); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store ptr {}, ptr {}", buf, storePtr); out << ir << Symbols::LF; }
+            dest = buf;
+            std::string src = emitExpr(out, mid->value.get(), currLineLabel);
+            std::string slen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", slen, src); out << ir << Symbols::LF; }
+            std::string n = slen;
+            if (mid->len) {
+                std::string lenD = emitExpr(out, mid->len.get(), currLineLabel);
+                n = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", n, lenD); out << ir << Symbols::LF; }
+            }
+            std::string negOff = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", negOff, off); out << ir << Symbols::LF; }
+            std::string geLen = nextTemp(); { std::string ir = std::format("  {} = icmp sge i64 {}, {}", geLen, off, dlen); out << ir << Symbols::LF; }
+            std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, negOff, geLen); out << ir << Symbols::LF; }
+            std::string doLbl = currLineLabel + std::string("_mid_do_") + std::to_string(++localCounter);
+            std::string endLbl2 = currLineLabel + std::string("_mid_end_") + std::to_string(localCounter);
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", bad, endLbl2, doLbl); out << ir << Symbols::LF; }
+            out << doLbl << ":" << Symbols::LF;
+            std::string avail = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", avail, dlen, off); out << ir << Symbols::LF; }
+            std::string n_lt_av = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", n_lt_av, n, avail); out << ir << Symbols::LF; }
+            std::string m1 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 {}, i64 {}", m1, n_lt_av, n, avail); out << ir << Symbols::LF; }
+            std::string m1_lt_s = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", m1_lt_s, m1, slen); out << ir << Symbols::LF; }
+            std::string m2 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 {}, i64 {}", m2, m1_lt_s, m1, slen); out << ir << Symbols::LF; }
+            std::string dst = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", dst, dest, off); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", dst, src, m2); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  br label %{}", endLbl2); out << ir << Symbols::LF; }
+            out << endLbl2 << ":" << Symbols::LF;
         } else if (auto pr = dyn_cast<PrintStmt>(s.get())) {
             std::vector<const Expr*> items; if (pr->value) items.push_back(pr->value.get()); for (const auto& v : pr->more) items.push_back(v.get());
             for (size_t pi = 0; pi < items.size(); ++pi) {
@@ -106,13 +156,22 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
                 }
             }
         } else if (auto aaset = dyn_cast<ArrayAssignStmt>(s.get())) {
-            const int len = arraySizes_[aaset->name]; ensureArrayAllocated(out, aaset->name, len);
-            std::string base = arrayAllocaName_[aaset->name];
+            const int len = arraySizes_[aaset->name];
             std::string idxReg = emitExpr(out, aaset->index.get(), currLineLabel);
             std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
-            std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; }
-            std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
-            { std::string ir = std::format("  store double {}, ptr {}", val, elem); out << ir << Symbols::LF; }
+            if (isStringArrayNameCG(aaset->name)) {
+                ensureStringArrayAllocated(out, aaset->name, len);
+                std::string base = arrayAllocaName_[aaset->name];
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; }
+                std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
+                { std::string ir = std::format("  store ptr {}, ptr {}", val, elem); out << ir << Symbols::LF; }
+            } else {
+                ensureArrayAllocated(out, aaset->name, len);
+                std::string base = arrayAllocaName_[aaset->name];
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; }
+                std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
+                { std::string ir = std::format("  store double {}, ptr {}", val, elem); out << ir << Symbols::LF; }
+            }
         } else if (auto fs = dyn_cast<ForStmt>(s.get())) {
             emitFor(out, fs, currLineLabel, localCounter);
         } else if (auto ib = dyn_cast<IfBlockStmt>(s.get())) {

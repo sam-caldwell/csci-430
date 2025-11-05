@@ -179,16 +179,22 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         // Treat known arrays as array element references (1-D)
         if (arraySizes_.contains(call->callee)) {
             const int len = arraySizes_[call->callee];
-            ensureArrayAllocated(out, call->callee, len);
-            std::string base = arrayAllocaName_[call->callee];
             // Evaluate index (assume numeric), convert to i64
             std::string idxReg = emitExpr(out, call->args[0].get(), "");
             std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array idx -> " << ir; log() << m.str() << Symbols::LF; } }
-            // gep to element: ptr elem = getelementptr [len x double], ptr base, i64 0, i64 idx
-            std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array elem gep -> " << ir; log() << m.str() << Symbols::LF; } }
-            // load double
-            std::string res = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", res, elem); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array load -> " << ir; log() << m.str() << Symbols::LF; } }
-            return res;
+            if (isStringArrayNameCG(call->callee)) {
+                ensureStringArrayAllocated(out, call->callee, len);
+                std::string base = arrayAllocaName_[call->callee];
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " StrArray elem gep -> " << ir; log() << m.str() << Symbols::LF; } }
+                std::string res = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", res, elem); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " StrArray load -> " << ir; log() << m.str() << Symbols::LF; } }
+                return res;
+            } else {
+                ensureArrayAllocated(out, call->callee, len);
+                std::string base = arrayAllocaName_[call->callee];
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array elem gep -> " << ir; log() << m.str() << Symbols::LF; } }
+                std::string res = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", res, elem); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array load -> " << ir; log() << m.str() << Symbols::LF; } }
+                return res;
+            }
         }
         // Emit args
         std::vector<std::string> argv; argv.reserve(call->args.size());

@@ -5,6 +5,7 @@
 #include "basic_compiler/ast/ReadStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
+#include "basic_compiler/ast/MidAssignStmt.h"
 
 namespace gwbasic {
 
@@ -40,6 +41,12 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
         variables_.insert(a->name);
         collectExprVars(a->value.get());
         logSem() << "Assign " << a->name << " @ " << a->pos.line << ':' << a->pos.col << Symbols::LF;
+    } else if (const auto m = dyn_cast<const MidAssignStmt>(s)) {
+        variables_.insert(m->name);
+        collectExprVars(m->start.get());
+        if (m->len) collectExprVars(m->len.get());
+        collectExprVars(m->value.get());
+        logSem() << "MidAssign " << m->name << " @ " << m->pos.line << ':' << m->pos.col << Symbols::LF;
     } else if (const auto i = dyn_cast<const IfStmt>(s)) {
         collectExprVars(i->cond.get());
         logSem() << "If @ " << i->pos.line << ':' << i->pos.col << Symbols::LF;

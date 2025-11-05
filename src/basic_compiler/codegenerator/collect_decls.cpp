@@ -102,6 +102,21 @@ void CodeGenerator::collectDecls(const Program& program) {
         // LineNumbers are computed from AST to drive emission order; no change
     }
 
+    // Populate DATA items into dataLiteralIds_ and ensure each item has an id
+    dataLiteralIds_.clear();
+    for (int ln : lineNumbers_) {
+        const auto* lptr = lineMap_[ln];
+        if (!lptr) continue;
+        for (const auto& st : lptr->statements) {
+            if (const auto ds = dyn_cast<const DataStmt>(st.get())) {
+                for (const auto& v : ds->items) {
+                    if (!strLiteralId_.contains(v)) strLiteralId_[v] = strCounter_++;
+                    dataLiteralIds_.push_back(strLiteralId_[v]);
+                }
+            }
+        }
+    }
+
     // Build mapping of DATA index at the start of each 1000-based line region
     // independent of whether semantics were provided.
     regionDataStartIdx_.clear();

@@ -39,6 +39,7 @@
 #include "basic_compiler/ast/ClearStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
+#include "basic_compiler/ast/MidAssignStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -74,6 +75,28 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         analyzeExpr(a->value.get());
         return;
     }
+    if (auto ma = dyn_cast<const MidAssignStmt>(s)) {
+        // Target must be string variable or string array element
+        if (ma->index) {
+            // String array element
+            if (!arrays_.contains(ma->name)) { std::ostringstream m; m << "TypeError: array '" << ma->name << "' not DIM'd @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            if (!varNameIsString(ma->name)) { std::ostringstream m; m << "TypeError: MID$ target array must be string '" << ma->name << "' @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            if (typeOf(ma->index.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: MID$ index must be numeric @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            analyzeExpr(ma->index.get());
+        } else {
+            reference(ma->name, ma->pos);
+            if (!varNameIsString(ma->name)) {
+                std::ostringstream m; m << "TypeError: MID$ target must be string variable '" << ma->name << "' @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n';
+                throw SemanticError(m.str());
+            }
+        }
+        // start and (optional) len must be numeric; value must be string
+        if (typeOf(ma->start.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: MID$ start must be numeric @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (ma->len && typeOf(ma->len.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: MID$ length must be numeric @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (typeOf(ma->value.get()) != ValueType::String) { std::ostringstream m; m << "TypeError: MID$ assignment requires string value @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(ma->start.get()); if (ma->len) analyzeExpr(ma->len.get()); analyzeExpr(ma->value.get());
+        return;
+    }
     if (auto i = dyn_cast<const IfStmt>(s)) {
         if (typeOf(i->cond.get()) == ValueType::String) {
             std::ostringstream m; m << "TypeError: IF condition cannot be string @ " << i->pos.line << ':' << i->pos.col; log() << m.str() << '\n';
@@ -102,7 +125,11 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         // Require array declared
         if (!arrays_.contains(aa->name)) { std::ostringstream m; m << "TypeError: array '" << aa->name << "' not DIM'd @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         if (typeOf(aa->index.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: array index must be numeric @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-        if (typeOf(aa->value.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: cannot assign string into numeric array @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        // Type-specific checks: string arrays accept string values; numeric arrays accept numeric values
+        const bool isStrArray = varNameIsString(aa->name);
+        const auto vty = typeOf(aa->value.get());
+        if (isStrArray && vty != ValueType::String) { std::ostringstream m; m << "TypeError: cannot assign number into string array @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (!isStrArray && vty == ValueType::String) { std::ostringstream m; m << "TypeError: cannot assign string into numeric array @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(aa->index.get());
         analyzeExpr(aa->value.get());
         return;

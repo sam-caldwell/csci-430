@@ -247,13 +247,22 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
             out << std::format("  br label %exit") << Symbols::LF;
             forTerminated = true; break;
         } else if (auto aaset = dyn_cast<ArrayAssignStmt>(s.get())) {
-            const int len = arraySizes_[aaset->name]; ensureArrayAllocated(out, aaset->name, len);
-            std::string base = arrayAllocaName_[aaset->name];
+            const int len = arraySizes_[aaset->name];
             std::string idxReg = emitExpr(out, aaset->index.get(), currLineLabel);
             std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body idx -> " << ir << Symbols::LF; }
-            std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body gep -> " << ir << Symbols::LF; }
-            std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
-            { std::string ir = std::format("  store double {}, ptr {}", val, elem); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body store -> " << ir << Symbols::LF; }
+            if (isStringArrayNameCG(aaset->name)) {
+                ensureStringArrayAllocated(out, aaset->name, len);
+                std::string base = arrayAllocaName_[aaset->name];
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body gep$ -> " << ir << Symbols::LF; }
+                std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
+                { std::string ir = std::format("  store ptr {}, ptr {}", val, elem); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body store$ -> " << ir << Symbols::LF; }
+            } else {
+                ensureArrayAllocated(out, aaset->name, len);
+                std::string base = arrayAllocaName_[aaset->name];
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body gep -> " << ir << Symbols::LF; }
+                std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
+                { std::string ir = std::format("  store double {}, ptr {}", val, elem); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body store -> " << ir << Symbols::LF; }
+            }
         } else {
             throw CodeGenError("Unsupported statement in FOR body");
         }

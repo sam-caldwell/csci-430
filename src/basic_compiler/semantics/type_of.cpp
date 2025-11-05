@@ -28,6 +28,11 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
     if (dyn_cast<const NumberExpr>(e)) return ValueType::Number;
     if (dyn_cast<const StringExpr>(e)) return ValueType::String;
     if (auto c = dyn_cast<const CallExpr>(e)) {
+        // Array element reference has form A(i)
+        if (arrays_.contains(c->callee)) {
+            if (varNameIsString(c->callee)) return ValueType::String;
+            return ValueType::Number;
+        }
         // Built-in intrinsics: CHR$ returns string; ASC returns number.
         std::string fn = c->callee; for (auto &ch: fn) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
         if (fn == "CHR$") return ValueType::String;

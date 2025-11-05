@@ -1,5 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/ast/MidAssignStmt.h"
 #include <cctype>
 
 namespace gwbasic {
@@ -35,8 +37,27 @@ std::unique_ptr<Stmt> Parser::tryParseSpecialIdentifierStatement(const Token& st
         n->pos = {startTok.line, startTok.col};
         return n;
     }
+    if (up == "MID$") {
+        // Bare MID$ assignment at statement start: MID$(s$, start[, len]) = expr$
+        // Only parse here if followed by '(' to avoid colliding with variable names
+        if (peekNext().type != TokenType::LParen) return nullptr;
+        advance(); // consume MID$
+        consume(TokenType::LParen, "(");
+        if (!check(TokenType::Identifier)) throw ParseError("Expected string variable name in MID$ assignment");
+        std::string name = peek().lexeme; advance();
+        std::unique_ptr<Expr> idx;
+        if (match(TokenType::LParen)) { idx = parseExpression(); consume(TokenType::RParen, ")"); }
+        consume(TokenType::Comma, ",");
+        auto start = parseExpression();
+        std::unique_ptr<Expr> len;
+        if (match(TokenType::Comma)) len = parseExpression();
+        consume(TokenType::RParen, ")");
+        consume(TokenType::Assign, "'='");
+        auto value = parseExpression();
+        auto n = make_node<MidAssignStmt>({startTok.line, startTok.col}, name, std::move(idx), std::move(start), std::move(len), std::move(value));
+        return n;
+    }
     return nullptr;
 }
 
 } // namespace gwbasic
-
