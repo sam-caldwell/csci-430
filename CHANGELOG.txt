@@ -166,3 +166,37 @@
               - Unit: test_semantics_screen_function.cpp (arity/type), test_codegen_screen_ir.cpp (globals/helper
                 present).
               - E2E: test_screen_e2e.cpp validates ASCII codes after printing "ABC".
+
+05 Nov 2025 - ON GOTO/GOSUB, LLVM 17 pin, lint fixes, and editor config
+            - Language: ON GOTO / ON GOSUB
+              - Lexer: added KwOn token.
+              - Parser: ON <expr> GOTO l1[,l2...] and ON <expr> GOSUB l1[,l2...] via parseOnGotoGosub().
+              - AST: new nodes OnGotoStmt and OnGosubStmt (index expr + targets).
+              - Semantics: index must be numeric; validates target lines (errors in strict mode; warnings otherwise).
+              - Codegen: lowers to a switch i32 on 1-based index; default falls through.
+                - ON GOTO: cases branch to line labels; default → continuation label.
+                - ON GOSUB: cases branch to per-case entry labels and inline subroutine; common continuation label.
+                - Supported in top-level lines, IF/ELSE bodies, and WHILE bodies.
+              - Tests:
+                - Unit: parser (OnGoto/OnGosub), semantics (string index errors, missing targets).
+                - Integration: IR patterns for switch targets and default labels; verifies continuation label blocks.
+                - E2E: correct branch/subroutine execution and out-of-range (0 and >N) fallthrough behavior.
+
+            - Tooling/CI: pin LLVM 17 everywhere and fix clang-tidy in Docker lint
+              - Dockerfile: install pinned LLVM/Clang 17 (clang-17, clang-tidy-17, llvm-17-tools, libc++-17-dev,
+                libc++abi-17-dev, lld-17); export PATH/CC/CXX for LLVM 17.
+              - CMake toolchain (cmake/toolchain.cmake):
+                - macOS: require Homebrew llvm@17 explicitly; fail fast if missing.
+                - Linux: pin to /usr/lib/llvm-17 (no multi-version probing); set PATH, LLVM_PREFIX, and rpaths.
+              - Build config (cmake/BuildConfig.cmake): apply -stdlib=libc++ only for C++ compilation to avoid
+                clang-tidy treating '-stdlib=libc++' as an error on C sources; link with libc++ for C++.
+              - GitHub Actions coverage workflow: macOS installs llvm@17; exports LLVM_PREFIX/CC/CXX/PATH;
+                Ubuntu uses apt.llvm.org llvm.sh 17 path; both use unified toolchain.
+              - make lint/linux now succeeds (clang-tidy present and clean) and make test/linux passes.
+
+            - Style/tooling: .editorconfig compatibility improvements
+              - Split grouped sections for compatibility with older plugins:
+                - Replace [{Makefile,*.mk}] with [Makefile] and [*.mk].
+                - Replace [{CMakeLists.txt,*.cmake}] with [CMakeLists.txt] and [*.cmake].
+
+            - Consumed enough caffeine to make Mötley Crüe seem tame.

@@ -24,6 +24,13 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic>")
 endif()
 
+# On Linux with Clang, prefer libc++ to avoid libstdc++ ABI/header conflicts.
+if (UNIX AND NOT APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # Apply libc++ only to C++ compilation to avoid warnings on C files.
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>")
+  add_link_options(-stdlib=libc++)
+endif()
+
 # On macOS with Homebrew LLVM, prefer linking against Homebrew's libc++ runtime.
 # Avoid regex in if() (CMake does not short-circuit evaluation reliably).
 if(APPLE)

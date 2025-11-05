@@ -2,41 +2,34 @@ FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=UTC \
-    CC=clang \
-    CXX=clang++
+    CC=clang-17 \
+    CXX=clang++-17 \
+    PATH=/usr/lib/llvm-17/bin:$PATH
 
-RUN apt-get update && \
+RUN set -eux; \
+    apt-get update; \
     apt-get install -y --no-install-recommends \
+      wget \
+      software-properties-common \
+      lsb-release \
+      gnupg \
       ca-certificates \
       build-essential \
       cmake \
       ninja-build \
       shellcheck \
-      clang \
-      llvm \
-      llvm-dev \
-      git && \
-    bash -lc 'set -eux; \
-      LLVMV=$([ -x /usr/bin/clang ] && /usr/bin/clang -dumpversion 2>/dev/null | sed -E "s/\..*//" || echo 18); \
-      echo "Detected Clang major version: ${LLVMV}"; \
-      found=0; \
-      for v in ${LLVMV} 18 17 16 15 14; do \
-        echo "Attempting to install LLVM runtimes for v${v}..."; \
-        if apt-get update && apt-get install -y --no-install-recommends \
-             libclang-rt-${v}-dev \
-             libc++-${v}-dev \
-             libc++abi-${v}-dev \
-             lld-${v} \
-             llvm-${v}-tools; then \
-          found=1; \
-          break; \
-        fi; \
-      done; \
-      if [ "$found" -eq 0 ]; then \
-        echo "Falling back to generic libc++/llvm tools"; \
-        apt-get update && apt-get install -y --no-install-recommends \
-          libc++-dev libc++abi-dev lld llvm; \
-      fi' && \
+      git; \
+    # Install pinned LLVM/Clang 17 toolchain from apt.llvm.org
+    wget https://apt.llvm.org/llvm.sh; \
+    chmod +x llvm.sh; \
+    ./llvm.sh 17; \
+    apt-get install -y --no-install-recommends \
+      clang-17 \
+      clang-tidy-17 \
+      llvm-17-tools \
+      libc++-17-dev \
+      libc++abi-17-dev \
+      lld-17; \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /work
