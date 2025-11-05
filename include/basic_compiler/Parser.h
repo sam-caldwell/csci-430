@@ -185,6 +185,8 @@ private:
     std::unique_ptr<Stmt> tryParseDefFamily(const Token& startTok);
     std::unique_ptr<Stmt> tryParseGotoGosub(const Token& startTok);
     std::unique_ptr<Stmt> tryParseOtherKeywords(const Token& startTok);
+    /** Parse ON <expr> GOTO line[,line...] or ON <expr> GOSUB line[,line...] */
+    std::unique_ptr<Stmt> parseOnGotoGosub();
     /**
      * Function: Parser::parsePrint
      * Purpose:
