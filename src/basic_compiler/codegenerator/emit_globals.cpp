@@ -31,7 +31,7 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@.mode_rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"" << Symbols::LF
         << "@.mode_wb = private unnamed_addr constant [3 x i8] c\"wb\\00\"" << Symbols::LF
         << "@.call_msg = private unnamed_addr constant [8 x i8] c\"CALLED\\0A\\00\"" << Symbols::LF
-        << "@gwb_last_rnd = global double 0.0" << Symbols::LF; // RNG state: last random value for RND(0)
+        << "@gwb_last_rnd = global float 0.0" << Symbols::LF; // RNG state (single precision) for RND(0)
     for (const auto&[fst, snd] : strLiteralId_) {
         const std::string& s = fst;
         const int id = snd;

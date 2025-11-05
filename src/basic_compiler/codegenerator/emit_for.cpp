@@ -30,21 +30,43 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
 
     ensureVarAllocated(out, fs->var);
     {
-        std::string startReg = emitExpr(out, fs->start.get(), currLineLabel);
-        std::string ir1 = std::format("  store double {}, ptr {}", startReg, varAllocaName_[fs->var]);
-        out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " ForStmt init -> " << ir1 << Symbols::LF;
+        std::string startReg = emitExpr(out, fs->start.get(), currLineLabel); // double
+        // Store to the loop variable with correct underlying type
+        storeNumberToVar(out, fs->var, startReg);
         std::string ir2 = std::format("  br label %{}", condLbl);
         out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " ForStmt -> " << ir2 << Symbols::LF;
     }
 
     out << condLbl << ":" << Symbols::LF;
-    std::string curVal = nextTemp();
+    std::string curVal = nextTemp(); // as double for comparisons
     {
-        std::string ir = std::format("  {} = load double, ptr {}", curVal, varAllocaName_[fs->var]);
-        out << ir << Symbols::LF;
-        {
-        log() << "line " << currentLine_ << " ForStmt cond load -> " << ir << Symbols::LF;
+        // Load the current loop variable and widen to double as needed
+        switch (numKindOf(fs->var)) {
+            case NumKind::Int16: {
+                std::string l = nextTemp();
+                { std::string ir = std::format("  {} = load i16, ptr {}", l, varAllocaName_[fs->var]); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  {} = sitofp i16 {} to double", curVal, l); out << ir << Symbols::LF; }
+                break;
+            }
+            case NumKind::Long32: {
+                std::string l = nextTemp();
+                { std::string ir = std::format("  {} = load i32, ptr {}", l, varAllocaName_[fs->var]); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  {} = sitofp i32 {} to double", curVal, l); out << ir << Symbols::LF; }
+                break;
+            }
+            case NumKind::Single: {
+                std::string l = nextTemp();
+                { std::string ir = std::format("  {} = load float, ptr {}", l, varAllocaName_[fs->var]); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  {} = fpext float {} to double", curVal, l); out << ir << Symbols::LF; }
+                break;
+            }
+            case NumKind::Double: {
+                std::string ir = std::format("  {} = load double, ptr {}", curVal, varAllocaName_[fs->var]);
+                out << ir << Symbols::LF;
+                break;
+            }
         }
+        log() << "line " << currentLine_ << " ForStmt cond load (->double)" << Symbols::LF;
     }
     {
         // Evaluate end and step for condition decision
@@ -66,10 +88,13 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
     for (const auto& s : fs->body) {
         if (auto asg = dyn_cast<AssignStmt>(s.get())) {
             std::string val = emitExpr(out, asg->value.get(), currLineLabel);
-            std::string ir;
-            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) { ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]); }
-            else { ir = std::format("  store double {}, ptr {}", val, varAllocaName_[asg->name]); }
-            out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body Assign -> " << ir << Symbols::LF;
+            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
+                std::string ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
+                out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body Assign$ -> " << ir << Symbols::LF;
+            } else {
+                // Numeric assignment: cast to destination storage and store
+                storeNumberToVar(out, asg->name, val);
+            }
         } else if (auto pr = dyn_cast<PrintStmt>(s.get())) {
             std::vector<const Expr*> items;
             if (pr->value) items.push_back(pr->value.get());
@@ -112,10 +137,34 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
     out << incLbl << ":" << Symbols::LF;
     std::string stepReg = fs->step ? emitExpr(out, fs->step.get(), currLineLabel) : std::string("1.0");
     std::string vcur = nextTemp();
-    { std::string ir = std::format("  {} = load double, ptr {}", vcur, varAllocaName_[fs->var]); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt inc load -> " << ir << Symbols::LF; }
+    // Load current value into vcur as double
+    switch (numKindOf(fs->var)) {
+        case NumKind::Int16: {
+            std::string l = nextTemp();
+            { std::string ir = std::format("  {} = load i16, ptr {}", l, varAllocaName_[fs->var]); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  {} = sitofp i16 {} to double", vcur, l); out << ir << Symbols::LF; }
+            break;
+        }
+        case NumKind::Long32: {
+            std::string l = nextTemp();
+            { std::string ir = std::format("  {} = load i32, ptr {}", l, varAllocaName_[fs->var]); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  {} = sitofp i32 {} to double", vcur, l); out << ir << Symbols::LF; }
+            break;
+        }
+        case NumKind::Single: {
+            std::string l = nextTemp();
+            { std::string ir = std::format("  {} = load float, ptr {}", l, varAllocaName_[fs->var]); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  {} = fpext float {} to double", vcur, l); out << ir << Symbols::LF; }
+            break;
+        }
+        case NumKind::Double: {
+            std::string ir = std::format("  {} = load double, ptr {}", vcur, varAllocaName_[fs->var]); out << ir << Symbols::LF; break;
+        }
+    }
     std::string vnext = nextTemp();
     { std::string ir = std::format("  {} = fadd double {}, {}", vnext, vcur, stepReg); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt inc add -> " << ir << Symbols::LF; }
-    { std::string ir = std::format("  store double {}, ptr {}", vnext, varAllocaName_[fs->var]); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt inc store -> " << ir << Symbols::LF; }
+    // Store back to the variable with correct type
+    storeNumberToVar(out, fs->var, vnext);
     { std::string ir = std::format("  br label %{}", condLbl); out << ir << Symbols::LF; log() << "line " << currentLine_ << " ForStmt -> " << ir << Symbols::LF; }
 
     out << endLbl << ":" << Symbols::LF;

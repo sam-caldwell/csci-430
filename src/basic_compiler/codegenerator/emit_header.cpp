@@ -58,7 +58,8 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
             << "  %iszero = fcmp oeq double %x, 0.0" << Symbols::LF
             << "  br i1 %iszero, label %retlast, label %nonzero" << Symbols::LF
             << "retlast:" << Symbols::LF
-            << "  %last = load double, ptr @gwb_last_rnd" << Symbols::LF
+            << "  %lastf = load float, ptr @gwb_last_rnd" << Symbols::LF
+            << "  %last = fpext float %lastf to double" << Symbols::LF
             << "  ret double %last" << Symbols::LF
             << "nonzero:" << Symbols::LF
             << "  %isneg = fcmp olt double %x, 0.0" << Symbols::LF
@@ -69,8 +70,10 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
             << "  br label %gen" << Symbols::LF
             << "gen:" << Symbols::LF
             << "  %rv = call double @drand48()" << Symbols::LF
-            << "  store double %rv, ptr @gwb_last_rnd" << Symbols::LF
-            << "  ret double %rv" << Symbols::LF
+            << "  %rvf = fptrunc double %rv to float" << Symbols::LF
+            << "  store float %rvf, ptr @gwb_last_rnd" << Symbols::LF
+            << "  %rve = fpext float %rvf to double" << Symbols::LF
+            << "  ret double %rve" << Symbols::LF
             << "}" << Symbols::LF << Symbols::LF;
     }
     // Provide a minimal CALL helper that interprets the first byte at the
