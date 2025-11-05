@@ -37,6 +37,8 @@
 #include "basic_compiler/ast/ScreenStmt.h"
 #include "basic_compiler/ast/CircleStmt.h"
 #include "basic_compiler/ast/ClearStmt.h"
+#include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -333,6 +335,34 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         if (rz->seed) {
             if (typeOf(rz->seed.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: RANDOMIZE requires numeric seed @ " << rz->pos.line << ':' << rz->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             analyzeExpr(rz->seed.get());
+        }
+        return;
+    }
+    if (auto og = dyn_cast<const OnGotoStmt>(s)) {
+        if (typeOf(og->index.get()) == ValueType::String) {
+            std::ostringstream m; m << "TypeError: ON index cannot be string @ " << og->pos.line << ':' << og->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(og->index.get());
+        for (int ln : og->targets) {
+            if (!lines_.contains(ln)) {
+                if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing ON GOTO target line " << ln << " @ " << og->pos.line << ':' << og->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
+                else { std::ostringstream w; w << "Warning: ON GOTO missing target line " << ln << " @ " << og->pos.line << ':' << og->pos.col; log() << w.str() << '\n'; }
+            }
+        }
+        return;
+    }
+    if (auto ogs = dyn_cast<const OnGosubStmt>(s)) {
+        if (typeOf(ogs->index.get()) == ValueType::String) {
+            std::ostringstream m; m << "TypeError: ON index cannot be string @ " << ogs->pos.line << ':' << ogs->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(ogs->index.get());
+        for (int ln : ogs->targets) {
+            if (!lines_.contains(ln)) {
+                if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing ON GOSUB target line " << ln << " @ " << ogs->pos.line << ':' << ogs->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
+                else { std::ostringstream w; w << "Warning: ON GOSUB missing target line " << ln << " @ " << ogs->pos.line << ':' << ogs->pos.col; log() << w.str() << '\n'; }
+            }
         }
         return;
     }
