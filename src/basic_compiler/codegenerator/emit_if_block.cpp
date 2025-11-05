@@ -45,10 +45,13 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
     for (const auto& s : ib->thenBody) {
         if (auto asg = dyn_cast<AssignStmt>(s.get())) {
             std::string val = emitExpr(out, asg->value.get(), currLineLabel);
-            std::string ir;
-            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) { ir = "  store ptr "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name]; }
-            else { ir = "  store double "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name]; }
-            out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Assign -> " << ir << Symbols::LF;
+            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
+                std::string ir = "  "; ir += "store ptr "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name];
+                out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Assign$ -> " << ir << Symbols::LF;
+            } else {
+                // Numeric assignment honors semantic numeric kind per variable
+                storeNumberToVar(out, asg->name, val);
+            }
         } else if (auto pr = dyn_cast<PrintStmt>(s.get())) {
             std::vector<const Expr*> items; if (pr->value) items.push_back(pr->value.get()); for (const auto& v : pr->more) items.push_back(v.get());
             for (size_t pi = 0; pi < items.size(); ++pi) {
@@ -106,10 +109,14 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
             emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
             out << contLbl << ":" << Symbols::LF;
         } else if (auto ins = dyn_cast<InputStmt>(s.get())) {
+            // Read into temp double then cast/store to variable's storage kind
             ensureVarAllocated(out, ins->name);
             std::string fmt = nextTemp();
-            std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_in, i64 0"; out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Input -> " << ir1 << Symbols::LF;
-            std::string ir2 = "  call i32 (ptr, ...) @scanf(ptr "; ir2 += fmt; ir2 += ", ptr "; ir2 += varAllocaName_[ins->name]; ir2 += ")"; out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Input -> " << ir2 << Symbols::LF;
+            { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Input -> " << ir1 << Symbols::LF; }
+            std::string tmp = nextTemp(); { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
+            { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Input -> " << ir2 << Symbols::LF; }
+            std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
+            storeNumberToVar(out, ins->name, dv);
         } else {
             throw CodeGenError("Unsupported statement in IF body");
         }
@@ -123,8 +130,13 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
         for (const auto& s : ib->elseBody) {
             if (auto asg = dyn_cast<AssignStmt>(s.get())) {
                 std::string val = emitExpr(out, asg->value.get(), currLineLabel);
-                std::string ir = "  store double "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name];
-                out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Assign -> " << ir << Symbols::LF;
+                if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
+                    std::string ir = "  "; ir += "store ptr "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name];
+                    out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Assign$ -> " << ir << Symbols::LF;
+                } else {
+                    // Numeric assignment honors semantic numeric kind per variable
+                    storeNumberToVar(out, asg->name, val);
+                }
             } else if (auto pr = dyn_cast<PrintStmt>(s.get())) {
                 std::vector<const Expr*> items; if (pr->value) items.push_back(pr->value.get()); for (const auto& v : pr->more) items.push_back(v.get());
                 for (size_t pi = 0; pi < items.size(); ++pi) {
@@ -167,9 +179,13 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                 emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
                 out << contLbl << ":" << Symbols::LF;
             } else if (auto ins = dyn_cast<InputStmt>(s.get())) {
+                // Read into temp double then cast/store to variable's storage kind
                 ensureVarAllocated(out, ins->name);
-                std::string fmt = nextTemp(); std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_in, i64 0"; out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Input -> " << ir1 << Symbols::LF;
-                std::string ir2 = "  call i32 (ptr, ...) @scanf(ptr "; ir2 += fmt; ir2 += ", ptr "; ir2 += varAllocaName_[ins->name]; ir2 += ")"; out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Input -> " << ir2 << Symbols::LF;
+                std::string fmt = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Input -> " << ir1 << Symbols::LF; }
+                std::string tmp = nextTemp(); { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
+                { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Input -> " << ir2 << Symbols::LF; }
+                std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
+                storeNumberToVar(out, ins->name, dv);
             } else {
                 throw CodeGenError("Unsupported statement in IF body");
             }
