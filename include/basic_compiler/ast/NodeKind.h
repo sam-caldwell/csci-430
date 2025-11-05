@@ -39,6 +39,8 @@ enum class NodeKind {
     CommonStmt,
     ChainStmt,
     MergeStmt,
+    OnGotoStmt,
+    OnGosubStmt,
     DimStmt,
     ArrayAssignStmt,
     OpenStmt,
