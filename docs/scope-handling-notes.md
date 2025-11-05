@@ -113,7 +113,6 @@ Key files:
 - Per-variable type-specialized numeric storage: all numeric variables are currently lowered to double.
 - Full runtime semantics for `CHAIN` (file handoff, full program overlay) and `CLEAR` (arrays, open files, DATA 
   pointer) are stubbed/simplified.
-- Case-insensitive variable name resolution.
 
 ## How to Inspect Scope Decisions
 
