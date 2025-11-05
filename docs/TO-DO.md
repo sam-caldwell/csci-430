@@ -4,7 +4,6 @@ I NEED MORE RED BULLS!  Time to go to the store before we continue.
 
 ## Parser and Grammar Coverage
 
-+ STOP, SYSTEM: program termination variants distinct from END (semantic intent differs).
 - MID$ assignment statement: MID$(s$, start[, len]) = expr$.
 - SWAP x, y: exchange variables and array elements (numeric and string variants).
 - ERASE array[, array...]: release arrays and reset descriptors.
