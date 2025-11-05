@@ -227,6 +227,10 @@ private:
     std::map<int, std::set<std::string>> varsBeforeLine_{};
     // Snapshot of arrays seen (DIM'd or referenced) before each line
     std::map<int, std::set<std::string>> arraysBeforeLine_{};
+    // Mapping from 1000-based line region base (e.g., 0, 1000, 2000, ...)
+    // to the DATA table index at the start of that region. Used to reset
+    // the DATA pointer on CHAIN to a new program segment.
+    std::map<int, int> regionDataStartIdx_{};
     // DATA items as string literal ids in program order
     std::vector<int> dataLiteralIds_{};
 

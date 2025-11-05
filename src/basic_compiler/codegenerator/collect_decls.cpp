@@ -12,6 +12,7 @@
 #include "basic_compiler/ast/InputStmt.h"
 #include "basic_compiler/ast/ReadStmt.h"
 #include "basic_compiler/ast/DimStmt.h"
+#include "basic_compiler/ast/DataStmt.h"
 #include "basic_compiler/ast/WriteStmt.h"
 #include "basic_compiler/ast/VarExpr.h"
 #include "basic_compiler/ast/CallExpr.h"
@@ -93,6 +94,24 @@ void CodeGenerator::collectDecls(const Program& program) {
             if (!strLiteralId_.contains(s)) strLiteralId_[s] = strCounter_++;
         }
         // LineNumbers are computed from AST to drive emission order; no change
+    }
+
+    // Build mapping of DATA index at the start of each 1000-based line region
+    // independent of whether semantics were provided.
+    regionDataStartIdx_.clear();
+    int dataCount = 0;
+    for (int ln : lineNumbers_) {
+        const int region = (ln / 1000) * 1000;
+        if (!regionDataStartIdx_.contains(region)) {
+            regionDataStartIdx_[region] = dataCount; // snapshot at first line in region
+        }
+        const auto* lptr = lineMap_[ln];
+        if (!lptr) continue;
+        for (const auto& st : lptr->statements) {
+            if (const auto ds = dyn_cast<const DataStmt>(st.get())) {
+                dataCount += static_cast<int>(ds->items.size());
+            }
+        }
     }
 }
 

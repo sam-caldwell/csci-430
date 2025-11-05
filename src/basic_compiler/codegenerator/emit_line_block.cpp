@@ -6,6 +6,8 @@
 #include "basic_compiler/ast/ReadStmt.h"
 #include "basic_compiler/ast/WriteStmt.h"
 #include "basic_compiler/ast/DimStmt.h"
+#include "basic_compiler/ast/OpenStmt.h"
+#include "basic_compiler/ast/CloseStmt.h"
 #include "basic_compiler/ast/DefTypeStmt.h"
 #include "basic_compiler/ast/DefSegStmt.h"
 #include "basic_compiler/ast/BloadStmt.h"
@@ -234,7 +236,7 @@ namespace gwbasic {
                 terminated = true;
                 break;
             } else if (auto ch = dyn_cast<ChainStmt>(st.get())) {
-                // CHAIN: reset non-preserved variables and branch to target/first line
+                // CHAIN: reset non-preserved variables/arrays and branch to target/first line
                 if (!ch->all) {
                     // Preserve only variables declared COMMON before this line
                     const auto itCBL = commonBeforeLine_.find(line.number);
@@ -246,16 +248,65 @@ namespace gwbasic {
                         if (it == varAllocaName_.end()) continue;
                         resetVar(out, v);
                     }
+                    // Also clear arrays not marked COMMON before this line
+                    const auto itAB = arraysBeforeLine_.find(line.number);
+                    const std::set<std::string> emptyArr;
+                    const std::set<std::string>& aset = (itAB == arraysBeforeLine_.end()) ? emptyArr : itAB->second;
+                    for (const auto &an : aset) {
+                        if (preserve.contains(an)) continue; // preserve COMMON arrays
+                        auto itLen = arraySizes_.find(an);
+                        if (itLen == arraySizes_.end()) continue;
+                        const int len = itLen->second;
+                        ensureArrayAllocated(out, an, len);
+                        std::string base = arrayAllocaName_[an];
+                        for (int i = 0; i < len; ++i) {
+                            std::string elem = nextTemp();
+                            { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, i); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store double 0.0, ptr {}", elem); out << ir << Symbols::LF; }
+                        }
+                    }
                 }
                 int dest = ch->targetLine.has_value()
                                ? *ch->targetLine
                                : (lineNumbers_.empty() ? line.number : lineNumbers_.front());
+                // Reset DATA pointer to the beginning of the destination program segment
+                {
+                    const int region = (dest / 1000) * 1000;
+                    int dataStart = 0;
+                    auto it = regionDataStartIdx_.find(region);
+                    if (it != regionDataStartIdx_.end()) dataStart = it->second;
+                    std::string ir = std::format("  store i32 {}, ptr @gwb_data_idx", dataStart);
+                    out << ir << Symbols::LF;
+                    { std::ostringstream m; m << "line " << currentLine_ << " ChainStmt data_idx -> " << ir; log() << m.str() << Symbols::LF; }
+                }
                 std::string ir = "  br label %";
                 ir += lineLabelName(dest);
                 out << ir << Symbols::LF;
                 { std::ostringstream m; m << "line " << currentLine_ << " ChainStmt branch -> " << ir; log() << m.str() << Symbols::LF; }
                 terminated = true;
                 break;
+            } else if (auto op = dyn_cast<OpenStmt>(st.get())) {
+                // OPEN <filename> FOR (INPUT|OUTPUT) AS #<channel>
+                // Evaluate filename expression and call fopen with mode
+                std::string fnptr = emitExpr(out, op->filename.get(), "");
+                std::string mode = nextTemp();
+                if (op->mode == FileMode::Input) {
+                    { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.mode_r, i64 0", mode); out << ir << Symbols::LF; }
+                } else {
+                    { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.mode_w, i64 0", mode); out << ir << Symbols::LF; }
+                }
+                std::string f = nextTemp(); { std::string ir = std::format("  {} = call ptr @fopen(ptr {}, ptr {})", f, fnptr, mode); out << ir << Symbols::LF; }
+                // Store file handle into channel table
+                const int idx = op->channel - 1;
+                std::string ep = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", ep, idx); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store ptr {}, ptr {}", f, ep); out << ir << Symbols::LF; }
+            } else if (auto cl = dyn_cast<CloseStmt>(st.get())) {
+                // CLOSE #<channel>
+                const int idx = cl->channel - 1;
+                std::string ep = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", ep, idx); out << ir << Symbols::LF; }
+                std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, ep); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  call i32 @fclose(ptr {})", fh); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store ptr null, ptr {}", ep); out << ir << Symbols::LF; }
             } else if (auto dim = dyn_cast<DimStmt>(st.get())) {
                 // DIM is a no-op at runtime in this compiler
                 { std::ostringstream m; m << "line " << currentLine_ << " DimStmt (no-op)"; log() << m.str() << Symbols::LF; }
@@ -443,10 +494,19 @@ namespace gwbasic {
                 }
                 // Reset DATA pointer to beginning
                 { std::string ir = std::format("  store i32 0, ptr @gwb_data_idx"); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " ClearStmt data_idx -> " << ir; log() << m.str() << Symbols::LF; } }
-                // Clear file channel table (set all to null)
+                // Close and clear file channel table entries
                 for (int i = 0; i < 16; ++i) {
                     std::string ep = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", ep, i); out << ir << Symbols::LF; }
+                    std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, ep); out << ir << Symbols::LF; }
+                    std::string isnn = nextTemp(); { std::string ir = std::format("  {} = icmp ne ptr {}, null", isnn, fh); out << ir << Symbols::LF; }
+                    std::string doLbl = lineLabelName(line.number) + "_clear_close_" + std::to_string(++localContCounter);
+                    std::string contLbl = lineLabelName(line.number) + "_clear_cont_" + std::to_string(localContCounter);
+                    { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isnn, doLbl, contLbl); out << ir << Symbols::LF; }
+                    out << doLbl << ":" << Symbols::LF;
+                    { std::string ir = std::format("  call i32 @fclose(ptr {})", fh); out << ir << Symbols::LF; }
                     { std::string ir = std::format("  store ptr null, ptr {}", ep); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  br label %{}", contLbl); out << ir << Symbols::LF; }
+                    out << contLbl << ":" << Symbols::LF;
                 }
             } else {
                 throw CodeGenError("Unsupported statement encountered");
