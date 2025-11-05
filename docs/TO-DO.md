@@ -1,135 +1,130 @@
-# Scope Handling in the GW-BASIC Compiler
+# ToDo List
 
-This document explains how the compiler models and implements scope, name resolution, and variable lifetime for 
-GW-BASIC programs.
+I NEED MORE RED BULLS!  Time to go to the store before we continue.
 
-Goals:
-- Match GW-BASIC’s mostly-global variable semantics so programs behave as expected.
-- Keep the implementation simple and explicit, while leaving space for future extensions.
-- Make scoping decisions visible in the semantic logs for debugging and tests.
+## Parser and Grammar Coverage
 
-## Language Model (Summary)
+- ON ERROR GOTO / RESUME: error trapping and nonlocal return forms (RESUME, RESUME NEXT, RESUME <line>).
+- STOP, SYSTEM: program termination variants distinct from END (semantic intent differs).
+- MID$ assignment statement: MID$(s$, start[, len]) = expr$.
+- SWAP x, y: exchange variables and array elements (numeric and string variants).
+- ERASE array[, array...]: release arrays and reset descriptors.
+- OPTION BASE 0|1: affect DIM lower-bound semantics; current DIM treated as fixed-length with 0-based indexing.
+- LSET/RSET field$ = expr$: fixed-length string field assignment semantics.
+- Additional PRINT forms: full “PRINT USING” with zone/tabbing and trailing separators (comma/semicolon) behavior.
+- INPUT improvements:
+  - INPUT var[, var...], INPUT ; prompt$, var[, ...], INPUT "prompt"; var[, ...] (current parser only accepts single 
+    var or redirects to file form).
+  - LINE INPUT forms already parse, but see runtime gaps below.
+- Additional commands listed in docs/gw-basic.ebnf but not recognized in the lexer/token set: FILES, NAME, KILL, MKDIR,
+  RMDIR, WIDTH, LOCATE, CLS, PSET, PRESET, LINE (graphics), PAINT, DRAW, VIEW/VIEW PRINT, WINDOW, BEEP/SOUND/PLAY, 
+  KEY/KEYn/ON KEY, ON event variants, PEN/STRIG, TIMER ON/OFF, TRON/TROFF, CONT, LOAD/SAVE/NEW/DELETE/LIST/LLIST/AUTO/
+  RENUM/EDIT/PCOPY, RESET, SHELL, ENVIRON, OUT, WAIT.
 
-- Global by default: Variables in GW-BASIC are global. 
-  - Structured blocks (`IF…THEN/ELSE`, `FOR…NEXT`, `WHILE…WEND`) do not introduce local scopes. 
-  - `GOSUB/RETURN` does not introduce locals either.
-- Implicit declarations: Referencing a variable implicitly declares it if it hasn’t been declared yet.
-- Type suffixes: `$` denotes string variables; numeric suffixes (`%`, `!`, `#`) are accepted syntactically but all 
-  numeric values are lowered to double in codegen for now. `A` and `A$` are distinct variables.
-- Arrays are global: `DIM` defines array shapes globally. `A` (scalar) and `A()` (array) are distinct.
-- User functions (`DEF FN`): Parameters are local to the function expression; the rest of names refer to globals.
-- COMMON/CHAIN: COMMON marks variables to be preserved across `CHAIN` boundaries.
+## Lexer Gaps
 
-## Implementation Overview
+- Numeric literals: support scientific notation (E/D exponents), octal (`&O`/`&`), and binary where applicable; only
+  `&H` hex is implemented.
+- String literals: GW-BASIC uses doubled quotes inside strings ("He said ""OK""") rather than C-style escapes; lexer 
+  currently recognizes C-style `\n`, `\t`, `\"`, `\\` and not doubled-quote semantics.
+- Apostrophe (`'`) inline comment form not handled (only `REM`-style supported via keyword).
 
-The compiler uses a two-phase pipeline:
+## Code Generation: Implementations Missing (parses exist)
 
-- Semantics (`SemanticAnalyzer`): Resolves names, collects global facts (variables, string literals, line numbers, 
-  arrays, user functions), validates simple type/arity/domain rules, and logs scoping events.
-- Codegen (`CodeGenerator`): Allocates storage for variables/arrays, lowers statements/expressions to LLVM IR, 
-- and applies lifetime policies for `RUN`, `CLEAR`, and `CHAIN`.
+- WRITE [#n,] expr[, ...]: parser exists; no codegen lowering yet.
+- INPUT #n, var[, ...]: file-input statement parsed; no codegen to `fscanf`/buffer + conversions.
+- LINE INPUT [#n,] var$: parser exists; no codegen to read an entire line (channel or stdin) and assign string.
+- RUN "file"[, line]: codegen ignores filename and only resets variables and branches; no handoff/loading semantics.
+- MERGE "file": compile-time directive only; codegen is a no-op; finalize expected behavior or tooling integration.
+- DEF SEG [= expr]: treated as semantic/logging only; codegen is a no-op yet memory ops (POKE/PEEK/CALL/BLOAD/BSAVE) 
+  reference @gwb_seg. Need runtime to set @gwb_seg (store casted value) when provided.
+- DEF USRn = expr and USR(): DEF USR is a no-op; USR(arg) returns arg identity in expressions. Define callout ABI or 
+  trap and optional index dispatch.
 
-Key files:
-- `include/basic_compiler/semantics/SemanticAnalyzer.h`
-- `src/basic_compiler/semantics/*.cpp`
-- `include/basic_compiler/codegen/CodeGenerator.h`
-- `src/basic_compiler/codegenerator/*.cpp`
+## File I/O Semantics
 
-## Name Resolution and Declarations
+- OPEN "name" FOR ... AS #n:
+  - Only INPUT and OUTPUT modes implemented. Missing: APPEND, RANDOM, BINARY; missing LEN=, ACCESS/LOCK, device forms
+    (COM/LPT/CONS), and error handling.
+  - Channel range checking and duplicate-open policy unspecified; currently simple table [16 x ptr].
+- CLOSE #n: basic support exists; missing CLOSE without argument (close all) semantics and error cases.
+- PRINT #n, ...: partial support; double-check format/USING enforcement and trailing separator behavior vs. GW-BASIC 
+  zones.
+- WRITE #n, ...: see the codegen gap above.
+- INPUT #n / LINE INPUT #n: see codegen gaps above; require numeric parsing with separators, string quoting rules, 
+  EOF behavior.
 
-- Implicit global declarations: The first reference to a variable triggers a declaration in the global scope.
-  - Semantics entry points:
-    - `SemanticAnalyzer::reference()` declares on first reference.
-    - `SemanticAnalyzer::declare()` inserts the symbol into the global scope and the `variables` set.
-  - Logging entries: `VarImplicitDecl <name>`, `VarDecl <name>`, `VarRef <name>`.
+## Arrays and DATA
 
-- Case handling: Identifiers are case-preserving and compared literally today. (Keywords are recognized 
-  case-insensitively by the lexer.)
+- DIM: only 1-D numeric arrays backed by `[len x double]`. Missing:
+  - Multi-dimensional arrays and string arrays.
+  - OPTION BASE lower-bound handling (current indexing is raw 0-based fptosi).
+  - Bounds checking and negative-index handling (currently none).
+- ERASE: not implemented (see parser gap).
+- DATA/READ/RESTORE:
+  - RESTORE [line] not supported (current RESTORE has no operand).
+  - READ parsing/assignment rules for quoted strings vs. numbers should follow GW-BASIC’s tokenization (currently 
+    uses `atof` for numeric targets; string targets store pointer to literal).
 
-- Type defaults: String-typed variables are detected by `$` suffix or `DEFSTR` letter ranges. 
-  DEFINT/DEFSNG/DEFDBL/DEFSTR adjust per-letter defaults; only `DEFSTR` affects storage kind (string vs. numeric) 
-  in codegen currently.
+## Control Flow and Blocks
 
-- Distinct namespaces by form:
-  - `A` (numeric scalar) vs `A$` (string scalar) are separate.
-  - `A` (scalar) vs `A()` (array) are separate.
+- IF block support exists, but missing single-line THEN/ELSE statement lists and THEN/ELSE GOTO forms.
+- GOSUB/RETURN implemented via inlining; `RETURN <line>` nonlocal form not supported.
+- FOR/NEXT: NEXT var-list form missing; verify semantics for mixed variable names and nested loops per spec.
+- WHILE/WEND implemented; consider EXIT loops and interactions once other control statements land.
 
-## Scopes and Blocks
+## Built-in Functions Coverage and Types
 
-- Global scope model: The semantic analyzer maintains a simple lexical scope stack primarily for structure/logging:
-  - `enterScope()/exitScope()` are called when analyzing `IF` bodies, `ELSE` bodies, `FOR` bodies, and `WHILE` bodies.
-  - However, declarations still land in the global scope. This intentionally matches GW-BASIC: variables “introduced” 
-    inside blocks remain visible after the block.
-  - Tests validating this behavior: `VarDeclaredInIfBodyVisibleAfter`, `VarDeclaredInForBodyVisibleAfter`, 
-    `VarDeclaredInWhileBodyVisibleAfter`.
+- Numeric: add VAL, LEN (of string), INSTR, FIX/INT differences (behavior vs. negatives), SGN/SQR/SQRT/log domain
+  handling done; ensure arity and domains enforced uniformly via `expected_arity` (currently returns 1 for all; 
+  SCREEN is special-cased elsewhere).
+- String: add STR$, STRING$, SPACE$, LTRIM$/RTRIM$/MID$ statement vs. function nuances, LEFT$/RIGHT$ complete; 
+  verify types/arity in semantics.
+- Update `isKnownNumericFunction`/`isKnownStringFunction` to reflect the above; expand tests.
 
-- Subroutines: `GOSUB/RETURN` does not introduce a new scope. Codegen inlines subroutine bodies at the callsite; 
-  variables referenced therein are global.
+## Type System and Conversions
 
-## DEF FN Functions (Local Parameters)
+- Variable kind defaults and suffixes are honored, but:
+  - Default kinds by DEFxxx only affect first-letter currently; document and test crossing interactions with
+    explicit suffixes.
+  - Mixed-type arithmetic conversion rules (Single vs. Double, Int16/Long promotion) are simplified: expressions are 
+    computed in double then stored with truncation/rounding; consider matching GW-BASIC’s rounding/truncation semantics
+    per operator.
+  - PRINT USING requires a string format; semantics do not enforce that `format` is string.
 
-- Discovery: `DEF FNname(param) = <expr>` is recorded in semantics (`userFunctions` map) keyed by uppercased function 
-  name.
-- Parameter scoping:
-  - Semantics: `currentFnParam_` marks the parameter; references to that identifier inside the body are treated as 
-    local (not added to the global variable set).
-  - Codegen: Calls are inlined; a temporary binding maps the parameter name to the evaluated argument SSA value via a
-    small `bindingStack_`. Variables elsewhere in the function body resolve globally.
-- Types: Return type follows function name suffix (`$` means string). Parameter type follows its name suffix.
+## Scope and COMMON Behavior
 
-## Arrays and DIM
+- COMMON variables tracked and preserved across CHAIN, but CHAIN/RUN file handoff is not implemented; clarify 
+  preservation across true overlays once implemented.
+- CLEAR is line-scoped to “vars/arrays seen before” to avoid crossing CHAIN boundaries; verify against GW-BASIC’s 
+  memory model (string space, array descriptors, file buffers).
 
-- Arrays are declared globally with `DIM`. The semantics pass records `name → length` in `arrays`.
-- Codegen allocates an `[N x double]` stack slot for each array on first use (`ensureArrayAllocated`). Indices are 
-  numeric and bounds are not currently enforced.
+## Operators and Expressions
 
-## COMMON and CHAIN (Preservation Across Program Transitions)
+- Exponentiation `^` operator not implemented.
+- Logical operators (AND/OR/NOT) for numeric truthy semantics are not implemented.
+- Relational operations are supported; boolean short-circuit semantics (from AND/OR) to be defined when added.
 
-- COMMON: `COMMON a, b, c` marks variables to be preserved across a subsequent `CHAIN` in this compiler. Semantics 
-  collects the set of COMMON variables and codegen snapshots which COMMONs are “in effect” before each line.
-- CHAIN emission: On `CHAIN` the codegen resets non-preserved variables before branching to the new entry point.
-  - With the `ALL` flag set, preservation behavior is toggled per GW-BASIC semantics approximation; see 
-    `emit_line_block.cpp` for the exact reset conditions used today.
-  - File channels and arrays are not closed or reallocated here; the compiler’s CHAIN is a control-flow branch with 
-    selective variable resets.
+## Diagnostics and Robustness
 
-## CLEAR and RUN (Lifetime Reset)
+- `expected_arity()` returns 1 for all intrinsics; replace with a concrete table and unify with analyzer checks 
+  (SCREEN special-cased today).
+- Improve error messages and warnings for file I/O (open failures, invalid channels), graphics stubs, and unsafe 
+  memory ops (PEEK/POKE/BLOAD/BSAVE/CALL).
 
-- CLEAR: Emits stores that reset all scalar numeric variables to `0.0` at the point of execution.
-  - Current scope of effect: scalars only; arrays, string pointers, file channels, and DATA indices are not cleared. 
-    This may evolve.
-- RUN: Resets all scalar numeric variables to `0.0` and branches to the program’s first (or specified) line.
+## Graphics
 
-## Storage Model in Codegen
+- SCREEN is not initializing a graphics window.
+- SCREEN initializes a readiness flag; CIRCLE lowers to a no-op stub when ready. Missing: CLS, 
+  PSET/PRESET/LINE/PAINT/DRAW, VIEW/WINDOW, PALETTE, and proper page switching.
 
-- Scalars: Each distinct scalar variable gets an `alloca` (either `double` or `ptr`) on first use
-  (`ensureVarAllocated`), initialized to `0.0` (numeric) or `null` (string pointer).
-- Arrays: Each array gets an `alloca [N x double]` on first use.
-- Strings: String expressions allocate temporary buffers via `malloc` and basic `str*` routines. Variables with `$` 
-  hold pointers.
+## Tooling/Directives
 
-## What’s Not (Yet) Implemented
+- MERGE is treated as a compile-time directive only; define integration with CLI/compiler phases (include path 
+  resolution, conflicts, and renumbering strategies).
 
-- Full runtime semantics for `CHAIN` (file handoff, full program overlay) and `CLEAR` (arrays, open files, DATA 
-  pointer) are stubbed/simplified.
+## Tests
 
-## How to Inspect Scope Decisions
-
-- Enable semantic logs via `SemanticAnalyzer::setLogPath()`. You’ll see entries like:
-  - `Line <n>`
-  - `ScopeEnter` / `ScopeExit` (structured blocks)
-  - `VarImplicitDecl <name>`, `VarDecl <name>`, `VarRef <name>`
-  - `DefFn <name>` and `FnParamRef <param>` references within function bodies
-
-## Pointers for Navigating the Code
-
-- Semantics scope and globals:
-  - `include/basic_compiler/semantics/SemanticAnalyzer.h` (scope stack, defaults, results)
-  - `src/basic_compiler/semantics/analyze_stmt.cpp` (blocks, COMMON, DEF FN, CLEAR)
-  - `src/basic_compiler/semantics/reference.cpp` and `declare.cpp`
-
-- Codegen storage and lifetime rules:
-  - `src/basic_compiler/codegenerator/ensure_var_allocated.cpp`
-  - `src/basic_compiler/codegenerator/ensure_array_allocated.cpp`
-  - `src/basic_compiler/codegenerator/emit_line_block.cpp` (`RUN`, `CLEAR`, `CHAIN`, `GOSUB` inline, etc.)
-  - `src/basic_compiler/codegenerator/emit_expr.cpp` (DEF FN parameter binding, built-ins)
+- Add unit tests for the above once implemented: WRITE codegen, INPUT#/LINE INPUT codegen semantics, DEF SEG 
+  runtime effect on @gwb_seg, RUN/CHAIN file overlay behavior, OPTION BASE effects on DIM/array indexing, and 
+  exponent/logical operator parsing and lowering.
