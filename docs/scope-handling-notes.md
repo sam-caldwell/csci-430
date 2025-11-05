@@ -110,8 +110,6 @@ Key files:
 
 ## What’s Not (Yet) Implemented
 
-- True block-local variables (e.g., locals scoped to IF/WHILE/FOR): all variables are global by design to match 
-  GW-BASIC.
 - Per-variable type-specialized numeric storage: all numeric variables are currently lowered to double.
 - Full runtime semantics for `CHAIN` (file handoff, full program overlay) and `CLEAR` (arrays, open files, DATA 
   pointer) are stubbed/simplified.
