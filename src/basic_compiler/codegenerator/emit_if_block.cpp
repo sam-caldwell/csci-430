@@ -42,6 +42,7 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
 
     // THEN body
     out << thenLbl << ":" << Symbols::LF;
+    bool thenTerminated = false;
     for (const auto& s : ib->thenBody) {
         if (auto asg = dyn_cast<AssignStmt>(s.get())) {
             std::string val = emitExpr(out, asg->value.get(), currLineLabel);
@@ -97,11 +98,11 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                 { std::string ir = "  call void @srand48(i64 "; ir += t; ir += ")"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Randomize srand48(time) -> " << ir << Symbols::LF; }
             }
         } else if (isa<ReturnStmt>(s.get())) {
-            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Return -> " << ir << Symbols::LF;
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Return -> " << ir << Symbols::LF; thenTerminated = true; break;
         } else if (isa<EndStmt>(s.get())) {
-            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then End -> " << ir << Symbols::LF;
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then End -> " << ir << Symbols::LF; thenTerminated = true; break;
         } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
-            std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Goto -> " << ir << Symbols::LF;
+            std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Goto -> " << ir << Symbols::LF; thenTerminated = true; break;
         } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
             std::string contLbl = currLineLabel; contLbl += "_gosub_cont"; contLbl += std::to_string(++localCounter);
             std::string entryLbl = currLineLabel; entryLbl += "_gosub_entry"; entryLbl += std::to_string(localCounter);
@@ -122,11 +123,12 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
         }
     }
     // Branch to end when THEN body completes
-    out << "  br label %" << endLbl << Symbols::LF;
+    if (!thenTerminated) out << "  br label %" << endLbl << Symbols::LF;
 
     // ELSE body, if present
     if (!ib->elseBody.empty()) {
     out << elseLbl << ":" << Symbols::LF;
+        bool elseTerminated = false;
         for (const auto& s : ib->elseBody) {
             if (auto asg = dyn_cast<AssignStmt>(s.get())) {
                 std::string val = emitExpr(out, asg->value.get(), currLineLabel);
@@ -167,11 +169,11 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                     { std::string ir = "  call void @srand48(i64 "; ir += t; ir += ")"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Randomize srand48(time) -> " << ir << Symbols::LF; }
                 }
             } else if (isa<ReturnStmt>(s.get())) {
-            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Return -> " << ir << Symbols::LF;
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Return -> " << ir << Symbols::LF; elseTerminated = true; break;
             } else if (isa<EndStmt>(s.get())) {
-            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else End -> " << ir << Symbols::LF;
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else End -> " << ir << Symbols::LF; elseTerminated = true; break;
             } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
-            std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Goto -> " << ir << Symbols::LF;
+            std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Goto -> " << ir << Symbols::LF; elseTerminated = true; break;
             } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
                 std::string contLbl = currLineLabel; contLbl += "_gosub_cont"; contLbl += std::to_string(++localCounter);
                 std::string entryLbl = currLineLabel; entryLbl += "_gosub_entry"; entryLbl += std::to_string(localCounter);
@@ -190,7 +192,7 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                 throw CodeGenError("Unsupported statement in IF body");
             }
         }
-        out << "  br label %" << endLbl << Symbols::LF;
+        if (!elseTerminated) out << "  br label %" << endLbl << Symbols::LF;
     }
 
     out << endLbl << ":" << Symbols::LF;

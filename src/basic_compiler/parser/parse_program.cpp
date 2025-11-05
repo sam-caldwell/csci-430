@@ -109,7 +109,7 @@ Program Parser::parseProgram() {
                     } else if (isa<IfBlockStmt>(st.get())) {
                         f->body.push_back(std::move(st));
                         auto* newI = dyn_cast<IfBlockStmt>(f->body.back().get());
-                        stack.push_back(BlockEntry::If(newI));
+                        if (!newI->inlineEnd) stack.push_back(BlockEntry::If(newI));
                     } else if (isa<WhileStmt>(st.get())) {
                         f->body.push_back(std::move(st));
                         if (auto* newW = dyn_cast<WhileStmt>(f->body.back().get()); !newW->inlineWend) stack.push_back(BlockEntry::While(newW));
@@ -125,7 +125,7 @@ Program Parser::parseProgram() {
                         if (!ifInElse) ib->thenBody.push_back(std::move(st));
                         else ib->elseBody.push_back(std::move(st));
                         auto* newI = dyn_cast<IfBlockStmt>((ifInElse ? ib->elseBody.back().get() : ib->thenBody.back().get()));
-                        stack.push_back(BlockEntry::If(newI));
+                        if (!newI->inlineEnd) stack.push_back(BlockEntry::If(newI));
                     } else if (isa<WhileStmt>(st.get())) {
                         if (!ifInElse) ib->thenBody.push_back(std::move(st));
                         else ib->elseBody.push_back(std::move(st));
@@ -141,7 +141,7 @@ Program Parser::parseProgram() {
                     } else if (isa<IfBlockStmt>(st.get())) {
                         w->body.push_back(std::move(st));
                         auto* newI = dyn_cast<IfBlockStmt>(w->body.back().get());
-                        stack.push_back(BlockEntry::If(newI));
+                        if (!newI->inlineEnd) stack.push_back(BlockEntry::If(newI));
                     } else if (isa<WhileStmt>(st.get())) {
                         w->body.push_back(std::move(st));
                         if (auto* newW = dyn_cast<WhileStmt>(w->body.back().get()); !newW->inlineWend) stack.push_back(BlockEntry::While(newW));
@@ -157,7 +157,7 @@ Program Parser::parseProgram() {
                 } else if (isa<IfBlockStmt>(st.get())) {
                     out.statements.push_back(std::move(st));
                     auto* ibPtr = dyn_cast<IfBlockStmt>(out.statements.back().get());
-                    stack.push_back(BlockEntry::If(ibPtr));
+                    if (!ibPtr->inlineEnd) stack.push_back(BlockEntry::If(ibPtr));
                 } else if (isa<WhileStmt>(st.get())) {
                     out.statements.push_back(std::move(st));
                     if (auto* wbPtr = dyn_cast<WhileStmt>(out.statements.back().get()); !wbPtr->inlineWend) stack.push_back(BlockEntry::While(wbPtr));

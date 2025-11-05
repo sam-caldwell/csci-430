@@ -24,6 +24,10 @@ struct IfBlockStmt final : ASTLeaf<NodeKind::IfBlockStmt, Stmt> {
     std::unique_ptr<Expr> cond;
     std::vector<std::unique_ptr<Stmt>> thenBody;
     std::vector<std::unique_ptr<Stmt>> elseBody; // empty if no ELSE
+    // True when this IF block is fully contained on a single source line.
+    // Inline IF blocks should not participate in END IF folding in the
+    // parser's restructuring pass.
+    bool inlineEnd{false};
     explicit IfBlockStmt(std::unique_ptr<Expr> c) : ASTLeaf(), cond(std::move(c)) {}
 };
 

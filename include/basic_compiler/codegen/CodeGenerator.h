@@ -2,6 +2,7 @@
 #pragma once
 
 #include <map>
+#include <ranges>
 #include <set>
 #include <string>
 #include <vector>
@@ -9,34 +10,53 @@
 #include <sstream>
 #include "logger/Logger.h"
 #include "basic_compiler/Symbols.h"
-
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/Stmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/NumberExpr.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/VarExpr.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/UnaryExpr.h"
 #include "basic_compiler/ast/BinaryExpr.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/CallExpr.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/StringExpr.h"
 #include "basic_compiler/ast/ForStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/AssignStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/PrintStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/OpenStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/InputStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/IfBlockStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/GotoStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/GosubStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/EndStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/ReturnStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/RunStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/CommonStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/ChainStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/MergeStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/codegen/CodeGenError.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include "basic_compiler/ast/Traits.h"
@@ -337,9 +357,9 @@ private:
     }
     // Lookup current inline binding for a variable name (if any)
     bool lookupBinding(const std::string& name, std::string& out) const {
-        for (auto it = bindingStack_.rbegin(); it != bindingStack_.rend(); ++it) {
-            auto f = it->find(name);
-            if (f != it->end()) { out = f->second; return true; }
+        for (const auto & it : std::ranges::reverse_view(bindingStack_)) {
+            auto f = it.find(name);
+            if (f != it.end()) { out = f->second; return true; }
         }
         return false;
     }
