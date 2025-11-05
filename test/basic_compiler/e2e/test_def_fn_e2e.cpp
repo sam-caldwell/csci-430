@@ -52,7 +52,6 @@ TEST(E2E, DEF_FN) {
 
     std::ostringstream r1; r1 << '"' << bin.string() << '"';
     std::string out = runCommand(r1.str());
-    ASSERT_NE(out.find("25.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("25\n"), std::string::npos);
     ASSERT_NE(out.find("hi!\n"), std::string::npos);
 }
-

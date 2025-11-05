@@ -50,5 +50,5 @@ TEST(E2E, FactorialFromInput) {
     int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0);
     std::string out = runCommandWithInput(bin.string(), "5\\n");
-    ASSERT_NE(out.find("120.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("120\n"), std::string::npos);
 }

@@ -50,8 +50,7 @@ TEST(E2E, CHR_ASC) {
 
     std::ostringstream r1; r1 << '"' << bin.string() << '"';
     std::string out = runCommand(r1.str());
-    // Expect two lines: A and 65.000000
+    // Expect two lines: A and 65
     ASSERT_NE(out.find("A\n"), std::string::npos);
-    ASSERT_NE(out.find("65.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("65\n"), std::string::npos);
 }
-

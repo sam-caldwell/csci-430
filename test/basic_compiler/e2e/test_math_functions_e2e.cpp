@@ -64,20 +64,20 @@ TEST(E2E, MathFunctionsProduceExpectedResults) {
     std::ostringstream run; run << '"' << bin.string() << '"';
     std::string out = runCommand(run.str());
 
-    // Compare expected values with 6 decimal places as emitted by %f
+    // Compare expected values with dynamic integer/float formatting
     const std::string expected =
-        "3.000000\n"
-        "5.000000\n"
-        "0.000000\n"
-        "1.000000\n"
-        "0.000000\n"
+        "3\n"
+        "5\n"
+        "0\n"
+        "1\n"
+        "0\n"
         "0.785398\n" // atan(1)
-        "0.000000\n" // log(1)
+        "0\n" // log(1)
         "2.718282\n" // exp(1)
-        "1.000000\n" // int(1.9)
-        "-1.000000\n" // fix(-1.9)
-        "-1.000000\n" // sgn(-2)
-        "0.000000\n"  // sgn(0)
-        "1.000000\n"; // sgn(2)
+        "1\n" // int(1.9)
+        "-1\n" // fix(-1.9)
+        "-1\n" // sgn(-2)
+        "0\n"  // sgn(0)
+        "1\n"; // sgn(2)
     ASSERT_EQ(out, expected);
 }

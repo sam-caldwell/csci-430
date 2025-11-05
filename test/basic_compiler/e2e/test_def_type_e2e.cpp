@@ -58,5 +58,5 @@ TEST(E2E, DEF_TYPE) {
     std::ostringstream r1; r1 << '"' << bin.string() << '"';
     std::string out = runCommand(r1.str());
     ASSERT_NE(out.find("ok\n"), std::string::npos);
-    ASSERT_NE(out.find("5.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("5\n"), std::string::npos);
 }

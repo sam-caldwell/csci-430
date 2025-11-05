@@ -61,8 +61,8 @@ TEST(E2E, MathEdgeCasesProduceExpectedResults) {
         "0.010000\n"
         "-6.907755\n"
         "148.413159\n"
-        "-2.000000\n"
-        "-1.000000\n"
-        "1.000000\n";
+        "-2\n"
+        "-1\n"
+        "1\n";
     ASSERT_EQ(out, expected);
 }

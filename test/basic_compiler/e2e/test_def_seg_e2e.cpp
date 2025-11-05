@@ -56,6 +56,6 @@ TEST(E2E, DEF_SEG) {
 
     std::ostringstream r1; r1 << '"' << bin.string() << '"';
     std::string out = runCommand(r1.str());
-    ASSERT_NE(out.find("65.000000\n"), std::string::npos);
-    ASSERT_NE(out.find("7.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("65\n"), std::string::npos);
+    ASSERT_NE(out.find("7\n"), std::string::npos);
 }

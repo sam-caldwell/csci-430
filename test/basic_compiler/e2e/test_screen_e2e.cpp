@@ -41,8 +41,8 @@ TEST(E2E, SCREEN_ReturnsAsciiAfterPrint) {
     int ec = std::system(c1.str().c_str());
     ASSERT_EQ(ec, 0);
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
-    // Look for ASCII codes 65, 66, 67 (as doubles with default precision)
-    ASSERT_NE(out.find("65.000000"), std::string::npos);
-    ASSERT_NE(out.find("66.000000"), std::string::npos);
-    ASSERT_NE(out.find("67.000000"), std::string::npos);
+    // Look for ASCII codes 65, 66, 67
+    ASSERT_NE(out.find("65"), std::string::npos);
+    ASSERT_NE(out.find("66"), std::string::npos);
+    ASSERT_NE(out.find("67"), std::string::npos);
 }

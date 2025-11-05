@@ -37,5 +37,5 @@ TEST(E2E, Chain_Common_PassesVariable) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
-    ASSERT_NE(out.find("123.000000"), std::string::npos);
+    ASSERT_NE(out.find("123"), std::string::npos);
 }

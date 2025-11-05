@@ -38,7 +38,6 @@ TEST(E2E, VariableState_InitialValues) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
-    // Expect double formatting emitted by our PRINT lowering
-    ASSERT_NE(out.find("initial state: X= 99.000000 Y= 42.000000"), std::string::npos);
+    // Expect dynamic formatting: integers print without decimals
+    ASSERT_NE(out.find("initial state: X= 99 Y= 42"), std::string::npos);
 }
-

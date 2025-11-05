@@ -60,8 +60,8 @@ TEST(E2E, MoreMathIntrinsicsWork) {
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 5u);
 
-    EXPECT_EQ(lines[0], std::string("2.000000"));     // CINT(1.6)
-    EXPECT_EQ(lines[1], std::string("-2.000000"));    // CINT(-1.6)
+    EXPECT_EQ(lines[0], std::string("2"));     // CINT(1.6)
+    EXPECT_EQ(lines[1], std::string("-2"));    // CINT(-1.6)
     EXPECT_EQ(lines[2], std::string("1.500000"));     // CDBL(1.5)
     EXPECT_EQ(lines[3], std::string("1.500000"));     // CSNG(1.5)
     // RND(1): 0.0 <= x < 1.0 (value varies)

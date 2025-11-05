@@ -19,10 +19,9 @@ Expected behavior: Asserts expected results/behavior described in test
 */
 TEST(OptimizerExpr, UnaryPlusMinusFolding) {
     auto ir = Compiler::compileStringOptimized("10 PRINT +1\n20 END\n");
-    EXPECT_NE(ir.find(", double 1.0)"), std::string::npos);
+    EXPECT_NE(ir.find(", i64 1)"), std::string::npos);
     EXPECT_EQ(ir.find(" = fsub double 0.0"), std::string::npos);
 
     ir = Compiler::compileStringOptimized("10 PRINT -(2)\n20 END\n");
-    EXPECT_NE(ir.find(", double -2.0)"), std::string::npos);
+    EXPECT_NE(ir.find(", i64 -2)"), std::string::npos);
 }
-

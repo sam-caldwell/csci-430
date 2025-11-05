@@ -52,6 +52,6 @@ TEST(E2E, CompileAndRun) {
     ASSERT_EQ(ec, 0) << "Clang failed: " << cmd;
 
     std::ostringstream r1; r1 << '"' << bin.string() << '"'; std::string out = runCommand(r1.str());
-    ASSERT_NE(out.find("7.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("7\n"), std::string::npos);
     ASSERT_NE(out.find("Done\n"), std::string::npos);
 }

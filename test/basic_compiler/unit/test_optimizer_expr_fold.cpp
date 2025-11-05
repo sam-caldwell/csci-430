@@ -24,7 +24,7 @@ TEST(OptimizerExpr, ConstantFoldingArithmetic) {
     const auto src = "10 PRINT 1 + 2 * 3\n20 END\n";
     auto ir = Compiler::compileStringOptimized(src);
     EXPECT_NE(ir.find("call i32 (ptr, ...) @printf"), std::string::npos);
-    EXPECT_NE(ir.find(", double 7.0)"), std::string::npos);
+    EXPECT_NE(ir.find(", i64 7)"), std::string::npos);
     EXPECT_EQ(ir.find(" = fmul double 2.0, 3.0"), std::string::npos);
     EXPECT_EQ(ir.find(" = fadd double"), std::string::npos);
 }

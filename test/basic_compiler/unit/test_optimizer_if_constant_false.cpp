@@ -24,6 +24,5 @@ TEST(OptimizerIf, ConstantFalseRemoved) {
         "30 END\n";
     auto ir = Compiler::compileStringOptimized(src);
     EXPECT_EQ(ir.find("line100"), std::string::npos);
-    EXPECT_NE(ir.find(", double 5.0)"), std::string::npos);
+    EXPECT_NE(ir.find(", i64 5)"), std::string::npos);
 }
-

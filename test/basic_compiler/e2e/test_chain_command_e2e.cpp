@@ -42,13 +42,13 @@ TEST(E2E, ChainCommand_ExecutesTrigDemo) {
     const std::string expected =
         "chain-test.bas starting\n"
         "chain-level2.bas starting\n"
-        "initial state: X:42.000000 ,Y:1337.000000 ,Z:-1.000000\n"
-        "modified state: X:42.000000 ,Y:1336.000000 ,Z:-1.000000\n"
+        "initial state: X:42 ,Y:1337 ,Z:-1\n"
+        "modified state: X:42 ,Y:1336 ,Z:-1\n"
         "chain-level3.bas starting\n"
-        "initial state: X:42.000000 ,Y:1336.000000 ,Z:-1.000000\n"
+        "initial state: X:42 ,Y:1336 ,Z:-1\n"
         "chain-level4.bas starting\n"
-        "initial state: X:42.000000 ,Y:1336.000000 ,Z:-1.000000\n"
-        "999.000000\n"
+        "initial state: X:42 ,Y:1336 ,Z:-1\n"
+        "999\n"
         " chain-level3-bas resumed\n"
         "chain-level2.bas resumed\n"
         "chain-test.bas resumed\n";

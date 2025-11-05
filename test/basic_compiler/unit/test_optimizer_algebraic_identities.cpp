@@ -28,6 +28,5 @@ TEST(OptimizerExpr, AlgebraicIdentities) {
         "70 PRINT X / 1\n"
         "80 PRINT X * 0\n"
         "90 END\n");
-    EXPECT_NE(ir.find(", double 0.0)"), std::string::npos);
+    EXPECT_NE(ir.find(", i64 0)"), std::string::npos);
 }
-

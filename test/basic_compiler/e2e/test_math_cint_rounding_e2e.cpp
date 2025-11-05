@@ -52,7 +52,7 @@ TEST(E2E, CintRoundsHalfAwayFromZero) {
     std::ostringstream run; run << '"' << bin.string() << '"';
     std::string out = runCommand(run.str());
     const std::string expected =
-        "2.000000\n"
-        "-2.000000\n";
+        "2\n"
+        "-2\n";
     ASSERT_EQ(out, expected);
 }

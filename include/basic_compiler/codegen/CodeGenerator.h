@@ -247,6 +247,9 @@ private:
     std::map<int, std::set<std::string>> varsBeforeLine_{};
     // Snapshot of arrays seen (DIM'd or referenced) before each line
     std::map<int, std::set<std::string>> arraysBeforeLine_{};
+    // For error handlers: map trap start line -> first non-handler line after the
+    // handler region (i.e., the line following the first line containing RESUME)
+    std::map<int, int> handlerSkipAfter_{};
     // Mapping from 1000-based line region base (e.g., 0, 1000, 2000, ...)
     // to the DATA table index at the start of that region. Used to reset
     // the DATA pointer on CHAIN to a new program segment.
@@ -289,6 +292,14 @@ private:
      *  - std::string: Label (e.g., "line100")
      */
     static std::string lineLabelName(int ln) { std::string s = "line"; s += std::to_string(ln); return s; }
+    /** Label for re-executing a specific statement index within a line. 1-based index. */
+    static std::string resumeLabelName(int ln, int stmtIndex) {
+        std::string s = "resume_l"; s += std::to_string(ln); s += "_"; s += std::to_string(stmtIndex); return s;
+    }
+    /** Label for resuming at the statement after a given index within a line. 1-based index. */
+    static std::string resumeNextLabelName(int ln, int stmtIndex) {
+        std::string s = "resume_next_l"; s += std::to_string(ln); s += "_"; s += std::to_string(stmtIndex); return s;
+    }
 
     // Declaration collection
     /** Collect declarations, variables, strings, and line ordering. */

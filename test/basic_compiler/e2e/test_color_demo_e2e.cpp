@@ -73,7 +73,7 @@ TEST(E2E, ColorDemo_PrintsExpectedAnsiAndText) {
 	// Validate SCREEN demo content
 	ASSERT_NE(out.find("SCREEN function demo\n"), std::string::npos);
 	// After printing "ABC" on row 7, SCREEN(7,1..3) should produce A,B,C ASCII codes
-	ASSERT_NE(out.find("65.000000"), std::string::npos);
-	ASSERT_NE(out.find("66.000000"), std::string::npos);
-	ASSERT_NE(out.find("67.000000"), std::string::npos);
+	ASSERT_NE(out.find("65"), std::string::npos);
+	ASSERT_NE(out.find("66"), std::string::npos);
+	ASSERT_NE(out.find("67"), std::string::npos);
 }
