@@ -52,6 +52,7 @@ public:
             case NodeKind::MergeStmt:
             case NodeKind::DimStmt:
             case NodeKind::ArrayAssignStmt:
+            case NodeKind::MidAssignStmt:
                 return true;
             default:
                 return false;
