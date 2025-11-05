@@ -51,6 +51,7 @@ inline std::string to_string(const TokenType t) {
         case TokenType::KwCommon: return "COMMON";
         case TokenType::KwAll: return "ALL";
         case TokenType::KwChain: return "CHAIN";
+        case TokenType::KwOn: return "ON";
         case TokenType::KwDim: return "DIM";
         case TokenType::KwOpen: return "OPEN";
         case TokenType::KwClose: return "CLOSE";
