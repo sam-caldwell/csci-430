@@ -108,6 +108,7 @@ private:
         {"ALL",       TokenType::KwAll},
         {"MERGE",     TokenType::KwMerge},
         {"CHAIN",     TokenType::KwChain},
+        {"ON",        TokenType::KwOn},
         {"DIM",       TokenType::KwDim},
         {"OPEN",      TokenType::KwOpen},
         {"CLOSE",     TokenType::KwClose},
@@ -244,7 +245,7 @@ private:
     void emitPairOrSingle(std::vector<Token>& out,
                           const char (&singleLex)[N1],
                           const char (&pairLex)[N2],
-                          int line, int col) {
+                          const int line, const int col) {
 
         if (peek() == Next) {
             advance();
