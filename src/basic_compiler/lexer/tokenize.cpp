@@ -56,8 +56,7 @@ std::vector<Token> Lexer::tokenize() {
             case '&': {
                 // Hexadecimal literal prefix &H...
                 advance();
-                char n = static_cast<char>(std::toupper(static_cast<unsigned char>(peek())));
-                if (n == 'H') {
+                if (auto n = static_cast<char>(std::toupper(static_cast<unsigned char>(peek()))); n == 'H') {
                     advance();
                     // accumulate hex digits
                     unsigned long long val = 0ULL;
