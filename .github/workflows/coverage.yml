@@ -29,14 +29,29 @@ jobs:
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
+          set -euxo pipefail
           sudo apt-get update
+          sudo apt-get install -y wget software-properties-common lsb-release gnupg ca-certificates
+          # Install pinned LLVM/Clang 17 toolchain
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 17
+          # libc++ runtime for Clang on Linux
           sudo apt-get install -y \
             build-essential \
             cmake \
             ninja-build \
-            clang \
-            llvm \
-            llvm-dev
+            libc++-17-dev \
+            libc++abi-17-dev \
+            lld-17
+
+      - name: Setup LLVM 17 env (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          echo "LLVM_PREFIX=/usr/lib/llvm-17" >> "$GITHUB_ENV"
+          echo "CC=clang-17" >> "$GITHUB_ENV"
+          echo "CXX=clang++-17" >> "$GITHUB_ENV"
+          echo "PATH=/usr/lib/llvm-17/bin:$PATH" >> "$GITHUB_ENV"
 
       - name: Install dependencies (macOS)
         if: startsWith(matrix.os, 'macos')
@@ -47,6 +62,8 @@ jobs:
       - name: Build, lint and test
         env:
           GENERATOR: Ninja
+          # Use unified toolchain (macOS: Homebrew LLVM, Linux: LLVM 17 + libc++)
+          TOOLCHAIN: cmake/toolchain.cmake
         run: |
           make clean
           make configure
@@ -67,21 +84,29 @@ jobs:
 
       - name: Install dependencies (Ubuntu)
         run: |
+          set -euxo pipefail
           sudo apt-get update
+          sudo apt-get install -y wget software-properties-common lsb-release gnupg ca-certificates
+          # Install pinned LLVM/Clang 17 toolchain
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 17
+          # libc++ runtime for Clang on Linux
           sudo apt-get install -y \
             build-essential \
             cmake \
             ninja-build \
-            clang \
-            llvm \
-            llvm-dev
+            libc++-17-dev \
+            libc++abi-17-dev \
+            lld-17
 
       - name: Detect LLVM prefix
         id: llvm
         shell: bash
         run: |
           set -euo pipefail
-          prefix=$(ls -d /usr/lib/llvm-* 2>/dev/null | sort -V | tail -n1 || true)
+          # We installed LLVM 17 explicitly; prefer that directory.
+          prefix="/usr/lib/llvm-17"
           if [ -n "${prefix}" ]; then
             echo "prefix=${prefix}" >> "$GITHUB_OUTPUT"
             echo "LLVM_PREFIX=${prefix}" >> "$GITHUB_ENV"
@@ -90,8 +115,16 @@ jobs:
           fi
           echo "Detected LLVM prefix: ${prefix:-none}"
 
+      - name: Setup LLVM 17 env (Ubuntu)
+        if: startsWith(runner.os, 'Linux')
+        run: |
+          echo "CC=clang-17" >> "$GITHUB_ENV"
+          echo "CXX=clang++-17" >> "$GITHUB_ENV"
+          echo "PATH=/usr/lib/llvm-17/bin:$PATH" >> "$GITHUB_ENV"
+
       - name: Build coverage
         env:
           GENERATOR: Ninja
+          TOOLCHAIN: cmake/toolchain.cmake
         run: |
           make coverage
