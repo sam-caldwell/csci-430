@@ -30,7 +30,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           set -euxo pipefail
-          sudo apt-get update
+          sudo apt-get update -y
           sudo apt-get install -y wget software-properties-common lsb-release gnupg ca-certificates
           # Install pinned LLVM/Clang 17 toolchain
           wget https://apt.llvm.org/llvm.sh
@@ -41,6 +41,8 @@ jobs:
             build-essential \
             cmake \
             ninja-build \
+            clang-tidy-17 \
+            llvm-17-tools \
             libc++-17-dev \
             libc++abi-17-dev \
             lld-17
@@ -65,72 +67,31 @@ jobs:
           echo "CC=${prefix}/bin/clang" >> "$GITHUB_ENV"
           echo "CXX=${prefix}/bin/clang++" >> "$GITHUB_ENV"
 
-      - name: Build, lint and test
+      - name: Run Linters
+        env:
+          GENERATOR: Ninja
+          # Use unified toolchain (macOS: Homebrew LLVM, Linux: LLVM 17 + libc++)
+          TOOLCHAIN: cmake/toolchain.cmake
+        run: make clean configure lint && echo "lint passed"
+
+      - name: Run Unit/integration/e2e tests
+        env:
+          GENERATOR: Ninja
+          # Use unified toolchain (macOS: Homebrew LLVM, Linux: LLVM 17 + libc++)
+          TOOLCHAIN: cmake/toolchain.cmake
+        run: make clean configure test -j2 && echo "tests passed"
+
+      - name: Build demo programs
+        env:
+          GENERATOR: Ninja
+          # Use unified toolchain (macOS: Homebrew LLVM, Linux: LLVM 17 + libc++)
+          TOOLCHAIN: cmake/toolchain.cmake
+        run: make clean configure build demo
+
+      - name: Run Coverage
         env:
           GENERATOR: Ninja
           # Use unified toolchain (macOS: Homebrew LLVM, Linux: LLVM 17 + libc++)
           TOOLCHAIN: cmake/toolchain.cmake
         run: |
-          make clean
-          make configure
-          make lint -j2
-          make test -j2
-          make demo -j2
-
-  coverage:
-    name: Make Coverage
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install dependencies (Ubuntu)
-        run: |
-          set -euxo pipefail
-          sudo apt-get update
-          sudo apt-get install -y wget software-properties-common lsb-release gnupg ca-certificates
-          # Install pinned LLVM/Clang 17 toolchain
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 17
-          # libc++ runtime for Clang on Linux
-          sudo apt-get install -y \
-            build-essential \
-            cmake \
-            ninja-build \
-            libc++-17-dev \
-            libc++abi-17-dev \
-            lld-17
-
-      - name: Detect LLVM prefix
-        id: llvm
-        shell: bash
-        run: |
-          set -euo pipefail
-          # We installed LLVM 17 explicitly; prefer that directory.
-          prefix="/usr/lib/llvm-17"
-          if [ -n "${prefix}" ]; then
-            echo "prefix=${prefix}" >> "$GITHUB_OUTPUT"
-            echo "LLVM_PREFIX=${prefix}" >> "$GITHUB_ENV"
-          else
-            echo "No versioned /usr/lib/llvm-* found; proceeding without LLVM_PREFIX"
-          fi
-          echo "Detected LLVM prefix: ${prefix:-none}"
-
-      - name: Setup LLVM 17 env (Ubuntu)
-        if: startsWith(runner.os, 'Linux')
-        run: |
-          echo "CC=clang-17" >> "$GITHUB_ENV"
-          echo "CXX=clang++-17" >> "$GITHUB_ENV"
-          echo "PATH=/usr/lib/llvm-17/bin:$PATH" >> "$GITHUB_ENV"
-
-      - name: Build coverage
-        env:
-          GENERATOR: Ninja
-          TOOLCHAIN: cmake/toolchain.cmake
-        run: |
-          make coverage
+          make clean configure coverage

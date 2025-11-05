@@ -63,6 +63,7 @@ function(build_project target)
             set(_std_flag "-std=c${CMAKE_C_STANDARD}")
           endif()
         endif()
+        set(_lang_opts "${_opt_expr}")
       else()
         set(_compiler "${CLANGXX_EXECUTABLE}")
         # Ensure C++ standard (e.g., C++23) is respected for bitcode generation
@@ -70,6 +71,11 @@ function(build_project target)
           set(_std_flag "-std=gnu++${CMAKE_CXX_STANDARD}")
         else()
           set(_std_flag "-std=c++${CMAKE_CXX_STANDARD}")
+        endif()
+        # Propagate compile options and ensure libc++ on Linux to avoid libstdc++ conflicts
+        set(_lang_opts "${_opt_expr}")
+        if(UNIX AND NOT APPLE)
+          list(APPEND _lang_opts -stdlib=libc++)
         endif()
       endif()
 
@@ -79,7 +85,8 @@ function(build_project target)
       add_custom_command(
         OUTPUT "${_bc}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${_outdir}"
-        COMMAND ${CMAKE_COMMAND} -E env CPATH=${_cpath_expr} "${_compiler}" ${_std_flag} -emit-llvm -c "${_abs_src}" -o "${_bc}" ${_def_expr}
+        # Note: pass target compile options (${_opt_expr}) so flags like -stdlib=libc++ propagate to bitcode builds.
+        COMMAND ${CMAKE_COMMAND} -E env CPATH=${_cpath_expr} "${_compiler}" ${_std_flag} ${_lang_opts} -emit-llvm -c "${_abs_src}" -o "${_bc}" ${_def_expr}
         DEPENDS "${_abs_src}"
         COMMENT "Generating LLVM bitcode ${_bc}"
         VERBATIM
