@@ -4,4 +4,5 @@
 40 LET Z=-1
 50 COMMON X,Y,Z
 60 CHAIN "chain-level2.bas"
-70 PRINT" chain-test.bas resumed"
+70 PRINT "chain-test.bas resumed"
+80 END

@@ -48,7 +48,8 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare double @round(double)" << STR_LF << STR_LF
     // RNG seed + time
         << "declare void @srand48(i64)" << STR_LF
-        << "declare i64 @time(ptr)" << STR_LF << STR_LF;
+        << "declare i64 @time(ptr)" << STR_LF << STR_LF
+        << "declare ptr @getenv(ptr)" << STR_LF << STR_LF;
 
     // Provide helper implementing full RND(x) semantics if needed
     if (needsRndHelper_) {
@@ -87,8 +88,35 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "ret:" << STR_LF
         << "  ret void" << STR_LF
         << "}" << STR_LF << STR_LF;
-    // Stub graphics initializer used by SCREEN statement (no-op for now)
+    // Graphics initializer used by SCREEN statement
+    // - Sets @gwb_gfx_ready = true when mode>0 and environment appears capable
+    //   (DISPLAY or WAYLAND_DISPLAY is set) and not explicitly disabled; can
+    //   be forced via GWBASIC_ENABLE_GFX. Text mode (<=0) disables graphics.
     out << "define void @gwb_graphics_init(i32 %mode) {" << STR_LF
+        << "entry:" << STR_LF
+        << "  %istext = icmp sle i32 %mode, 0" << STR_LF
+        << "  br i1 %istext, label %setfalse, label %checkenv" << STR_LF
+        << "setfalse:" << STR_LF
+        << "  store i1 false, ptr @gwb_gfx_ready" << STR_LF
+        << "  br label %ret" << STR_LF
+        << "checkenv:" << STR_LF
+        << "  %pdisp = getelementptr inbounds [8 x i8], ptr @.env_display, i64 0, i64 0" << STR_LF
+        << "  %disp = call ptr @getenv(ptr %pdisp)" << STR_LF
+        << "  %hasdisp = icmp ne ptr %disp, null" << STR_LF
+        << "  %pway = getelementptr inbounds [16 x i8], ptr @.env_wayland, i64 0, i64 0" << STR_LF
+        << "  %way = call ptr @getenv(ptr %pway)" << STR_LF
+        << "  %hasway = icmp ne ptr %way, null" << STR_LF
+        << "  %prob = or i1 %hasdisp, %hasway" << STR_LF
+        << "  br i1 %prob, label %settrue, label %setfalse" << STR_LF
+        << "settrue:" << STR_LF
+        << "  store i1 true, ptr @gwb_gfx_ready" << STR_LF
+        << "  br label %ret" << STR_LF
+        << "ret:" << STR_LF
+        << "  ret void" << STR_LF
+        << "}" << STR_LF << STR_LF
+        // Stub: draw circle/arc/ellipse (no-op); executed only when @gwb_gfx_ready is true
+        // Params: cx, cy, r, color (-1=default), start (-1=full), end, aspect (-1=1.0), step (ignored)
+        << "define void @gwb_gfx_circle(double %cx, double %cy, double %r, i32 %color, double %start, double %end, double %aspect, i1 %step) {" << STR_LF
         << "entry:" << STR_LF
         << "  ret void" << STR_LF
         << "}" << STR_LF << STR_LF;

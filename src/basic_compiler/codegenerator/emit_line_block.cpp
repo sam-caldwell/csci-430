@@ -16,6 +16,9 @@
 #include "basic_compiler/ast/ChdirStmt.h"
 #include "basic_compiler/ast/ColorStmt.h"
 #include "basic_compiler/ast/ScreenStmt.h"
+#include "basic_compiler/ast/CircleStmt.h"
+#include "basic_compiler/ast/ClearStmt.h"
+#include "basic_compiler/ast/StringExpr.h"
 #include <sstream>
 #include <format>
 
@@ -93,17 +96,23 @@ namespace gwbasic {
                         auto val = emitExpr(out, v, "");
                         std::string fmt = nextTemp();
                         {
+                            // Choose numeric format. For non-last items, add a trailing space
+                            // unless the next item is a string literal that already begins with
+                            // a space (to avoid double spacing).
+                            bool nextStartsWithSpace = false;
+                            if (!last && (pi + 1) < items.size()) {
+                                if (const auto* ns = dyn_cast<const StringExpr>(items[pi + 1])) {
+                                    if (!ns->value.empty() && ns->value.front() == ' ') nextStartsWithSpace = true;
+                                }
+                            }
+                            const char* fmt_sym = last ? "@.fmt_num" : (nextStartsWithSpace ? "@.fmt_num_ns" : "@.fmt_num_sp");
                             std::string ir1 = "  ";
                             ir1 += fmt;
                             ir1 += " = getelementptr inbounds i8, ptr ";
-                            ir1 += (last ? "@.fmt_num" : "@.fmt_num_sp");
+                            ir1 += fmt_sym;
                             ir1 += ", i64 0";
                             out << ir1 << STR_LF;
-                            {
-                                std::ostringstream m;
-                                m << "line " << currentLine_ << " PrintStmt -> " << ir1;
-                            log() << m.str() << CH_LF;
-                            }
+                            { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir1; log() << m.str() << CH_LF; }
                         }
                         // Optional USING override
                         std::string useFmt2 = fmt;
@@ -390,6 +399,69 @@ namespace gwbasic {
                     modei32 = i32v;
                 }
                 { std::string ir = std::format("  call void @gwb_graphics_init(i32 {})", modei32); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " Screen init -> " << ir; log() << m.str() << CH_LF; } }
+            } else if (auto ci = dyn_cast<CircleStmt>(st.get())) {
+                // Guard: skip graphics if not ready
+                std::string rdy = nextTemp(); { std::string ir = std::format("  {} = load i1, ptr @gwb_gfx_ready", rdy); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " Circle load gfx_ready -> " << ir; log() << m.str() << CH_LF; } }
+                std::string doLbl = lineLabelName(line.number) + "_circle_do" + std::to_string(++localContCounter);
+                std::string contLbl = lineLabelName(line.number) + "_circle_cont" + std::to_string(localContCounter);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", rdy, doLbl, contLbl); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " Circle guard br -> " << ir; log() << m.str() << CH_LF; } }
+                out << doLbl << ":" << STR_LF;
+                std::string xv = emitExpr(out, ci->x.get(), "");
+                std::string yv = emitExpr(out, ci->y.get(), "");
+                std::string rv = emitExpr(out, ci->r.get(), "");
+                std::string colori32 = "-1";
+                if (ci->color) {
+                    std::string cv = emitExpr(out, ci->color.get(), "");
+                    std::string ci32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", ci32, cv); out << ir << STR_LF; }
+                    colori32 = ci32;
+                }
+                std::string sv = ci->start ? emitExpr(out, ci->start.get(), "") : "-1.0";
+                std::string ev = ci->end ? emitExpr(out, ci->end.get(), "") : "-1.0";
+                std::string av = ci->aspect ? emitExpr(out, ci->aspect.get(), "") : "-1.0";
+                std::string stepv = ci->step ? "true" : "false";
+                { std::string ir = std::format("  call void @gwb_gfx_circle(double {}, double {}, double {}, i32 {}, double {}, double {}, double {}, i1 {})", xv, yv, rv, colori32, sv, ev, av, stepv); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " Circle call -> " << ir; log() << m.str() << CH_LF; } }
+                { std::string ir = std::format("  br label %{}", contLbl); out << ir << STR_LF; }
+                out << contLbl << ":" << STR_LF;
+            } else if (isa<ClearStmt>(st.get())) {
+                // CLEAR: reset program state (scalars, strings, arrays in current segment), DATA index, file channels
+                // Scope: limit to variables/arrays seen before this line to avoid crossing CHAIN boundaries
+                const auto itVB = varsBeforeLine_.find(line.number);
+                const std::set<std::string> emptyVars;
+                const std::set<std::string>& vset = (itVB == varsBeforeLine_.end()) ? emptyVars : itVB->second;
+                for (const auto &v: vset) {
+                    auto it = varAllocaName_.find(v);
+                    if (it == varAllocaName_.end()) continue;
+                    if (isStringVarNameCG(v)) {
+                        std::string ir = std::format("  store ptr null, ptr {}", it->second);
+                        out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " ClearStmt reset$ -> " << ir; log() << m.str() << CH_LF; }
+                    } else {
+                        std::string ir = std::format("  store double 0.0, ptr {}", it->second);
+                        out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " ClearStmt reset -> " << ir; log() << m.str() << CH_LF; }
+                    }
+                }
+                // Arrays: zero elements for arrays seen before this line
+                const auto itAB = arraysBeforeLine_.find(line.number);
+                const std::set<std::string> emptyArr;
+                const std::set<std::string>& aset = (itAB == arraysBeforeLine_.end()) ? emptyArr : itAB->second;
+                for (const auto &an : aset) {
+                    auto itLen = arraySizes_.find(an);
+                    if (itLen == arraySizes_.end()) continue;
+                    const int len = itLen->second;
+                    ensureArrayAllocated(out, an, len);
+                    std::string base = arrayAllocaName_[an];
+                    for (int i = 0; i < len; ++i) {
+                        std::string elem = nextTemp();
+                        { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, i); out << ir << STR_LF; }
+                        { std::string ir = std::format("  store double 0.0, ptr {}", elem); out << ir << STR_LF; }
+                    }
+                }
+                // Reset DATA pointer to beginning
+                { std::string ir = std::format("  store i32 0, ptr @gwb_data_idx"); out << ir << STR_LF; { std::ostringstream m; m << "line " << currentLine_ << " ClearStmt data_idx -> " << ir; log() << m.str() << CH_LF; } }
+                // Clear file channel table (set all to null)
+                for (int i = 0; i < 16; ++i) {
+                    std::string ep = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", ep, i); out << ir << STR_LF; }
+                    { std::string ir = std::format("  store ptr null, ptr {}", ep); out << ir << STR_LF; }
+                }
             } else {
                 throw CodeGenError("Unsupported statement encountered");
             }

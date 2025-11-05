@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <unordered_map>
 
 namespace gwbasic {
 
@@ -69,14 +70,16 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
         gwbasic::Program prog;
         size_t idx{0};
         bool mergeMode{false};
-        bool clearOnEnter{false};
     };
 
     auto resolvePath = [](const std::string& base, const std::string& rel) -> std::string {
         std::filesystem::path p(rel);
-        if (p.is_absolute()) return p.string();
+        if (p.is_absolute()) return std::filesystem::weakly_canonical(p).string();
         std::filesystem::path b(base);
-        return (b.parent_path() / p).string();
+        return std::filesystem::weakly_canonical(b.parent_path() / p).string();
+    };
+    auto canonicalPath = [](const std::string& p) -> std::string {
+        return std::filesystem::weakly_canonical(std::filesystem::path(p)).string();
     };
     auto parseFile = [&](const std::string& fpath) -> gwbasic::Program {
         std::ifstream fin(fpath);
@@ -100,6 +103,7 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
     // Build composite program by following CHAIN/RUN/MERGE depth-first using a LIFO stack
     std::vector<Frame> stack;
     gwbasic::Program program; // composite result
+    std::unordered_map<std::string, std::pair<int,int>> imported; // path -> {base, minLine}
     // Root file: set lex + syntax logs
     {
         // Tokenize root with lex log
@@ -108,41 +112,76 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
         auto toks2 = lex2.tokenize();
         Parser rp(std::move(toks2));
         rp.setSyntaxLogPath(syntaxLogPath);
-        Frame root{path, rp.parseProgram(), 0, false, false};
+        Frame root{canonicalPath(path), rp.parseProgram(), 0, false};
+        // Register root
+        int minRoot = INT_MAX;
+        for (const auto& l : root.prog.lines) if (l.number < minRoot) minRoot = l.number;
+        imported[root.path] = {0, (minRoot == INT_MAX ? 0 : minRoot)};
         stack.push_back(std::move(root));
     }
     while (!stack.empty()) {
-        Frame fr = std::move(stack.back()); stack.pop_back();
-        if (fr.clearOnEnter) program.lines.clear();
-        bool stopHere = false;
+        Frame fr = std::move(stack.back());
+        stack.pop_back();
         for (; fr.idx < fr.prog.lines.size(); ++fr.idx) {
             gwbasic::Line& ln = fr.prog.lines[fr.idx];
-            bool directiveFound = false;
+            bool hadDirective = false;
             std::string incPath;
             enum class Dir { None, Merge, Chain, Run } dir{Dir::None};
             for (const auto& st : ln.statements) {
                 if (const auto mg = gwbasic::dyn_cast<gwbasic::MergeStmt>(st.get())) {
-                    dir = Dir::Merge; incPath = resolvePath(fr.path, mg->filename); directiveFound = true; break;
+                    dir = Dir::Merge; incPath = resolvePath(fr.path, mg->filename); hadDirective = true; break;
                 }
                 if (const auto ch = gwbasic::dyn_cast<gwbasic::ChainStmt>(st.get())) {
-                    if (ch->filename.has_value()) { dir = Dir::Chain; incPath = resolvePath(fr.path, *ch->filename); directiveFound = true; break; }
+                    if (ch->filename.has_value()) { dir = Dir::Chain; incPath = resolvePath(fr.path, *ch->filename); hadDirective = true; break; }
                 }
                 if (const auto rn = gwbasic::dyn_cast<gwbasic::RunStmt>(st.get())) {
-                    if (rn->filename.has_value()) { dir = Dir::Run; incPath = resolvePath(fr.path, *rn->filename); directiveFound = true; break; }
+                    if (rn->filename.has_value()) { dir = Dir::Run; incPath = resolvePath(fr.path, *rn->filename); hadDirective = true; break; }
                 }
             }
-            if (directiveFound) {
-                // Stop parsing this file at directive and follow included path depth-first
-                Frame next{incPath, parseFile(incPath), 0, /*mergeMode*/ (dir == Dir::Merge), /*clearOnEnter*/ (dir == Dir::Run)};
-                stack.push_back(std::move(next));
-                stopHere = true;
-                break;
+            if (hadDirective && (dir == Dir::Chain || dir == Dir::Run)) {
+                const std::string canon = canonicalPath(incPath);
+                auto it = imported.find(canon);
+                if (it == imported.end()) {
+                    gwbasic::Program nextProg = parseFile(canon);
+                    int minImported = INT_MAX;
+                    for (const auto& l2 : nextProg.lines) if (l2.number < minImported) minImported = l2.number;
+                    const int base = (canon == fr.path) ? 0 : static_cast<int>(imported.size()) * 1000 + 1000; // simple incremental base
+                    for (auto& l2 : nextProg.lines) l2.number += base;
+                    imported[canon] = {base, (minImported == INT_MAX ? 0 : minImported)};
+                    stack.push_back(Frame{canon, std::move(nextProg), 0, /*mergeMode*/ false});
+                    it = imported.find(canon);
+                }
+                // Patch target line respecting explicit line when given
+                if (dir == Dir::Chain) {
+                    for (auto& st : ln.statements) {
+                        if (auto ch = gwbasic::dyn_cast<gwbasic::ChainStmt>(st.get())) {
+                            const int base = it->second.first;
+                            const int first = it->second.second;
+                            const int tgt = ch->targetLine.has_value() ? *ch->targetLine : first;
+                            ch->targetLine = base + tgt; break;
+                        }
+                    }
+                } else {
+                    for (auto& st : ln.statements) {
+                        if (auto rn = gwbasic::dyn_cast<gwbasic::RunStmt>(st.get())) {
+                            const int base = it->second.first;
+                            const int first = it->second.second;
+                            const int tgt = rn->targetLine.has_value() ? *rn->targetLine : first;
+                            rn->targetLine = base + tgt; break;
+                        }
+                    }
+                }
+                // Keep the directive line
+                replaceOrAppendLine(program, std::move(ln), fr.mergeMode);
+                continue;
+            } else if (hadDirective && dir == Dir::Merge) {
+                const std::string canon = canonicalPath(incPath);
+                gwbasic::Program mprog = parseFile(canon);
+                for (auto& ml : mprog.lines) replaceOrAppendLine(program, std::move(ml), /*replace*/ true);
+                continue;
             }
-            // Normal line: adopt into composite
             replaceOrAppendLine(program, std::move(ln), fr.mergeMode);
         }
-        // If no directive encountered and finished file, nothing to push; continue with next frame
-        (void)stopHere;
     }
     // Semantic analysis (scope + references + strings)
     SemanticAnalyzer sema;

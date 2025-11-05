@@ -1,6 +1,22 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include <algorithm>
+// AST headers needed for per-line variable/array collection
+#include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/ArrayAssignStmt.h"
+#include "basic_compiler/ast/IfBlockStmt.h"
+#include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/ForStmt.h"
+#include "basic_compiler/ast/WhileStmt.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/InputStmt.h"
+#include "basic_compiler/ast/ReadStmt.h"
+#include "basic_compiler/ast/DimStmt.h"
+#include "basic_compiler/ast/WriteStmt.h"
+#include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/UnaryExpr.h"
 
 namespace gwbasic {
 
@@ -27,6 +43,8 @@ void CodeGenerator::collectDecls(const Program& program) {
     lineMap_.clear();
     needsRndHelper_ = false;
     commonBeforeLine_.clear();
+    varsBeforeLine_.clear();
+    arraysBeforeLine_.clear();
 
     for (const auto& line : program.lines) {
         lineNumbers_.push_back(line.number);
@@ -42,16 +60,24 @@ void CodeGenerator::collectDecls(const Program& program) {
 
     // Build mapping of COMMON variables that are in effect before each line
     {
+        // Track COMMON variables seen before each line
         std::set<std::string> accumCommon;
+        // Track variables/arrays seen before each line (by name)
+        std::set<std::string> accumVars;
+        std::set<std::string> accumArrays;
         for (int ln : lineNumbers_) {
-            // Record snapshot of COMMON seen before this line
+            // Record snapshots before processing this line
             commonBeforeLine_[ln] = accumCommon;
+            varsBeforeLine_[ln] = accumVars;
+            arraysBeforeLine_[ln] = accumArrays;
             const auto* lptr = lineMap_[ln];
             if (!lptr) continue;
+            // Update accumulators based on statements in this line
             for (const auto& st : lptr->statements) {
                 if (const auto cs = dyn_cast<const CommonStmt>(st.get())) {
                     for (const auto& n : cs->names) accumCommon.insert(n);
                 }
+                collectVarsForBeforeLineFromStmt(st.get(), accumVars, accumArrays);
             }
         }
     }
@@ -69,5 +95,7 @@ void CodeGenerator::collectDecls(const Program& program) {
         // LineNumbers are computed from AST to drive emission order; no change
     }
 }
+
+// helpers moved to separate compilation units to satisfy one-function-per-file rule
 
 } // namespace gwbasic

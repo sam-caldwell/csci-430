@@ -61,6 +61,7 @@ enum class NodeKind {
     ColorStmt,
     ScreenStmt,
     CircleStmt,
+    ClearStmt,
 };
 
 } // namespace gwbasic

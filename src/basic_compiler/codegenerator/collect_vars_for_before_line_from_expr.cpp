@@ -1,0 +1,29 @@
+// (c) 2025 Sam Caldwell. All Rights Reserved.
+#include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+
+namespace gwbasic {
+
+void CodeGenerator::collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string>& vars, std::set<std::string>& arrays) {
+    if (!e) return;
+    if (auto v = dyn_cast<const VarExpr>(e)) { vars.insert(v->name); return; }
+    if (auto c = dyn_cast<const CallExpr>(e)) {
+        // Array element reference syntax uses call-form: A(index)
+        if (arraySizes_.contains(c->callee)) {
+            arrays.insert(c->callee);
+            if (!c->args.empty()) collectVarsForBeforeLineFromExpr(c->args[0].get(), vars, arrays);
+            return;
+        }
+        for (const auto& a : c->args) collectVarsForBeforeLineFromExpr(a.get(), vars, arrays);
+        return;
+    }
+    if (auto b = dyn_cast<const BinaryExpr>(e)) { collectVarsForBeforeLineFromExpr(b->lhs.get(), vars, arrays); collectVarsForBeforeLineFromExpr(b->rhs.get(), vars, arrays); return; }
+    if (auto u = dyn_cast<const UnaryExpr>(e)) { collectVarsForBeforeLineFromExpr(u->inner.get(), vars, arrays); return; }
+}
+
+} // namespace gwbasic
+

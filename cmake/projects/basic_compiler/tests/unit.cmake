@@ -14,4 +14,9 @@ target_include_directories(basic_compiler_unit_tests PRIVATE
 
 target_link_libraries(basic_compiler_unit_tests PRIVATE basic_compiler_lib GTest::gtest_main GTest::gtest)
 
+# Suppress expected warnings in unit tests that intentionally redefine access
+# specifiers (e.g., `#define private public`) to introspect internals.
+# Clang warns with -Wkeyword-macro; silence it for this target only.
+target_compile_options(basic_compiler_unit_tests PRIVATE $<$<CXX_COMPILER_ID:Clang>:-Wno-keyword-macro>)
+
 gtest_discover_tests(basic_compiler_unit_tests PROPERTIES LABELS unit)

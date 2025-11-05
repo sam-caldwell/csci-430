@@ -22,8 +22,9 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
     //    exact output (avoids unexpected double spaces).
     out << "@.fmt_num = private unnamed_addr constant [4 x i8] c\"%f\\0A\\00\"" << STR_LF
         << "@.fmt_str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"" << STR_LF
-        << "@.fmt_num_sp = private unnamed_addr constant [3 x i8] c\"%f\\00\"" << STR_LF // no trailing space
-        << "@.fmt_str_sp = private unnamed_addr constant [3 x i8] c\"%s\\00\"" << STR_LF // no trailing space
+        << "@.fmt_num_sp = private unnamed_addr constant [4 x i8] c\"%f\\20\\00\"" << STR_LF // numeric non-last: add one space
+        << "@.fmt_num_ns = private unnamed_addr constant [3 x i8] c\"%f\\00\"" << STR_LF // numeric non-last: no suffix
+        << "@.fmt_str_sp = private unnamed_addr constant [3 x i8] c\"%s\\00\"" << STR_LF // string non-last: no extra space
         << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"" << STR_LF
         << "@.mode_r = private unnamed_addr constant [2 x i8] c\"r\\00\"" << STR_LF
         << "@.mode_w = private unnamed_addr constant [2 x i8] c\"w\\00\"" << STR_LF

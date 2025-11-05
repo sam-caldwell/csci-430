@@ -36,6 +36,7 @@
 #include "basic_compiler/ast/ColorStmt.h"
 #include "basic_compiler/ast/ScreenStmt.h"
 #include "basic_compiler/ast/CircleStmt.h"
+#include "basic_compiler/ast/ClearStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -267,9 +268,17 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         if (typeOf(cc->x.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE x must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         if (typeOf(cc->y.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE y must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         if (typeOf(cc->r.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE r must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (cc->color && typeOf(cc->color.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE color must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (cc->start && typeOf(cc->start.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE start must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (cc->end && typeOf(cc->end.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE end must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (cc->aspect && typeOf(cc->aspect.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: CIRCLE aspect must be numeric @ " << cc->pos.line << ':' << cc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(cc->x.get());
         analyzeExpr(cc->y.get());
         analyzeExpr(cc->r.get());
+        if (cc->color) analyzeExpr(cc->color.get());
+        if (cc->start) analyzeExpr(cc->start.get());
+        if (cc->end) analyzeExpr(cc->end.get());
+        if (cc->aspect) analyzeExpr(cc->aspect.get());
         return;
     }
     if (auto df = dyn_cast<const DefFnStmt>(s)) {
@@ -300,6 +309,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         log() << "DefFn " << df->fnName << '\n';
         return;
     }
+    if (dyn_cast<const ClearStmt>(s)) { log() << "Clear" << '\n'; return; }
     if (auto g = dyn_cast<const GotoStmt>(s)) {
         std::ostringstream m; m << "Goto target=" << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << m.str() << '\n';
         if (!lines_.contains(g->targetLine)) {

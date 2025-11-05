@@ -73,6 +73,7 @@ enum class TokenType {
     KwPoke,
     KwColor,
     KwChdir,
+    KwClear,
 
     // Operators / punctuation
     Plus,

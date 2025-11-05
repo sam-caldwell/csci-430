@@ -39,5 +39,18 @@ TEST(E2E, ChainCommand_ExecutesTrigDemo) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
-    ASSERT_NE(out.find("SIN(X)    COS(X)    TAN(X)"), std::string::npos);
+    const std::string expected =
+        "chain-test.bas starting\n"
+        "chain-level2.bas starting\n"
+        "initial state: X:42.000000 ,Y:1337.000000 ,Z:-1.000000\n"
+        "modified state: X:42.000000 ,Y:1336.000000 ,Z:-1.000000\n"
+        "chain-level3.bas starting\n"
+        "initial state: X:42.000000 ,Y:1336.000000 ,Z:-1.000000\n"
+        "chain-level4.bas starting\n"
+        "initial state: X:42.000000 ,Y:1336.000000 ,Z:-1.000000\n"
+        "999.000000\n"
+        " chain-level3-bas resumed\n"
+        "chain-level2.bas resumed\n"
+        "chain-test.bas resumed\n";
+    ASSERT_EQ(out, expected);
 }

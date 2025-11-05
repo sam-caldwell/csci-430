@@ -89,6 +89,7 @@ std::unique_ptr<Stmt> Parser::parseStatement() {
     if (match(TokenType::KwChdir)) { auto n = parseChdir(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwColor)) { auto n = parseColor(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwLine)) { consume(TokenType::KwInput, "INPUT"); auto n = parseLineInput(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwClear)) { auto n = parseClear(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwChain)) { auto n = parseChain(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwMerge)) { auto n = parseMerge(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwGoto)) {

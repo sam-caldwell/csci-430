@@ -210,6 +210,10 @@ private:
      *    drive CHAIN scoping behavior.
      */
     std::map<int, std::set<std::string>> commonBeforeLine_{};
+    // Snapshot of variables seen before each line (in source order)
+    std::map<int, std::set<std::string>> varsBeforeLine_{};
+    // Snapshot of arrays seen (DIM'd or referenced) before each line
+    std::map<int, std::set<std::string>> arraysBeforeLine_{};
     // DATA items as string literal ids in program order
     std::vector<int> dataLiteralIds_{};
 
@@ -252,6 +256,9 @@ private:
     // Declaration collection
     /** Collect declarations, variables, strings, and line ordering. */
     void collectDecls(const Program& program);
+    // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
+    void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string>& vars, std::set<std::string>& arrays);
+    void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string>& vars, std::set<std::string>& arrays);
     /** Collect variables/strings referenced by an expression. */
     void collectExprVars(const Expr* e);
     /** Collect variables/strings/COMMON from a statement (recursive). */

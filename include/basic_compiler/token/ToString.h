@@ -70,6 +70,7 @@ inline std::string to_string(const TokenType t) {
         case TokenType::KwPoke: return "POKE";
         case TokenType::KwColor: return "COLOR";
         case TokenType::KwChdir: return "CHDIR";
+        case TokenType::KwClear: return "CLEAR";
         case TokenType::Plus: return "+";
         case TokenType::Minus: return "-";
         case TokenType::Star: return "*";
