@@ -56,8 +56,14 @@ jobs:
       - name: Install dependencies (macOS)
         if: startsWith(matrix.os, 'macos')
         run: |
+          set -euxo pipefail
           brew update
-          brew install llvm ninja cmake || true
+          brew install llvm@17 ninja cmake || true
+          prefix=$(brew --prefix llvm@17)
+          echo "LLVM_PREFIX=${prefix}" >> "$GITHUB_ENV"
+          echo "PATH=${prefix}/bin:$PATH" >> "$GITHUB_ENV"
+          echo "CC=${prefix}/bin/clang" >> "$GITHUB_ENV"
+          echo "CXX=${prefix}/bin/clang++" >> "$GITHUB_ENV"
 
       - name: Build, lint and test
         env:
