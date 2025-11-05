@@ -21,10 +21,8 @@ struct ResumeStmt : ASTLeaf<NodeKind::ResumeStmt, Stmt> {
     Kind kind{Kind::Reexecute};
     int line{0}; // used only when kind==Line
     ResumeStmt() : ASTLeaf() {}
-    static ResumeStmt Reexec() { return ResumeStmt(); }
-    static ResumeStmt Next() { ResumeStmt r; r.kind = Kind::Next; return r; }
-    static ResumeStmt ToLine(int ln) { ResumeStmt r; r.kind = Kind::Line; r.line = ln; return r; }
+    explicit ResumeStmt(Kind k) : ASTLeaf(), kind(k) {}
+    ResumeStmt(Kind k, int ln) : ASTLeaf(), kind(k), line(ln) {}
 };
 
 } // namespace gwbasic
-
