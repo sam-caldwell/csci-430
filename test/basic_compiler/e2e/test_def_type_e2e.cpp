@@ -35,11 +35,14 @@ TEST(E2E, DEF_TYPE) {
         "50 PRINT A\n"
         "60 PRINT B\n"
         "70 END\n";
-    std::string ir = Compiler::compileString(src);
-    ASSERT_FALSE(ir.empty());
-
+    // Write to a temp file and compile via compileFile to align with file-based resolution
     std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_def_type";
     std::filesystem::create_directories(tmp);
+    std::filesystem::path bas = tmp / "program.bas";
+    { std::ofstream f(bas); f << src; }
+    std::string ir = Compiler::compileFile(bas.string().c_str());
+    ASSERT_FALSE(ir.empty());
+
     std::filesystem::path ll = tmp / "program.ll";
     std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
@@ -57,4 +60,3 @@ TEST(E2E, DEF_TYPE) {
     ASSERT_NE(out.find("ok\n"), std::string::npos);
     ASSERT_NE(out.find("5.000000\n"), std::string::npos);
 }
-
