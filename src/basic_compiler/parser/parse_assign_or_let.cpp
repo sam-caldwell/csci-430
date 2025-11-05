@@ -21,7 +21,8 @@ std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
     }
     if (!check(TokenType::Identifier)) throw ParseError("Expected variable name after LET");
     std::string name = peek().lexeme;
-    int l = peek().line, c = peek().col;
+    const int l = peek().line;
+    int c = peek().col;
     advance();
     // Array element assignment A(expr) = ...
     if (match(TokenType::LParen)) {

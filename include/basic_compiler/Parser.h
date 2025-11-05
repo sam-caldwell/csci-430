@@ -294,7 +294,7 @@ private:
     /** Parse CIRCLE x, y, r */
     std::unique_ptr<Stmt> parseCircle();
     /** Parse CLEAR */
-    std::unique_ptr<Stmt> parseClear();
+    std::unique_ptr<Stmt> parseClear() const;
     /**
      * Function: Parser::parseExpression
      * Purpose:

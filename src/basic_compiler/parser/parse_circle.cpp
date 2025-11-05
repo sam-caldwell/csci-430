@@ -28,7 +28,12 @@ std::unique_ptr<Stmt> Parser::parseCircle() {
     std::unique_ptr<Expr> color, start, end, aspect;
 
     auto canStartExpr = [&]() {
-        return !(check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile) || check(TokenType::Comma));
+        return !(
+            check(TokenType::NewLine) ||
+            check(TokenType::Colon) ||
+            check(TokenType::EndOfFile) ||
+            check(TokenType::Comma)
+        );
     };
     if (match(TokenType::Comma)) {
         // color or empty

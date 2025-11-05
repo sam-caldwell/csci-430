@@ -12,7 +12,7 @@ namespace gwbasic {
  * Outputs:
  *  - ClearStmt
  */
-std::unique_ptr<Stmt> Parser::parseClear() {
+std::unique_ptr<Stmt> Parser::parseClear() const {
     return make_node<ClearStmt>({peek().line, peek().col});
 }
 
