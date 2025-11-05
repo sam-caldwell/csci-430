@@ -171,6 +171,14 @@ private:
      *  - std::unique_ptr<Stmt>: Parsed statement node
      */
     std::unique_ptr<Stmt> parseStatement();
+
+    // Helpers used by parseStatement() to reduce complexity. These are
+    // intentionally declared private; unit tests may make them visible
+    // via test-only macros to validate behavior in isolation.
+    std::unique_ptr<Stmt> tryParseSpecialIdentifierStatement(const Token& startTok);
+    std::unique_ptr<Stmt> tryParseDefFamily(const Token& startTok);
+    std::unique_ptr<Stmt> tryParseGotoGosub(const Token& startTok);
+    std::unique_ptr<Stmt> tryParseOtherKeywords(const Token& startTok);
     /**
      * Function: Parser::parsePrint
      * Purpose:
