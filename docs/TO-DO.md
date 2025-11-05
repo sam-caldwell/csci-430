@@ -4,8 +4,7 @@ I NEED MORE RED BULLS!  Time to go to the store before we continue.
 
 ## Parser and Grammar Coverage
 
-- ON ERROR GOTO / RESUME: error trapping and nonlocal return forms (RESUME, RESUME NEXT, RESUME <line>).
-- STOP, SYSTEM: program termination variants distinct from END (semantic intent differs).
++ STOP, SYSTEM: program termination variants distinct from END (semantic intent differs).
 - MID$ assignment statement: MID$(s$, start[, len]) = expr$.
 - SWAP x, y: exchange variables and array elements (numeric and string variants).
 - ERASE array[, array...]: release arrays and reset descriptors.
@@ -20,6 +19,8 @@ I NEED MORE RED BULLS!  Time to go to the store before we continue.
   RMDIR, WIDTH, LOCATE, CLS, PSET, PRESET, LINE (graphics), PAINT, DRAW, VIEW/VIEW PRINT, WINDOW, BEEP/SOUND/PLAY, 
   KEY/KEYn/ON KEY, ON event variants, PEN/STRIG, TIMER ON/OFF, TRON/TROFF, CONT, LOAD/SAVE/NEW/DELETE/LIST/LLIST/AUTO/
   RENUM/EDIT/PCOPY, RESET, SHELL, ENVIRON, OUT, WAIT.
+- Add metrics for optimizations in semantics (algebraic simplifications, constant folding, etc.) and codegen 
+  optimizations.
 
 ## Lexer Gaps
 
