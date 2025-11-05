@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/EmitAssembly.h"
+#include "basic_compiler/Symbols.h"
 #include "basic_compiler/AsmUtils.h"
 #include "basic_compiler/TargetUtils.h"
 #include <cctype>
@@ -40,7 +41,7 @@ int emitAssembly(const std::filesystem::path &llTmp,
         auto srcName = std::filesystem::path(input).filename().string();
         std::string os = "unknown";
         std::string arch = triple;
-        if (auto dash = triple.find('-'); dash != std::string::npos) arch = triple.substr(0, dash);
+        if (auto dash = triple.find(gwbasic::Symbols::MINUS.first()); dash != std::string::npos) arch = triple.substr(0, dash);
         std::string lowerTriple = triple;
         for (auto &c: lowerTriple) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
         if (lowerTriple.find("linux") != std::string::npos) os = "linux";

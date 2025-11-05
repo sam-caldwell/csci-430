@@ -26,7 +26,7 @@ std::string Lexer::escapeForLog(const std::string& s) {
             case '"':  out += R"(\")";
                 break;
             default:
-                if (ch < CH_SPACE || ch == CH_DEL) {
+                if (ch < Symbols::SPACE.first() || ch == Symbols::DEL.first()) {
                     static constexpr char HEX[] = "0123456789ABCDEF";
                     out += "\\x";
                     const auto b = static_cast<std::byte>(ch);

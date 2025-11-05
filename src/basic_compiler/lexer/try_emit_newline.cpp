@@ -12,12 +12,11 @@ namespace gwbasic {
  *  - bool: true if a newline was consumed and emitted; false otherwise
  */
 bool Lexer::tryEmitNewline(std::vector<Token>& out) {
-    if (peek() != CH_LF) return false;
+    if (peek() != Symbols::LF.first()) return false;
     advance();
-    emitFixed<TokenType::NewLine>(out, STR_LF, line_ - 1, 1);
+    emitFixed<TokenType::NewLine>(out, Symbols::LF, line_ - 1, 1);
     bol_ = true;
     return true;
 }
 
 } // namespace gwbasic
-

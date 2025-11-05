@@ -23,14 +23,14 @@ void CodeGenerator::ensureVarAllocated(std::ostringstream& out, const std::strin
     const bool isStr = isStringVarNameCG(name);
     if (isStr) {
         std::string ir1 = std::format("  {} = alloca ptr", a);
-        out << ir1 << STR_LF; log() << "line " << currentLine_ << " VarAllocStr(" << name << ") -> " << ir1 << CH_LF;
+        out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " VarAllocStr(" << name << ") -> " << ir1 << Symbols::LF;
         std::string ir2 = std::format("  store ptr null, ptr {}", a);
-        out << ir2 << STR_LF; log() << "line " << currentLine_ << " InitNullStr(" << name << ") -> " << ir2 << CH_LF;
+        out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InitNullStr(" << name << ") -> " << ir2 << Symbols::LF;
     } else {
         std::string ir1 = std::format("  {} = alloca double", a);
-        out << ir1 << STR_LF; log() << "line " << currentLine_ << " VarAlloc(" << name << ") -> " << ir1 << CH_LF;
+        out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " VarAlloc(" << name << ") -> " << ir1 << Symbols::LF;
         std::string ir2 = std::format("  store double 0.0, ptr {}", a);
-        out << ir2 << STR_LF; log() << "line " << currentLine_ << " InitZero(" << name << ") -> " << ir2 << CH_LF;
+        out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InitZero(" << name << ") -> " << ir2 << Symbols::LF;
     }
 }
 

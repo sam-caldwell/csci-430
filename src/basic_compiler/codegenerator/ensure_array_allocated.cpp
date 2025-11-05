@@ -10,8 +10,8 @@ void CodeGenerator::ensureArrayAllocated(std::ostringstream& out, const std::str
     std::string a = "%"; a += name; a += "_arr";
     arrayAllocaName_[name] = a;
     std::string ir = std::format("  {} = alloca [{} x double]", a, length);
-    out << ir << STR_LF;
-    log() << "line " << currentLine_ << " ArrayAlloc(" << name << ") -> " << ir << CH_LF;
+    out << ir << Symbols::LF;
+    log() << "line " << currentLine_ << " ArrayAlloc(" << name << ") -> " << ir << Symbols::LF;
 }
 
 } // namespace gwbasic

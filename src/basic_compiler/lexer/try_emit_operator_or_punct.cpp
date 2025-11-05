@@ -13,28 +13,28 @@ namespace gwbasic {
  */
 bool Lexer::tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, const char c) {
     switch (c) {
-        case SYM_PLUS:       advance(); emitFixed<TokenType::Plus>(out, "+", line, col); break;
-        case SYM_MINUS:      advance(); emitFixed<TokenType::Minus>(out, "-", line, col); break;
-        case SYM_STAR:       advance(); emitFixed<TokenType::Star>(out, "*", line, col); break;
-        case SYM_SLASH:      advance(); emitFixed<TokenType::Slash>(out, "/", line, col); break;
-        case SYM_LPAREN:     advance(); emitFixed<TokenType::LParen>(out, "(", line, col); break;
-        case SYM_RPAREN:     advance(); emitFixed<TokenType::RParen>(out, ")", line, col); break;
-        case SYM_COLON:      advance(); emitFixed<TokenType::Colon>(out, ":", line, col); break;
-        case SYM_COMMA:      advance(); emitFixed<TokenType::Comma>(out, ",", line, col); break;
-        case SYM_HASH:       advance(); emitFixed<TokenType::Hash>(out, "#", line, col); break;
-        case SYM_EQUALS:     advance(); emitFixed<TokenType::Assign>(out, "=", line, col); break;
-        case SYM_LESS_THAN:
+        case Symbols::PLUS.first():       advance(); emitFixed<TokenType::Plus>(out, "+", line, col); break;
+        case Symbols::MINUS.first():      advance(); emitFixed<TokenType::Minus>(out, "-", line, col); break;
+        case Symbols::STAR.first():       advance(); emitFixed<TokenType::Star>(out, "*", line, col); break;
+        case Symbols::SLASH.first():      advance(); emitFixed<TokenType::Slash>(out, "/", line, col); break;
+        case Symbols::LPAREN.first():     advance(); emitFixed<TokenType::LParen>(out, "(", line, col); break;
+        case Symbols::RPAREN.first():     advance(); emitFixed<TokenType::RParen>(out, ")", line, col); break;
+        case Symbols::COLON.first():      advance(); emitFixed<TokenType::Colon>(out, ":", line, col); break;
+        case Symbols::COMMA.first():      advance(); emitFixed<TokenType::Comma>(out, ",", line, col); break;
+        case Symbols::HASH.first():       advance(); emitFixed<TokenType::Hash>(out, "#", line, col); break;
+        case Symbols::EQUALS.first():     advance(); emitFixed<TokenType::Assign>(out, "=", line, col); break;
+        case Symbols::LESS_THAN.first():
             advance();
-            if (peek() == SYM_GREATER_THAN) {
+            if (peek() == Symbols::GREATER_THAN.first()) {
                 advance(); emitFixed<TokenType::NotEqual>(out, "<>", line, col);
             }
             else {
-                emitPairOrSingle<TokenType::Less, TokenType::LessEqual, SYM_EQUALS>(out, "<", "<=", line, col);
+                emitPairOrSingle<TokenType::Less, TokenType::LessEqual, Symbols::EQUALS.first()>(out, "<", "<=", line, col);
             }
             break;
-        case SYM_GREATER_THAN:
+        case Symbols::GREATER_THAN.first():
             advance();
-            emitPairOrSingle<TokenType::Greater, TokenType::GreaterEqual, SYM_EQUALS>(out, ">", ">=", line, col);
+            emitPairOrSingle<TokenType::Greater, TokenType::GreaterEqual, Symbols::EQUALS.first()>(out, ">", ">=", line, col);
             break;
         default:
             return false;

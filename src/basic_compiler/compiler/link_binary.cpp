@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/LinkBinary.h"
+#include "basic_compiler/Symbols.h"
 #include <sstream>
 
 /*
@@ -30,7 +31,7 @@ int linkBinary(const std::filesystem::path &llTmp, const std::string &outBIN, co
         // Defer SDK path resolution to xcrun at runtime (works on GitHub macOS runners).
         oss << "-isysroot $(xcrun --sdk macosx --show-sdk-path) ";
     }
-    oss << '"' << llTmp.string() << "\" -o \"" << outBIN << "\"";
+    oss << gwbasic::Symbols::DOUBLE_QUOTE << llTmp.string() << "\" -o \"" << outBIN << "\"";
 #if defined(__APPLE__)
     // libSystem provides libm; no extra flag needed
 #else

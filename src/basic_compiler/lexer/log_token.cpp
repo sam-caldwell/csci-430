@@ -18,18 +18,18 @@ namespace gwbasic {
 void Lexer::logToken(const Token& t) {
     // Use a chained logging pattern: single stream chain for the whole line
     auto& L = log();
-    L << "token" << CH_SPACE << to_string(t.type) << CH_SPACE << "@" << CH_SPACE << t.line << ":" << t.col;
+    L << "token" << Symbols::SPACE.first() << to_string(t.type) << Symbols::SPACE.first() << "@" << Symbols::SPACE.first() << t.line << ":" << t.col;
     switch (t.type) {
         case TokenType::EndOfFile:
         case TokenType::NewLine:
             break;
         default: {
             const std::string esc = escapeForLog(t.lexeme);
-            L << CH_SPACE << STR_DBL_QUOTE << esc << STR_DBL_QUOTE;
+            L << Symbols::SPACE.first() << Symbols::DOUBLE_QUOTE << esc << Symbols::DOUBLE_QUOTE;
             break;
         }
     }
-    L << '\n';
+    L << Symbols::LF;
 }
 
 } // namespace gwbasic

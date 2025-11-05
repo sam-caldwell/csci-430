@@ -137,7 +137,13 @@ private:
      * Outputs:
      *  - bool: true if matched and consumed; false otherwise
      */
-    bool match(const TokenType t) { if (check(t)) { advance(); return true; } return false; }
+    bool match(const TokenType t) {
+        if (check(t)) {
+            advance();
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Function: Parser::consume

@@ -19,7 +19,7 @@ void CodeGenerator::collectExprVars(const Expr* e) {
     if (!e) return;
     if (const auto v = dyn_cast<const VarExpr>(e)) {
         variables_.insert(v->name);
-        logSem() << "VarRef " << v->name << " @ " << v->pos.line << ':' << v->pos.col << CH_LF;
+        logSem() << "VarRef " << v->name << " @ " << v->pos.line << ':' << v->pos.col << Symbols::LF;
         return;
     }
     if (const auto b = dyn_cast<const BinaryExpr>(e)) {

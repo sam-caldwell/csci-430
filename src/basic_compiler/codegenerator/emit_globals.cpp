@@ -20,18 +20,18 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
     //  - For non-last items, do not append any extra spacing. Any spacing
     //    should come from the program's string literals so tests can assert
     //    exact output (avoids unexpected double spaces).
-    out << "@.fmt_num = private unnamed_addr constant [4 x i8] c\"%f\\0A\\00\"" << STR_LF
-        << "@.fmt_str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"" << STR_LF
-        << "@.fmt_num_sp = private unnamed_addr constant [4 x i8] c\"%f\\20\\00\"" << STR_LF // numeric non-last: add one space
-        << "@.fmt_num_ns = private unnamed_addr constant [3 x i8] c\"%f\\00\"" << STR_LF // numeric non-last: no suffix
-        << "@.fmt_str_sp = private unnamed_addr constant [3 x i8] c\"%s\\00\"" << STR_LF // string non-last: no extra space
-        << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"" << STR_LF
-        << "@.mode_r = private unnamed_addr constant [2 x i8] c\"r\\00\"" << STR_LF
-        << "@.mode_w = private unnamed_addr constant [2 x i8] c\"w\\00\"" << STR_LF
-        << "@.mode_rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"" << STR_LF
-        << "@.mode_wb = private unnamed_addr constant [3 x i8] c\"wb\\00\"" << STR_LF
-        << "@.call_msg = private unnamed_addr constant [8 x i8] c\"CALLED\\0A\\00\"" << STR_LF
-        << "@gwb_last_rnd = global double 0.0" << STR_LF; // RNG state: last random value for RND(0)
+    out << "@.fmt_num = private unnamed_addr constant [4 x i8] c\"%f\\0A\\00\"" << Symbols::LF
+        << "@.fmt_str = private unnamed_addr constant [4 x i8] c\"%s\\0A\\00\"" << Symbols::LF
+        << "@.fmt_num_sp = private unnamed_addr constant [4 x i8] c\"%f\\20\\00\"" << Symbols::LF // numeric non-last: add one space
+        << "@.fmt_num_ns = private unnamed_addr constant [3 x i8] c\"%f\\00\"" << Symbols::LF // numeric non-last: no suffix
+        << "@.fmt_str_sp = private unnamed_addr constant [3 x i8] c\"%s\\00\"" << Symbols::LF // string non-last: no extra space
+        << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"" << Symbols::LF
+        << "@.mode_r = private unnamed_addr constant [2 x i8] c\"r\\00\"" << Symbols::LF
+        << "@.mode_w = private unnamed_addr constant [2 x i8] c\"w\\00\"" << Symbols::LF
+        << "@.mode_rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"" << Symbols::LF
+        << "@.mode_wb = private unnamed_addr constant [3 x i8] c\"wb\\00\"" << Symbols::LF
+        << "@.call_msg = private unnamed_addr constant [8 x i8] c\"CALLED\\0A\\00\"" << Symbols::LF
+        << "@gwb_last_rnd = global double 0.0" << Symbols::LF; // RNG state: last random value for RND(0)
     for (const auto&[fst, snd] : strLiteralId_) {
         const std::string& s = fst;
         const int id = snd;
@@ -39,45 +39,45 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         const size_t N = s.size() + 1;
         out << globalStringName(id)
             << " = private unnamed_addr constant [" << N << " x i8] c\""
-            << esc << "\\00\"" << STR_LF;
+            << esc << "\\00\"" << Symbols::LF;
         // Log discovery of string literals by streaming directly
-        log() << "emitGlobals: literal " << globalStringName(id) << " from StringExpr \"" << s << "\"" << CH_LF;
+        log() << "emitGlobals: literal " << globalStringName(id) << " from StringExpr \"" << s << "\"" << Symbols::LF;
     }
-    out << STR_LF;
+    out << Symbols::LF;
     // SGR printf format for COLOR statement: "%c[%dm\0"; emit as bytes
-    out << "@.fmt_sgr = private unnamed_addr constant [7 x i8] [i8 37, i8 99, i8 91, i8 37, i8 100, i8 109, i8 0]" << STR_LF
+    out << "@.fmt_sgr = private unnamed_addr constant [7 x i8] [i8 37, i8 99, i8 91, i8 37, i8 100, i8 109, i8 0]" << Symbols::LF
         // PC palette to ANSI SGR mapping (foreground)
-        << "@.sgr_fg_tbl = private unnamed_addr constant [16 x i32] [i32 30, i32 34, i32 32, i32 36, i32 31, i32 35, i32 33, i32 37, i32 90, i32 94, i32 92, i32 96, i32 91, i32 95, i32 93, i32 97]" << STR_LF
+        << "@.sgr_fg_tbl = private unnamed_addr constant [16 x i32] [i32 30, i32 34, i32 32, i32 36, i32 31, i32 35, i32 33, i32 37, i32 90, i32 94, i32 92, i32 96, i32 91, i32 95, i32 93, i32 97]" << Symbols::LF
         // PC palette to ANSI SGR mapping (background)
-        << "@.sgr_bg_tbl = private unnamed_addr constant [16 x i32] [i32 40, i32 44, i32 42, i32 46, i32 41, i32 45, i32 43, i32 47, i32 100, i32 104, i32 102, i32 106, i32 101, i32 105, i32 103, i32 107]" << STR_LF << STR_LF;
+        << "@.sgr_bg_tbl = private unnamed_addr constant [16 x i32] [i32 40, i32 44, i32 42, i32 46, i32 41, i32 45, i32 43, i32 47, i32 100, i32 104, i32 102, i32 106, i32 101, i32 105, i32 103, i32 107]" << Symbols::LF << Symbols::LF;
     // Graphics environment variables and readiness flag
-    out << "@.env_display = private unnamed_addr constant [8 x i8] c\"DISPLAY\\00\"" << STR_LF
-        << "@.env_wayland = private unnamed_addr constant [16 x i8] c\"WAYLAND_DISPLAY\\00\"" << STR_LF
-        << "@gwb_gfx_ready = global i1 false" << STR_LF << STR_LF;
+    out << "@.env_display = private unnamed_addr constant [8 x i8] c\"DISPLAY\\00\"" << Symbols::LF
+        << "@.env_wayland = private unnamed_addr constant [16 x i8] c\"WAYLAND_DISPLAY\\00\"" << Symbols::LF
+        << "@gwb_gfx_ready = global i1 false" << Symbols::LF << Symbols::LF;
     // Virtual screen state for SCREEN(row,col[,z])
     // - 80x25 character buffer, row-major, 0-based indices internally
     // - current cursor position used by PRINT mirroring logic
-    out << "@gwb_screen = internal global [2000 x i8] zeroinitializer" << STR_LF
-        << "@gwb_cur_row = global i32 0" << STR_LF
-        << "@gwb_cur_col = global i32 0" << STR_LF
+    out << "@gwb_screen = internal global [2000 x i8] zeroinitializer" << Symbols::LF
+        << "@gwb_cur_row = global i32 0" << Symbols::LF
+        << "@gwb_cur_col = global i32 0" << Symbols::LF
         // Shared formatting scratch buffer for mirroring printf output to screen
-        << "@gwb_sbuf = internal global [256 x i8] zeroinitializer" << STR_LF << STR_LF;
+        << "@gwb_sbuf = internal global [256 x i8] zeroinitializer" << Symbols::LF << Symbols::LF;
     // Emit DATA/READ backing store if present (array of pointers to literals) and an index
     {
         // Always provide an index variable; table may be size 0
-        out << "@gwb_data_idx = global i32 0" << STR_LF;
+        out << "@gwb_data_idx = global i32 0" << Symbols::LF;
         const size_t N = dataLiteralIds_.size();
         out << "@gwb_data = internal constant [" << N << " x ptr] [";
         for (size_t i = 0; i < N; ++i) {
             if (i) out << ", ";
             out << "ptr " << globalStringName(dataLiteralIds_[i]);
         }
-        out << "]" << STR_LF << STR_LF;
+        out << "]" << Symbols::LF << Symbols::LF;
     }
 
     // Emulated memory and current segment
-    out << "@gwb_mem = internal global [1048576 x i8] zeroinitializer" << STR_LF
-        << "@gwb_seg = global i32 0" << STR_LF << STR_LF;
+    out << "@gwb_mem = internal global [1048576 x i8] zeroinitializer" << Symbols::LF
+        << "@gwb_seg = global i32 0" << Symbols::LF << Symbols::LF;
 }
 
 } // namespace gwbasic

@@ -21,7 +21,7 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
     // Support string vs string comparison via strcmp; otherwise numeric fcmp
     auto isStr = [&](const Expr* e, const auto& self) -> bool {
         if (isa<StringExpr>(e)) return true;
-        if (const auto vv = dyn_cast<VarExpr>(e)) return !vv->name.empty() && vv->name.back() == CH_DOLLARSIGN;
+        if (const auto vv = dyn_cast<VarExpr>(e)) return !vv->name.empty() && vv->name.back() == Symbols::DOLLARSIGN.first();
         if (const auto bb = dyn_cast<BinaryExpr>(e)) return (bb->op == BinaryOp::Add) && (self(bb->lhs.get(), self) || self(bb->rhs.get(), self));
         return false;
     };
@@ -32,8 +32,8 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
         std::string call = nextTemp();
         {
             std::string ir = std::format("  {} = call i32 @strcmp(ptr {}, ptr {})", call, ls, rs);
-            out << ir << STR_LF;
-            log() << "line " << currentLine_ << " StrCmp -> " << ir << CH_LF;
+            out << ir << Symbols::LF;
+            log() << "line " << currentLine_ << " StrCmp -> " << ir << Symbols::LF;
         }
         std::string res = nextTemp();
         const char* pred = nullptr;
@@ -49,8 +49,8 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
         {
             std::string rhs = "0"; //Simplified this from something I can't remember why I did it.
             std::string ir = std::format("  {} = icmp {} i32 {}, 0", res, pred, call);
-            out << ir << STR_LF;
-            log() << "line " << currentLine_ << " StrCmp icmp -> " << ir << CH_LF;
+            out << ir << Symbols::LF;
+            log() << "line " << currentLine_ << " StrCmp icmp -> " << ir << Symbols::LF;
         }
         return res;
     } else {
@@ -69,8 +69,8 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
         }
         {
             std::string ir = std::format("  {} = fcmp {} double {}, {}", res, pred, lhsReg, rhsReg);
-            out << ir << STR_LF;
-            log() << "line " << currentLine_ << " Compare -> " << ir << CH_LF;
+            out << ir << Symbols::LF;
+            log() << "line " << currentLine_ << " Compare -> " << ir << Symbols::LF;
         }
         return res;
     }

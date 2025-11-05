@@ -8,7 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include "logger/Logger.h"
-#include "basic_compiler/Chars.h"
+#include "basic_compiler/Symbols.h"
 
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/RTTI.h"
@@ -316,7 +316,7 @@ private:
     }
     // Helper: determine if a variable name is string-typed
     bool isStringVarNameCG(const std::string& name) const {
-        if (!name.empty() && name.back() == CH_DOLLARSIGN) return true;
+        if (!name.empty() && name.back() == Symbols::DOLLARSIGN.first()) return true;
         return semStringVariables_.contains(name);
     }
 

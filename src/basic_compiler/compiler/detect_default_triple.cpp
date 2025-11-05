@@ -1,6 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/DetectDefaultTriple.h"
 #include <cstdio>
+#include "basic_compiler/Symbols.h"
 #include <string>
 
 /*
@@ -22,8 +23,8 @@ std::string detectDefaultTriple(const std::string& clangPath) {
         while (const size_t n = fread(buf, 1, sizeof(buf), pipe)) out.append(buf, buf + n);
         pclose(pipe);
         if (const auto pos = out.find("\"-triple\""); pos != std::string::npos) {
-            if (const auto q1 = out.find('"', pos + 9); q1 != std::string::npos) {
-                if (const auto q2 = out.find('"', q1 + 1); q2 != std::string::npos && q2 > q1 + 1) {
+            if (const auto q1 = out.find(gwbasic::Symbols::DOUBLE_QUOTE.first(), pos + 9); q1 != std::string::npos) {
+                if (const auto q2 = out.find(gwbasic::Symbols::DOUBLE_QUOTE.first(), q1 + 1); q2 != std::string::npos && q2 > q1 + 1) {
                     triple = out.substr(q1 + 1, q2 - (q1 + 1));
                 }
             }

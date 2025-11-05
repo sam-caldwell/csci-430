@@ -5,6 +5,7 @@
 #include "basic_compiler/ast/UnaryExpr.h"
 #include "basic_compiler/ast/BinaryExpr.h"
 #include "basic_compiler/ast/BinaryOp.h"
+#include "basic_compiler/Symbols.h"
 
 namespace gwbasic {
 
@@ -24,8 +25,8 @@ bool SemanticAnalyzer::constEval(const Expr* e, double& out) {
     if (const auto n = dyn_cast<const NumberExpr>(e)) { out = n->value; return true; }
     if (const auto u = dyn_cast<const UnaryExpr>(e)) {
         if (double v; constEval(u->inner.get(), v)) {
-            if (u->op == '+') { out = v; return true; }
-            if (u->op == '-') { out = -v; return true; }
+            if (u->op == Symbols::PLUS.first()) { out = v; return true; }
+            if (u->op == Symbols::MINUS.first()) { out = -v; return true; }
         }
         return false;
     }

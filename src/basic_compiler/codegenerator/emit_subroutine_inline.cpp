@@ -23,7 +23,7 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
      */
     int startIdx = -1;
     for (size_t i = 0; i < lineNumbers_.size(); ++i) if (lineNumbers_[i] == targetLine) { startIdx = static_cast<int>(i); break; }
-    if (startIdx < 0) { out << entryLabel << ":" << STR_LF; out << "  br label %" << returnLabel << STR_LF; return; }
+    if (startIdx < 0) { out << entryLabel << ":" << Symbols::LF; out << "  br label %" << returnLabel << Symbols::LF; return; }
     int localContCounter = 0;
     std::string currLabel = entryLabel;
     for (int idx = startIdx; idx < static_cast<int>(lineNumbers_.size()); ++idx) {
@@ -31,16 +31,16 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
         const Line* line = findLine(ln);
         if (!line) break;
         currentLine_ = ln;
-        out << currLabel << ":" << STR_LF;
-        log() << "begin subroutine line " << currentLine_ << CH_LF;
+        out << currLabel << ":" << Symbols::LF;
+        log() << "begin subroutine line " << currentLine_ << Symbols::LF;
         bool terminated = false;
         for (const auto& st : line->statements) {
             if (auto asg = dyn_cast<AssignStmt>(st.get())) {
                 std::string val = emitExpr(out, asg->value.get(), entryLabel);
                 std::string ir;
-            if (!asg->name.empty() && asg->name.back() == CH_DOLLARSIGN) { ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]); }
+            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) { ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]); }
             else { ir = std::format("  store double {}, ptr {}", val, varAllocaName_[asg->name]); }
-            out << ir << STR_LF; log() << "line " << currentLine_ << " AssignStmt -> " << ir << CH_LF;
+            out << ir << Symbols::LF; log() << "line " << currentLine_ << " AssignStmt -> " << ir << Symbols::LF;
             } else if (auto pr = dyn_cast<PrintStmt>(st.get())) {
                 std::vector<const Expr*> items;
                 if (pr->value) items.push_back(pr->value.get());
@@ -50,57 +50,57 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
                     const Expr* v = items[pi];
                     auto isStr = [&](const Expr* e, const auto& self) -> bool {
                         if (isa<StringExpr>(e)) return true;
-                    if (auto vv = dyn_cast<VarExpr>(e)) return !vv->name.empty() && vv->name.back() == CH_DOLLARSIGN;
+                    if (auto vv = dyn_cast<VarExpr>(e)) return !vv->name.empty() && vv->name.back() == Symbols::DOLLARSIGN.first();
                         if (auto bb = dyn_cast<BinaryExpr>(e)) return (bb->op == BinaryOp::Add) && (self(bb->lhs.get(), self) || self(bb->rhs.get(), self));
                         return false;
                     };
                     if (isStr(v, isStr)) {
                         auto sptr = emitExpr(out, v, entryLabel);
                         std::string fmt = nextTemp();
-                        { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (last ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << STR_LF; log() << "line " << currentLine_ << " PrintStmt -> " << ir2 << CH_LF; }
-                        { std::string ir3 = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmt, sptr); out << ir3 << STR_LF; log() << "line " << currentLine_ << " PrintStmt -> " << ir3 << CH_LF; }
+                        { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (last ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " PrintStmt -> " << ir2 << Symbols::LF; }
+                        { std::string ir3 = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmt, sptr); out << ir3 << Symbols::LF; log() << "line " << currentLine_ << " PrintStmt -> " << ir3 << Symbols::LF; }
                     } else {
                         auto val = emitExpr(out, v, entryLabel);
                         std::string fmt = nextTemp();
-                        { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (last ? "@.fmt_num" : "@.fmt_num_sp")); out << ir1 << STR_LF; log() << "line " << currentLine_ << " PrintStmt -> " << ir1 << CH_LF; }
-                        { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", fmt, val); out << ir2 << STR_LF; log() << "line " << currentLine_ << " PrintStmt -> " << ir2 << CH_LF; }
+                        { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (last ? "@.fmt_num" : "@.fmt_num_sp")); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " PrintStmt -> " << ir1 << Symbols::LF; }
+                        { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", fmt, val); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " PrintStmt -> " << ir2 << Symbols::LF; }
                     }
                 }
             } else if (auto ins = dyn_cast<InputStmt>(st.get())) {
                 std::string fmt = nextTemp();
                 std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt);
-                out << ir1 << STR_LF; log() << "line " << currentLine_ << " InputStmt -> " << ir1 << CH_LF;
+                out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " InputStmt -> " << ir1 << Symbols::LF;
                 std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, varAllocaName_[ins->name]);
-                out << ir2 << STR_LF; log() << "line " << currentLine_ << " InputStmt -> " << ir2 << CH_LF;
+                out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InputStmt -> " << ir2 << Symbols::LF;
             } else if (auto is = dyn_cast<IfStmt>(st.get())) {
                 auto be = dyn_cast<BinaryExpr>(is->cond.get());
                 if (!be || (be->op != BinaryOp::Eq && be->op != BinaryOp::Ne && be->op != BinaryOp::Lt && be->op != BinaryOp::Le && be->op != BinaryOp::Gt && be->op != BinaryOp::Ge)) throw CodeGenError("IF condition must be a comparison");
                 std::string cond = emitComparison(out, be);
                 std::string contLbl = entryLabel; contLbl += "_cont"; contLbl += std::to_string(++localContCounter);
                 std::string ir = std::format("  br i1 {}, label %{}, label %{}", cond, lineLabelName(is->targetLine), contLbl);
-                out << ir << STR_LF; log() << "line " << currentLine_ << " IfStmt -> " << ir << CH_LF;
-                out << contLbl << ":" << STR_LF;
+                out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfStmt -> " << ir << Symbols::LF;
+                out << contLbl << ":" << Symbols::LF;
             } else if (auto gt = dyn_cast<GotoStmt>(st.get())) {
                 std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine));
-                out << ir << STR_LF; log() << "line " << currentLine_ << " GotoStmt -> " << ir << CH_LF;
+                out << ir << Symbols::LF; log() << "line " << currentLine_ << " GotoStmt -> " << ir << Symbols::LF;
                 terminated = true;
                 break;
             } else if (auto gs = dyn_cast<GosubStmt>(st.get())) {
                 std::string cont = entryLabel; cont += "_gosub_cont"; cont += std::to_string(++localContCounter);
                 std::string ent = entryLabel; ent += "_gosub_entry"; ent += std::to_string(localContCounter);
-                { std::string ir = std::format("  br label %{}", ent); out << ir << STR_LF; log() << "line " << currentLine_ << " GosubStmt -> " << ir << CH_LF; }
+                { std::string ir = std::format("  br label %{}", ent); out << ir << Symbols::LF; log() << "line " << currentLine_ << " GosubStmt -> " << ir << Symbols::LF; }
                 emitSubroutineInline(out, gs->targetLine, ent, cont);
-                out << cont << ":" << STR_LF;
+                out << cont << ":" << Symbols::LF;
             } else if (auto fs = dyn_cast<ForStmt>(st.get())) {
                 emitFor(out, fs, entryLabel, localContCounter);
             } else if (isa<ReturnStmt>(st.get())) {
                 std::string ir = std::format("  br label %{}", returnLabel);
-                out << ir << STR_LF; log() << "line " << currentLine_ << " ReturnStmt -> " << ir << CH_LF;
+                out << ir << Symbols::LF; log() << "line " << currentLine_ << " ReturnStmt -> " << ir << Symbols::LF;
                 terminated = true;
                 break;
             } else if (isa<EndStmt>(st.get())) {
                 std::string ir = std::format("  br label %exit");
-                out << ir << STR_LF; log() << "line " << currentLine_ << " EndStmt -> " << ir << CH_LF;
+                out << ir << Symbols::LF; log() << "line " << currentLine_ << " EndStmt -> " << ir << Symbols::LF;
                 terminated = true;
                 break;
             } else {
@@ -113,8 +113,8 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
                 std::string label = entryLabel; label += "_n"; label += std::to_string(idx - startIdx + 1);
                 currLabel = std::move(label);
             }
-            { std::string ir = std::format("  br label %{}", currLabel); out << ir << STR_LF; log() << "line " << currentLine_ << " fallthrough -> " << ir << CH_LF; }
-        } else { out << std::format("  br label %{}", returnLabel) << STR_LF; return; }
+            { std::string ir = std::format("  br label %{}", currLabel); out << ir << Symbols::LF; log() << "line " << currentLine_ << " fallthrough -> " << ir << Symbols::LF; }
+        } else { out << std::format("  br label %{}", returnLabel) << Symbols::LF; return; }
     }
 }
 

@@ -34,21 +34,21 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
     std::string cond = emitComparison(out, be);
     if (!ib->elseBody.empty()) {
         std::string br = "  br i1 "; br += cond; br += ", label %"; br += thenLbl; br += ", label %"; br += elseLbl;
-        out << br << STR_LF; log() << "line " << currentLine_ << " IfBlock -> " << br << CH_LF;
+        out << br << Symbols::LF; log() << "line " << currentLine_ << " IfBlock -> " << br << Symbols::LF;
     } else {
         std::string br = "  br i1 "; br += cond; br += ", label %"; br += thenLbl; br += ", label %"; br += endLbl;
-        out << br << STR_LF; log() << "line " << currentLine_ << " IfBlock -> " << br << CH_LF;
+        out << br << Symbols::LF; log() << "line " << currentLine_ << " IfBlock -> " << br << Symbols::LF;
     }
 
     // THEN body
-    out << thenLbl << ":" << STR_LF;
+    out << thenLbl << ":" << Symbols::LF;
     for (const auto& s : ib->thenBody) {
         if (auto asg = dyn_cast<AssignStmt>(s.get())) {
             std::string val = emitExpr(out, asg->value.get(), currLineLabel);
             std::string ir;
-            if (!asg->name.empty() && asg->name.back() == CH_DOLLARSIGN) { ir = "  store ptr "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name]; }
+            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) { ir = "  store ptr "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name]; }
             else { ir = "  store double "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name]; }
-            out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock then Assign -> " << ir << CH_LF;
+            out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Assign -> " << ir << Symbols::LF;
         } else if (auto pr = dyn_cast<PrintStmt>(s.get())) {
             std::vector<const Expr*> items; if (pr->value) items.push_back(pr->value.get()); for (const auto& v : pr->more) items.push_back(v.get());
             for (size_t pi = 0; pi < items.size(); ++pi) {
@@ -56,30 +56,30 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                 const Expr* v = items[pi];
                 auto isStr = [&](const Expr* e, const auto& self) -> bool {
                     if (isa<StringExpr>(e)) return true;
-                    if (auto vv = dyn_cast<VarExpr>(e)) return !vv->name.empty() && vv->name.back() == CH_DOLLARSIGN;
+                    if (auto vv = dyn_cast<VarExpr>(e)) return !vv->name.empty() && vv->name.back() == Symbols::DOLLARSIGN.first();
                     if (auto bb = dyn_cast<BinaryExpr>(e)) return (bb->op == BinaryOp::Add) && (self(bb->lhs.get(), self) || self(bb->rhs.get(), self));
                     return false;
                 };
                 if (isStr(v, isStr)) {
                     auto sptr = emitExpr(out, v, currLineLabel);
                     std::string fmt = nextTemp();
-                    { std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr "; ir2 += (last ? "@.fmt_str" : "@.fmt_str_sp"); ir2 += ", i64 0"; out << ir2 << STR_LF; log() << "line " << currentLine_ << " IfBlock then Print -> " << ir2 << CH_LF; }
-                    { std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")"; out << ir3 << STR_LF; log() << "line " << currentLine_ << " IfBlock then Print -> " << ir3 << CH_LF; }
+                    { std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr "; ir2 += (last ? "@.fmt_str" : "@.fmt_str_sp"); ir2 += ", i64 0"; out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Print -> " << ir2 << Symbols::LF; }
+                    { std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")"; out << ir3 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Print -> " << ir3 << Symbols::LF; }
                 } else {
                     auto val = emitExpr(out, v, currLineLabel);
                     std::string fmt = nextTemp();
-                    { std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += (last ? "@.fmt_num" : "@.fmt_num_sp"); ir1 += ", i64 0"; out << ir1 << STR_LF; log() << "line " << currentLine_ << " IfBlock then Print -> " << ir1 << CH_LF; }
-                    { std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")"; out << ir2 << STR_LF; log() << "line " << currentLine_ << " IfBlock then Print -> " << ir2 << CH_LF; }
+                    { std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += (last ? "@.fmt_num" : "@.fmt_num_sp"); ir1 += ", i64 0"; out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Print -> " << ir1 << Symbols::LF; }
+                    { std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")"; out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Print -> " << ir2 << Symbols::LF; }
                 }
             }
         } else if (auto aaset = dyn_cast<ArrayAssignStmt>(s.get())) {
             const int len = arraySizes_[aaset->name]; ensureArrayAllocated(out, aaset->name, len);
             std::string base = arrayAllocaName_[aaset->name];
             std::string idxReg = emitExpr(out, aaset->index.get(), currLineLabel);
-            std::string idxI64 = nextTemp(); { std::string ir = "  "; ir += idxI64; ir += " = fptosi double "; ir += idxReg; ir += " to i64"; out << ir << STR_LF; }
-            std::string elem = nextTemp(); { std::string ir = "  "; ir += elem; ir += " = getelementptr inbounds ["; ir += std::to_string(len); ir += " x double], ptr "; ir += base; ir += ", i64 0, i64 "; ir += idxI64; out << ir << STR_LF; }
+            std::string idxI64 = nextTemp(); { std::string ir = "  "; ir += idxI64; ir += " = fptosi double "; ir += idxReg; ir += " to i64"; out << ir << Symbols::LF; }
+            std::string elem = nextTemp(); { std::string ir = "  "; ir += elem; ir += " = getelementptr inbounds ["; ir += std::to_string(len); ir += " x double], ptr "; ir += base; ir += ", i64 0, i64 "; ir += idxI64; out << ir << Symbols::LF; }
             std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
-            { std::string ir = std::format("  store double {}, ptr {}", val, elem); out << ir << STR_LF; }
+            { std::string ir = std::format("  store double {}, ptr {}", val, elem); out << ir << Symbols::LF; }
         } else if (auto fs = dyn_cast<ForStmt>(s.get())) {
             emitFor(out, fs, currLineLabel, localCounter);
         } else if (auto ib2 = dyn_cast<IfBlockStmt>(s.get())) {
@@ -87,44 +87,44 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
         } else if (auto rz = dyn_cast<RandomizeStmt>(s.get())) {
             if (rz->seed) {
                 auto val = emitExpr(out, rz->seed.get(), currLineLabel);
-                std::string si = nextTemp(); { std::string ir = "  "; ir += si; ir += " = fptosi double "; ir += val; ir += " to i64"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock then Randomize fptosi -> " << ir << CH_LF; }
-                { std::string ir = "  call void @srand48(i64 "; ir += si; ir += ")"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock then Randomize srand48 -> " << ir << CH_LF; }
+                std::string si = nextTemp(); { std::string ir = "  "; ir += si; ir += " = fptosi double "; ir += val; ir += " to i64"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Randomize fptosi -> " << ir << Symbols::LF; }
+                { std::string ir = "  call void @srand48(i64 "; ir += si; ir += ")"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Randomize srand48 -> " << ir << Symbols::LF; }
             } else {
-                std::string t = nextTemp(); { std::string ir = "  "; ir += t; ir += " = call i64 @time(ptr null)"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock then Randomize time -> " << ir << CH_LF; }
-                { std::string ir = "  call void @srand48(i64 "; ir += t; ir += ")"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock then Randomize srand48(time) -> " << ir << CH_LF; }
+                std::string t = nextTemp(); { std::string ir = "  "; ir += t; ir += " = call i64 @time(ptr null)"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Randomize time -> " << ir << Symbols::LF; }
+                { std::string ir = "  call void @srand48(i64 "; ir += t; ir += ")"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Randomize srand48(time) -> " << ir << Symbols::LF; }
             }
         } else if (isa<ReturnStmt>(s.get())) {
-            std::string ir = "  br label %exit"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock then Return -> " << ir << CH_LF;
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Return -> " << ir << Symbols::LF;
         } else if (isa<EndStmt>(s.get())) {
-            std::string ir = "  br label %exit"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock then End -> " << ir << CH_LF;
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then End -> " << ir << Symbols::LF;
         } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
-            std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock then Goto -> " << ir << CH_LF;
+            std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Goto -> " << ir << Symbols::LF;
         } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
             std::string contLbl = currLineLabel; contLbl += "_gosub_cont"; contLbl += std::to_string(++localCounter);
             std::string entryLbl = currLineLabel; entryLbl += "_gosub_entry"; entryLbl += std::to_string(localCounter);
-            out << "  br label %" << entryLbl << STR_LF;
+            out << "  br label %" << entryLbl << Symbols::LF;
             emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
-            out << contLbl << ":" << STR_LF;
+            out << contLbl << ":" << Symbols::LF;
         } else if (auto ins = dyn_cast<InputStmt>(s.get())) {
             ensureVarAllocated(out, ins->name);
             std::string fmt = nextTemp();
-            std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_in, i64 0"; out << ir1 << STR_LF; log() << "line " << currentLine_ << " IfBlock then Input -> " << ir1 << CH_LF;
-            std::string ir2 = "  call i32 (ptr, ...) @scanf(ptr "; ir2 += fmt; ir2 += ", ptr "; ir2 += varAllocaName_[ins->name]; ir2 += ")"; out << ir2 << STR_LF; log() << "line " << currentLine_ << " IfBlock then Input -> " << ir2 << CH_LF;
+            std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_in, i64 0"; out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Input -> " << ir1 << Symbols::LF;
+            std::string ir2 = "  call i32 (ptr, ...) @scanf(ptr "; ir2 += fmt; ir2 += ", ptr "; ir2 += varAllocaName_[ins->name]; ir2 += ")"; out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Input -> " << ir2 << Symbols::LF;
         } else {
             throw CodeGenError("Unsupported statement in IF body");
         }
     }
     // Branch to end when THEN body completes
-    out << "  br label %" << endLbl << STR_LF;
+    out << "  br label %" << endLbl << Symbols::LF;
 
     // ELSE body, if present
     if (!ib->elseBody.empty()) {
-    out << elseLbl << ":" << STR_LF;
+    out << elseLbl << ":" << Symbols::LF;
         for (const auto& s : ib->elseBody) {
             if (auto asg = dyn_cast<AssignStmt>(s.get())) {
                 std::string val = emitExpr(out, asg->value.get(), currLineLabel);
                 std::string ir = "  store double "; ir += val; ir += ", ptr "; ir += varAllocaName_[asg->name];
-                out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock else Assign -> " << ir << CH_LF;
+                out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Assign -> " << ir << Symbols::LF;
             } else if (auto pr = dyn_cast<PrintStmt>(s.get())) {
                 std::vector<const Expr*> items; if (pr->value) items.push_back(pr->value.get()); for (const auto& v : pr->more) items.push_back(v.get());
                 for (size_t pi = 0; pi < items.size(); ++pi) {
@@ -132,13 +132,13 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                     const Expr* v = items[pi];
                     if (isa<StringExpr>(v)) {
                         int id = strLiteralId_[dyn_cast<StringExpr>(v)->value];
-                        std::string sptr = nextTemp(); { std::string ir1 = "  "; ir1 += sptr; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += globalStringName(id); ir1 += ", i64 0"; out << ir1 << STR_LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir1 << CH_LF; }
-                        std::string fmt = nextTemp(); { std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr "; ir2 += (last ? "@.fmt_str" : "@.fmt_str_sp"); ir2 += ", i64 0"; out << ir2 << STR_LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir2 << CH_LF; }
-                        { std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")"; out << ir3 << STR_LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir3 << CH_LF; }
+                        std::string sptr = nextTemp(); { std::string ir1 = "  "; ir1 += sptr; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += globalStringName(id); ir1 += ", i64 0"; out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir1 << Symbols::LF; }
+                        std::string fmt = nextTemp(); { std::string ir2 = "  "; ir2 += fmt; ir2 += " = getelementptr inbounds i8, ptr "; ir2 += (last ? "@.fmt_str" : "@.fmt_str_sp"); ir2 += ", i64 0"; out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir2 << Symbols::LF; }
+                        { std::string ir3 = "  call i32 (ptr, ...) @printf(ptr "; ir3 += fmt; ir3 += ", ptr "; ir3 += sptr; ir3 += ")"; out << ir3 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir3 << Symbols::LF; }
                     } else {
                         auto val = emitExpr(out, v, currLineLabel);
-                        std::string fmt = nextTemp(); { std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += (last ? "@.fmt_num" : "@.fmt_num_sp"); ir1 += ", i64 0"; out << ir1 << STR_LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir1 << CH_LF; }
-                        { std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")"; out << ir2 << STR_LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir2 << CH_LF; }
+                        std::string fmt = nextTemp(); { std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr "; ir1 += (last ? "@.fmt_num" : "@.fmt_num_sp"); ir1 += ", i64 0"; out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir1 << Symbols::LF; }
+                        { std::string ir2 = "  call i32 (ptr, ...) @printf(ptr "; ir2 += fmt; ir2 += ", double "; ir2 += val; ir2 += ")"; out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Print -> " << ir2 << Symbols::LF; }
                     }
                 }
             } else if (auto fs = dyn_cast<ForStmt>(s.get())) {
@@ -148,36 +148,36 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
             } else if (auto rz = dyn_cast<RandomizeStmt>(s.get())) {
                 if (rz->seed) {
                     auto val = emitExpr(out, rz->seed.get(), currLineLabel);
-                    std::string si = nextTemp(); { std::string ir = "  "; ir += si; ir += " = fptosi double "; ir += val; ir += " to i64"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock else Randomize fptosi -> " << ir << CH_LF; }
-                    { std::string ir = "  call void @srand48(i64 "; ir += si; ir += ")"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock else Randomize srand48 -> " << ir << CH_LF; }
+                    std::string si = nextTemp(); { std::string ir = "  "; ir += si; ir += " = fptosi double "; ir += val; ir += " to i64"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Randomize fptosi -> " << ir << Symbols::LF; }
+                    { std::string ir = "  call void @srand48(i64 "; ir += si; ir += ")"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Randomize srand48 -> " << ir << Symbols::LF; }
                 } else {
-                    std::string t = nextTemp(); { std::string ir = "  "; ir += t; ir += " = call i64 @time(ptr null)"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock else Randomize time -> " << ir << CH_LF; }
-                    { std::string ir = "  call void @srand48(i64 "; ir += t; ir += ")"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock else Randomize srand48(time) -> " << ir << CH_LF; }
+                    std::string t = nextTemp(); { std::string ir = "  "; ir += t; ir += " = call i64 @time(ptr null)"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Randomize time -> " << ir << Symbols::LF; }
+                    { std::string ir = "  call void @srand48(i64 "; ir += t; ir += ")"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Randomize srand48(time) -> " << ir << Symbols::LF; }
                 }
             } else if (isa<ReturnStmt>(s.get())) {
-            std::string ir = "  br label %exit"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock else Return -> " << ir << CH_LF;
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Return -> " << ir << Symbols::LF;
             } else if (isa<EndStmt>(s.get())) {
-            std::string ir = "  br label %exit"; out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock else End -> " << ir << CH_LF;
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else End -> " << ir << Symbols::LF;
             } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
-            std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << STR_LF; log() << "line " << currentLine_ << " IfBlock else Goto -> " << ir << CH_LF;
+            std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Goto -> " << ir << Symbols::LF;
             } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
                 std::string contLbl = currLineLabel; contLbl += "_gosub_cont"; contLbl += std::to_string(++localCounter);
                 std::string entryLbl = currLineLabel; entryLbl += "_gosub_entry"; entryLbl += std::to_string(localCounter);
-                out << "  br label %" << entryLbl << STR_LF;
+                out << "  br label %" << entryLbl << Symbols::LF;
                 emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
-                out << contLbl << ":" << STR_LF;
+                out << contLbl << ":" << Symbols::LF;
             } else if (auto ins = dyn_cast<InputStmt>(s.get())) {
                 ensureVarAllocated(out, ins->name);
-                std::string fmt = nextTemp(); std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_in, i64 0"; out << ir1 << STR_LF; log() << "line " << currentLine_ << " IfBlock else Input -> " << ir1 << CH_LF;
-                std::string ir2 = "  call i32 (ptr, ...) @scanf(ptr "; ir2 += fmt; ir2 += ", ptr "; ir2 += varAllocaName_[ins->name]; ir2 += ")"; out << ir2 << STR_LF; log() << "line " << currentLine_ << " IfBlock else Input -> " << ir2 << CH_LF;
+                std::string fmt = nextTemp(); std::string ir1 = "  "; ir1 += fmt; ir1 += " = getelementptr inbounds i8, ptr @.fmt_in, i64 0"; out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Input -> " << ir1 << Symbols::LF;
+                std::string ir2 = "  call i32 (ptr, ...) @scanf(ptr "; ir2 += fmt; ir2 += ", ptr "; ir2 += varAllocaName_[ins->name]; ir2 += ")"; out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Input -> " << ir2 << Symbols::LF;
             } else {
                 throw CodeGenError("Unsupported statement in IF body");
             }
         }
-        out << "  br label %" << endLbl << STR_LF;
+        out << "  br label %" << endLbl << Symbols::LF;
     }
 
-    out << endLbl << ":" << STR_LF;
+    out << endLbl << ":" << Symbols::LF;
 }
 
 } // namespace gwbasic

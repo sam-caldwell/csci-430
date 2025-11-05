@@ -14,9 +14,9 @@ void CodeGenerator::emitMainEpilogue(std::ostringstream& out) {
      * Theory of operation:
      *  - Emits the exit label and returns 0 to finish main.
      */
-    out << "exit:" << STR_LF;
-    out << "  ret i32 0" << STR_LF;
-    out << "}" << STR_LF;
+    out << "exit:" << Symbols::LF;
+    out << "  ret i32 0" << Symbols::LF;
+    out << "}" << Symbols::LF;
 }
 
 } // namespace gwbasic
