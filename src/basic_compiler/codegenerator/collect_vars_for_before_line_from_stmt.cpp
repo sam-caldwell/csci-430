@@ -12,6 +12,8 @@
 #include "basic_compiler/ast/ReadStmt.h"
 #include "basic_compiler/ast/DimStmt.h"
 #include "basic_compiler/ast/WriteStmt.h"
+#include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
 
 namespace gwbasic {
 
@@ -34,7 +36,8 @@ void CodeGenerator::collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std
     }
     if (auto ds = dyn_cast<const DimStmt>(s)) { arrays.insert(ds->name); return; }
     if (auto wr = dyn_cast<const WriteStmt>(s)) { for (const auto& e : wr->items) collectVarsForBeforeLineFromExpr(e.get(), vars, arrays); return; }
+    if (auto og = dyn_cast<const OnGotoStmt>(s)) { collectVarsForBeforeLineFromExpr(og->index.get(), vars, arrays); return; }
+    if (auto ogs = dyn_cast<const OnGosubStmt>(s)) { collectVarsForBeforeLineFromExpr(ogs->index.get(), vars, arrays); return; }
 }
 
 } // namespace gwbasic
-

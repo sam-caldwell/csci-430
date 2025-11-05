@@ -3,6 +3,8 @@
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/DataStmt.h"
 #include "basic_compiler/ast/ReadStmt.h"
+#include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
 
 namespace gwbasic {
 
@@ -80,6 +82,12 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
                 variables_.insert(t.name);
             }
         }
+    } else if (const auto og = dyn_cast<const OnGotoStmt>(s)) {
+        collectExprVars(og->index.get());
+        logSem() << "OnGoto targets=" << og->targets.size() << Symbols::LF;
+    } else if (const auto ogs = dyn_cast<const OnGosubStmt>(s)) {
+        collectExprVars(ogs->index.get());
+        logSem() << "OnGosub targets=" << ogs->targets.size() << Symbols::LF;
     }
 }
 
