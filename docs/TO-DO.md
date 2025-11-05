@@ -1,10 +1,9 @@
 # ToDo List
 
-I NEED MORE RED BULLS!  Time to go to the store before we continue.
+- REDBULL BEFORE CODING.  Tired Sam is dumb Sam!
 
 ## Parser and Grammar Coverage
 
-- MID$ assignment statement: MID$(s$, start[, len]) = expr$.
 - SWAP x, y: exchange variables and array elements (numeric and string variants).
 - ERASE array[, array...]: release arrays and reset descriptors.
 - OPTION BASE 0|1: affect DIM lower-bound semantics; current DIM treated as fixed-length with 0-based indexing.
