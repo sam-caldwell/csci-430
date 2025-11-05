@@ -32,6 +32,8 @@ template <> struct NodeKindTraits<NodeKind::InputStmt>   { static constexpr auto
 template <> struct NodeKindTraits<NodeKind::ForStmt>     { static constexpr auto pretty = "ForStmt"; };
 template <> struct NodeKindTraits<NodeKind::NextStmt>    { static constexpr auto pretty = "NextStmt"; };
 template <> struct NodeKindTraits<NodeKind::EndStmt>     { static constexpr auto pretty = "EndStmt"; };
+template <> struct NodeKindTraits<NodeKind::StopStmt>    { static constexpr auto pretty = "StopStmt"; };
+template <> struct NodeKindTraits<NodeKind::SystemStmt>  { static constexpr auto pretty = "SystemStmt"; };
 template <> struct NodeKindTraits<NodeKind::RandomizeStmt> { static constexpr auto pretty = "RandomizeStmt"; };
 template <> struct NodeKindTraits<NodeKind::WhileStmt>    { static constexpr auto pretty = "WhileStmt"; };
 template <> struct NodeKindTraits<NodeKind::WendStmt>     { static constexpr auto pretty = "WendStmt"; };
@@ -92,6 +94,8 @@ inline auto prettyName(const NodeKind k) {
         case NodeKind::ForStmt: return NodeKindTraits<NodeKind::ForStmt>::pretty;
         case NodeKind::NextStmt: return NodeKindTraits<NodeKind::NextStmt>::pretty;
         case NodeKind::EndStmt: return NodeKindTraits<NodeKind::EndStmt>::pretty;
+        case NodeKind::StopStmt: return NodeKindTraits<NodeKind::StopStmt>::pretty;
+        case NodeKind::SystemStmt: return NodeKindTraits<NodeKind::SystemStmt>::pretty;
         case NodeKind::RandomizeStmt: return NodeKindTraits<NodeKind::RandomizeStmt>::pretty;
         case NodeKind::WhileStmt: return NodeKindTraits<NodeKind::WhileStmt>::pretty;
         case NodeKind::WendStmt: return NodeKindTraits<NodeKind::WendStmt>::pretty;

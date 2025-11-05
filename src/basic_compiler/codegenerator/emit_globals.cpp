@@ -25,7 +25,13 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@.fmt_num_sp = private unnamed_addr constant [4 x i8] c\"%f\\20\\00\"" << Symbols::LF // numeric non-last: add one space
         << "@.fmt_num_ns = private unnamed_addr constant [3 x i8] c\"%f\\00\"" << Symbols::LF // numeric non-last: no suffix
         << "@.fmt_str_sp = private unnamed_addr constant [3 x i8] c\"%s\\00\"" << Symbols::LF // string non-last: no extra space
-        << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"" << Symbols::LF
+        << "@.fmt_int = private unnamed_addr constant [5 x i8] c\"%ld\\0A\\00\"" << Symbols::LF
+        << "@.fmt_int_sp = private unnamed_addr constant [5 x i8] c\"%ld\\20\\00\"" << Symbols::LF
+        << "@.fmt_int_ns = private unnamed_addr constant [4 x i8] c\"%ld\\00\"" << Symbols::LF;
+    if (needsBreakMsg_) {
+        out << "@.msg_break = private unnamed_addr constant [13 x i8] c\"Break in %d\\0A\\00\"" << Symbols::LF;
+    }
+    out << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"" << Symbols::LF
         << "@.mode_r = private unnamed_addr constant [2 x i8] c\"r\\00\"" << Symbols::LF
         << "@.mode_w = private unnamed_addr constant [2 x i8] c\"w\\00\"" << Symbols::LF
         << "@.mode_rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"" << Symbols::LF
@@ -62,6 +68,13 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@gwb_cur_col = global i32 0" << Symbols::LF
         // Shared formatting scratch buffer for mirroring printf output to screen
         << "@gwb_sbuf = internal global [256 x i8] zeroinitializer" << Symbols::LF << Symbols::LF;
+    // Error handling/trap globals
+    out << "@gwb_err_trap_line = global i32 0" << Symbols::LF
+        << "@gwb_err_code = global i32 0" << Symbols::LF
+        << "@gwb_err_line = global i32 0" << Symbols::LF
+        << "@gwb_resume_line = global i32 0" << Symbols::LF
+        << "@gwb_resume_stmt = global i32 0" << Symbols::LF
+        << "@gwb_in_handler = global i1 false" << Symbols::LF << Symbols::LF;
     // Emit DATA/READ backing store if present (array of pointers to literals) and an index
     {
         // Always provide an index variable; table may be size 0

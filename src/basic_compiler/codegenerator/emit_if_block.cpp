@@ -4,6 +4,8 @@
 #include "basic_compiler/ast/ArrayAssignStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
+#include "basic_compiler/ast/StopStmt.h"
+#include "basic_compiler/ast/SystemStmt.h"
 #include <sstream>
 #include <format>
 
@@ -126,6 +128,12 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
             std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Return -> " << ir << Symbols::LF; thenTerminated = true; break;
             } else if (isa<EndStmt>(s.get())) {
             std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then End -> " << ir << Symbols::LF; thenTerminated = true; break;
+            } else if (isa<StopStmt>(s.get())) {
+            std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.msg_break, i64 0", fmt); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 {})", fmt, currentLine_); out << ir << Symbols::LF; }
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Stop -> break+exit" << Symbols::LF; thenTerminated = true; break;
+            } else if (isa<SystemStmt>(s.get())) {
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then System -> " << ir << Symbols::LF; thenTerminated = true; break;
             } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
             std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Goto -> " << ir << Symbols::LF; thenTerminated = true; break;
         } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
@@ -220,6 +228,12 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
             std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Return -> " << ir << Symbols::LF; elseTerminated = true; break;
             } else if (isa<EndStmt>(s.get())) {
             std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else End -> " << ir << Symbols::LF; elseTerminated = true; break;
+            } else if (isa<StopStmt>(s.get())) {
+            std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.msg_break, i64 0", fmt); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 {})", fmt, currentLine_); out << ir << Symbols::LF; }
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Stop -> break+exit" << Symbols::LF; elseTerminated = true; break;
+            } else if (isa<SystemStmt>(s.get())) {
+            std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else System -> " << ir << Symbols::LF; elseTerminated = true; break;
             } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
             std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Goto -> " << ir << Symbols::LF; elseTerminated = true; break;
             } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {

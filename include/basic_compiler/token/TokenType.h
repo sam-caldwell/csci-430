@@ -55,6 +55,8 @@ enum class TokenType {
     KwAll,
     KwMerge,
     KwChain,
+    KwStop,
+    KwSystem,
     KwOn,
     KwError,
     KwResume,

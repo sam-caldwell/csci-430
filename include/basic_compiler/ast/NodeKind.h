@@ -32,6 +32,8 @@ enum class NodeKind {
     ForStmt,
     NextStmt,
     EndStmt,
+    StopStmt,
+    SystemStmt,
     RandomizeStmt,
     WhileStmt,
     WendStmt,

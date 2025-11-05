@@ -197,6 +197,8 @@ private:
      */
     bool needsRndHelper_{false};
     bool needsColor_{false};
+    // Whether STOP appears anywhere (to emit break message global)
+    bool needsBreakMsg_{false};
     // Inline call-time substitution bindings (stack of name->SSA value)
     std::vector<std::map<std::string, std::string>> bindingStack_{};
     // Optional semantic input
@@ -316,6 +318,8 @@ private:
     void scanExprForRnd(const Expr* e);
     /** Scan statement (and children) for RND() usage. */
     void scanStmtForRnd(const Stmt* s);
+    /** Scan statement (and children) for STOP usage. */
+    void scanStmtForStop(const Stmt* s);
 
     // Emission helpers
     /** Emit module-level declarations (printf, math, rng helpers). */

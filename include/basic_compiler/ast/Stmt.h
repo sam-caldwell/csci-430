@@ -41,6 +41,8 @@ public:
             case NodeKind::ForStmt:
             case NodeKind::NextStmt:
             case NodeKind::EndStmt:
+            case NodeKind::StopStmt:
+            case NodeKind::SystemStmt:
             case NodeKind::RandomizeStmt:
             case NodeKind::WhileStmt:
             case NodeKind::WendStmt:

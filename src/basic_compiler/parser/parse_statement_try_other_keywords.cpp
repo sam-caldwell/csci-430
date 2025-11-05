@@ -9,6 +9,8 @@
 #include "basic_compiler/ast/WendStmt.h"
 #include "basic_compiler/ast/NextStmt.h"
 #include "basic_compiler/ast/EndStmt.h"
+#include "basic_compiler/ast/StopStmt.h"
+#include "basic_compiler/ast/SystemStmt.h"
 #include "basic_compiler/ast/RandomizeStmt.h"
 
 namespace gwbasic {
@@ -59,10 +61,20 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     if (match(TokenType::KwChain)) { auto n = parseChain(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwMerge)) { auto n = parseMerge(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwRun)) { auto n = parseRun(); n->pos = {startTok.line, startTok.col}; return n; }
-    if (match(TokenType::KwOn)) { auto n = parseOnGotoGosub(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwStop)) { return make_node<StopStmt>({startTok.line, startTok.col}); }
+    if (match(TokenType::KwSystem)) { return make_node<SystemStmt>({startTok.line, startTok.col}); }
+    if (match(TokenType::KwOn)) {
+        if (check(TokenType::KwError)) {
+            auto n = parseOnErrorGoto(); n->pos = {startTok.line, startTok.col}; return n;
+        } else {
+            auto n = parseOnGotoGosub(); n->pos = {startTok.line, startTok.col}; return n;
+        }
+    }
 
     // Misc simple keywords
     if (match(TokenType::KwReturn)) { return make_node<ReturnStmt>({startTok.line, startTok.col}); }
+    if (match(TokenType::KwError)) { auto n = parseError(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwResume)) { auto n = parseResume(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwInput)) { auto n = parseInput(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwRandomize)) {
         std::unique_ptr<Expr> seed;

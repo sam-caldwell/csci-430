@@ -108,6 +108,8 @@ private:
         {"ALL",       TokenType::KwAll},
         {"MERGE",     TokenType::KwMerge},
         {"CHAIN",     TokenType::KwChain},
+        {"STOP",      TokenType::KwStop},
+        {"SYSTEM",    TokenType::KwSystem},
         {"ON",        TokenType::KwOn},
         {"ERROR",     TokenType::KwError},
         {"RESUME",    TokenType::KwResume},
