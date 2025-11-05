@@ -25,7 +25,7 @@ bool processChainRun(const std::string& curPath,
                      const bool isChain,
                      std::unordered_map<std::string, std::pair<int,int>,
                      TransparentSVHasher, std::equal_to<>>& imported,
-                     const Line& ln,
+                     Line& ln,
                      ImportedProg& out) {
     const std::string canon = canonicalPath(incPath);
     const bool added = ensureImported(canon, curPath, imported, out);
