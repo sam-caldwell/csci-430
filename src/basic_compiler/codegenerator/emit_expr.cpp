@@ -44,9 +44,33 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             out << ir << Symbols::LF;
             log() << "line " << currentLine_ << " VarExpr$ -> " << ir << Symbols::LF;
         } else {
-            std::string ir = std::format("  {} = load double, ptr {}", r, a);
-            out << ir << Symbols::LF;
-            log() <<"line " << currentLine_ << " VarExpr -> " << ir << Symbols::LF;
+            // Load typed storage and convert to double for expression math
+            switch (numKindOf(v->name)) {
+                case NumKind::Int16: {
+                    std::string l = nextTemp();
+                    { std::string ir = std::format("  {} = load i16, ptr {}", l, a); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  {} = sitofp i16 {} to double", r, l); out << ir << Symbols::LF; }
+                    break;
+                }
+                case NumKind::Long32: {
+                    std::string l = nextTemp();
+                    { std::string ir = std::format("  {} = load i32, ptr {}", l, a); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  {} = sitofp i32 {} to double", r, l); out << ir << Symbols::LF; }
+                    break;
+                }
+                case NumKind::Single: {
+                    std::string l = nextTemp();
+                    { std::string ir = std::format("  {} = load float, ptr {}", l, a); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  {} = fpext float {} to double", r, l); out << ir << Symbols::LF; }
+                    break;
+                }
+                case NumKind::Double: {
+                    std::string ir = std::format("  {} = load double, ptr {}", r, a);
+                    out << ir << Symbols::LF;
+                    break;
+                }
+            }
+            log() <<"line " << currentLine_ << " VarExpr -> load/convert to double" << Symbols::LF;
         }
         return r;
     }

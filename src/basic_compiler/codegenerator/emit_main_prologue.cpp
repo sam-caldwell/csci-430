@@ -19,14 +19,8 @@ void CodeGenerator::emitMainPrologue(std::ostringstream& out) {
     out << "define i32 @main() {" << Symbols::LF
         << "entry:" << Symbols::LF;
     for (const auto& v : variables_) {
-        std::string a = "%"; a += v;
-        varAllocaName_[v] = a;
-        std::string i1 = "  "; i1 += a; i1 += " = alloca double";
-        std::string i2 = "  store double 0.0, ptr "; i2 += a;
-        out << i1 << Symbols::LF
-            << i2 << Symbols::LF;
-        log() << "line 0 VarAlloc(" << v << ") -> " << i1 << Symbols::LF;
-        log() << "line 0 InitZero(" << v << ") -> " << i2 << Symbols::LF;
+        // Allocate and initialize each variable using typed storage
+        ensureVarAllocated(out, v);
     }
     if (!lineNumbers_.empty()) { std::string br = "  br label %"; br += lineLabelName(lineNumbers_.front()); out << br << Symbols::LF; log() << "entry -> " << br << Symbols::LF; }
     else { out << "  ret i32 0" << Symbols::LF; out << "}" << Symbols::LF; }

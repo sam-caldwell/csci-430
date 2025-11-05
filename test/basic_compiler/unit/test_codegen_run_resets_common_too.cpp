@@ -31,8 +31,7 @@ TEST(CodeGenRun, RunResetsCommonAndBranches) {
     std::string ir = Compiler::compileString(src);
     auto blk = irBlockSlice(ir, "line30");
     ASSERT_FALSE(blk.empty());
-    EXPECT_NE(blk.find("store double 0.0, ptr %A"), std::string::npos);
-    EXPECT_NE(blk.find("store double 0.0, ptr %B"), std::string::npos);
+    EXPECT_NE(blk.find("store float 0.0, ptr %A"), std::string::npos);
+    EXPECT_NE(blk.find("store float 0.0, ptr %B"), std::string::npos);
     EXPECT_NE(blk.find("br label %line100"), std::string::npos);
 }
-

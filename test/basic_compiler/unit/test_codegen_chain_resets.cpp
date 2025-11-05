@@ -30,9 +30,9 @@ TEST(CodeGenChain, ResetsNonCommonAndBranches) {
     std::string ir = Compiler::compileString(src);
     auto blk = irBlockSlice(ir, "line30");
     ASSERT_FALSE(blk.empty());
-    // B should be reset, A should not
-    EXPECT_NE(blk.find("store double 0.0, ptr %B"), std::string::npos);
-    EXPECT_EQ(blk.find("store double 0.0, ptr %A"), std::string::npos);
+    // B should be reset (float), A should not
+    EXPECT_NE(blk.find("store float 0.0, ptr %B"), std::string::npos);
+    EXPECT_EQ(blk.find("store float 0.0, ptr %A"), std::string::npos);
     // Branch to line100
     EXPECT_NE(blk.find("br label %line100"), std::string::npos);
 }

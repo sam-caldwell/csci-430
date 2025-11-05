@@ -48,14 +48,13 @@ namespace gwbasic {
             const auto &st = line.statements[i];
             if (auto asg = dyn_cast<AssignStmt>(st.get())) {
                 std::string val = emitExpr(out, asg->value.get(), "");
-                std::string ir;
                 if (isStringVarNameCG(asg->name)) {
-                    ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
+                    std::string ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
+                    out << ir << Symbols::LF;
+                    { std::ostringstream m; m << "line " << currentLine_ << ' ' << nodeName(st.get()) << " -> " << ir; log() << m.str() << Symbols::LF; }
                 } else {
-                    ir = std::format("  store double {}, ptr {}", val, varAllocaName_[asg->name]);
+                    storeNumberToVar(out, asg->name, val);
                 }
-                out << ir << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << ' ' << nodeName(st.get()) << " -> " << ir; log() << m.str() << Symbols::LF; }
             } else if (auto aaset = dyn_cast<ArrayAssignStmt>(st.get())) {
                 // A(i) = expr
                 const int len = arraySizes_[aaset->name];
@@ -174,13 +173,15 @@ namespace gwbasic {
                 break;
             } else if (auto ins = dyn_cast<InputStmt>(st.get())) {
                 ensureVarAllocated(out, ins->name);
+                // Read into a temporary double, then convert to variable's storage type
                 std::string fmt = nextTemp();
-                std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt);
-                out << ir1 << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " InputStmt -> " << ir1; log() << m.str() << Symbols::LF; }
-                std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, varAllocaName_[ins->name]);
-                out << ir2 << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " InputStmt -> " << ir2; log() << m.str() << Symbols::LF; }
+                { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " InputStmt fmt -> " << ir1; log() << m.str() << Symbols::LF; } }
+                std::string tmp = nextTemp();
+                { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
+                { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " InputStmt scanf -> " << ir2; log() << m.str() << Symbols::LF; } }
+                std::string dv = nextTemp();
+                { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
+                storeNumberToVar(out, ins->name, dv);
             } else if (auto fs = dyn_cast<ForStmt>(st.get())) {
                 emitFor(out, fs, lineLabelName(line.number), localContCounter);
             } else if (auto rz = dyn_cast<RandomizeStmt>(st.get())) {
@@ -221,14 +222,8 @@ namespace gwbasic {
                 // COMMON has no direct codegen effect in this compiler; treat as no-op.
                 { std::ostringstream m; m << "line " << currentLine_ << " CommonStmt (no-op)"; log() << m.str() << Symbols::LF; }
             } else if (auto rn = dyn_cast<RunStmt>(st.get())) {
-                // Reset all variables to 0.0 and branch to first or specified line
-                for (const auto &v: variables_) {
-                    auto it = varAllocaName_.find(v);
-                    if (it == varAllocaName_.end()) continue;
-                    std::string ir = std::format("  store double 0.0, ptr {}", it->second);
-                    out << ir << Symbols::LF;
-                    { std::ostringstream m; m << "line " << currentLine_ << " RunStmt reset -> " << ir; log() << m.str() << Symbols::LF; }
-                }
+                // Reset all variables to zero/null and branch to first or specified line
+                for (const auto &v: variables_) { if (varAllocaName_.contains(v)) resetVar(out, v); }
                 int dest = rn->targetLine.has_value()
                                ? *rn->targetLine
                                : (lineNumbers_.empty() ? line.number : lineNumbers_.front());
@@ -249,10 +244,7 @@ namespace gwbasic {
                         if (preserve.contains(v)) continue; // preserve caller's COMMON only
                         auto it = varAllocaName_.find(v);
                         if (it == varAllocaName_.end()) continue;
-                        std::string ir = "  store double 0.0, ptr ";
-                        ir += it->second;
-                        out << ir << Symbols::LF;
-                        { std::ostringstream m; m << "line " << currentLine_ << " ChainStmt reset -> " << ir; log() << m.str() << Symbols::LF; }
+                        resetVar(out, v);
                     }
                 }
                 int dest = ch->targetLine.has_value()
@@ -431,13 +423,7 @@ namespace gwbasic {
                 for (const auto &v: vset) {
                     auto it = varAllocaName_.find(v);
                     if (it == varAllocaName_.end()) continue;
-                    if (isStringVarNameCG(v)) {
-                        std::string ir = std::format("  store ptr null, ptr {}", it->second);
-                        out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " ClearStmt reset$ -> " << ir; log() << m.str() << Symbols::LF; }
-                    } else {
-                        std::string ir = std::format("  store double 0.0, ptr {}", it->second);
-                        out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " ClearStmt reset -> " << ir; log() << m.str() << Symbols::LF; }
-                    }
+                    resetVar(out, v);
                 }
                 // Arrays: zero elements for arrays seen before this line
                 const auto itAB = arraysBeforeLine_.find(line.number);
@@ -467,9 +453,9 @@ namespace gwbasic {
             }
         }
         if (!terminated) {
-            std::string ir = std::format("  br label %{}", nextLabel);
-            out << ir << Symbols::LF;
-            { std::ostringstream m; m << "line " << currentLine_ << " fallthrough -> " << ir; log() << m.str() << Symbols::LF; }
+                std::string ir = std::format("  br label %{}", nextLabel);
+                out << ir << Symbols::LF;
+                { std::ostringstream m; m << "line " << currentLine_ << " fallthrough -> " << ir; log() << m.str() << Symbols::LF; }
         }
     }
 } // namespace gwbasic

@@ -30,8 +30,8 @@ TEST(CodeGenChain, AllPreservesAllAndBranches) {
     const std::string ir = Compiler::compileString(src);
     auto blk = irBlockSlice(ir, "line20");
     ASSERT_FALSE(blk.empty());
-    // No resets for either variable
-    EXPECT_EQ(blk.find("store double 0.0, ptr %A"), std::string::npos);
-    EXPECT_EQ(blk.find("store double 0.0, ptr %B"), std::string::npos);
+    // No resets for either variable (float typed by default)
+    EXPECT_EQ(blk.find("store float 0.0, ptr %A"), std::string::npos);
+    EXPECT_EQ(blk.find("store float 0.0, ptr %B"), std::string::npos);
     EXPECT_NE(blk.find("br label %line100"), std::string::npos);
 }

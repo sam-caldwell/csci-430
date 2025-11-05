@@ -33,6 +33,12 @@ SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
     for (const auto& v : vars_) {
         if (varNameIsString(v)) r.stringVariables.insert(v);
     }
+    // Determine numeric kinds for non-string variables
+    for (const auto& v : vars_) {
+        if (!r.stringVariables.contains(v)) {
+            r.numericKinds[v] = numericKindOf(v);
+        }
+    }
     return r;
 }
 

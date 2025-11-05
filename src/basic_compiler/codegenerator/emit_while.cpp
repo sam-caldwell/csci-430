@@ -43,10 +43,12 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
     for (const auto& s : ws->body) {
         if (auto asg = dyn_cast<AssignStmt>(s.get())) {
             std::string val = emitExpr(out, asg->value.get(), currLineLabel);
-            std::string ir;
-            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) { ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]); }
-            else { ir = std::format("  store double {}, ptr {}", val, varAllocaName_[asg->name]); }
-            out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body Assign -> " << ir << Symbols::LF;
+            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
+                std::string ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
+                out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body Assign -> " << ir << Symbols::LF;
+            } else {
+                storeNumberToVar(out, asg->name, val);
+            }
         } else if (auto pr = dyn_cast<PrintStmt>(s.get())) {
             std::vector<const Expr*> items; if (pr->value) items.push_back(pr->value.get()); for (const auto& v : pr->more) items.push_back(v.get());
             for (size_t pi = 0; pi < items.size(); ++pi) {
@@ -96,8 +98,12 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             out << contLbl << ":" << Symbols::LF;
         } else if (auto ins = dyn_cast<InputStmt>(s.get())) {
             ensureVarAllocated(out, ins->name);
-            std::string fmt = nextTemp(); std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir1 << Symbols::LF;
-            std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, varAllocaName_[ins->name]); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir2 << Symbols::LF;
+            std::string fmt = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir1 << Symbols::LF; }
+            // Read into temp double then convert to var storage
+            std::string tmp = nextTemp(); { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
+            { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir2 << Symbols::LF; }
+            std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
+            storeNumberToVar(out, ins->name, dv);
         } else {
             throw CodeGenError("Unsupported statement in WHILE body");
         }

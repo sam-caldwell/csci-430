@@ -99,6 +99,16 @@ public:
         arraySizes_ = r.arrays;
         userFunctions_ = r.userFunctions;
         semStringVariables_ = r.stringVariables;
+        // Map numeric kinds from semantics into codegen's representation
+        semNumericKinds_.clear();
+        for (const auto& [name, kind] : r.numericKinds) {
+            switch (kind) {
+                case SemanticAnalyzer::Result::NumericKind::Int16: semNumericKinds_[name] = NumKind::Int16; break;
+                case SemanticAnalyzer::Result::NumericKind::Long32: semNumericKinds_[name] = NumKind::Long32; break;
+                case SemanticAnalyzer::Result::NumericKind::Single: semNumericKinds_[name] = NumKind::Single; break;
+                case SemanticAnalyzer::Result::NumericKind::Double: semNumericKinds_[name] = NumKind::Double; break;
+            }
+        }
     }
 
 private:
@@ -139,6 +149,9 @@ private:
     std::map<std::string, const DefFnStmt*> userFunctions_{};
     // Variables determined as string-typed (by suffix or DEFSTR)
     std::set<std::string> semStringVariables_{};
+    // Variables numeric kind mapping (non-strings only)
+    enum class NumKind { Int16, Long32, Single, Double };
+    std::map<std::string, NumKind> semNumericKinds_{};
     /*
      * Property: lineNumbers_
      * Purpose:
@@ -306,6 +319,18 @@ private:
     /** Allocate a stack slot for a variable if not already allocated. */
     void ensureVarAllocated(std::ostringstream& out, const std::string& name);
     void ensureArrayAllocated(std::ostringstream& out, const std::string& name, int length);
+    /** Sanitize BASIC variable name into a valid local IR identifier */
+    static std::string sanitizeLocal(const std::string& name);
+    /** Emit casts+store to assign a computed double to a typed variable */
+    void storeNumberToVar(std::ostringstream& out, const std::string& name, const std::string& doubleValSSA);
+    /** Reset a variable to zero/null according to its type */
+    void resetVar(std::ostringstream& out, const std::string& name);
+    /** Lookup numeric kind for variable (assumes non-string); defaults to Single */
+    NumKind numKindOf(const std::string& name) const {
+        auto it = semNumericKinds_.find(name);
+        if (it != semNumericKinds_.end()) return it->second;
+        return NumKind::Single;
+    }
     // Lookup current inline binding for a variable name (if any)
     bool lookupBinding(const std::string& name, std::string& out) const {
         for (auto it = bindingStack_.rbegin(); it != bindingStack_.rend(); ++it) {

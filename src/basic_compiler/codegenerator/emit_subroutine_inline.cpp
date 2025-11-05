@@ -38,9 +38,12 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
             if (auto asg = dyn_cast<AssignStmt>(st.get())) {
                 std::string val = emitExpr(out, asg->value.get(), entryLabel);
                 std::string ir;
-            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) { ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]); }
-            else { ir = std::format("  store double {}, ptr {}", val, varAllocaName_[asg->name]); }
-            out << ir << Symbols::LF; log() << "line " << currentLine_ << " AssignStmt -> " << ir << Symbols::LF;
+            if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
+                ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
+                out << ir << Symbols::LF; log() << "line " << currentLine_ << " AssignStmt -> " << ir << Symbols::LF;
+            } else {
+                storeNumberToVar(out, asg->name, val);
+            }
             } else if (auto pr = dyn_cast<PrintStmt>(st.get())) {
                 std::vector<const Expr*> items;
                 if (pr->value) items.push_back(pr->value.get());
@@ -70,8 +73,12 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
                 std::string fmt = nextTemp();
                 std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt);
                 out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " InputStmt -> " << ir1 << Symbols::LF;
-                std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, varAllocaName_[ins->name]);
-                out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InputStmt -> " << ir2 << Symbols::LF;
+            // Read into a temp double, then convert to variable storage type
+            std::string tmp = nextTemp(); { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
+            std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp);
+            out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InputStmt -> " << ir2 << Symbols::LF;
+            std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
+            storeNumberToVar(out, ins->name, dv);
             } else if (auto is = dyn_cast<IfStmt>(st.get())) {
                 auto be = dyn_cast<BinaryExpr>(is->cond.get());
                 if (!be || (be->op != BinaryOp::Eq && be->op != BinaryOp::Ne && be->op != BinaryOp::Lt && be->op != BinaryOp::Le && be->op != BinaryOp::Gt && be->op != BinaryOp::Ge)) throw CodeGenError("IF condition must be a comparison");

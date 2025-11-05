@@ -49,6 +49,9 @@ public:
         std::map<std::string, const DefFnStmt*> userFunctions;
         // Variables determined to be strings (by suffix or DEFSTR)
         std::set<std::string> stringVariables;
+        // Per-variable numeric kind (for non-strings). Only includes non-string vars.
+        enum class NumericKind { Int16, Long32, Single, Double };
+        std::map<std::string, NumericKind> numericKinds;
     };
 
     SemanticAnalyzer() = default;
@@ -137,6 +140,8 @@ private:
     DefaultKind defaultKinds_[26]{}; // initialized to None
     // Helper: determine if a variable name is string-typed by suffix or DEFSTR rules.
     bool varNameIsString(const std::string& name) const;
+    // Helper: determine numeric kind for a non-string variable name
+    Result::NumericKind numericKindOf(const std::string& name) const;
 
     // Logging via ostream-based logger
     logger::Logger logger_{};

@@ -33,4 +33,6 @@ std::string CodeGenerator::escapeForIR(const std::string& s) {
     return out;
 }
 
+// other helper methods are defined in separate compilation units
+
 } // namespace gwbasic
