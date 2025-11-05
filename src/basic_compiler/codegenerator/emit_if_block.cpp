@@ -2,6 +2,8 @@
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/ArrayAssignStmt.h"
+#include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
 #include <sstream>
 #include <format>
 
@@ -97,11 +99,34 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                 std::string t = nextTemp(); { std::string ir = "  "; ir += t; ir += " = call i64 @time(ptr null)"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Randomize time -> " << ir << Symbols::LF; }
                 { std::string ir = "  call void @srand48(i64 "; ir += t; ir += ")"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Randomize srand48(time) -> " << ir << Symbols::LF; }
             }
-        } else if (isa<ReturnStmt>(s.get())) {
+            } else if (auto og = dyn_cast<OnGotoStmt>(s.get())) {
+                std::string idx = emitExpr(out, og->index.get(), currLineLabel);
+                std::string idxi32 = nextTemp(); { std::string ir = "  "; ir += idxi32; ir += " = fptosi double "; ir += idx; ir += " to i32"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then OnGoto fptosi -> " << ir << Symbols::LF; }
+                std::string contLbl = currLineLabel + std::string("_on_cont_") + std::to_string(++localCounter);
+                {
+                    std::ostringstream ir; ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
+                    for (size_t i = 0; i < og->targets.size(); ++i) ir << " i32 " << (i+1) << ", label %" << lineLabelName(og->targets[i]);
+                    ir << " ]"; out << ir.str() << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then OnGoto switch -> " << ir.str() << Symbols::LF;
+                }
+                out << contLbl << ":" << Symbols::LF;
+            } else if (auto ogs = dyn_cast<OnGosubStmt>(s.get())) {
+                std::string idx = emitExpr(out, ogs->index.get(), currLineLabel);
+                std::string idxi32 = nextTemp(); { std::string ir = "  "; ir += idxi32; ir += " = fptosi double "; ir += idx; ir += " to i32"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then OnGosub fptosi -> " << ir << Symbols::LF; }
+                std::string contLbl = currLineLabel + std::string("_on_gs_cont_") + std::to_string(++localCounter);
+                std::vector<std::string> entryLbls; entryLbls.reserve(ogs->targets.size());
+                for (size_t i = 0; i < ogs->targets.size(); ++i) entryLbls.push_back(currLineLabel + std::string("_on_gs_entry_") + std::to_string(localCounter) + std::string("_") + std::to_string(i+1));
+                {
+                    std::ostringstream ir; ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
+                    for (size_t i = 0; i < ogs->targets.size(); ++i) ir << " i32 " << (i+1) << ", label %" << entryLbls[i];
+                    ir << " ]"; out << ir.str() << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then OnGosub switch -> " << ir.str() << Symbols::LF;
+                }
+                for (size_t i = 0; i < ogs->targets.size(); ++i) emitSubroutineInline(out, ogs->targets[i], entryLbls[i], contLbl);
+                out << contLbl << ":" << Symbols::LF;
+            } else if (isa<ReturnStmt>(s.get())) {
             std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Return -> " << ir << Symbols::LF; thenTerminated = true; break;
-        } else if (isa<EndStmt>(s.get())) {
+            } else if (isa<EndStmt>(s.get())) {
             std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then End -> " << ir << Symbols::LF; thenTerminated = true; break;
-        } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
+            } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
             std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock then Goto -> " << ir << Symbols::LF; thenTerminated = true; break;
         } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
             std::string contLbl = currLineLabel; contLbl += "_gosub_cont"; contLbl += std::to_string(++localCounter);
@@ -168,6 +193,29 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                     std::string t = nextTemp(); { std::string ir = "  "; ir += t; ir += " = call i64 @time(ptr null)"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Randomize time -> " << ir << Symbols::LF; }
                     { std::string ir = "  call void @srand48(i64 "; ir += t; ir += ")"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Randomize srand48(time) -> " << ir << Symbols::LF; }
                 }
+            } else if (auto og = dyn_cast<OnGotoStmt>(s.get())) {
+                std::string idx = emitExpr(out, og->index.get(), currLineLabel);
+                std::string idxi32 = nextTemp(); { std::string ir = "  "; ir += idxi32; ir += " = fptosi double "; ir += idx; ir += " to i32"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else OnGoto fptosi -> " << ir << Symbols::LF; }
+                std::string contLbl = currLineLabel + std::string("_on_cont_") + std::to_string(++localCounter);
+                {
+                    std::ostringstream ir; ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
+                    for (size_t i = 0; i < og->targets.size(); ++i) ir << " i32 " << (i+1) << ", label %" << lineLabelName(og->targets[i]);
+                    ir << " ]"; out << ir.str() << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else OnGoto switch -> " << ir.str() << Symbols::LF;
+                }
+                out << contLbl << ":" << Symbols::LF;
+            } else if (auto ogs = dyn_cast<OnGosubStmt>(s.get())) {
+                std::string idx = emitExpr(out, ogs->index.get(), currLineLabel);
+                std::string idxi32 = nextTemp(); { std::string ir = "  "; ir += idxi32; ir += " = fptosi double "; ir += idx; ir += " to i32"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else OnGosub fptosi -> " << ir << Symbols::LF; }
+                std::string contLbl = currLineLabel + std::string("_on_gs_cont_") + std::to_string(++localCounter);
+                std::vector<std::string> entryLbls; entryLbls.reserve(ogs->targets.size());
+                for (size_t i = 0; i < ogs->targets.size(); ++i) entryLbls.push_back(currLineLabel + std::string("_on_gs_entry_") + std::to_string(localCounter) + std::string("_") + std::to_string(i+1));
+                {
+                    std::ostringstream ir; ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
+                    for (size_t i = 0; i < ogs->targets.size(); ++i) ir << " i32 " << (i+1) << ", label %" << entryLbls[i];
+                    ir << " ]"; out << ir.str() << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else OnGosub switch -> " << ir.str() << Symbols::LF;
+                }
+                for (size_t i = 0; i < ogs->targets.size(); ++i) emitSubroutineInline(out, ogs->targets[i], entryLbls[i], contLbl);
+                out << contLbl << ":" << Symbols::LF;
             } else if (isa<ReturnStmt>(s.get())) {
             std::string ir = "  br label %exit"; out << ir << Symbols::LF; log() << "line " << currentLine_ << " IfBlock else Return -> " << ir << Symbols::LF; elseTerminated = true; break;
             } else if (isa<EndStmt>(s.get())) {

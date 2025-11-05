@@ -20,6 +20,8 @@
 #include "basic_compiler/ast/ScreenStmt.h"
 #include "basic_compiler/ast/CircleStmt.h"
 #include "basic_compiler/ast/ClearStmt.h"
+#include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/StringExpr.h"
 #include <sstream>
 #include <format>
@@ -162,6 +164,52 @@ namespace gwbasic {
                 std::string ir = std::format("  br i1 {}, label %{}, label %{}", cond, lineLabelName(is->targetLine), contLbl);
                 out << ir << Symbols::LF;
                 { std::ostringstream m; m << "line " << currentLine_ << " IfStmt -> " << ir; log() << m.str() << Symbols::LF; }
+                out << contLbl << ":" << Symbols::LF;
+            } else if (auto og = dyn_cast<OnGotoStmt>(st.get())) {
+                // Evaluate index and dispatch to one of the targets by 1-based index; default falls through
+                std::string idx = emitExpr(out, og->index.get(), lineLabelName(line.number));
+                std::string idxi32 = nextTemp();
+                { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " OnGoto fptosi -> " << ir; log() << m.str() << Symbols::LF; } }
+                std::string contLbl = lineLabelName(line.number) + std::string("_on_cont_") + std::to_string(++localContCounter);
+                // Emit switch header
+                {
+                    std::ostringstream ir;
+                    ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
+                    for (size_t i = 0; i < og->targets.size(); ++i) {
+                        ir << " i32 " << (i + 1) << ", label %" << lineLabelName(og->targets[i]);
+                    }
+                    ir << " ]";
+                    out << ir.str() << Symbols::LF;
+                    { std::ostringstream m; m << "line " << currentLine_ << " OnGoto switch -> " << ir.str(); log() << m.str() << Symbols::LF; }
+                }
+                // Continuation label for out-of-range/zero
+                out << contLbl << ":" << Symbols::LF;
+            } else if (auto ogs = dyn_cast<OnGosubStmt>(st.get())) {
+                // Evaluate index and dispatch to one of several subroutine entries
+                std::string idx = emitExpr(out, ogs->index.get(), lineLabelName(line.number));
+                std::string idxi32 = nextTemp();
+                { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " OnGosub fptosi -> " << ir; log() << m.str() << Symbols::LF; } }
+                std::string contLbl = lineLabelName(line.number) + std::string("_on_gs_cont_") + std::to_string(++localContCounter);
+                // Build case entries and emit switch to per-case entry labels
+                std::vector<std::string> entryLbls; entryLbls.reserve(ogs->targets.size());
+                for (size_t i = 0; i < ogs->targets.size(); ++i) {
+                    std::string el = lineLabelName(line.number) + std::string("_on_gs_entry_") + std::to_string(localContCounter) + std::string("_") + std::to_string(i+1);
+                    entryLbls.push_back(el);
+                }
+                {
+                    std::ostringstream ir;
+                    ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
+                    for (size_t i = 0; i < ogs->targets.size(); ++i) {
+                        ir << " i32 " << (i + 1) << ", label %" << entryLbls[i];
+                    }
+                    ir << " ]";
+                    out << ir.str() << Symbols::LF;
+                    { std::ostringstream m; m << "line " << currentLine_ << " OnGosub switch -> " << ir.str(); log() << m.str() << Symbols::LF; }
+                }
+                // Emit each entry label and inline the subroutine
+                for (size_t i = 0; i < ogs->targets.size(); ++i) {
+                    emitSubroutineInline(out, ogs->targets[i], entryLbls[i], contLbl);
+                }
                 out << contLbl << ":" << Symbols::LF;
             } else if (auto ib = dyn_cast<IfBlockStmt>(st.get())) {
                 emitIfBlock(out, ib, lineLabelName(line.number), localContCounter);
