@@ -59,7 +59,9 @@ TEST(Lexer, AllRecognizedTokens) {
         // COMMON (decl-list)
         "170 COMMON A, B\n"
         // ALL keyword (appears in CHAIN syntax; lex only)
-        "180 ALL\n";
+        "180 ALL\n"
+        // ON keyword (used by ON GOTO/GOSUB)
+        "190 ON 1 GOTO 10\n";
 
     std::istringstream iss(src);
     Lexer lex(iss);
@@ -106,6 +108,7 @@ TEST(Lexer, AllRecognizedTokens) {
         TokenType::Comma,
         TokenType::KwCommon,
         TokenType::KwAll,
+        TokenType::KwOn,
     };
 
     for (auto tt : expected) {
