@@ -187,6 +187,8 @@ private:
     std::unique_ptr<Stmt> tryParseOtherKeywords(const Token& startTok);
     /** Parse ON <expr> GOTO line[,line...] or ON <expr> GOSUB line[,line...] */
     std::unique_ptr<Stmt> parseOnGotoGosub();
+    /** Parse ON ERROR GOTO (0|line) */
+    std::unique_ptr<Stmt> parseOnErrorGoto();
     /**
      * Function: Parser::parsePrint
      * Purpose:
@@ -273,6 +275,10 @@ private:
     std::unique_ptr<Stmt> parseRestore() const;
     /** Parse WRITE [#n,] expr[,expr...] */
     std::unique_ptr<Stmt> parseWrite();
+    /** Parse ERROR numeric-expression */
+    std::unique_ptr<Stmt> parseError();
+    /** Parse RESUME [0|NEXT|line] */
+    std::unique_ptr<Stmt> parseResume();
     /** Parse INPUT with optional #n, varlist or simple INPUT var */
     std::unique_ptr<Stmt> parseInput();
     /** Parse LINE INPUT [#n,] var$ */

@@ -109,6 +109,8 @@ private:
         {"MERGE",     TokenType::KwMerge},
         {"CHAIN",     TokenType::KwChain},
         {"ON",        TokenType::KwOn},
+        {"ERROR",     TokenType::KwError},
+        {"RESUME",    TokenType::KwResume},
         {"DIM",       TokenType::KwDim},
         {"OPEN",      TokenType::KwOpen},
         {"CLOSE",     TokenType::KwClose},
