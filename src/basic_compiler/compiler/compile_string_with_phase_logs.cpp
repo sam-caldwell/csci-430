@@ -29,11 +29,11 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     parser.setSyntaxLogPath(syntaxLogPath);
     auto program = parser.parseProgram();
     if (gMetrics) {
-        Metrics::computeAstSnapshot(program, gMetrics->ast_parsed);
-        gMetrics->analyze_only = true;
+        gMetrics->recordParsedSnapshot(program);
+        gMetrics->setAnalyzeOnly(true);
         gwbasic::AstOptimizer::optimize(program);
-        gMetrics->analyze_only = false;
-        Metrics::computeAstSnapshot(program, gMetrics->ast_after_semantics);
+        gMetrics->setAnalyzeOnly(false);
+        gMetrics->recordAfterSemanticsSnapshot(program);
     }
     // Semantic analysis (scope + references + strings)
     SemanticAnalyzer sema;
@@ -43,7 +43,7 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     if (!codegenLogPath.empty()) gen.setLogPath(codegenLogPath);
     gen.setSemantics(semRes);
     auto ir = gen.generate(program);
-    if (gMetrics) gMetrics->codegen.ir_instructions = countIrInstructions(ir);
+    if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(ir));
     return Compiler::addDefaultTripleIfMissing(ir);
 }
 

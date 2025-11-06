@@ -180,10 +180,8 @@ int main(int argc, char **argv) {
             std::cout << irWithTriple;
         }
         if (wantMetrics) {
-            // Populate codegen optimization phase counts using clang if available
-            metrics.codegen.opt_phase_ir_counts = optimizedIrInstructionCounts(irWithTriple, CLANG_PATH, {"-O1", "-O2", "-O3"});
-            // Print to stderr to avoid polluting IR/stdout
-            printMetricsTable(metrics, std::cerr);
+            metrics.setOptPhaseCounts(Metrics::optimizedIrInstructionCounts(irWithTriple, CLANG_PATH, {"-O1", "-O2", "-O3"}));
+            metrics.print();
             gwbasic::gMetrics = nullptr; // clear
         }
         return 0;

@@ -21,15 +21,15 @@ std::string Compiler::compileStringOptimized(const std::string& source) {
     auto tokens = lex.tokenize();
     Parser parser(std::move(tokens));
     auto program = parser.parseProgram();
-    if (gMetrics) Metrics::computeAstSnapshot(program, gMetrics->ast_parsed);
+    if (gMetrics) gMetrics->recordParsedSnapshot(program);
     gwbasic::AstOptimizer::optimize(program);
-    if (gMetrics) Metrics::computeAstSnapshot(program, gMetrics->ast_after_opt);
+    if (gMetrics) gMetrics->recordOptimizedSnapshot(program);
     CodeGenerator gen;
     SemanticAnalyzer sema;
     auto res = sema.analyze(program);
     gen.setSemantics(res);
     auto ir = gen.generate(program);
-    if (gMetrics) gMetrics->codegen.ir_instructions = countIrInstructions(ir);
+    if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(ir));
     return Compiler::addDefaultTripleIfMissing(ir);
 }
 

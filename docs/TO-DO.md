@@ -99,3 +99,13 @@
 - Add unit tests for the above once implemented: WRITE codegen, INPUT#/LINE INPUT codegen semantics, DEF SEG 
   runtime effect on @gwb_seg, RUN/CHAIN file overlay behavior, OPTION BASE effects on DIM/array indexing, and 
   exponent/logical operator parsing and lowering.
+
+## Bug report
+```text
+[904/973] /usr/lib/llvm-17/bin/clang++ -DCLANG_PATH=\"/usr/lib/llvm-17/bin/clang\" -I/home/runner/work/csci-430/csci-430/include -stdlib=libc++ -stdlib=libc++ -g -std=c++23 -Wall -Wextra -Wpedantic -stdlib=libc++ -MD -MT CMakeFiles/basic_compiler.dir/src/basic_compiler/parser/parse_def_fn.cpp.o -MF CMakeFiles/basic_compiler.dir/src/basic_compiler/parser/parse_def_fn.cpp.o.d -o CMakeFiles/basic_compiler.dir/src/basic_compiler/parser/parse_def_fn.cpp.o -c /home/runner/work/csci-430/csci-430/src/basic_compiler/parser/parse_def_fn.cpp
+In file included from /home/runner/work/csci-430/csci-430/src/basic_compiler/parser/parse_def_fn.cpp:3:
+/home/runner/work/csci-430/csci-430/include/basic_compiler/token/ToString.h:20:13: warning: enumeration values 'KwOption' and 'KwBase' not handled in switch [-Wswitch]
+   20 |     switch (t) {
+      |             ^
+1 warning generated.
+```

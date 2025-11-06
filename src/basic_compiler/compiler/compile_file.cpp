@@ -59,19 +59,17 @@ std::string Compiler::compileFile(const std::string& path) {
         replaceOrAppendLine(program, std::move(ln), fr.mergeMode);
     }
     if (gMetrics) {
-        Metrics::computeAstSnapshot(program, gMetrics->ast_parsed);
-        gMetrics->analyze_only = true;
+        gMetrics->recordParsedSnapshot(program);
+        gMetrics->setAnalyzeOnly(true);
         gwbasic::AstOptimizer::optimize(program);
-        gMetrics->analyze_only = false;
-        Metrics::computeAstSnapshot(program, gMetrics->ast_after_semantics);
+        gMetrics->setAnalyzeOnly(false);
+        gMetrics->recordAfterSemanticsSnapshot(program);
     }
     // Keep semantics integration consistent with compileString
     SemanticAnalyzer sema; auto res = sema.analyze(program);
     CodeGenerator gen; gen.setSemantics(res);
     auto ir = gen.generate(program);
-    if (gMetrics) {
-        gMetrics->codegen.ir_instructions = countIrInstructions(ir);
-    }
+    if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(ir));
     return Compiler::addDefaultTripleIfMissing(ir);
 }
 

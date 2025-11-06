@@ -39,12 +39,12 @@ public:
         Parser parser(std::move(tokens));
         auto program = parser.parseProgram();
         if (gMetrics) {
-            Metrics::computeAstSnapshot(program, gMetrics->ast_parsed);
+            gMetrics->recordParsedSnapshot(program);
             // Collect semantics-optimization metrics via analysis-only optimization
-            gMetrics->analyze_only = true;
+            gMetrics->setAnalyzeOnly(true);
             gwbasic::AstOptimizer::optimize(program);
-            gMetrics->analyze_only = false;
-            Metrics::computeAstSnapshot(program, gMetrics->ast_after_semantics);
+            gMetrics->setAnalyzeOnly(false);
+            gMetrics->recordAfterSemanticsSnapshot(program);
         }
         CodeGenerator gen;
         // Provide semantic info to avoid duplicate collection
@@ -52,9 +52,7 @@ public:
         auto res = sema.analyze(program);
         gen.setSemantics(res);
         auto ir = gen.generate(program);
-        if (gMetrics) {
-            gMetrics->codegen.ir_instructions = countIrInstructions(ir);
-        }
+        if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(ir));
         return addDefaultTripleIfMissing(ir);
     }
 

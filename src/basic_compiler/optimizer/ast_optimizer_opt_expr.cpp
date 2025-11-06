@@ -35,15 +35,14 @@ std::unique_ptr<Expr> AstOptimizer::optExpr(std::unique_ptr<Expr> e) {
     if (const auto u = dyn_cast<UnaryExpr>(e.get())) {
         u->inner = optExpr(std::move(u->inner));
         if (u->op == Symbols::PLUS.first()) {
-            if (gMetrics) { ++gMetrics->semantics_opt.unary_elim_plus; ++gMetrics->semantics_opt.algebraic_simplifications; }
-            // In analysis-only mode, do not mutate; otherwise, drop unary plus
-            if (gMetrics && gMetrics->analyze_only) return e;
+            if (gMetrics) gMetrics->incUnaryElimPlus();
+            if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
             return std::move(u->inner);
         }
         if (u->op == Symbols::MINUS.first()) {
             if (double v; asNumber(u->inner.get(), v)) {
-                if (gMetrics) { ++gMetrics->semantics_opt.unary_const_minus; ++gMetrics->semantics_opt.const_folds; }
-                if (gMetrics && gMetrics->analyze_only) return e;
+                if (gMetrics) gMetrics->incUnaryConstMinus();
+                if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                 return std::make_unique<NumberExpr>(-v);
             }
             return e;
@@ -60,106 +59,106 @@ std::unique_ptr<Expr> AstOptimizer::optExpr(std::unique_ptr<Expr> e) {
         switch (b->op) {
             case BinaryOp::Add:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_add; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldAdd();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L + R);
                 }
                 if (isZero(b->lhs.get())) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.id_add_zero; ++gMetrics->semantics_opt.algebraic_simplifications; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incIdAddZero();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::move(b->rhs);
                 }
                 if (isZero(b->rhs.get())) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.id_add_zero; ++gMetrics->semantics_opt.algebraic_simplifications; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incIdAddZero();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::move(b->lhs);
                 }
                 return e;
             case BinaryOp::Sub:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_sub; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldSub();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L - R);
                 }
                 if (isZero(b->rhs.get())) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.id_sub_zero; ++gMetrics->semantics_opt.algebraic_simplifications; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incIdSubZero();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::move(b->lhs);
                 }
                 return e;
             case BinaryOp::Mul:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_mul; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldMul();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L * R);
                 }
                 if (isZero(b->lhs.get()) || isZero(b->rhs.get())) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.id_mul_zero; ++gMetrics->semantics_opt.algebraic_simplifications; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incIdMulZero();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(0.0);
                 }
                 if (isOne(b->lhs.get())) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.id_mul_one; ++gMetrics->semantics_opt.algebraic_simplifications; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incIdMulOne();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::move(b->rhs);
                 }
                 if (isOne(b->rhs.get())) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.id_mul_one; ++gMetrics->semantics_opt.algebraic_simplifications; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incIdMulOne();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::move(b->lhs);
                 }
                 return e;
             case BinaryOp::Div:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_div; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldDiv();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L / R);
                 }
                 if (isOne(b->rhs.get())) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.id_div_one; ++gMetrics->semantics_opt.algebraic_simplifications; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incIdDivOne();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::move(b->lhs);
                 }
                 return e;
             case BinaryOp::Eq:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_cmp; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldCmp();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L == R ? 1.0 : 0.0);
                 }
                 return e;
             case BinaryOp::Ne:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_cmp; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldCmp();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L != R ? 1.0 : 0.0);
                 }
                 return e;
             case BinaryOp::Lt:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_cmp; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldCmp();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L < R ? 1.0 : 0.0);
                 }
                 return e;
             case BinaryOp::Le:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_cmp; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldCmp();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L <= R ? 1.0 : 0.0);
                 }
                 return e;
             case BinaryOp::Gt:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_cmp; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldCmp();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L > R ? 1.0 : 0.0);
                 }
                 return e;
             case BinaryOp::Ge:
                 if (lN && rN) {
-                    if (gMetrics) { ++gMetrics->semantics_opt.const_folds; ++gMetrics->semantics_opt.fold_cmp; }
-                    if (gMetrics && gMetrics->analyze_only) return e;
+                    if (gMetrics) gMetrics->incConstFoldCmp();
+                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
                     return std::make_unique<NumberExpr>(L >= R ? 1.0 : 0.0);
                 }
                 return e;

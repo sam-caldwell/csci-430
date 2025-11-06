@@ -28,7 +28,7 @@ TEST(Integration, Metrics_TableFormatting) {
     m.codegen.opt_phase_ir_counts = {{"-O1", 40}, {"-O2", 38}};
 
     std::ostringstream oss;
-    printMetricsTable(m, oss);
+    m.print(oss);
     const std::string tbl = oss.str();
 
     // Basic structure
@@ -47,4 +47,3 @@ TEST(Integration, Metrics_TableFormatting) {
     ASSERT_NE(tbl.find("12"), std::string::npos);
     ASSERT_NE(tbl.find("42"), std::string::npos);
 }
-
