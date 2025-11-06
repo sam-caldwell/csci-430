@@ -4,16 +4,11 @@
 
 ## Arrays and DATA
 
-+ DIM: only 1-D numeric arrays backed by `[len x double]`. Missing:
-    - Multi-dimensional arrays and string arrays.
-    - OPTION BASE lower-bound handling (current indexing is raw 0-based fptosi).
-    - Bounds checking and negative-index handling (currently none).
 - ERASE: not implemented (see parser gap).
 - DATA/READ/RESTORE:
     - RESTORE [line] not supported (current RESTORE has no operand).
     - READ parsing/assignment rules for quoted strings vs. numbers should follow GW-BASIC’s tokenization (currently
       uses `atof` for numeric targets; string targets store pointer to literal).
-
 
 ## Parser and Grammar Coverage
 
