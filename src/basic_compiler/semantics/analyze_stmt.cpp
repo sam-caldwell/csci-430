@@ -37,6 +37,7 @@
 #include "basic_compiler/ast/ScreenStmt.h"
 #include "basic_compiler/ast/CircleStmt.h"
 #include "basic_compiler/ast/ClearStmt.h"
+#include "basic_compiler/ast/EraseStmt.h"
 #include "basic_compiler/ast/OptionBaseStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
@@ -132,6 +133,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             if (ub < 0) { std::ostringstream m; m << "TypeError: DIM bounds must be non-negative @ " << d->pos.line << ':' << d->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         }
         arrays_[d->name] = d->upperBounds;
+        allArrays_[d->name] = d->upperBounds; // record for codegen regardless of later ERASE
         std::ostringstream m; m << "Dim " << d->name << "(";
         for (size_t i = 0; i < d->upperBounds.size(); ++i) { if (i) m << ','; m << d->upperBounds[i]; }
         m << ")"; log() << m.str() << '\n';
@@ -240,6 +242,16 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             analyzeExpr(ds->value.get());
         }
         log() << "DefSeg" << '\n';
+        return;
+    }
+    if (auto er = dyn_cast<const EraseStmt>(s)) {
+        // ERASE: remove arrays from the current environment; subsequent uses require re-DIM
+        for (const auto& n : er->names) {
+            if (arrays_.contains(n)) {
+                arrays_.erase(n);
+            }
+            std::ostringstream m; m << "Erase " << n << " @ " << er->pos.line << ':' << er->pos.col; log() << m.str() << '\n';
+        }
         return;
     }
     if (auto bl = dyn_cast<const BloadStmt>(s)) {

@@ -11,12 +11,10 @@ include_guard(GLOBAL)
 find_program(CLANG_TIDY_EXE NAMES clang-tidy)
 
 # Collect lintable sources (project sources only; exclude tests)
-file(GLOB_RECURSE LINT_C_SOURCES CONFIGURE_DEPENDS
-  ${PROJECT_SOURCE_DIR}/src/*.c
+file(GLOB_RECURSE LINT_SOURCES CONFIGURE_DEPENDS
   ${PROJECT_SOURCE_DIR}/src/*.cc
   ${PROJECT_SOURCE_DIR}/src/*.cxx
   ${PROJECT_SOURCE_DIR}/src/*.cpp)
-set(LINT_SOURCES ${LINT_C_SOURCES})
 list(REMOVE_DUPLICATES LINT_SOURCES)
 
 # Default checks (override with -DTIDY_CHECKS=...)

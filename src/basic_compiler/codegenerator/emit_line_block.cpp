@@ -20,6 +20,7 @@
 #include "basic_compiler/ast/ScreenStmt.h"
 #include "basic_compiler/ast/CircleStmt.h"
 #include "basic_compiler/ast/ClearStmt.h"
+#include "basic_compiler/ast/EraseStmt.h"
 #include "basic_compiler/ast/OptionBaseStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
@@ -1052,6 +1053,35 @@ namespace gwbasic {
                     { std::string ir = std::format("  store ptr null, ptr {}", ep); out << ir << Symbols::LF; }
                     { std::string ir = std::format("  br label %{}", contLbl); out << ir << Symbols::LF; }
                     out << contLbl << ":" << Symbols::LF;
+                }
+            } else if (auto er = dyn_cast<EraseStmt>(st.get())) {
+                // ERASE: clear/reset specific arrays only (numeric to 0, strings to null)
+                for (const auto& an : er->names) {
+                    auto itLen = arrayDims_.find(an);
+                    if (itLen == arrayDims_.end()) continue;
+                    long long len = 1; for (int ub : itLen->second) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; len *= ext; }
+                    if (isStringArrayNameCG(an)) {
+                        ensureStringArrayAllocated(out, an, static_cast<int>(len));
+                        std::string base = arrayAllocaName_[an];
+                        for (long long i = 0; i < len; ++i) {
+                            std::string elem = nextTemp();
+                            { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, i); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store ptr null, ptr {}", elem); out << ir << Symbols::LF; }
+                        }
+                    } else {
+                        ensureArrayAllocated(out, an, static_cast<int>(len));
+                        std::string base = arrayAllocaName_[an];
+                        for (long long i = 0; i < len; ++i) {
+                            std::string elem = nextTemp();
+                            { std::string ir = std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, len, arrayElemType(an), base, i); out << ir << Symbols::LF; }
+                            switch (numKindOf(an)) {
+                                case NumKind::Int16: { std::string ir = std::format("  store i32 0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                                case NumKind::Long32:{ std::string ir = std::format("  store i64 0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                                case NumKind::Single:{ std::string ir = std::format("  store float 0.0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                                case NumKind::Double:{ std::string ir = std::format("  store double 0.0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                            }
+                        }
+                    }
                 }
             } else {
                 throw CodeGenError("Unsupported statement encountered");

@@ -198,5 +198,61 @@
               - Split grouped sections for compatibility with older plugins:
                 - Replace [{Makefile,*.mk}] with [Makefile] and [*.mk].
                 - Replace [{CMakeLists.txt,*.cmake}] with [CMakeLists.txt] and [*.cmake].
+06 Nov 2025 - ERASE statement + apostrophe comments tests + diagnostics
+            - ERASE arrays: full pipeline implementation and tests
+              - Lexer: added ERASE keyword.
+              - AST: new EraseStmt node with list of array names.
+              - Parser: parseErase() for ERASE name[,name...]; wired into keyword dispatch.
+              - Semantics: ERASE removes arrays from the active environment; added historical dims map so codegen
+                can compute lengths for reset without re-enabling usage. Using an array after ERASE now yields a
+                clear error message: "TypeError: array '<name>' not DIM'd".
+              - Codegen: ERASE emits stores to reset arrays (numeric → 0/0.0; string → null); respects OPTION BASE
+                when computing extents; uses existing ensureArrayAllocated helpers.
+              - Tests:
+                - Unit: parser coverage (ERASE name list), semantics positive (ERASE + re-DIM allows reuse), and
+                  negative (PRINT A(1) after ERASE A raises "array not DIM'd").
+                - Integration: IR patterns show zeroing/null stores for affected arrays.
+                - E2E: ERASE followed by re-DIM compiles/runs (no output), validating behavior.
+
+            - Apostrophe (') inline comment support: strict tests added
+              - Lexer already treated apostrophe as comment to EOL; added tests to guarantee strict behavior.
+              - Integration: confirms garbage tokens after apostrophe are ignored (no lex/parse errors); IR contains
+                expected print formatting for statements before comments.
+              - E2E: program with apostrophe comments runs and prints expected results for statements before comments.
+              - Unit: added test ensuring a literal apostrophe inside a double-quoted string (e.g., "Bob's") is not
+                treated as a comment and remains in the StringExpr.
+
+            - Diagnostics
+              - Improved semantic error message for call-like identifiers with arguments that are not builtins or
+                user functions to treat them as array uses, yielding "array '<name>' not DIM'd" instead of
+                "Unknown function" when applicable (e.g., after ERASE).
+
+            - Array features (consolidated)
+              - DIM arrays with types and multidimensional support
+                - Numeric arrays by suffix: % (Int16→i32), & (Long32→i64), ! (Single→float), # (Double→double).
+                - String arrays by suffix $: arrays of ptr elements.
+                - Multidimensional DIM A(m,n,...) lowers to a single alloca of product extents.
+                - OPTION BASE 0/1 honored for extent calculation and indexing (ub - base + 1).
+              - Usage and type checking in semantics
+                - Arity: number of indices must match number of DIM bounds.
+                - Index expressions must be numeric; string indices rejected.
+                - Assignments type-checked: numeric arrays accept numeric; string arrays accept string only.
+                - Referencing arrays before DIM or after ERASE produces "array '<name>' not DIM'd".
+              - Code generation
+                - Ensures per-array stack allocation on first use (numeric/string variants) and reuses allocas.
+                - Linearization from multi-index to linear element with GEP; prints use typed formats.
+                - Numeric stores emit fptosi/fptrunc/bit-casts as appropriate for target element type.
+                - String array elements are stored as pointers; string operations use @strncpy/@malloc helpers.
+              - Runtime behavior helpers
+                - CLEAR resets arrays seen before the CLEAR line: numeric to 0/0.0; strings to null.
+                - ERASE resets only the specified arrays (numeric→0/0.0; strings→null) without re-enabling usage.
+                - READ into arrays processes DATA in order; numeric via @atof; string items stored as pointers.
+                - WRITE #n from string arrays lowers to fprintf with format constants.
+                - Optionally mirrors runtime bounds errors into ERR/ERL and respects ON ERROR handlers
+                  (ArrayBoundsTriggersOnErrorHandler e2e test).
+
+            - Tooling
+              - Linter scope narrowed to C++ sources to avoid environment-specific C toolchain header detection
+                issues during clang-tidy in this sandbox; no functional code changes.
 
             - Consumed enough caffeine to make Mötley Crüe seem tame.

@@ -134,6 +134,8 @@ private:
      */
     std::set<std::string> common_;
     std::map<std::string, std::vector<int>> arrays_;
+    // Historical record of DIM'd arrays (last DIM wins) for codegen lengths
+    std::map<std::string, std::vector<int>> allArrays_;
     int optionBase_{0};
     // User-defined functions by uppercase name
     std::map<std::string, const DefFnStmt*> userFunctions_;

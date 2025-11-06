@@ -4,27 +4,30 @@
 
 ## Arrays and DATA
 
-- ERASE: not implemented (see parser gap).
-- DATA/READ/RESTORE:
+- Implement DATA/READ/RESTORE:
     - RESTORE [line] not supported (current RESTORE has no operand).
     - READ parsing/assignment rules for quoted strings vs. numbers should follow GW-BASIC’s tokenization (currently
       uses `atof` for numeric targets; string targets store pointer to literal).
-
+    - Ensure unit/integration and e2e tests for DATA/READ/RESTORE cover happy/sad path with 100% coverage.
+ 
 ## Parser and Grammar Coverage
 
-- SWAP x, y: exchange variables and array elements (numeric and string variants).
-- ERASE array[, array...]: release arrays and reset descriptors.
-- OPTION BASE 0|1: affect DIM lower-bound semantics; current DIM treated as fixed-length with 0-based indexing.
++ SWAP x, y: exchange variables and array elements (numeric and string variants).
+
 - LSET/RSET field$ = expr$: fixed-length string field assignment semantics.
+ 
 - Additional PRINT forms: full “PRINT USING” with zone/tabbing and trailing separators (comma/semicolon) behavior.
+
 - INPUT improvements:
   - INPUT var[, var...], INPUT ; prompt$, var[, ...], INPUT "prompt"; var[, ...] (current parser only accepts single 
     var or redirects to file form).
   - LINE INPUT forms already parse, but see runtime gaps below.
+
 - Additional commands listed in docs/gw-basic.ebnf but not recognized in the lexer/token set: FILES, NAME, KILL, MKDIR,
   RMDIR, WIDTH, LOCATE, CLS, PSET, PRESET, LINE (graphics), PAINT, DRAW, VIEW/VIEW PRINT, WINDOW, BEEP/SOUND/PLAY, 
   KEY/KEYn/ON KEY, ON event variants, PEN/STRIG, TIMER ON/OFF, TRON/TROFF, CONT, LOAD/SAVE/NEW/DELETE/LIST/LLIST/AUTO/
   RENUM/EDIT/PCOPY, RESET, SHELL, ENVIRON, OUT, WAIT.
+
 - Add metrics for optimizations in semantics (algebraic simplifications, constant folding, etc.) and codegen 
   optimizations.
 
@@ -32,7 +35,8 @@
 
 - Numeric literals: support scientific notation (E/D exponents), octal (`&O`/`&`), and binary where applicable; only
   `&H` hex is implemented.
-- Apostrophe (`'`) inline comment form not handled (only `REM`-style supported via keyword).
+
+
 
 ## Code Generation: Implementations Missing (parses exist)
 

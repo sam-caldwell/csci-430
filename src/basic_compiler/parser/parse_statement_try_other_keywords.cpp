@@ -59,6 +59,7 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     if (match(TokenType::KwColor)) { auto n = parseColor(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwLine)) { consume(TokenType::KwInput, "INPUT"); auto n = parseLineInput(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwClear)) { auto n = parseClear(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwErase)) { auto n = parseErase(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwChain)) { auto n = parseChain(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwMerge)) { auto n = parseMerge(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwRun)) { auto n = parseRun(); n->pos = {startTok.line, startTok.col}; return n; }

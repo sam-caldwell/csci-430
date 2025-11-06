@@ -69,6 +69,7 @@ enum class NodeKind {
     ScreenStmt,
     CircleStmt,
     ClearStmt,
+    EraseStmt,
     MidAssignStmt,
     OptionBaseStmt,
 };

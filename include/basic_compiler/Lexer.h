@@ -132,6 +132,8 @@ private:
         {"COLOR",     TokenType::KwColor},
         {"CHDIR",     TokenType::KwChdir},
         {"CLEAR",     TokenType::KwClear},
+        {"SWAP",      TokenType::KwSwap},
+        {"ERASE",     TokenType::KwErase},
         {"OPTION",    TokenType::KwOption},
         {"BASE",      TokenType::KwBase},
     };
