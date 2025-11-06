@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include "basic_compiler/Compiler.h"
+#include "../helper/ir_match.h"
 
 using namespace gwbasic;
 
@@ -24,6 +25,6 @@ TEST(Integration, CLEAR_IRPatterns) {
         "20 CLEAR\n"
         "30 END\n";
     std::string ir = Compiler::compileString(src);
-    ASSERT_NE(ir.find("fptrunc double 7.0 to float"), std::string::npos);
+    ASSERT_TRUE(irtest::irContainsAny(ir, {"fptrunc double 7.0 to float"}));
     ASSERT_NE(ir.find("store float 0.0, ptr %A"), std::string::npos);
 }

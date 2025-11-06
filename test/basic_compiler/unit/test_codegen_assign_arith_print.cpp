@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include "basic_compiler/Compiler.h"
+#include "../helper/ir_match.h"
 
 using namespace gwbasic;
 
@@ -33,12 +34,12 @@ TEST(CodeGenCore, AssignAndArithmeticAndPrint) {
     EXPECT_NE(ir.find("define i32 @main()"), std::string::npos);
     EXPECT_NE(ir.find("%X = alloca float"), std::string::npos);
     EXPECT_NE(ir.find("store float 0.0, ptr %X"), std::string::npos);
-    EXPECT_NE(ir.find(" = fmul double 2.0, 3.0"), std::string::npos);
+    EXPECT_TRUE(irtest::irContainsAny(ir, {" = fmul double 2.0, 3.0"}));
     EXPECT_NE(ir.find(" = fadd double"), std::string::npos);
-    EXPECT_NE(ir.find(" = fdiv double 4.0, 2.0"), std::string::npos);
+    EXPECT_TRUE(irtest::irContainsAny(ir, {" = fdiv double 4.0, 2.0"}));
     EXPECT_NE(ir.find(" = fsub double 0.0, %"), std::string::npos);
-    EXPECT_NE(ir.find(" = fcmp olt double 1.0, 2.0"), std::string::npos);
-    EXPECT_NE(ir.find(" = fcmp oeq double 2.0, 3.0"), std::string::npos);
+    EXPECT_TRUE(irtest::irContainsAny(ir, {" = fcmp olt double 1.0, 2.0"}));
+    EXPECT_TRUE(irtest::irContainsAny(ir, {" = fcmp oeq double 2.0, 3.0"}));
     EXPECT_NE(ir.find(" = uitofp i1 %"), std::string::npos);
     EXPECT_NE(ir.find("getelementptr inbounds i8, ptr @.fmt_num"), std::string::npos);
 }

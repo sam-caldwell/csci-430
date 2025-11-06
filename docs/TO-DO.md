@@ -4,11 +4,6 @@
 
 ## Parser and Grammar Coverage
 
-- Mixed-type arithmetic conversion rules (Single vs. Double, Int16/Long promotion) are simplified: expressions are
-  computed in double then stored with truncation/rounding; consider matching GW-BASIC’s rounding/truncation semantics
-  per operator.
-
-- LSET/RSET field$ = expr$: fixed-length string field assignment semantics.
  
 - Additional PRINT forms: full “PRINT USING” with zone/tabbing and trailing separators (comma/semicolon) behavior.
 

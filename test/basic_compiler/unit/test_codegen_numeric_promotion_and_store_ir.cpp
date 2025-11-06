@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include "basic_compiler/Compiler.h"
+#include "../helper/ir_match.h"
 
 using namespace gwbasic;
 
@@ -29,9 +30,15 @@ TEST(CodeGen, NumericPromotionAndStoreCasts) {
     ASSERT_NE(ir.find("alloca float"), std::string::npos) << "expected float alloca for !";
     ASSERT_NE(ir.find("alloca double"), std::string::npos) << "expected double alloca for #";
 
-    // Stores cast from double to target type
-    ASSERT_NE(ir.find("fptosi double 1.9 to i16"), std::string::npos);
-    ASSERT_NE(ir.find("fptosi double 2.9 to i32"), std::string::npos);
+    // Stores cast from double to target type (be tolerant to platform-specific literal formatting)
+    ASSERT_TRUE(irtest::irContainsAny(ir, {
+                    "fptosi double 1.9 to i16",
+                    "fptosi double 1.8999999999999999 to i16"}))
+        << "expected int16 store cast from 1.9";
+    ASSERT_TRUE(irtest::irContainsAny(ir, {
+                    "fptosi double 2.9 to i32",
+                    "fptosi double 2.8999999999999999 to i32"}))
+        << "expected long32 store cast from 2.9";
     ASSERT_NE(ir.find("fptrunc double 3.25 to float"), std::string::npos);
     // Double stores are direct
     ASSERT_NE(ir.find("store double 4.5, ptr"), std::string::npos);
@@ -41,4 +48,3 @@ TEST(CodeGen, NumericPromotionAndStoreCasts) {
     ASSERT_NE(ir.find("sitofp i32"), std::string::npos) << "B& should promote via sitofp i32 -> double";
     ASSERT_NE(ir.find("fpext float"), std::string::npos) << "C! should extend via fpext float -> double";
 }
-
