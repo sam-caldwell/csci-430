@@ -10,7 +10,7 @@ set(COVERAGE_MIN "95" CACHE STRING "Minimum percent (Lines/Regions) to pass")
 set(COVERAGE_SCOPE "src/basic_compiler/" CACHE STRING "Path prefix to report/aggregate")
 # Default scope: include all compiler sources only; exclude tests from coverage requirements.
 # Include CLI helpers, usage, and the CLI entrypoint (main.cpp) in coverage by default.
-set(COVERAGE_INCLUDE_RE "^(src/basic_compiler/lexer/|src/basic_compiler/main.cpp|src/basic_compiler/compiler/usage.cpp|src/basic_compiler/compiler/cli/|src/basic_compiler/compiler/derive_default_logs.cpp|src/basic_compiler/compiler/target_support.cpp)" CACHE STRING "egrep regex to include rows")
+set(COVERAGE_INCLUDE_RE "^(src/|include/)" CACHE STRING "egrep regex to include rows")
 set(COVERAGE_EXCLUDE_RE "" CACHE STRING "egrep regex to exclude rows")
 set(COVERAGE_METRIC "lines" CACHE STRING "lines|regions|both (both requires both >= min)")
 

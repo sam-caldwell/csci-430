@@ -17,7 +17,13 @@ COVERAGE_MIN ?= 95
 COVERAGE_SCOPE ?= test/
 # Enforce comprehensive coverage on the compiler only; exclude tests from coverage requirements.
 # Includes all compiler areas (lexer, parser, semantics, codegenerator, etc.).
-COVERAGE_INCLUDE_RE ?= ^(include/|src/)
+# Focus coverage on compiler semantics, parser, lexer, optimizer, and IR codegen (headers + sources).
+# Focus on semantic and IR optimization (headers + sources); exclude parser/lexer from coverage requirement for now.
+# Measure only logger and metrics sources to verify ≥95% coverage for these components.
+# Focus coverage on compiler CLI features: usage + CLI helpers + main.cpp entrypoint.
+# Include main.cpp to ensure the CLI entrypoint is covered by E2E tests.
+# Expand scope to all sources and public headers
+COVERAGE_INCLUDE_RE ?= ^(src/|include/)
 COVERAGE_METRIC ?= lines
 # No test files included, so helper exclusion is unnecessary; keep empty unless overriding.
 COVERAGE_EXCLUDE_RE ?=
