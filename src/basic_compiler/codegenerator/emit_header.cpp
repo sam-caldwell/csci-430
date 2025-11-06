@@ -21,6 +21,7 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare i32 @snprintf(ptr, i64, ptr, ...)" << Symbols::LF
         << "declare i32 @strcmp(ptr, ptr)" << Symbols::LF
         << "declare i64 @strlen(ptr)" << Symbols::LF
+        << "declare ptr @strstr(ptr, ptr)" << Symbols::LF
         << "declare ptr @malloc(i64)" << Symbols::LF
         << "declare ptr @strcpy(ptr, ptr)" << Symbols::LF
         << "declare ptr @strcat(ptr, ptr)" << Symbols::LF << Symbols::LF
@@ -46,6 +47,8 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
     // Additional helpers for extended math/CVT
         << "declare double @drand48()" << Symbols::LF
         << "declare double @round(double)" << Symbols::LF << Symbols::LF
+    // Conversion
+        << "declare double @strtod(ptr, ptr)" << Symbols::LF << Symbols::LF
     // RNG seed + time
         << "declare void @srand48(i64)" << Symbols::LF
         << "declare i64 @time(ptr)" << Symbols::LF << Symbols::LF

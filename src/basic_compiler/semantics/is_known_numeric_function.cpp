@@ -20,7 +20,8 @@ bool SemanticAnalyzer::isKnownNumericFunction(const std::string& upperName) {
         upperName == "INT" || upperName == "FIX" || upperName == "SGN" ||
         upperName == "CINT" || upperName == "CSNG" || upperName == "CDBL" ||
         upperName == "RND" || upperName == "PEEK" || upperName == "USR" ||
-        upperName == "ASC" || upperName == "SCREEN"
+        upperName == "ASC" || upperName == "SCREEN" ||
+        upperName == "VAL" || upperName == "LEN" || upperName == "INSTR"
     );
 }
 

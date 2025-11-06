@@ -46,16 +46,17 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
             throw SemanticError(m.str());
         }
         if (isBuiltinStr) {
-            if (fn == "CHR$") {
-                if (call->args.size() != 1) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects 1 arg @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-            } else if (fn == "LEFT$" || fn == "RIGHT$") {
-                if (call->args.size() != 2) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects 2 args @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-            } else if (fn == "MID$") {
+            if (fn == "MID$") {
                 if (!(call->args.size() == 2 || call->args.size() == 3)) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects 2 or 3 args @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            } else {
+                int exp = expectedArity(fn);
+                if (static_cast<int>(call->args.size()) != exp) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects " << exp << " arg(s) @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             }
         } else if (isBuiltinNum) {
             if (fn == "SCREEN") {
                 if (!(call->args.size() == 2 || call->args.size() == 3)) { std::ostringstream m; m << "ArityError: function 'SCREEN' expects 2 or 3 args @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            } else if (fn == "INSTR") {
+                if (!(call->args.size() == 2 || call->args.size() == 3)) { std::ostringstream m; m << "ArityError: function 'INSTR' expects 2 or 3 args @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             } else {
                 int exp = expectedArity(fn);
                 if (static_cast<int>(call->args.size()) != exp) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects " << exp << " arg(s) @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
@@ -109,13 +110,31 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
             }
             for (const auto& arg : call->args) analyzeExpr(arg.get());
         } else if (isBuiltinNum) {
-            for (const auto& arg : call->args) {
-                if (fn == "ASC") {
-                    if (typeOf(arg.get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function 'ASC' expects string argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            if (fn == "ASC" || fn == "LEN" || fn == "VAL") {
+                // Expect exactly one string argument for ASC/LEN/VAL
+                if (typeOf(call->args[0].get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function '" << call->callee << "' expects string argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                analyzeExpr(call->args[0].get());
+            } else if (fn == "INSTR") {
+                if (call->args.size() == 2) {
+                    // INSTR(s$, sub$)
+                    if (typeOf(call->args[0].get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function 'INSTR' expects string first argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    if (typeOf(call->args[1].get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function 'INSTR' expects string second argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    analyzeExpr(call->args[0].get());
+                    analyzeExpr(call->args[1].get());
                 } else {
-                    if (typeOf(arg.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function '" << call->callee << "' requires numeric argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    // INSTR(start, s$, sub$)
+                    if (typeOf(call->args[0].get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function 'INSTR' expects numeric start argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    if (typeOf(call->args[1].get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function 'INSTR' expects string second argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    if (typeOf(call->args[2].get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function 'INSTR' expects string third argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    analyzeExpr(call->args[0].get());
+                    analyzeExpr(call->args[1].get());
+                    analyzeExpr(call->args[2].get());
                 }
-                analyzeExpr(arg.get());
+            } else {
+                for (const auto& arg : call->args) {
+                    if (typeOf(arg.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function '" << call->callee << "' requires numeric argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    analyzeExpr(arg.get());
+                }
             }
         } else {
             for (const auto& arg : call->args) analyzeExpr(arg.get());

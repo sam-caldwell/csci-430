@@ -285,6 +285,34 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         if (fn == "TAN") { std::string ir = std::format("  {} = call double @tan(double {})", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr tan -> " << ir; log() << m.str() << Symbols::LF; } return res; }
         if (fn == "ATN") { std::string ir = std::format("  {} = call double @atan(double {})", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr atan -> " << ir; log() << m.str() << Symbols::LF; } return res; }
         if (fn == "LOG") { std::string ir = std::format("  {} = call double @log(double {})", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr log -> " << ir; log() << m.str() << Symbols::LF; } return res; }
+        if (fn == "VAL") { std::string ir = std::format("  {} = call double @strtod(ptr {}, ptr null)", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr val -> " << ir; log() << m.str() << Symbols::LF; } return res; }
+        if (fn == "LEN") { std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", n, argv[0]); out << ir << Symbols::LF; } { std::string ir = std::format("  {} = sitofp i64 {} to double", res, n); out << ir << Symbols::LF; } { std::ostringstream m; m << "line " << currentLine_ << " CallExpr len -> len->double"; log() << m.str() << Symbols::LF; } return res; }
+        if (fn == "INSTR") {
+            // INSTR(s$, sub$) or INSTR(start, s$, sub$)
+            std::string s = argv.size() == 2 ? argv[0] : argv[1];
+            std::string sub = argv.size() == 2 ? argv[1] : argv[2];
+            std::string starti = "";
+            if (argv.size() == 3) {
+                starti = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", starti, argv[0]); out << ir << Symbols::LF; }
+            } else {
+                starti = nextTemp(); { std::string ir = std::format("  {} = add i64 1, 0", starti); out << ir << Symbols::LF; }
+            }
+            // off = max(0, start-1)
+            std::string off0 = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, 1", off0, starti); out << ir << Symbols::LF; }
+            std::string isNeg = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", isNeg, off0); out << ir << Symbols::LF; }
+            std::string off = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 0, i64 {}", off, isNeg, off0); out << ir << Symbols::LF; }
+            // sOff = s + off; p = strstr(sOff, sub)
+            std::string sOff = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", sOff, s, off); out << ir << Symbols::LF; }
+            std::string p = nextTemp(); { std::string ir = std::format("  {} = call ptr @strstr(ptr {}, ptr {})", p, sOff, sub); out << ir << Symbols::LF; }
+            std::string p_i = nextTemp(); { std::string ir = std::format("  {} = ptrtoint ptr {} to i64", p_i, p); out << ir << Symbols::LF; }
+            std::string s_i = nextTemp(); { std::string ir = std::format("  {} = ptrtoint ptr {} to i64", s_i, s); out << ir << Symbols::LF; }
+            std::string diff = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", diff, p_i, s_i); out << ir << Symbols::LF; }
+            std::string idx1 = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", idx1, diff); out << ir << Symbols::LF; }
+            std::string idxd = nextTemp(); { std::string ir = std::format("  {} = sitofp i64 {} to double", idxd, idx1); out << ir << Symbols::LF; }
+            std::string isNull = nextTemp(); { std::string ir = std::format("  {} = icmp eq ptr {}, null", isNull, p); out << ir << Symbols::LF; }
+            std::string sel = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, double 0.0, double {}", sel, isNull, idxd); out << ir << Symbols::LF; }
+            return sel;
+        }
         if (fn == "EXP") { std::string ir = std::format("  {} = call double @exp(double {})", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr exp -> " << ir; log() << m.str() << Symbols::LF; } return res; }
         if (fn == "INT") { std::string ir = std::format("  {} = call double @floor(double {})", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr floor(INT) -> " << ir; log() << m.str() << Symbols::LF; } return res; }
         if (fn == "FIX") {

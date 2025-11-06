@@ -294,6 +294,15 @@ private:
      *  - Return the expected argument count for a given intrinsic name.
      */
     static int expectedArity(const std::string& name);
+
+    // Friend accessor to enable unit tests to query private arity table
+    friend class SemanticAnalyzerArityAccessorForTests;
+};
+
+// Minimal friend accessor for tests: exposes expectedArity without widening API surface
+class SemanticAnalyzerArityAccessorForTests {
+public:
+    static int expectedArity(const std::string& name) { return SemanticAnalyzer::expectedArity(name); }
 };
 
 } // namespace gwbasic
