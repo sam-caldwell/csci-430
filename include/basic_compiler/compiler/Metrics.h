@@ -27,7 +27,7 @@ public:
     Metrics() = default;
 
     // Control analysis-only mode (prevents optimizer mutations during counting)
-    void setAnalyzeOnly(bool v) { analyze_only_ = v; }
+    void setAnalyzeOnly(const bool v) { analyze_only_ = v; }
     [[nodiscard]] bool isAnalyzeOnly() const { return analyze_only_; }
 
     // Lexer
@@ -101,6 +101,40 @@ private:
 
     // Friend accessors for tests if needed
     friend class MetricsAccessorForTests;
+};
+
+// Minimal friend accessor for tests to seed metrics without exposing internals
+class MetricsAccessorForTests {
+public:
+    static void setLexerTokenCount(Metrics& m, const std::size_t n) { m.lexer_.token_count = n; }
+    static void setAstParsed(Metrics& m, const std::size_t lines, const std::size_t statements,
+                             const std::size_t expressions, const std::size_t max_expr_depth,
+                             const double avg_expr_depth) {
+        m.ast_parsed_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
+    }
+    static void setAstAfterSemantics(Metrics& m, const std::size_t lines, const std::size_t statements,
+                                     const std::size_t expressions, const std::size_t max_expr_depth,
+                                     const double avg_expr_depth) {
+        m.ast_after_semantics_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
+    }
+    static void setAstOptimized(Metrics& m, const std::size_t lines, const std::size_t statements,
+                                const std::size_t expressions, const std::size_t max_expr_depth,
+                                const double avg_expr_depth) {
+        m.ast_after_opt_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
+    }
+    static void setSemanticsBasic(Metrics& m, const std::size_t const_folds,
+                                  const std::size_t fold_add, const std::size_t fold_mul,
+                                  const std::size_t unary_elim_plus, const std::size_t id_add_zero) {
+        m.semantics_opt_.const_folds = const_folds;
+        m.semantics_opt_.fold_add = fold_add;
+        m.semantics_opt_.fold_mul = fold_mul;
+        m.semantics_opt_.unary_elim_plus = unary_elim_plus;
+        m.semantics_opt_.id_add_zero = id_add_zero;
+    }
+    static void setIrInstructions(Metrics& m, std::size_t n) { m.codegen_.ir_instructions = n; }
+    static void setOptPhaseCounts(Metrics& m, std::vector<std::pair<std::string, std::size_t>> v) {
+        m.codegen_.opt_phase_ir_counts = std::move(v);
+    }
 };
 
 // Global metrics context (optional)

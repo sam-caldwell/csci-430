@@ -15,17 +15,13 @@ using namespace gwbasic;
 TEST(Integration, Metrics_TableFormatting) {
     Metrics m;
     // Fill minimal but varied values
-    m.lexer.token_count = 12;
-    m.ast_parsed = {2, 3, 2, 2, 1.5};
-    m.ast_after_semantics = {2, 3, 2, 2, 1.5};
-    m.ast_after_opt = {2, 3, 1, 1, 1.0};
-    m.semantics_opt.const_folds = 2;
-    m.semantics_opt.fold_add = 1;
-    m.semantics_opt.fold_mul = 1;
-    m.semantics_opt.unary_elim_plus = 1;
-    m.semantics_opt.id_add_zero = 1;
-    m.codegen.ir_instructions = 42;
-    m.codegen.opt_phase_ir_counts = {{"-O1", 40}, {"-O2", 38}};
+    MetricsAccessorForTests::setLexerTokenCount(m, 12);
+    MetricsAccessorForTests::setAstParsed(m, 2, 3, 2, 2, 1.5);
+    MetricsAccessorForTests::setAstAfterSemantics(m, 2, 3, 2, 2, 1.5);
+    MetricsAccessorForTests::setAstOptimized(m, 2, 3, 1, 1, 1.0);
+    MetricsAccessorForTests::setSemanticsBasic(m, 2, 1, 1, 1, 1);
+    MetricsAccessorForTests::setIrInstructions(m, 42);
+    MetricsAccessorForTests::setOptPhaseCounts(m, {{"-O1", 40}, {"-O2", 38}});
 
     std::ostringstream oss;
     m.print(oss);

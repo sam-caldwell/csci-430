@@ -26,6 +26,7 @@
 #include <cctype>
 #include <charconv>
 #include <cstdio>
+#include <iostream>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -83,9 +84,11 @@ static void countStmtExprs(const Stmt* s, std::size_t& n, std::size_t& depthSum,
         countExprs(aa->value.get(), n, depthSum, maxDepth);
         for (const auto& idx : aa->indices) countExprs(idx.get(), n, depthSum, maxDepth);
     } else if (const auto* ma = dyn_cast<const MidAssignStmt>(s)) {
-        countExprs(ma->source.get(), n, depthSum, maxDepth);
+        // MID$(...)= assigns from a string value with start and optional len
+        countExprs(ma->value.get(), n, depthSum, maxDepth);
         countExprs(ma->start.get(), n, depthSum, maxDepth);
-        if (ma->length) countExprs(ma->length.get(), n, depthSum, maxDepth);
+        if (ma->len) countExprs(ma->len.get(), n, depthSum, maxDepth);
+        for (const auto& idx : ma->indices) countExprs(idx.get(), n, depthSum, maxDepth);
     } else if (const auto* ps = dyn_cast<const PrintStmt>(s)) {
         if (ps->value) countExprs(ps->value.get(), n, depthSum, maxDepth);
         for (const auto& v : ps->more) countExprs(v.get(), n, depthSum, maxDepth);
@@ -104,11 +107,13 @@ static void countStmtExprs(const Stmt* s, std::size_t& n, std::size_t& depthSum,
         countExprs(ws->cond.get(), n, depthSum, maxDepth);
         for (const auto& st : ws->body) countStmtExprs(st.get(), n, depthSum, maxDepth);
     } else if (const auto* inp = dyn_cast<const InputStmt>(s)) {
-        if (inp->prompt) countExprs(inp->prompt.get(), n, depthSum, maxDepth);
+        // InputStmt has no prompt expression; nothing to count
+        (void)inp;
     } else if (const auto* lin = dyn_cast<const LineInputStmt>(s)) {
-        if (lin->prompt) countExprs(lin->prompt.get(), n, depthSum, maxDepth);
+        // LineInputStmt has no prompt expression; nothing to count
+        (void)lin;
     } else if (const auto* wr = dyn_cast<const WriteStmt>(s)) {
-        for (const auto& e : wr->values) countExprs(e.get(), n, depthSum, maxDepth);
+        for (const auto& e : wr->items) countExprs(e.get(), n, depthSum, maxDepth);
     }
 }
 
@@ -117,13 +122,14 @@ static void countStmtExprs(const Stmt* s, std::size_t& n, std::size_t& depthSum,
 void Metrics::computeAstSnapshot(const Program& prog, AstSnapshot& out) {
     out = {}; // reset
     out.lines = prog.lines.size();
+    std::size_t depth_sum = 0;
     for (const auto& line : prog.lines) {
         out.statements += line.statements.size();
         for (const auto& st : line.statements) {
-            countStmtExprs(st.get(), out.expressions, out.avg_expr_depth /*reuse as sum*/, out.max_expr_depth);
+            countStmtExprs(st.get(), out.expressions, depth_sum, out.max_expr_depth);
         }
     }
-    if (out.expressions > 0) out.avg_expr_depth = out.avg_expr_depth / static_cast<double>(out.expressions);
+    if (out.expressions > 0) out.avg_expr_depth = static_cast<double>(depth_sum) / static_cast<double>(out.expressions);
 }
 
 // Count IR instructions heuristically by scanning lines that look like instructions.

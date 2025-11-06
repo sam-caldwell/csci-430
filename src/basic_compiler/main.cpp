@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
             std::cout << irWithTriple;
         }
         if (wantMetrics) {
-            metrics.setOptPhaseCounts(Metrics::optimizedIrInstructionCounts(irWithTriple, CLANG_PATH, {"-O1", "-O2", "-O3"}));
+            metrics.setOptPhaseCounts(gwbasic::Metrics::optimizedIrInstructionCounts(irWithTriple, CLANG_PATH, {"-O1", "-O2", "-O3"}));
             metrics.print();
             gwbasic::gMetrics = nullptr; // clear
         }

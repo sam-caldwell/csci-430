@@ -75,6 +75,8 @@ inline std::string to_string(const TokenType t) {
         case TokenType::KwChdir: return "CHDIR";
         case TokenType::KwClear: return "CLEAR";
         case TokenType::KwSwap: return "SWAP";
+        case TokenType::KwOption: return "OPTION";
+        case TokenType::KwBase: return "BASE";
         case TokenType::KwErase: return "ERASE";
         case TokenType::KwAnd: return "AND";
         case TokenType::KwOr: return "OR";
