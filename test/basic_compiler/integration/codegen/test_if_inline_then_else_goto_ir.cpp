@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "../helper/ir_block_slice.h"
+#include "../../helper/ir_block_slice.h"
 
 using namespace gwbasic;
 
