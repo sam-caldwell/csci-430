@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "../helper/compile_single_line_print.h"
+#include "../../helper/compile_single_line_print.h"
 
 using namespace gwbasic;
 
