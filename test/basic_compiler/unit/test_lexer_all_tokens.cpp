@@ -67,7 +67,11 @@ TEST(Lexer, AllRecognizedTokens) {
         // logical operators AND/OR/NOT
         "210 IF 1 AND 0 THEN 220\n"
         "220 IF 1 OR 0 THEN 230\n"
-        "230 IF NOT 0 THEN 240\n";
+        "230 IF NOT 0 THEN 240\n"
+        // integer division and MOD keyword
+        "240 PRINT 5 \\ 2, 5 MOD 2\n"
+        // file channel '#'
+        "250 PRINT #1, 123\n";
 
     std::istringstream iss(src);
     Lexer lex(iss);
@@ -119,6 +123,9 @@ TEST(Lexer, AllRecognizedTokens) {
         TokenType::KwAnd,
         TokenType::KwOr,
         TokenType::KwNot,
+        TokenType::Backslash,
+        TokenType::KwMod,
+        TokenType::Hash,
     };
 
     for (auto tt : expected) {

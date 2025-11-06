@@ -301,12 +301,20 @@ private:
 
     // Friend accessor to enable unit tests to query private arity table
     friend class SemanticAnalyzerArityAccessorForTests;
+    // Friend accessor to enable unit tests to invoke private constEval
+    friend class SemanticAnalyzerConstEvalAccessorForTests;
 };
 
 // Minimal friend accessor for tests: exposes expectedArity without widening API surface
 class SemanticAnalyzerArityAccessorForTests {
 public:
     static int expectedArity(const std::string& name) { return SemanticAnalyzer::expectedArity(name); }
+};
+
+// Minimal friend accessor for tests: exposes constEval without widening API surface
+class SemanticAnalyzerConstEvalAccessorForTests {
+public:
+    static bool constEval(const Expr* e, double& out) { return SemanticAnalyzer::constEval(e, out); }
 };
 
 } // namespace gwbasic
