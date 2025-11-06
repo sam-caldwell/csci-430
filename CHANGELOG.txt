@@ -1,4 +1,5 @@
 31 Oct 2025 - initial version
+
 01 Nov 2025 - Added LLVM-style RTTI to AST (Node/NodeKind, isa/dyn_cast), introduced SemanticAnalyzer with scope
               tracking, type checks, and strict GOTO/GOSUB validation (now default), enabled string-to-string
               comparisons (codegen via strcmp), refactored codegen/optimizer away from dynamic_cast, integrated
@@ -31,6 +32,7 @@
               codegen support.
             - Tests: unit (semantics/codegen) and e2e validating repeat-on-zero, reseed-on-negative, advance-on-positive,
               and RANDOMIZE behaviors. All tests pass.
+
 02 Nov 2025 - Control flow and loops expansion + demos
             - FOR: Added multi-line FOR...NEXT support.
               - New AST marker NextStmt; parseFor now permits newline before NEXT.
@@ -71,6 +73,7 @@
               - Added tiny AST-driven unit tests to exercise intrinsic helper paths indirectly via analyze()
                 (unknown function errors, arity mismatch, LOG with comparison arg, SQR negative constant).
               - Keeps public API boundaries intact; no private hooks needed. All tests pass.
+
 03 Nov 2025 - GW-BASIC extensions: memory ops, CALL/USR, DEF SEG/USR, CHDIR, ASC/CHR$/LEFT$/RIGHT$/MID$, DATA/READ,
               demos
             - DEF SEG + memory-mapped operations and USR/CALL
@@ -219,7 +222,7 @@
               - Integration: confirms garbage tokens after apostrophe are ignored (no lex/parse errors); IR contains
                 expected print formatting for statements before comments.
 
-06 Nov 2025 - DATA/READ/RESTORE overhaul
+            - DATA/READ/RESTORE overhaul
             - Lexer/Parser/AST: DATA items now preserve tokenization as quoted strings vs. numbers.
               - New AST type DataItem { bool isString; std::string text } and DataStmt now holds vector<DataItem>.
               - Parser::parseData produces DataItem entries; existing unit tests updated accordingly.
@@ -312,3 +315,11 @@
             - Ensure relational operators are supported with strict semantics, unit/integration/e2e tests, and ensure
               these tests are green.
 
+06 Nov 2025 - Numeric:
+                - add VAL, LEN (of string), INSTR, FIX/INT differences (behavior vs. negatives),
+                - SGN/SQR/SQRT/log domain handling done;
+                - Ensure arity and domains enforced uniformly via `expected_arity` (currently returns 1 for all;
+                  SCREEN is special-cased elsewhere).
+                - Mixed-type arithmetic conversion rules (Single vs. Double, Int16/Long promotion) are simplified:
+                    - expressions are computed in double then stored with truncation/rounding;
+                    - consider matching GW-BASIC’s rounding/truncation semantics per operator.
