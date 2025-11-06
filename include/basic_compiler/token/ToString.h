@@ -76,6 +76,9 @@ inline std::string to_string(const TokenType t) {
         case TokenType::KwClear: return "CLEAR";
         case TokenType::KwSwap: return "SWAP";
         case TokenType::KwErase: return "ERASE";
+        case TokenType::KwAnd: return "AND";
+        case TokenType::KwOr: return "OR";
+        case TokenType::KwNot: return "NOT";
         case TokenType::KwStop: return "STOP";
         case TokenType::KwSystem: return "SYSTEM";
         case TokenType::Plus: return "+";
@@ -88,6 +91,7 @@ inline std::string to_string(const TokenType t) {
         case TokenType::LessEqual: return "<=";
         case TokenType::GreaterEqual: return ">=";
         case TokenType::NotEqual: return "<>";
+        case TokenType::Caret: return "^";
         case TokenType::LParen: return "(";
         case TokenType::RParen: return ")";
         case TokenType::Colon: return ":";

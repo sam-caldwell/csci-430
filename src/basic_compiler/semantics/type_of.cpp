@@ -84,6 +84,9 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
             case BinaryOp::Sub:
             case BinaryOp::Mul:
             case BinaryOp::Div:
+            case BinaryOp::Pow:
+            case BinaryOp::And:
+            case BinaryOp::Or:
                 if (lt == ValueType::String || rt == ValueType::String) {
                     std::ostringstream m; m << "TypeError: arithmetic on string @ " << e->pos.line << ':' << e->pos.col; log() << m.str() << '\n';
                     throw SemanticError(m.str());

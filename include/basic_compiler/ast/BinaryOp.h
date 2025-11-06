@@ -13,7 +13,8 @@ namespace gwbasic {
  *  - Eq, Ne, Lt, Le, Gt, Ge: comparisons yielding 0.0/1.0 in codegen
  */
 enum class BinaryOp {
-    Add, Sub, Mul, Div,
+    Add, Sub, Mul, Div, Pow,
+    And, Or,
     Eq, Ne, Lt, Le, Gt, Ge
 };
 

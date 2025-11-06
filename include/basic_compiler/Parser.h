@@ -331,6 +331,8 @@ private:
      *  - Expr: Expression node
      */
     std::unique_ptr<Expr> parseComparison();
+    /** Parse logical expressions (AND/OR) over comparison expressions. */
+    std::unique_ptr<Expr> parseLogical();
     /**
      * Function: Parser::parseTerm
      * Purpose:
@@ -355,6 +357,14 @@ private:
      *  - Expr: Expression node
      */
     std::unique_ptr<Expr> parseUnary();
+    /**
+     * Function: Parser::parsePower
+     * Purpose:
+     *  - Parse exponentiation (^) with right associativity.
+     * Outputs:
+     *  - Expr: Expression node
+     */
+    std::unique_ptr<Expr> parsePower();
     /**
      * Function: Parser::parsePrimary
      * Purpose:

@@ -136,6 +136,9 @@ private:
         {"ERASE",     TokenType::KwErase},
         {"OPTION",    TokenType::KwOption},
         {"BASE",      TokenType::KwBase},
+        {"AND",       TokenType::KwAnd},
+        {"OR",        TokenType::KwOr},
+        {"NOT",       TokenType::KwNot},
     };
 
     /*
@@ -445,7 +448,7 @@ private:
     // Lightweight helpers used by tokenize() to reduce branching
     bool tryEmitNewline(std::vector<Token>& out);
     bool tryEmitPrimary(std::vector<Token>& out);
-    void emitHexLiteral(std::vector<Token>& out, int line, int col);
+    void emitAmpLiteral(std::vector<Token>& out, int line, int col);
     bool tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, char c);
 };
 

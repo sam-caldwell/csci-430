@@ -294,3 +294,21 @@
 
             - Tests: unit (parser + semantics), integration (IR patterns for string vars and numeric array elems),
               and e2e (numeric and string swaps produce expected outputs). All tests pass locally.
+
+            - Numeric literal formats
+                - Lexer: expanded number scanning to support scientific notation with E/D exponents (case-insensitive),
+                  normalizing 'D' to 'E' for downstream parsing. Added '&' numeric forms beyond hex:
+                  - &H[0-9A-F]+ (hex), &O[0-7]+ (octal), &[0-7]+ (octal shorthand), &B[01]+ (binary).
+                  - Emits Integer tokens with decimal lexemes for base-prefixed forms.
+                - Parser/Codegen: no changes required beyond lexer normalization; primary numeric parsing and DATA number
+                  table construction now accept scientific notation with 'D'.
+                - Tests: unit (lexer exponent normalization and &O/&/&B decoding), integration (DATA 1D2 → double
+                  1.000000e+02 in @gwb_data_num), and E2E (PRINT &H/&O/&/&B and 1D2 produce expected values). All
+                  tests are green.
+            - Implement Exponentiation `^` operator, associated unit/integration, and e2e tests, then ensure the
+              tests are all green.
+            - Implement logical operators (AND/OR/NOT) for numeric truthy semantics, unit/integration/e2e tests, and
+              ensure all tests are green.
+            - Ensure relational operators are supported with strict semantics, unit/integration/e2e tests, and ensure
+              these tests are green.
+

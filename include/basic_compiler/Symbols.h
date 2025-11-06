@@ -41,6 +41,7 @@ struct Symbols {
     static inline constexpr Symbol AMPERSAND    {'&'};
     static inline constexpr Symbol PERCENT      {'%'};
     static inline constexpr Symbol EXCLAMATION  {'!'};
+    static inline constexpr Symbol CARET        {'^'};
 
     // Operators (double)
     static inline constexpr Symbol LESS_EQUAL   {"<="};
@@ -56,4 +57,3 @@ struct Symbols {
 };
 
 } // namespace gwbasic
-

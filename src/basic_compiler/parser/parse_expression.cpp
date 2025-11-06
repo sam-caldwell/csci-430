@@ -23,7 +23,7 @@ std::unique_ptr<Expr> Parser::parseExpression() {
      *  - Delegates to parseComparison(), which handles precedence and
      *    relational operators.
      */
-    return parseComparison();
+    return parseLogical();
 }
 
 } // namespace gwbasic

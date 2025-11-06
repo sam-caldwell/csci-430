@@ -6,42 +6,60 @@
 namespace gwbasic {
 
 /*
- * Function: Lexer::emitHexLiteral
+ * Function: Lexer::emitAmpLiteral
  * Purpose:
- *  - Consume an '&' followed by 'H'/'h' and a sequence of hex digits,
- *    emitting an Integer token with the parsed decimal value.
+ *  - Consume an '&' numeric literal in one of the following forms:
+ *      &H[0-9A-F]+  (hex)
+ *      &O[0-7]+     (octal)
+ *      &[0-7]+      (octal shorthand)
+ *      &B[0-1]+     (binary)
+ *    Emits an Integer token with the parsed decimal value.
  * Inputs:
  *  - line/col: token position metadata captured by the caller
  * Throws:
- *  - LexError when the format is invalid (missing 'H' or digits)
+ *  - LexError when the format is invalid
  */
-void Lexer::emitHexLiteral(std::vector<Token>& out, const int line, const int col) {
+void Lexer::emitAmpLiteral(std::vector<Token>& out, const int line, const int col) {
     // Caller should have peek() == '&'
     advance();
+    if (atEnd()) { std::ostringstream oss; oss << "Unexpected '&' at " << line << ':' << col; throw LexError(oss.str()); }
     const unsigned char cu = static_cast<unsigned char>(peek());
-    const char n = static_cast<char>(std::toupper(cu));
-    if (n != 'H') {
-        std::ostringstream oss; oss << "Unexpected '&' at " << line << ':' << col;
-        throw LexError(oss.str());
-    }
-    advance();
+    const char up = static_cast<char>(std::toupper(cu));
 
     unsigned long long val = 0ULL;
+    int base = 0;
+    bool expectDigits = true;
+
+    if (up == 'H') { base = 16; advance(); }
+    else if (up == 'O') { base = 8; advance(); }
+    else if (up == 'B') { base = 2; advance(); }
+    else if (std::isdigit(cu)) { base = 8; /* shorthand: &<octal> */ }
+    else {
+        std::ostringstream oss; oss << "Unexpected '&' at " << line << ':' << col; throw LexError(oss.str());
+    }
+
     int digits = 0;
-    while (true) {
+    while (!atEnd()) {
         const unsigned char ch = static_cast<unsigned char>(peek());
-        int v;
-        if (ch >= '0' && ch <= '9') v = ch - '0';
-        else if (ch >= 'A' && ch <= 'F') v = 10 + (ch - 'A');
-        else if (ch >= 'a' && ch <= 'f') v = 10 + (ch - 'a');
-        else break;
-        val = (val << 4) + static_cast<unsigned long long>(v);
+        int v = -1;
+        if (base == 16) {
+            if (ch >= '0' && ch <= '9') v = ch - '0';
+            else if (ch >= 'A' && ch <= 'F') v = 10 + (ch - 'A');
+            else if (ch >= 'a' && ch <= 'f') v = 10 + (ch - 'a');
+            else break;
+        } else if (base == 8) {
+            if (ch >= '0' && ch <= '7') v = ch - '0';
+            else break;
+        } else if (base == 2) {
+            if (ch == '0' || ch == '1') v = ch - '0';
+            else break;
+        }
+        val = val * static_cast<unsigned long long>(base) + static_cast<unsigned long long>(v);
         advance();
         ++digits;
     }
-    if (digits == 0) {
-        std::ostringstream oss; oss << "Invalid hex literal at " << line << ':' << col;
-        throw LexError(oss.str());
+    if (expectDigits && digits == 0) {
+        std::ostringstream oss; oss << "Invalid & literal at " << line << ':' << col; throw LexError(oss.str());
     }
     Token t(TokenType::Integer, std::to_string(val), line, col);
     emitToken(out, t);
@@ -49,4 +67,3 @@ void Lexer::emitHexLiteral(std::vector<Token>& out, const int line, const int co
 }
 
 } // namespace gwbasic
-

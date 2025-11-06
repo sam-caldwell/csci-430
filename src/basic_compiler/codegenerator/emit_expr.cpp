@@ -84,6 +84,14 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             std::ostringstream m; m << "line " << currentLine_ << " UnaryExpr(-) -> " << ir; log() << m.str() << Symbols::LF;
             return res;
         }
+        if (u->op == Symbols::EXCLAMATION.first()) {
+            // Logical NOT (numeric truthy): 1.0 if inner == 0.0 else 0.0
+            std::string isZero = nextTemp();
+            { std::string ir = std::format("  {} = fcmp oeq double {}, 0.0", isZero, inner); out << ir << Symbols::LF; }
+            std::string res = nextTemp();
+            { std::string ir = std::format("  {} = uitofp i1 {} to double", res, isZero); out << ir << Symbols::LF; }
+            return res;
+        }
     }
     if (auto b = dyn_cast<const BinaryExpr>(e)) {
         if (b->op == BinaryOp::Eq || b->op == BinaryOp::Ne || b->op == BinaryOp::Lt || b->op == BinaryOp::Le || b->op == BinaryOp::Gt || b->op == BinaryOp::Ge) {
@@ -169,6 +177,26 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             case BinaryOp::Sub: { std::string ir = std::format("  {} = fsub double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(-) -> " << ir; log() << m.str() << Symbols::LF; } break; }
             case BinaryOp::Mul: { std::string ir = std::format("  {} = fmul double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(*) -> " << ir; log() << m.str() << Symbols::LF; } break; }
             case BinaryOp::Div: { std::string ir = std::format("  {} = fdiv double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(/) -> " << ir; log() << m.str() << Symbols::LF; } break; }
+            case BinaryOp::And: {
+                std::string lb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", lb, L); out << ir << Symbols::LF; }
+                std::string rb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", rb, R); out << ir << Symbols::LF; }
+                std::string bb = nextTemp(); { std::string ir = std::format("  {} = and i1 {}, {}", bb, lb, rb); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  {} = uitofp i1 {} to double", res, bb); out << ir << Symbols::LF; }
+                break;
+            }
+            case BinaryOp::Or: {
+                std::string lb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", lb, L); out << ir << Symbols::LF; }
+                std::string rb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", rb, R); out << ir << Symbols::LF; }
+                std::string bb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bb, lb, rb); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  {} = uitofp i1 {} to double", res, bb); out << ir << Symbols::LF; }
+                break;
+            }
+            case BinaryOp::Pow: {
+                std::string ir = std::format("  {} = call double @pow(double {}, double {})", res, L, R);
+                out << ir << Symbols::LF;
+                { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(^) -> " << ir; log() << m.str() << Symbols::LF; }
+                break;
+            }
             default: throw CodeGenError("Unsupported binary op in arithmetic");
         }
         return res;

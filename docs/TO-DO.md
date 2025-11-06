@@ -4,8 +4,6 @@
 
 ## Parser and Grammar Coverage
 
-- Implement Numeric literals: support scientific notation (E/D exponents), octal (`&O`/`&`), and binary where applicable; only `&H` hex is implemented. Add unit/integration/e2e tests, and ensure all tests are green.
-
 - LSET/RSET field$ = expr$: fixed-length string field assignment semantics.
  
 - Additional PRINT forms: full “PRINT USING” with zone/tabbing and trailing separators (comma/semicolon) behavior.
@@ -39,7 +37,7 @@
 ## File I/O Semantics
 
 - OPEN "name" FOR ... AS #n:
-  - Only INPUT and OUTPUT modes implemented. Missing: APPEND, RANDOM, BINARY; missing LEN=, ACCESS/LOCK, device forms
+  - Only INPUT and OUTPUT modes are implemented. Missing: APPEND, RANDOM, BINARY; missing LEN=, ACCESS/LOCK, device forms
     (COM/LPT/CONS), and error handling.
   - Channel range checking and duplicate-open policy unspecified; currently simple table [16 x ptr].
 - CLOSE #n: basic support exists; missing CLOSE without argument (close all) semantics and error cases.
@@ -81,12 +79,6 @@
   preservation across true overlays once implemented.
 - CLEAR is line-scoped to “vars/arrays seen before” to avoid crossing CHAIN boundaries; verify against GW-BASIC’s 
   memory model (string space, array descriptors, file buffers).
-
-## Operators and Expressions
-
-- Exponentiation `^` operator not implemented.
-- Logical operators (AND/OR/NOT) for numeric truthy semantics are not implemented.
-- Relational operations are supported; boolean short-circuit semantics (from AND/OR) to be defined when added.
 
 ## Diagnostics and Robustness
 

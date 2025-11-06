@@ -83,6 +83,9 @@ enum class TokenType {
     KwOption,
     KwBase,
     KwErase,
+    KwAnd,
+    KwOr,
+    KwNot,
 
     // Operators / punctuation
     Plus,
@@ -95,6 +98,7 @@ enum class TokenType {
     LessEqual,
     GreaterEqual,
     NotEqual,
+    Caret,
     LParen,
     RParen,
     Colon,

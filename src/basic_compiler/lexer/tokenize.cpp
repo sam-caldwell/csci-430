@@ -28,7 +28,7 @@ std::vector<Token> Lexer::tokenize() {
         const int tline = line_;
         const int tcol = col_;
         const char c = peek();
-        if (c == Symbols::AMPERSAND.first()) { emitHexLiteral(tokens, tline, tcol); continue; }
+        if (c == Symbols::AMPERSAND.first()) { emitAmpLiteral(tokens, tline, tcol); continue; }
         if (tryEmitOperatorOrPunct(tokens, tline, tcol, c)) continue;
 
         std::ostringstream oss;

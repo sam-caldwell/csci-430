@@ -41,6 +41,7 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare double @atan(double)" << Symbols::LF
         << "declare double @log(double)" << Symbols::LF
         << "declare double @exp(double)" << Symbols::LF
+        << "declare double @pow(double, double)" << Symbols::LF
         << "declare double @floor(double)" << Symbols::LF << Symbols::LF
     // Additional helpers for extended math/CVT
         << "declare double @drand48()" << Symbols::LF

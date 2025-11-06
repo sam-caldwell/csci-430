@@ -18,7 +18,8 @@ namespace gwbasic {
 std::unique_ptr<Expr> Parser::parseUnary() {
     if (match(TokenType::Plus)) return std::make_unique<UnaryExpr>(Symbols::PLUS.first(), parseUnary());
     if (match(TokenType::Minus)) return std::make_unique<UnaryExpr>(Symbols::MINUS.first(), parseUnary());
-    return parsePrimary();
+    if (match(TokenType::KwNot)) return std::make_unique<UnaryExpr>(Symbols::EXCLAMATION.first(), parseUnary());
+    return parsePower();
 }
 
 } // namespace gwbasic
