@@ -301,7 +301,7 @@
                   - &H[0-9A-F]+ (hex), &O[0-7]+ (octal), &[0-7]+ (octal shorthand), &B[01]+ (binary).
                   - Emits Integer tokens with decimal lexemes for base-prefixed forms.
                 - Parser/Codegen: no changes required beyond lexer normalization; primary numeric parsing and DATA number
-                  table construction now accept scientific notation with 'D'.
+                  table construction now accept scientific notation with 'D.'
                 - Tests: unit (lexer exponent normalization and &O/&/&B decoding), integration (DATA 1D2 → double
                   1.000000e+02 in @gwb_data_num), and E2E (PRINT &H/&O/&/&B and 1D2 produce expected values). All
                   tests are green.

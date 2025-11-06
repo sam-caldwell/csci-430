@@ -61,7 +61,13 @@ TEST(Lexer, AllRecognizedTokens) {
         // ALL keyword (appears in CHAIN syntax; lex only)
         "180 ALL\n"
         // ON keyword (used by ON GOTO/GOSUB)
-        "190 ON 1 GOTO 10\n";
+        "190 ON 1 GOTO 10\n"
+        // caret '^' exponent operator
+        "200 PRINT 2 ^ 3\n"
+        // logical operators AND/OR/NOT
+        "210 IF 1 AND 0 THEN 220\n"
+        "220 IF 1 OR 0 THEN 230\n"
+        "230 IF NOT 0 THEN 240\n";
 
     std::istringstream iss(src);
     Lexer lex(iss);
@@ -109,6 +115,10 @@ TEST(Lexer, AllRecognizedTokens) {
         TokenType::KwCommon,
         TokenType::KwAll,
         TokenType::KwOn,
+        TokenType::Caret,
+        TokenType::KwAnd,
+        TokenType::KwOr,
+        TokenType::KwNot,
     };
 
     for (auto tt : expected) {

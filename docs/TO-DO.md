@@ -18,8 +18,7 @@
   KEY/KEYn/ON KEY, ON event variants, PEN/STRIG, TIMER ON/OFF, TRON/TROFF, CONT, LOAD/SAVE/NEW/DELETE/LIST/LLIST/AUTO/
   RENUM/EDIT/PCOPY, RESET, SHELL, ENVIRON, OUT, WAIT.
 
-- Add metrics for optimizations in semantics (algebraic simplifications, constant folding, etc.) and codegen 
-  optimizations.
+- 
 
 
 ## Code Generation: Implementations Missing (parses exist)
