@@ -19,13 +19,15 @@ if [ -f "${EXCLUDE_RE}" ]; then EXCLUDE_RE="$(cat "${EXCLUDE_RE}")"; fi
 if [ -f "${SCOPE}" ]; then SCOPE="$(cat "${SCOPE}")"; fi
 
 echo "[coverage] Generating report..."
-"${LLVM_COV}" report "${UNIT_BIN}" -instr-profile="${PROF_DATA}" -use-color=false > "${OUT_DIR}/report.txt"
+# Build list of binaries to include in the report (some may not exist in certain builds)
+report_bins=()
+if [ -x "${UNIT_BIN}" ]; then report_bins+=("${UNIT_BIN}"); fi
+if [ -x "${INT_BIN}" ]; then report_bins+=("${INT_BIN}"); fi
+if [ -x "${E2E_BIN}" ]; then report_bins+=("${E2E_BIN}"); fi
+"${LLVM_COV}" report "${report_bins[@]}" -instr-profile="${PROF_DATA}" -use-color=false > "${OUT_DIR}/report.txt"
 
 echo "[coverage] Exporting LCOV to ${OUT_DIR}/lcov.info..."
-: > "${OUT_DIR}/lcov.info"
-"${LLVM_COV}" export -format=lcov "${UNIT_BIN}" -instr-profile="${PROF_DATA}" >> "${OUT_DIR}/lcov.info"
-"${LLVM_COV}" export -format=lcov "${INT_BIN}"  -instr-profile="${PROF_DATA}" >> "${OUT_DIR}/lcov.info" || true
-"${LLVM_COV}" export -format=lcov "${E2E_BIN}"  -instr-profile="${PROF_DATA}" >> "${OUT_DIR}/lcov.info" || true
+"${LLVM_COV}" export -format=lcov "${report_bins[@]}" -instr-profile="${PROF_DATA}" > "${OUT_DIR}/lcov.info"
 
 awk_input="${OUT_DIR}/report.txt"
 if [ -n "${INCLUDE_RE}" ]; then

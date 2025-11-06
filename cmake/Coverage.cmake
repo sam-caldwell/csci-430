@@ -8,10 +8,10 @@ include_guard(GLOBAL)
 # Configuration knobs (override at configure time with -D...)
 set(COVERAGE_MIN "95" CACHE STRING "Minimum percent (Lines/Regions) to pass")
 set(COVERAGE_SCOPE "src/basic_compiler/" CACHE STRING "Path prefix to report/aggregate")
-# Default scope: focus on lexer to enable 100% coverage goals incrementally
-set(COVERAGE_INCLUDE_RE "src/basic_compiler/lexer/" CACHE STRING "egrep regex to include rows")
-set(COVERAGE_EXCLUDE_RE "src/basic_compiler/lexer/log_token.cpp|src/basic_compiler/codegenerator/" CACHE STRING "egrep regex to exclude rows")
-set(COVERAGE_METRIC "regions" CACHE STRING "lines|regions|both (both requires both >= min)")
+# Default scope: include all compiler sources only; exclude tests from coverage requirements.
+set(COVERAGE_INCLUDE_RE "^(include/|src/)" CACHE STRING "egrep regex to include rows")
+set(COVERAGE_EXCLUDE_RE "" CACHE STRING "egrep regex to exclude rows")
+set(COVERAGE_METRIC "lines" CACHE STRING "lines|regions|both (both requires both >= min)")
 
 # Test executables (from this project)
 set(UNIT_BIN "${CMAKE_BINARY_DIR}/basic_compiler_unit_tests")

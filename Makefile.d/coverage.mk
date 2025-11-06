@@ -13,13 +13,14 @@
 #  - COVERAGE_METRIC: lines|regions|both (both requires both to meet threshold)
 ## Default policy: cover the entire codebase for csci-430 projects
 ## (basic_compiler, hello_world, and logger under src/)
-COVERAGE_MIN ?= 100
+COVERAGE_MIN ?= 95
 COVERAGE_SCOPE ?= test/
-# Focus coverage aggregation on executed tests to achieve 100% test coverage.
-# Exclude test helper utilities (headers with inline helpers may depress coverage unfairly).
-COVERAGE_INCLUDE_RE ?= ^test/
+# Enforce comprehensive coverage on the compiler only; exclude tests from coverage requirements.
+# Includes all compiler areas (lexer, parser, semantics, codegenerator, etc.).
+COVERAGE_INCLUDE_RE ?= ^(include/|src/)
 COVERAGE_METRIC ?= lines
-COVERAGE_EXCLUDE_RE ?= ^test/basic_compiler/helper/
+# No test files included, so helper exclusion is unnecessary; keep empty unless overriding.
+COVERAGE_EXCLUDE_RE ?=
 # Use a dedicated build directory for coverage to avoid CMakeCache path mismatches
 COVERAGE_BUILD_DIR ?= build/cmake-build-coverage
 
