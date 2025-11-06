@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Expected Behavior: Loop emits cond/body/inc/end blocks with inclusive
  *          compare (ole) and fadd increment; INPUT uses @.fmt_in and scanf.
  */
+/*
+Test: CodeGenLoopsInput.ForLoopDefaultStepLabelsAndOps
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenLoopsInput, ForLoopDefaultStepLabelsAndOps) {
     const auto src =
         "10 FOR I = 1 TO 3: PRINT I: NEXT\n"

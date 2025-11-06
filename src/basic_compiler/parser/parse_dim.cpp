@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseDim
+ * Purpose:
+ *  - Parse DIM name(length)
+ * Inputs:
+ *  - none (assumes 'DIM' matched by caller)
+ * Outputs:
+ *  - DimStmt: array name and length
+ */
 std::unique_ptr<Stmt> Parser::parseDim() {
     // DIM <Identifier> '(' <Integer> ')'
     if (!check(TokenType::Identifier)) throw ParseError("Expected array name after DIM");
@@ -17,4 +26,3 @@ std::unique_ptr<Stmt> Parser::parseDim() {
 }
 
 } // namespace gwbasic
-

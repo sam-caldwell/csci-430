@@ -1,0 +1,97 @@
+name: Coverage
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          set -euxo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y wget software-properties-common lsb-release gnupg ca-certificates
+          # Install pinned LLVM/Clang 17 toolchain
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 17
+          # libc++ runtime for Clang on Linux
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            clang-tidy-17 \
+            llvm-17-tools \
+            libc++-17-dev \
+            libc++abi-17-dev \
+            lld-17
+
+      - name: Setup LLVM 17 env (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          echo "LLVM_PREFIX=/usr/lib/llvm-17" >> "$GITHUB_ENV"
+          echo "CC=clang-17" >> "$GITHUB_ENV"
+          echo "CXX=clang++-17" >> "$GITHUB_ENV"
+          echo "PATH=/usr/lib/llvm-17/bin:$PATH" >> "$GITHUB_ENV"
+
+      - name: Install dependencies (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          set -euxo pipefail
+          brew update
+          brew install llvm@17 ninja cmake || true
+          prefix=$(brew --prefix llvm@17)
+          echo "LLVM_PREFIX=${prefix}" >> "$GITHUB_ENV"
+          echo "PATH=${prefix}/bin:$PATH" >> "$GITHUB_ENV"
+          echo "CC=${prefix}/bin/clang" >> "$GITHUB_ENV"
+          echo "CXX=${prefix}/bin/clang++" >> "$GITHUB_ENV"
+
+      - name: Run Linters
+        env:
+          GENERATOR: Ninja
+          # Use unified toolchain (macOS: Homebrew LLVM, Linux: LLVM 17 + libc++)
+          TOOLCHAIN: cmake/toolchain.cmake
+        run: make clean configure lint && echo "lint passed"
+
+      - name: Run Unit/integration/e2e tests
+        env:
+          GENERATOR: Ninja
+          # Use unified toolchain (macOS: Homebrew LLVM, Linux: LLVM 17 + libc++)
+          TOOLCHAIN: cmake/toolchain.cmake
+        run: make clean configure test -j2 && echo "tests passed"
+
+      - name: Build demo programs
+        env:
+          GENERATOR: Ninja
+          # Use unified toolchain (macOS: Homebrew LLVM, Linux: LLVM 17 + libc++)
+          TOOLCHAIN: cmake/toolchain.cmake
+        run: make clean configure build demo
+
+      - name: Run Coverage
+        env:
+          GENERATOR: Ninja
+          # Use unified toolchain (macOS: Homebrew LLVM, Linux: LLVM 17 + libc++)
+          TOOLCHAIN: cmake/toolchain.cmake
+        run: |
+          make clean configure coverage

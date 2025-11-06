@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseStatement for INPUT.
  * Expected Behavior: Error reported when no identifier follows INPUT.
  */
+/*
+Test: Parser.ErrorInputMissingIdentifier
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorInputMissingIdentifier) {
     std::string src = "10 INPUT 123\n";
     std::istringstream iss(src);

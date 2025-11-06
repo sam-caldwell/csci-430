@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram
  * Expected Behavior: Parsing throws ParseError when a WHILE loop lacks a WEND terminator.
  */
+/*
+Test: Parser.ErrorWhileMissingWendSameLine
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorWhileMissingWendSameLine) {
     std::string src = "10 WHILE I < 3 : PRINT I\n"; // missing WEND on the same line
     Lexer lex(src);

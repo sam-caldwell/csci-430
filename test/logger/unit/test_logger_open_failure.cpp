@@ -13,10 +13,16 @@ namespace fs = std::filesystem;
  * Test: Logger.OpenFailureReturnsFalse
  * Purpose: Opening a directory path should fail and writes are discarded.
  */
+/*
+Test: Logger.OpenFailureReturnsFalse
+Inputs: Filesystem paths, log messages, toggles
+Code under test: Logger component
+Expected behavior: Creates directories, writes/appends as expected, handles errors
+*/
 TEST(Logger, OpenFailureReturnsFalse) {
   logger::Logger log;
   // Attempt to open a directory path as a file (should fail)
-  fs::path dir = fs::current_path();
+  const fs::path dir = fs::current_path();
   bool ok = log.open(dir.string());
   EXPECT_FALSE(ok);
 

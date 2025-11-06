@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Expected Behavior: IR contains the RUN site label (line20) and a branch to
  *                    the first line label (br label %line10).
  */
+/*
+Test: CodeGenRun.RunNoArg_BranchesToFirstLine
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenRun, RunNoArg_BranchesToFirstLine) {
     const auto src =
         "10 LET X = 5\n"

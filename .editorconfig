@@ -1,0 +1,65 @@
+# .editorconfig
+# (c) 2025 Asymmetric Effort, LLC. <scaldwell@asymmetric-effort.com>
+
+# Top-most EditorConfig file
+root = true
+
+# Global defaults
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Indentation
+indent_style = space
+indent_size = 4
+
+# Makefiles
+# Makefile (top-level)
+[Makefile]
+indent_style = tab
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Makefile fragments
+[*.mk]
+indent_style = tab
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# C++ source files
+[*.{cpp,h,cxx,hxx,cc,hh}]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Shell scripts
+[*.sh]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+
+# CMake (top-level file)
+[CMakeLists.txt]
+indent_style = space
+indent_size = 4
+
+# CMake modules
+[*.cmake]
+indent_style = space
+indent_size = 4
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true

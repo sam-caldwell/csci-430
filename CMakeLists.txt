@@ -30,3 +30,12 @@ include(cmake/linter.cmake)
 
 # Coverage target (llvm-cov via CMake)
 include(cmake/Coverage.cmake)
+
+# Custom checks: ensure docstrings on tests and single-TEST constraint
+include(cmake/check_test_docstrings.cmake)
+
+# Helper target to insert missing docstrings in tests
+include(cmake/add_test_docstrings.cmake)
+
+# Static checks for code organization
+include(cmake/check_one_function_per_file.cmake)

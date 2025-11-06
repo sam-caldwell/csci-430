@@ -11,6 +11,12 @@ using namespace gwbasic;
  * Components Under Test: CodeGenerator emitFor.
  * Expected Behavior: Presence of cond label and fadd increment using step.
  */
+/*
+Test: CodeGenLoopsInput.ForLoopWithStepTwo
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenLoopsInput, ForLoopWithStepTwo) {
     const auto src =
         "10 FOR I = 1 TO 5 STEP 2: NEXT\n"

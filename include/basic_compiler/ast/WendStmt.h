@@ -6,7 +6,15 @@
 
 namespace gwbasic {
 
-struct WendStmt : ASTLeaf<NodeKind::WendStmt, Stmt> { WendStmt() = default; };
+/**
+ * Type: WendStmt (marker)
+ * Purpose:
+ *  - Structural marker for WEND terminating a WHILE block; removed during
+ *    parseProgram() restructuring.
+ * Inputs: none
+ * Outputs:
+ *  - Temporary Stmt, not present after folding
+ */
+struct WendStmt final : ASTLeaf<NodeKind::WendStmt, Stmt> { WendStmt() = default; };
 
 } // namespace gwbasic
-

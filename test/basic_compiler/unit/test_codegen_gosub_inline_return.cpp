@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Expected Behavior: IR contains line10_gosub_entry1/cont1 labels and
  *          branch from inlined body back to continuation.
  */
+/*
+Test: CodeGenFlow.GosubInlineAndReturn
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenFlow, GosubInlineAndReturn) {
     const auto src =
         "10 GOSUB 300\n"

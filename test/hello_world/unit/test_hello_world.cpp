@@ -1,10 +1,10 @@
 // File: test/hello_world/unit/test_hello_world.cpp
 // (c) 2025 Sam Caldwell.  All Rights Reserved.
 /*
- * Test Suite: Hello World
- * Purpose: Sanity-check example C module returns the expected string.
- * Components Under Test: hello_world library function(s).
- * Expected Behavior: API returns the exact expected "Hello, world!" content.
+ * Test: HelloWorldTest.ReturnsExpectedString
+ * Inputs: None (direct call to API)
+ * Code under test: hello_world::get_hello_world()
+ * Expected behavior: Returns literal "Hello, World"
  */
 #include <gtest/gtest.h>
 extern "C" {

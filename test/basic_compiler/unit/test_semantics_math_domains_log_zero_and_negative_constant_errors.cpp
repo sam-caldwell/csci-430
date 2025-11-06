@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (intrinsic domain checks)
  * Expected Behavior: Compilation throws SemanticError for both LOG(0) and LOG(-1).
  */
+/*
+Test: SemanticsMathDomains.LogZeroAndNegativeConstantErrors
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsMathDomains, LogZeroAndNegativeConstantErrors) {
     const auto src1 =
         "10 PRINT LOG(0)\n"

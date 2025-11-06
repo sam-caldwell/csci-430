@@ -6,19 +6,20 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parsePrint
+ * Inputs:
+ *  - none (assumes PRINT already consumed)
+ * Outputs:
+ *  - PrintStmt: printing either a string literal or an expression
+ * Theory of operation:
+ *  - If the next token is STRING, returns a PrintStmt with StringExpr;
+ *    otherwise parses an expression and returns a PrintStmt for numeric
+ *    output.
+ */
 std::unique_ptr<Stmt> Parser::parsePrint() {
-    /*
-     * Function: Parser::parsePrint
-     * Inputs:
-     *  - none (assumes PRINT already consumed)
-     * Outputs:
-     *  - PrintStmt: printing either a string literal or an expression
-     * Theory of operation:
-     *  - If the next token is STRING, returns a PrintStmt with StringExpr;
-     *    otherwise parses an expression and returns a PrintStmt for numeric
-     *    output.
-     */
-    int l = peek().line, c = peek().col;
+    const int l = peek().line;
+    const int c = peek().col;
     int channel = -1;
     // Optional: PRINT # n ,
     if (match(TokenType::Hash)) {

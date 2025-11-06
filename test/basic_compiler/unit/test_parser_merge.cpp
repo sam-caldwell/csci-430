@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram
  * Expected Behavior: Parses without error and yields one program line containing MERGE.
  */
+/*
+Test: Parser.Merge_WithFile_Parses
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, Merge_WithFile_Parses) {
     std::string src = "10 MERGE \"demo.bas\"\n";
     std::istringstream iss(src);

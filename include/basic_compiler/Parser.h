@@ -14,6 +14,7 @@
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/parser/ParseError.h"
 #include "basic_compiler/ast/Traits.h"
+#include "basic_compiler/ast/DefTypeStmt.h"
 
 namespace gwbasic {
 
@@ -136,7 +137,13 @@ private:
      * Outputs:
      *  - bool: true if matched and consumed; false otherwise
      */
-    bool match(const TokenType t) { if (check(t)) { advance(); return true; } return false; }
+    bool match(const TokenType t) {
+        if (check(t)) {
+            advance();
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Function: Parser::consume
@@ -170,6 +177,18 @@ private:
      *  - std::unique_ptr<Stmt>: Parsed statement node
      */
     std::unique_ptr<Stmt> parseStatement();
+
+    // Helpers used by parseStatement() to reduce complexity. These are
+    // intentionally declared private; unit tests may make them visible
+    // via test-only macros to validate behavior in isolation.
+    std::unique_ptr<Stmt> tryParseSpecialIdentifierStatement(const Token& startTok);
+    std::unique_ptr<Stmt> tryParseDefFamily(const Token& startTok);
+    std::unique_ptr<Stmt> tryParseGotoGosub(const Token& startTok);
+    std::unique_ptr<Stmt> tryParseOtherKeywords(const Token& startTok);
+    /** Parse ON <expr> GOTO line[,line...] or ON <expr> GOSUB line[,line...] */
+    std::unique_ptr<Stmt> parseOnGotoGosub();
+    /** Parse ON ERROR GOTO (0|line) */
+    std::unique_ptr<Stmt> parseOnErrorGoto();
     /**
      * Function: Parser::parsePrint
      * Purpose:
@@ -253,13 +272,43 @@ private:
     /** Parse READ var[,var...] */
     std::unique_ptr<Stmt> parseRead();
     /** Parse RESTORE */
-    std::unique_ptr<Stmt> parseRestore();
+    std::unique_ptr<Stmt> parseRestore() const;
     /** Parse WRITE [#n,] expr[,expr...] */
     std::unique_ptr<Stmt> parseWrite();
+    /** Parse ERROR numeric-expression */
+    std::unique_ptr<Stmt> parseError();
+    /** Parse RESUME [0|NEXT|line] */
+    std::unique_ptr<Stmt> parseResume();
     /** Parse INPUT with optional #n, varlist or simple INPUT var */
     std::unique_ptr<Stmt> parseInput();
     /** Parse LINE INPUT [#n,] var$ */
     std::unique_ptr<Stmt> parseLineInput();
+    /** Parse DEF FNname(param) = expression */
+    std::unique_ptr<Stmt> parseDefFn();
+    /** Parse DEFSTR/DEFINT/DEFSNG/DEFDBL letter range list */
+    std::unique_ptr<Stmt> parseDefType(DefTypeStmt::Kind k);
+    /** Parse DEF SEG [= expr] */
+    std::unique_ptr<Stmt> parseDefSeg();
+    /** Parse BLOAD "file"[,offset] */
+    std::unique_ptr<Stmt> parseBload();
+    /** Parse BSAVE "file",offset,length */
+    std::unique_ptr<Stmt> parseBsave();
+    /** Parse POKE address, value */
+    std::unique_ptr<Stmt> parsePoke();
+    /** Parse CALL address */
+    std::unique_ptr<Stmt> parseCallAbs();
+    /** Parse DEF USR[digits] = expr */
+    std::unique_ptr<Stmt> parseDefUsr();
+    /** Parse COLOR [fg][,[bg][,[border]]] */
+    std::unique_ptr<Stmt> parseColor();
+    /** Parse CHDIR string-expr */
+    std::unique_ptr<Stmt> parseChdir();
+    /** Parse SCREEN [mode][,[colorswitch][,[apage][,vpage]]] */
+    std::unique_ptr<Stmt> parseScreen();
+    /** Parse CIRCLE x, y, r */
+    std::unique_ptr<Stmt> parseCircle();
+    /** Parse CLEAR */
+    std::unique_ptr<Stmt> parseClear() const;
     /**
      * Function: Parser::parseExpression
      * Purpose:

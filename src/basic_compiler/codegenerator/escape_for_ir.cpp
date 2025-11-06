@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/Symbols.h"
 
 namespace gwbasic {
 
@@ -19,8 +20,8 @@ std::string CodeGenerator::escapeForIR(const std::string& s) {
     for (const unsigned char c : s) {
         switch (c) {
             case '\\': out += "\\5C"; break;
-            case '"': out += "\\22"; break;
-            case CH_LF: out += "\\0A"; break;
+            case Symbols::DOUBLE_QUOTE.first(): out += "\\22"; break;
+            case Symbols::LF.first(): out += "\\0A"; break;
             case '\t': out += "\\09"; break;
             case '\r': out += "\\0D"; break;
             default:
@@ -31,5 +32,7 @@ std::string CodeGenerator::escapeForIR(const std::string& s) {
     }
     return out;
 }
+
+// other helper methods are defined in separate compilation units
 
 } // namespace gwbasic

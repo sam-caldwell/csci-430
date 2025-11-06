@@ -15,6 +15,12 @@ using namespace gwbasic;
  * Expected Behavior: Semantic analysis declares variable N so it is usable on a later line
  *                    (result variables contain "N").
  */
+/*
+Test: SemanticsScope.VarDeclaredInIfWithinForVisibleAfter
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsScope, VarDeclaredInIfWithinForVisibleAfter) {
     const std::string src =
         "10 FOR I = 1 TO 1\n"

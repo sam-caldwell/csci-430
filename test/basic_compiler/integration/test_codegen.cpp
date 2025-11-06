@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Expected Behavior: IR defines main, labels for each BASIC line, and
  *          declares @.fmt_num and @.fmt_str.
  */
+/*
+Test: CodeGen.GeneratesIRWithBlocks
+Inputs: BASIC snippet compiled through multiple stages
+Code under test: Parser + Semantics + Codegen integration
+Expected behavior: Emitted IR/state contains expected constructs and values
+*/
 TEST(CodeGen, GeneratesIRWithBlocks) {
     const std::string src = R"(10 LET A = 1+2*3
 20 PRINT A

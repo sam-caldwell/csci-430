@@ -2,6 +2,7 @@
 #include "basic_compiler/Compiler.h"
 #include <fstream>
 #include <sstream>
+#include "basic_compiler/compiler/FileOpenError.h"
 
 namespace gwbasic {
 /*
@@ -18,7 +19,7 @@ namespace gwbasic {
  */
 std::string Compiler::compileFileWithLog(const std::string& path, const std::string& logPath) {
     std::ifstream in(path);
-    if (!in) throw std::runtime_error(std::string("Unable to open input file: ").append(path));
+    if (!in) throw gwbasic::FileOpenError(path);
     Lexer lex(in);
     auto tokens = lex.tokenize();
     Parser parser(std::move(tokens));

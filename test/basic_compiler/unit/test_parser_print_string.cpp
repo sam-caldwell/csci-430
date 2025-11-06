@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parsePrint; string literal handling.
  * Expected Behavior: PrintStmt contains StringExpr with expected contents.
  */
+/*
+Test: Parser.PrintString
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, PrintString) {
     std::string src = "10 PRINT \"Hello\"\n";
     std::istringstream iss(src);

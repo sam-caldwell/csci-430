@@ -9,6 +9,12 @@ using namespace gwbasic;
  * Test Suite: CodeGen Loop (multi-line body)
  * Purpose: Ensure multi-line FOR loop emits body/cond labels and printf call.
  */
+/*
+Test: CodeGenLoops.ForLoopMultilineBody
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenLoops, ForLoopMultilineBody) {
     const auto src =
         "10 FOR I = 1 TO 3\n"

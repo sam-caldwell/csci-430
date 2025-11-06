@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (intrinsic arity checks)
  * Expected Behavior: Compilation throws SemanticError for TAN called with two arguments.
  */
+/*
+Test: SemanticsMathMore.ArityErrorsReported
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsMathMore, ArityErrorsReported) {
     // recognized function but wrong arity
     const auto src =

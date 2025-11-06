@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseExpression/parseFactor.
  * Expected Behavior: Parsing fails when right parenthesis is missing.
  */
+/*
+Test: Parser.ErrorMissingRightParen
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorMissingRightParen) {
     std::string src = "10 PRINT (1+2\n"; // missing ')'
     std::istringstream iss(src);

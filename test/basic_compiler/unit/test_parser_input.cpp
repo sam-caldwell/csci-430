@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseStatement for INPUT.
  * Expected Behavior: InputStmt present with expected variable name.
  */
+/*
+Test: Parser.InputStmt
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, InputStmt) {
     std::string src = "10 INPUT X\n";
     std::istringstream iss(src);

@@ -3,6 +3,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseExpression
+ * Purpose:
+ *  - Parse the top-level expression (lowest precedence).
+ * Inputs:
+ *  - none
+ * Outputs:
+ *  - Expr: expression node (delegates to parseComparison for precedence)
+ */
 std::unique_ptr<Expr> Parser::parseExpression() {
     /*
      * Function: Parser::parseExpression

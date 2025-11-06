@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFor.
  * Expected Behavior: Error is reported if NEXT is missing.
  */
+/*
+Test: Parser.ErrorForMissingNextSameLine
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorForMissingNextSameLine) {
     std::string src = "10 FOR I = 1 TO 3 : PRINT I\n"; // missing NEXT on same line
     std::istringstream iss(src);

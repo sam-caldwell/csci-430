@@ -14,6 +14,12 @@ namespace { struct DummyStmt final : Stmt {}; }
  * Components Under Test: CodeGenerator emitLineBlock.
  * Expected Behavior: generate() throws CodeGenError.
  */
+/*
+Test: CodeGenErrors.UnsupportedStatementInLineBlock
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenErrors, UnsupportedStatementInLineBlock) {
     Program p;
     Line l; l.number = 10;

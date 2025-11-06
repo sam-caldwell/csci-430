@@ -28,9 +28,11 @@ class Logger {
 
   // Get the output stream (file when enabled and open; otherwise null sink).
   std::ostream& stream();
+  std::ostream& stream() const;
 
   // Shorthand to chain: log() << "message" << '\n';
   std::ostream& operator()() { return stream(); }
+  std::ostream& operator()() const { return stream(); }
 
  private:
   // Null sink stream buffer that discards all output
@@ -46,10 +48,9 @@ class Logger {
     NullBuffer buf_{};
   };
 
-  std::ofstream ofs_{};
+  mutable std::ofstream ofs_{};
   bool enabled_{false};
-  NullStream null_{};
+  mutable NullStream null_{};
 };
 
 }  // namespace logger
-

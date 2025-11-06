@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseIf/parseComparison.
  * Expected Behavior: IfStmt with BinaryExpr comparison and correct target line.
  */
+/*
+Test: Parser.IfThenComparison
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, IfThenComparison) {
     std::string src = "10 IF A <= 10 THEN 50\n";
     std::istringstream iss(src);

@@ -19,6 +19,12 @@ using namespace e2e_helpers;
  * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
  * Expected Behavior: Program output matches assertions in test.
  */
+/*
+Test: E2E.CintRoundsHalfAwayFromZero
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, CintRoundsHalfAwayFromZero) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -46,7 +52,7 @@ TEST(E2E, CintRoundsHalfAwayFromZero) {
     std::ostringstream run; run << '"' << bin.string() << '"';
     std::string out = runCommand(run.str());
     const std::string expected =
-        "2.000000\n"
-        "-2.000000\n";
+        "2\n"
+        "-2\n";
     ASSERT_EQ(out, expected);
 }

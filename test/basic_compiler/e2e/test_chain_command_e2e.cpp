@@ -9,6 +9,7 @@
 #include "clang_path.h"
 #include "run_command.h"
 #include "../helper/tool_exists.h"
+#include "source_root.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
@@ -18,11 +19,17 @@ using namespace e2e_helpers;
  * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
  * Expected Behavior: Program output matches assertions in test.
  */
+/*
+Test: E2E.ChainCommand_ExecutesTrigDemo
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, ChainCommand_ExecutesTrigDemo) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found";
     }
-    std::string ir = Compiler::compileFile("demos/chain-test.bas");
+    std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/chain-test.bas").c_str());
     std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_chain";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll"; auto bin = tmp / "program.out"; { std::ofstream f(ll); f << ir; }
@@ -32,5 +39,18 @@ TEST(E2E, ChainCommand_ExecutesTrigDemo) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
-    ASSERT_NE(out.find("SIN(X)    COS(X)    TAN(X)"), std::string::npos);
+    const std::string expected =
+        "chain-test.bas starting\n"
+        "chain-level2.bas starting\n"
+        "initial state: X:42 ,Y:1337 ,Z:-1\n"
+        "modified state: X:42 ,Y:1336 ,Z:-1\n"
+        "chain-level3.bas starting\n"
+        "initial state: X:42 ,Y:1336 ,Z:-1\n"
+        "chain-level4.bas starting\n"
+        "initial state: X:42 ,Y:1336 ,Z:-1\n"
+        "999\n"
+        " chain-level3-bas resumed\n"
+        "chain-level2.bas resumed\n"
+        "chain-test.bas resumed\n";
+    ASSERT_EQ(out, expected);
 }

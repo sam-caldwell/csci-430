@@ -21,6 +21,12 @@ static SemanticAnalyzer::Result analyze_src(const std::string& src) {
  * Test: SemanticsIntrinsics.KnownFunction_AllowsNumericArg
  * Purpose: Verify known intrinsic SQR accepts numeric argument and passes semantics.
  */
+/*
+Test: SemanticsIntrinsics.KnownFunction_AllowsNumericArg
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsIntrinsics, KnownFunction_AllowsNumericArg) {
     const std::string src = "10 PRINT SQR(9)\n";
     EXPECT_NO_THROW({ (void)analyze_src(src); });

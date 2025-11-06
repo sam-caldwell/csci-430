@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFor, expression parsing.
  * Expected Behavior: ForStmt.step is present and matches the parsed expression.
  */
+/*
+Test: Parser.ForWithStep
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ForWithStep) {
     std::string src = "10 FOR I = 1 TO 10 STEP 2 : NEXT I\n";
     std::istringstream iss(src);

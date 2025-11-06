@@ -9,9 +9,10 @@
 using namespace gwbasic;
 
 /*
- * Test Suite: CodeGen Without Semantics
- * Purpose: Force CodeGenerator to collect decls/vars internally to cover
- *          collectStmtVars/collectExprVars paths.
+ * Test: CodeGenCore.GenerateWithoutSemanticsCollectsVars
+ * Inputs: Simple program with LET/IF/PRINT/END.
+ * Code under test: CodeGenerator::generate without SemanticAnalyzer attached.
+ * Expected behavior: IR still contains global format strings and code paths run.
  */
 TEST(CodeGenCore, GenerateWithoutSemanticsCollectsVars) {
     const auto src =

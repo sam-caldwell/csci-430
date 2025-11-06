@@ -32,7 +32,14 @@ function(build_project target)
   # Use CPATH to convey include directories to avoid argument quoting issues.
   set(_cpath_expr "$<$<BOOL:$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>>:$<JOIN:$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>,:>>")
   set(_def_expr   "$<$<BOOL:$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>>:-D$<JOIN:$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>, -D>>")
-  set(_opt_expr   "$<$<BOOL:$<TARGET_PROPERTY:${target},COMPILE_OPTIONS>>:$<JOIN:$<TARGET_PROPERTY:${target},COMPILE_OPTIONS>, >>")
+  # Coverage flags: pass explicitly as separate args to avoid quoting issues
+  set(_cov_flags)
+  if(CODE_COVERAGE)
+    # Only meaningful with Clang toolchains
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+      list(APPEND _cov_flags -fprofile-instr-generate -fcoverage-mapping)
+    endif()
+  endif()
 
   # Per-source bitcode and IR
   set(_bc_files)
@@ -63,6 +70,8 @@ function(build_project target)
             set(_std_flag "-std=c${CMAKE_C_STANDARD}")
           endif()
         endif()
+        # Use list for language-specific options to avoid single-arg quoting
+        set(_lang_opts)
       else()
         set(_compiler "${CLANGXX_EXECUTABLE}")
         # Ensure C++ standard (e.g., C++23) is respected for bitcode generation
@@ -70,6 +79,11 @@ function(build_project target)
           set(_std_flag "-std=gnu++${CMAKE_CXX_STANDARD}")
         else()
           set(_std_flag "-std=c++${CMAKE_CXX_STANDARD}")
+        endif()
+        # Ensure libc++ on Linux to avoid libstdc++ conflicts
+        set(_lang_opts)
+        if(UNIX AND NOT APPLE)
+          list(APPEND _lang_opts -stdlib=libc++)
         endif()
       endif()
 
@@ -79,7 +93,7 @@ function(build_project target)
       add_custom_command(
         OUTPUT "${_bc}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${_outdir}"
-        COMMAND ${CMAKE_COMMAND} -E env CPATH=${_cpath_expr} "${_compiler}" ${_std_flag} -emit-llvm -c "${_abs_src}" -o "${_bc}" ${_def_expr}
+        COMMAND ${CMAKE_COMMAND} -E env CPATH=${_cpath_expr} "${_compiler}" ${_std_flag} ${_lang_opts} ${_cov_flags} -emit-llvm -c "${_abs_src}" -o "${_bc}" ${_def_expr}
         DEPENDS "${_abs_src}"
         COMMENT "Generating LLVM bitcode ${_bc}"
         VERBATIM

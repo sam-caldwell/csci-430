@@ -13,7 +13,7 @@ include Makefile.d/*.mk
 CMAKE ?= cmake
 
 GENERATOR = Ninja
-TOOLCHAIN ?= cmake/Toolchain-HomebrewLLVM.cmake
+TOOLCHAIN ?= cmake/toolchain.cmake
 
 # Only pass a toolchain if the file exists
 TOOLCHAIN_FLAG := $(if $(wildcard $(TOOLCHAIN)),-DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN),)

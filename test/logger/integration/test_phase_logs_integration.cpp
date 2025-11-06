@@ -14,19 +14,25 @@ using namespace gwbasic;
  * Test: LoggerIntegration.CompilerPhaseLogsProduceContent
  * Purpose: Ensure Compiler phase logs produce output via Logger integration.
  */
+/*
+Test: LoggerIntegration.CompilerPhaseLogsProduceContent
+Inputs: Filesystem paths, log messages, toggles
+Code under test: Logger component
+Expected behavior: Creates directories, writes/appends as expected, handles errors
+*/
 TEST(LoggerIntegration, CompilerPhaseLogsProduceContent) {
   namespace fs = std::filesystem;
-  std::string src =
+  const std::string src =
       "10 LET A = 1\n"
       "20 PRINT A\n"
       "30 END\n";
 
-  fs::path outdir = fs::current_path() / "logger_integration";
+  const fs::path outdir = fs::current_path() / "logger_integration";
   fs::create_directories(outdir);
-  fs::path lex = outdir / "lex.log";
-  fs::path syn = outdir / "syntax.log";
-  fs::path sem = outdir / "semantic.log";
-  fs::path cg  = outdir / "codegen.log";
+  const fs::path lex = outdir / "lex.log";
+  const fs::path syn = outdir / "syntax.log";
+  const fs::path sem = outdir / "semantic.log";
+  const fs::path cg  = outdir / "codegen.log";
 
   std::string ir = Compiler::compileStringWithPhaseLogs(
       src,

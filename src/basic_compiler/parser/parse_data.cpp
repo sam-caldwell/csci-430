@@ -7,9 +7,18 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseData
+ * Purpose:
+ *  - Parse DATA item[,item...] where items are literal numbers or strings.
+ * Inputs:
+ *  - none (assumes 'DATA' was matched by caller)
+ * Outputs:
+ *  - DataStmt: list of literal strings as stored text
+ */
 std::unique_ptr<Stmt> Parser::parseData() {
     // DATA item[,item...]; items must be string or numeric literals
-    int l = peek().line, c = peek().col;
+    const int l = peek().line, c = peek().col;
     std::vector<std::string> items;
     bool first = true;
     while (true) {
@@ -34,4 +43,3 @@ std::unique_ptr<Stmt> Parser::parseData() {
 }
 
 } // namespace gwbasic
-

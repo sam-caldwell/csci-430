@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (intrinsic arity/type checks)
  * Expected Behavior: Throws SemanticError for RND() with no args and for CINT("A") with string arg.
  */
+/*
+Test: SemanticsMathExt.ArityAndTypeChecks
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsMathExt, ArityAndTypeChecks) {
     const auto src1 =
         "10 PRINT RND()\n"

@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram
  * Expected Behavior: Parsing throws ParseError when encountering ELSE without a matching IF.
  */
+/*
+Test: Parser.IfBlock_Error_ElseWithoutIf
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, IfBlock_Error_ElseWithoutIf) {
     std::string src = "10 ELSE\n";
     Lexer lex(src);

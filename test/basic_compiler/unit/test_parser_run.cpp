@@ -16,6 +16,12 @@ using namespace gwbasic;
  * Expected Behavior: Missing filename errors; with filename (and optional
  *                    line) parses and records targetLine.
  */
+/*
+Test: Parser.Run_MissingFilename_Errors
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, Run_MissingFilename_Errors) {
     std::string src = "10 RUN\n";
     std::istringstream iss(src);

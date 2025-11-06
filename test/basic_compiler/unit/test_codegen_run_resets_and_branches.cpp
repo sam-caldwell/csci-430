@@ -11,6 +11,12 @@ using namespace gwbasic;
  *          specified line label.
  * Components Under Test: CodeGenerator emitLineBlock (RunStmt lowering).
  */
+/*
+Test: CodeGenRun.RunWithTarget_ResetsAndBranches
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenRun, RunWithTarget_ResetsAndBranches) {
     const auto src =
         "10 LET A = 1 : LET B = 2\n"
@@ -19,10 +25,10 @@ TEST(CodeGenRun, RunWithTarget_ResetsAndBranches) {
         "100 PRINT A, B\n"
         "110 END\n";
     std::string ir = Compiler::compileString(src);
-    // Expect stores to zero for A and B on the RUN line (line20 block)
+    // Expect stores to zero for A and B on the RUN line (line20 block) using typed storage (float default)
     EXPECT_NE(ir.find("line20:"), std::string::npos);
-    EXPECT_NE(ir.find("store double 0.0, ptr %A"), std::string::npos);
-    EXPECT_NE(ir.find("store double 0.0, ptr %B"), std::string::npos);
+    EXPECT_NE(ir.find("store float 0.0, ptr %A"), std::string::npos);
+    EXPECT_NE(ir.find("store float 0.0, ptr %B"), std::string::npos);
     // And branch to line100
     EXPECT_NE(ir.find("br label %line100"), std::string::npos);
 }

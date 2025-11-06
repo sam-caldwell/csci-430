@@ -17,6 +17,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseUnary/parseFactor.
  * Expected Behavior: UnaryExpr with op '-' over grouped inner expression.
  */
+/*
+Test: Parser.UnaryMinusParenthesized
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, UnaryMinusParenthesized) {
     // A = -(1 + 2) * 3  => Mul( Unary(-, Add(1,2)), 3 )
     std::string src = "10 LET A = -(1 + 2) * 3\n";

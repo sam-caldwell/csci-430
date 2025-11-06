@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <unordered_set>
+#include <optional>
 #include <vector>
 #include <fstream>
 #include "logger/Logger.h"
@@ -14,6 +15,8 @@
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/semantics/SemanticError.h"
+#include "basic_compiler/ast/DefFnStmt.h"
+#include "basic_compiler/ast/DefTypeStmt.h"
 
 
 namespace gwbasic {
@@ -42,6 +45,13 @@ public:
         std::set<int> lineNumbers;
         std::set<std::string> commonVariables;
         std::map<std::string,int> arrays; // 1-D arrays name->length
+        // User-defined functions keyed by uppercase function name (e.g., "FNSQ")
+        std::map<std::string, const DefFnStmt*> userFunctions;
+        // Variables determined to be strings (by suffix or DEFSTR)
+        std::set<std::string> stringVariables;
+        // Per-variable numeric kind (for non-strings). Only includes non-string vars.
+        enum class NumericKind { Int16, Long32, Single, Double };
+        std::map<std::string, NumericKind> numericKinds;
     };
 
     SemanticAnalyzer() = default;
@@ -121,6 +131,17 @@ private:
      */
     std::set<std::string> common_;
     std::map<std::string,int> arrays_;
+    // User-defined functions by uppercase name
+    std::map<std::string, const DefFnStmt*> userFunctions_;
+    // Current DEF FN parameter name (skip global reference tracking when set)
+    std::optional<std::string> currentFnParam_{};
+    // Default type mapping by letter (A..Z). Only String affects codegen typing.
+    enum class DefaultKind { None, Int, Sng, Dbl, Str };
+    DefaultKind defaultKinds_[26]{}; // initialized to None
+    // Helper: determine if a variable name is string-typed by suffix or DEFSTR rules.
+    bool varNameIsString(const std::string& name) const;
+    // Helper: determine numeric kind for a non-string variable name
+    Result::NumericKind numericKindOf(const std::string& name) const;
 
     // Logging via ostream-based logger
     logger::Logger logger_{};
@@ -233,7 +254,7 @@ private:
      * Purpose:
      *  - Identify whether an expression is a comparison operation.
      */
-    bool isComparisonExpr(const Expr* e) const;
+    static bool isComparisonExpr(const Expr* e);
 
     /**
      * Function: SemanticAnalyzer::constEval
@@ -245,7 +266,7 @@ private:
      * Outputs:
      *  - bool: true if constant value was produced
      */
-    bool constEval(const Expr* e, double& out) const;
+    static bool constEval(const Expr* e, double& out);
 
     // Function utilities
     /**
@@ -254,6 +275,12 @@ private:
      *  - Determine if a function name is a supported numeric intrinsic.
      */
     static bool isKnownNumericFunction(const std::string& name);
+    /**
+     * Function: SemanticAnalyzer::isKnownStringFunction
+     * Purpose:
+     *  - Determine if a function name is a supported string intrinsic.
+     */
+    static bool isKnownStringFunction(const std::string& name);
 
     /**
      * Function: SemanticAnalyzer::expectedArity

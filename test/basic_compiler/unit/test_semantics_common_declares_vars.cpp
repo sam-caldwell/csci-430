@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Test Suite: Semantics COMMON
  * Purpose: Ensure COMMON declares listed variables globally.
  */
+/*
+Test: SemanticsCommon.DeclaresVariables
+Inputs: Parsed AST (from BASIC snippet) and default environment
+Code under test: Semantics analyzer (type/arity/domain checks)
+Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+*/
 TEST(SemanticsCommon, DeclaresVariables) {
     std::string src = "10 COMMON A, B\n20 PRINT A\n";
     std::istringstream iss(src);

@@ -7,7 +7,7 @@ include_guard(GLOBAL)
 
 set(_tool "${CMAKE_TOOLCHAIN_FILE}")
 if(NOT _tool)
-  set(_tool "cmake/Toolchain-HomebrewLLVM.cmake")
+  set(_tool "cmake/toolchain.cmake")
 endif()
 
 set(GENERATOR "Ninja")
@@ -20,4 +20,3 @@ configure_file(
 )
 
 message(STATUS "Wrote CMakePresets.json with generator='${GENERATOR}' and toolchain='${TOOLCHAIN}'")
-

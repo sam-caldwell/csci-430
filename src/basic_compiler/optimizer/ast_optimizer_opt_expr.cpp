@@ -11,6 +11,7 @@
 #include "basic_compiler/ast/UnaryExpr.h"
 #include "basic_compiler/ast/BinaryExpr.h"
 #include "basic_compiler/ast/NumberExpr.h"
+#include "basic_compiler/Symbols.h"
 
 namespace gwbasic {
 
@@ -30,16 +31,16 @@ namespace gwbasic {
  */
 std::unique_ptr<Expr> AstOptimizer::optExpr(std::unique_ptr<Expr> e) {
     if (!e) return e;
-    if (auto u = dyn_cast<UnaryExpr>(e.get())) {
+    if (const auto u = dyn_cast<UnaryExpr>(e.get())) {
         u->inner = optExpr(std::move(u->inner));
-        if (u->op == '+') return std::move(u->inner);
-        if (u->op == '-') {
-            double v; if (asNumber(u->inner.get(), v)) return std::make_unique<NumberExpr>(-v);
+        if (u->op == Symbols::PLUS.first()) return std::move(u->inner);
+        if (u->op == Symbols::MINUS.first()) {
+            if (double v; asNumber(u->inner.get(), v)) return std::make_unique<NumberExpr>(-v);
             return e;
         }
         return e;
     }
-    if (auto b = dyn_cast<BinaryExpr>(e.get())) {
+    if (const auto b = dyn_cast<BinaryExpr>(e.get())) {
         b->lhs = optExpr(std::move(b->lhs));
         b->rhs = optExpr(std::move(b->rhs));
         double L, R;

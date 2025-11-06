@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Expected Behavior: @.fmt_str declaration, @.str.N global, and GEP to
  *          @.fmt_str in emitted IR.
  */
+/*
+Test: CodeGenCore.PrintStringAndGlobals
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenCore, PrintStringAndGlobals) {
     const auto src = "10 PRINT \"Hello\"\n20 END\n";
     std::string ir = Compiler::compileString(src);

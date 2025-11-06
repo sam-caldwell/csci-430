@@ -3,6 +3,9 @@
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/DataStmt.h"
 #include "basic_compiler/ast/ReadStmt.h"
+#include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
+#include "basic_compiler/ast/MidAssignStmt.h"
 
 namespace gwbasic {
 
@@ -23,7 +26,7 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
             collectExprVars(v);
             if (const auto se = dyn_cast<StringExpr>(v)) {
                 if (!strLiteralId_.count(se->value)) strLiteralId_[se->value] = strCounter_++;
-                logSem() << "StringLiteral @ " << se->pos.line << ':' << se->pos.col << CH_LF;
+                logSem() << "StringLiteral @ " << se->pos.line << ':' << se->pos.col << Symbols::LF;
             }
         }
         for (const auto& vx : p->more) {
@@ -31,34 +34,40 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
             collectExprVars(v);
             if (const auto se = dyn_cast<StringExpr>(v)) {
                 if (!strLiteralId_.count(se->value)) strLiteralId_[se->value] = strCounter_++;
-                logSem() << "StringLiteral @ " << se->pos.line << ':' << se->pos.col << CH_LF;
+                logSem() << "StringLiteral @ " << se->pos.line << ':' << se->pos.col << Symbols::LF;
             }
         }
     } else if (const auto a = dyn_cast<const AssignStmt>(s)) {
         variables_.insert(a->name);
         collectExprVars(a->value.get());
-        logSem() << "Assign " << a->name << " @ " << a->pos.line << ':' << a->pos.col << CH_LF;
+        logSem() << "Assign " << a->name << " @ " << a->pos.line << ':' << a->pos.col << Symbols::LF;
+    } else if (const auto m = dyn_cast<const MidAssignStmt>(s)) {
+        variables_.insert(m->name);
+        collectExprVars(m->start.get());
+        if (m->len) collectExprVars(m->len.get());
+        collectExprVars(m->value.get());
+        logSem() << "MidAssign " << m->name << " @ " << m->pos.line << ':' << m->pos.col << Symbols::LF;
     } else if (const auto i = dyn_cast<const IfStmt>(s)) {
         collectExprVars(i->cond.get());
-        logSem() << "If @ " << i->pos.line << ':' << i->pos.col << CH_LF;
+        logSem() << "If @ " << i->pos.line << ':' << i->pos.col << Symbols::LF;
     } else if (const auto f = dyn_cast<const ForStmt>(s)) {
         variables_.insert(f->var);
         collectExprVars(f->start.get());
         collectExprVars(f->end.get());
         if (f->step) collectExprVars(f->step.get());
         for (const auto& bs : f->body) collectStmtVars(bs.get());
-        logSem() << "For var=" << f->var << " @ " << f->pos.line << ':' << f->pos.col << CH_LF;
+        logSem() << "For var=" << f->var << " @ " << f->pos.line << ':' << f->pos.col << Symbols::LF;
     } else if (const auto in = dyn_cast<const InputStmt>(s)) {
         variables_.insert(in->name);
-        logSem() << "Input " << in->name << " @ " << in->pos.line << ':' << in->pos.col << CH_LF;
+        logSem() << "Input " << in->name << " @ " << in->pos.line << ':' << in->pos.col << Symbols::LF;
     } else if (const auto rz = dyn_cast<const RandomizeStmt>(s)) {
         if (rz->seed) collectExprVars(rz->seed.get());
-        logSem() << "Randomize @ " << rz->pos.line << ':' << rz->pos.col << CH_LF;
+        logSem() << "Randomize @ " << rz->pos.line << ':' << rz->pos.col << Symbols::LF;
     } else if (const auto cs = dyn_cast<const CommonStmt>(s)) {
         for (const auto& n : cs->names) {
             variables_.insert(n);
             commonVariables_.insert(n);
-            logSem() << "Common " << n << " @ " << cs->pos.line << ':' << cs->pos.col << CH_LF;
+            logSem() << "Common " << n << " @ " << cs->pos.line << ':' << cs->pos.col << Symbols::LF;
         }
     } else if (dyn_cast<const MergeStmt>(s)) {
         // MERGE is a compile-time directive; codegen no-op
@@ -70,7 +79,7 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
             if (!strLiteralId_.count(norm)) strLiteralId_[norm] = strCounter_++;
             dataLiteralIds_.push_back(strLiteralId_[norm]);
         }
-        logSem() << "Data items=" << ds->items.size() << CH_LF;
+        logSem() << "Data items=" << ds->items.size() << Symbols::LF;
     } else if (const auto rd = dyn_cast<const ReadStmt>(s)) {
         for (const auto& t : rd->targets) {
             if (t.index) {
@@ -80,6 +89,12 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
                 variables_.insert(t.name);
             }
         }
+    } else if (const auto og = dyn_cast<const OnGotoStmt>(s)) {
+        collectExprVars(og->index.get());
+        logSem() << "OnGoto targets=" << og->targets.size() << Symbols::LF;
+    } else if (const auto ogs = dyn_cast<const OnGosubStmt>(s)) {
+        collectExprVars(ogs->index.get());
+        logSem() << "OnGosub targets=" << ogs->targets.size() << Symbols::LF;
     }
 }
 

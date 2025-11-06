@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Test Suite: Parser COMMON
  * Purpose: Verify COMMON var[,var...] parses correctly.
  */
+/*
+Test: Parser.Common_DeclList_Parses
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, Common_DeclList_Parses) {
     std::string src = "10 COMMON A, B, C\n";
     std::istringstream iss(src);

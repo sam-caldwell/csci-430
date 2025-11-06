@@ -19,14 +19,19 @@ DEMO_SRCS := demos/factorial.bas \
 	demos/fibonacci.bas \
 	demos/run-test.bas \
 	demos/chain-test.bas \
+	demos/chain-level2.bas \
+	demos/chain-level3.bas \
+	demos/chain-level4.bas \
 	demos/merge-test.bas \
 	demos/pass-params.bas \
 	demos/use-passed-params.bas \
+	demos/run-pass-vars.bas \
+	demos/variable-state-test.bas \
 	demos/pass-params-all.bas \
 	demos/use-passed-params-all.bas \
-	demos/chain-level2.bas \
-	demos/chain-level3.bas \
-	demos/chain-level4.bas
+	demos/data-arrays-strings-integers-and-floats.bas \
+	demos/working-with-color.bas \
+	demos/graphics-circle.bas
 demo:
 	@set -e; \
 	BUILD_ROOT="./build"; \
@@ -34,8 +39,8 @@ demo:
 	if [ ! -x "$$COMPILER_BIN" ]; then echo "Compiler not found: $$COMPILER_BIN"; exit 2; fi; \
 	UNAMES=$$(uname -s); ARCH=$$(uname -m); TRIPLE=""; \
 	if [ "$$UNAMES" = "Darwin" ]; then \
-	  if [ "$$ARCH" = "arm64" ]; then TRIPLE=arm64-darwin-macos; \
-	  elif [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-darwin-macos; fi; \
+	  if [ "$$ARCH" = "arm64" ]; then TRIPLE=arm64-apple-macosx; \
+	  elif [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-apple-macosx; fi; \
 	elif [ "$$UNAMES" = "Linux" ]; then \
 	  if [ "$$ARCH" = "x86_64" ]; then TRIPLE=x86_64-linux-gnu; \
 	  elif [ "$$ARCH" = "aarch64" ] || [ "$$ARCH" = "arm64" ]; then \
@@ -43,6 +48,7 @@ demo:
 	  fi; \
 	fi; \
 	TGT_ARG=""; \
+	if [ -n "$$TRIPLE" ]; then TGT_ARG="--target $$TRIPLE"; fi; \
 	for SRC in $(DEMO_SRCS); do \
 	  BN=$$(basename "$$SRC" .bas); \
 	  OUT_DIR="$$BUILD_ROOT/demos/$$BN"; \

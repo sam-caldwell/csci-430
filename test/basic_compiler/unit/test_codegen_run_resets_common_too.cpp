@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Expected Behavior: IR for the RUN line contains store 0.0 for both %A (COMMON) and %B,
  *                    and a branch to the specified target line.
  */
+/*
+Test: CodeGenRun.RunResetsCommonAndBranches
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenRun, RunResetsCommonAndBranches) {
     const auto src =
         "10 COMMON A\n"
@@ -25,8 +31,7 @@ TEST(CodeGenRun, RunResetsCommonAndBranches) {
     std::string ir = Compiler::compileString(src);
     auto blk = irBlockSlice(ir, "line30");
     ASSERT_FALSE(blk.empty());
-    EXPECT_NE(blk.find("store double 0.0, ptr %A"), std::string::npos);
-    EXPECT_NE(blk.find("store double 0.0, ptr %B"), std::string::npos);
+    EXPECT_NE(blk.find("store float 0.0, ptr %A"), std::string::npos);
+    EXPECT_NE(blk.find("store float 0.0, ptr %B"), std::string::npos);
     EXPECT_NE(blk.find("br label %line100"), std::string::npos);
 }
-

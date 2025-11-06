@@ -7,7 +7,8 @@
 #include <vector>
 #include <fstream>
 #include "logger/Logger.h"
-#include "basic_compiler/Chars.h"
+#include "basic_compiler/Symbols.h"
+#include "basic_compiler/Symbol.h"
 #include <string_view>
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/LexError.h"
@@ -107,12 +108,30 @@ private:
         {"ALL",       TokenType::KwAll},
         {"MERGE",     TokenType::KwMerge},
         {"CHAIN",     TokenType::KwChain},
+        {"STOP",      TokenType::KwStop},
+        {"SYSTEM",    TokenType::KwSystem},
+        {"ON",        TokenType::KwOn},
+        {"ERROR",     TokenType::KwError},
+        {"RESUME",    TokenType::KwResume},
         {"DIM",       TokenType::KwDim},
         {"OPEN",      TokenType::KwOpen},
         {"CLOSE",     TokenType::KwClose},
         {"AS",        TokenType::KwAs},
         {"OUTPUT",    TokenType::KwOutput},
         {"USING",     TokenType::KwUsing},
+        {"DEF",       TokenType::KwDef},
+        {"DEFINT",    TokenType::KwDefInt},
+        {"DEFSNG",    TokenType::KwDefSng},
+        {"DEFDBL",    TokenType::KwDefDbl},
+        {"DEFSTR",    TokenType::KwDefStr},
+        {"SEG",       TokenType::KwSeg},
+        {"BLOAD",     TokenType::KwBload},
+        {"BSAVE",     TokenType::KwBsave},
+        {"CALL",      TokenType::KwCall},
+        {"POKE",      TokenType::KwPoke},
+        {"COLOR",     TokenType::KwColor},
+        {"CHDIR",     TokenType::KwChdir},
+        {"CLEAR",     TokenType::KwClear},
     };
 
     /*
@@ -125,7 +144,9 @@ private:
      *  - TokenType: Matching keyword type, or Identifier if not matched.
      */
     static TokenType lookupKeyword(const std::string_view upper) {
-        for (const auto&[kw, tt] : kKeywords_) if (kw == upper) return tt;
+        for (const auto&[kw, tt] : kKeywords_)
+            if (kw == upper)
+                return tt;
         return TokenType::Identifier;
     }
 
@@ -142,7 +163,8 @@ private:
     template <class Pred>
     std::string scanWhile(Pred&& pred) {
         std::string out;
-        while (!atEnd() && pred(peek())) out.push_back(advance());
+        while (!atEnd() && pred(peek()))
+            out.push_back(advance());
         return out;
     }
 
@@ -157,7 +179,8 @@ private:
      */
     template <class Pred>
     void skipWhile(Pred&& pred) {
-        while (!atEnd() && pred(peek())) advance();
+        while (!atEnd() && pred(peek()))
+            advance();
     }
 
     /*
@@ -174,6 +197,37 @@ private:
     template <TokenType TT, size_t N>
     void emitFixed(std::vector<Token>& out, const char (&lex)[N], const int line, const int col) {
         Token t{TT, std::string(lex, N - 1), line, col};
+        out.emplace_back(t);
+        logToken(t);
+    }
+
+    // Overload: emitFixed from string_view
+    template <TokenType TT>
+    void emitFixed(std::vector<Token>& out, std::string_view lex, const int line, const int col) {
+        Token t{TT, std::string(lex), line, col};
+        out.emplace_back(t);
+        logToken(t);
+    }
+
+    // Overload: emitFixed from Symbol
+    template <TokenType TT>
+    void emitFixed(std::vector<Token>& out, const Symbol& sym, const int line, const int col) {
+        Token t{TT, sym.to_string(), line, col};
+        out.emplace_back(t);
+        logToken(t);
+    }
+
+    /*
+     * Function: Lexer::emitToken
+     * Purpose:
+     *  - Push a pre-constructed token into the output vector and log it.
+     * Inputs:
+     *  - out: token destination vector
+     *  - t: token to emit (by const ref)
+     * Outputs:
+     *  - void (pushes token and logs it)
+     */
+    void emitToken(std::vector<Token>& out, const Token& t) {
         out.emplace_back(t);
         logToken(t);
     }
@@ -195,7 +249,8 @@ private:
     void emitPairOrSingle(std::vector<Token>& out,
                           const char (&singleLex)[N1],
                           const char (&pairLex)[N2],
-                          int line, int col) {
+                          const int line, const int col) {
+
         if (peek() == Next) {
             advance();
             emitFixed<Pair>(out, pairLex, line, col);
@@ -269,7 +324,7 @@ private:
      * Outputs:
      *  - char: current character or '\0' at end-of-input
      */
-    char peek() const { return atEnd() ? CH_NULL : src_[pos_]; }
+    char peek() const { return atEnd() ? Symbols::NUL.first() : src_[pos_]; }
 
     /*
      * Function: Lexer::peekNext
@@ -280,7 +335,9 @@ private:
      * Outputs:
      *  - char: next character or '\0' if beyond end-of-input
      */
-    char peekNext() const { return (pos_ + 1 < src_.size()) ? src_[pos_ + 1] : CH_NULL; }
+    char peekNext() const {
+        return (pos_ + 1 < src_.size()) ? src_[pos_ + 1] : Symbols::NUL.first();
+    }
 
     /*
      * Function: Lexer::advance
@@ -379,6 +436,12 @@ private:
      *  - std::string: Escaped representation suitable for logs
      */
     static std::string escapeForLog(const std::string& s);
+
+    // Lightweight helpers used by tokenize() to reduce branching
+    bool tryEmitNewline(std::vector<Token>& out);
+    bool tryEmitPrimary(std::vector<Token>& out);
+    void emitHexLiteral(std::vector<Token>& out, int line, int col);
+    bool tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, char c);
 };
 
 } // namespace gwbasic

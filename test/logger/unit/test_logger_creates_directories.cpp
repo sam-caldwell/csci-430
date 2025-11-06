@@ -13,10 +13,16 @@ namespace fs = std::filesystem;
  * Test: Logger.CreatesParentDirectories
  * Purpose: Opening a file path should create missing parent directories.
  */
+/*
+Test: Logger.CreatesParentDirectories
+Inputs: Filesystem paths, log messages, toggles
+Code under test: Logger component
+Expected behavior: Creates directories, writes/appends as expected, handles errors
+*/
 TEST(Logger, CreatesParentDirectories) {
   logger::Logger log;
-  fs::path base = fs::current_path() / "logger_tests" / "deep" / "nest";
-  fs::path file = base / "dirs.log";
+  const fs::path base = fs::current_path() / "logger_tests" / "deep" / "nest";
+  const fs::path file = base / "dirs.log";
 
   // Ensure base does not exist beforehand; then open should create it.
   fs::remove_all(base);

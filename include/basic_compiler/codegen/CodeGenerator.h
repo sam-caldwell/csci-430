@@ -2,44 +2,65 @@
 #pragma once
 
 #include <map>
+#include <ranges>
 #include <set>
 #include <string>
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include "logger/Logger.h"
-#include "basic_compiler/Chars.h"
-
+#include "basic_compiler/Symbols.h"
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/Stmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/NumberExpr.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/VarExpr.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/UnaryExpr.h"
 #include "basic_compiler/ast/BinaryExpr.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/CallExpr.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/StringExpr.h"
 #include "basic_compiler/ast/ForStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/AssignStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/PrintStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/OpenStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/InputStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/IfBlockStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/GotoStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/GosubStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/EndStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/ReturnStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/RunStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/CommonStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/ChainStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/MergeStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/codegen/CodeGenError.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include "basic_compiler/ast/Traits.h"
+#include "basic_compiler/ast/DefFnStmt.h"
 
 namespace gwbasic {
 
@@ -96,6 +117,18 @@ public:
         semLineNumbers_ = r.lineNumbers;
         semCommonVariables_ = r.commonVariables;
         arraySizes_ = r.arrays;
+        userFunctions_ = r.userFunctions;
+        semStringVariables_ = r.stringVariables;
+        // Map numeric kinds from semantics into codegen's representation
+        semNumericKinds_.clear();
+        for (const auto& [name, kind] : r.numericKinds) {
+            switch (kind) {
+                case SemanticAnalyzer::Result::NumericKind::Int16: semNumericKinds_[name] = NumKind::Int16; break;
+                case SemanticAnalyzer::Result::NumericKind::Long32: semNumericKinds_[name] = NumKind::Long32; break;
+                case SemanticAnalyzer::Result::NumericKind::Single: semNumericKinds_[name] = NumKind::Single; break;
+                case SemanticAnalyzer::Result::NumericKind::Double: semNumericKinds_[name] = NumKind::Double; break;
+            }
+        }
     }
 
 private:
@@ -132,6 +165,13 @@ private:
     std::map<std::string, int> strLiteralId_;
     std::map<std::string, int> arraySizes_{};
     std::map<std::string, std::string> arrayAllocaName_{};
+    // User-defined functions by uppercase name
+    std::map<std::string, const DefFnStmt*> userFunctions_{};
+    // Variables determined as string-typed (by suffix or DEFSTR)
+    std::set<std::string> semStringVariables_{};
+    // Variables numeric kind mapping (non-strings only)
+    enum class NumKind { Int16, Long32, Single, Double };
+    std::map<std::string, NumKind> semNumericKinds_{};
     /*
      * Property: lineNumbers_
      * Purpose:
@@ -156,6 +196,11 @@ private:
      *  - Flag indicating whether RND(x) helper function must be emitted.
      */
     bool needsRndHelper_{false};
+    bool needsColor_{false};
+    // Whether STOP appears anywhere (to emit break message global)
+    bool needsBreakMsg_{false};
+    // Inline call-time substitution bindings (stack of name->SSA value)
+    std::vector<std::map<std::string, std::string>> bindingStack_{};
     // Optional semantic input
     /*
      * Property: semProvided_
@@ -200,6 +245,17 @@ private:
      *    drive CHAIN scoping behavior.
      */
     std::map<int, std::set<std::string>> commonBeforeLine_{};
+    // Snapshot of variables seen before each line (in source order)
+    std::map<int, std::set<std::string>> varsBeforeLine_{};
+    // Snapshot of arrays seen (DIM'd or referenced) before each line
+    std::map<int, std::set<std::string>> arraysBeforeLine_{};
+    // For error handlers: map trap start line -> first non-handler line after the
+    // handler region (i.e., the line following the first line containing RESUME)
+    std::map<int, int> handlerSkipAfter_{};
+    // Mapping from 1000-based line region base (e.g., 0, 1000, 2000, ...)
+    // to the DATA table index at the start of that region. Used to reset
+    // the DATA pointer on CHAIN to a new program segment.
+    std::map<int, int> regionDataStartIdx_{};
     // DATA items as string literal ids in program order
     std::vector<int> dataLiteralIds_{};
 
@@ -238,10 +294,21 @@ private:
      *  - std::string: Label (e.g., "line100")
      */
     static std::string lineLabelName(int ln) { std::string s = "line"; s += std::to_string(ln); return s; }
+    /** Label for re-executing a specific statement index within a line. 1-based index. */
+    static std::string resumeLabelName(int ln, int stmtIndex) {
+        std::string s = "resume_l"; s += std::to_string(ln); s += "_"; s += std::to_string(stmtIndex); return s;
+    }
+    /** Label for resuming at the statement after a given index within a line. 1-based index. */
+    static std::string resumeNextLabelName(int ln, int stmtIndex) {
+        std::string s = "resume_next_l"; s += std::to_string(ln); s += "_"; s += std::to_string(stmtIndex); return s;
+    }
 
     // Declaration collection
     /** Collect declarations, variables, strings, and line ordering. */
     void collectDecls(const Program& program);
+    // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
+    void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string>& vars, std::set<std::string>& arrays);
+    void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string>& vars, std::set<std::string>& arrays);
     /** Collect variables/strings referenced by an expression. */
     void collectExprVars(const Expr* e);
     /** Collect variables/strings/COMMON from a statement (recursive). */
@@ -251,6 +318,8 @@ private:
     void scanExprForRnd(const Expr* e);
     /** Scan statement (and children) for RND() usage. */
     void scanStmtForRnd(const Stmt* s);
+    /** Scan statement (and children) for STOP usage. */
+    void scanStmtForStop(const Stmt* s);
 
     // Emission helpers
     /** Emit module-level declarations (printf, math, rng helpers). */
@@ -276,6 +345,8 @@ private:
     // Expression lowering
     /** Lower an expression to SSA value; returns its name. */
     std::string emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix);
+    // Helper: determine whether an expression is string-typed (for codegen routing)
+    bool isStringExpr(const Expr* e) const;
     /** Lower a comparison expression to an i1 predicate value. */
     std::string emitComparison(std::ostringstream& out, const BinaryExpr* c);
 
@@ -287,6 +358,33 @@ private:
     /** Allocate a stack slot for a variable if not already allocated. */
     void ensureVarAllocated(std::ostringstream& out, const std::string& name);
     void ensureArrayAllocated(std::ostringstream& out, const std::string& name, int length);
+    void ensureStringArrayAllocated(std::ostringstream& out, const std::string& name, int length);
+    /** Sanitize BASIC variable name into a valid local IR identifier */
+    static std::string sanitizeLocal(const std::string& name);
+    /** Emit casts+store to assign a computed double to a typed variable */
+    void storeNumberToVar(std::ostringstream& out, const std::string& name, const std::string& doubleValSSA);
+    /** Reset a variable to zero/null according to its type */
+    void resetVar(std::ostringstream& out, const std::string& name);
+    /** Lookup numeric kind for variable (assumes non-string); defaults to Single */
+    NumKind numKindOf(const std::string& name) const {
+        auto it = semNumericKinds_.find(name);
+        if (it != semNumericKinds_.end()) return it->second;
+        return NumKind::Single;
+    }
+    // Lookup current inline binding for a variable name (if any)
+    bool lookupBinding(const std::string& name, std::string& out) const {
+        for (const auto & it : std::ranges::reverse_view(bindingStack_)) {
+            auto f = it.find(name);
+            if (f != it.end()) { out = f->second; return true; }
+        }
+        return false;
+    }
+    // Helper: determine if a variable name is string-typed
+    bool isStringVarNameCG(const std::string& name) const {
+        if (!name.empty() && name.back() == Symbols::DOLLARSIGN.first()) return true;
+        return semStringVariables_.contains(name);
+    }
+    bool isStringArrayNameCG(const std::string& name) const { return isStringVarNameCG(name); }
 
     // Logging utilities
     /** Stream accessor: codegen-phase logger (ostream sink when disabled). */

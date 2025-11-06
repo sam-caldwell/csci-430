@@ -5,13 +5,13 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseRun
+ * Inputs: none (assumes RUN already consumed)
+ * Outputs: RunStmt with optional target line number
+ * Theory: Accepts optional integer; otherwise restarts at first line.
+ */
 std::unique_ptr<Stmt> Parser::parseRun() {
-    /*
-     * Function: Parser::parseRun
-     * Inputs: none (assumes RUN already consumed)
-     * Outputs: RunStmt with optional target line number
-     * Theory: Accepts optional integer; otherwise restarts at first line.
-     */
     // Strict: require filename string; optional , <line>
     if (!check(TokenType::String)) throw ParseError("Expected filename string after RUN");
     std::string file = peek().lexeme; advance();

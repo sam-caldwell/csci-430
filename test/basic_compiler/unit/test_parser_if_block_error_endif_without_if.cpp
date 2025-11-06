@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer::tokenize; Parser::parseProgram
  * Expected Behavior: Parsing throws ParseError when encountering END IF without a matching IF.
  */
+/*
+Test: Parser.IfBlock_Error_EndIfWithoutIf
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, IfBlock_Error_EndIfWithoutIf) {
     std::string src = "10 END IF\n";
     Lexer lex(src);

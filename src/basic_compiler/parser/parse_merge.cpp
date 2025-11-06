@@ -5,15 +5,19 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseMerge
+ * Purpose:
+ *  - Parse MERGE "file"
+ * Inputs:
+ *  - none (assumes 'MERGE' was matched by caller)
+ * Outputs:
+ *  - MergeStmt: filename string (as written)
+ */
 std::unique_ptr<Stmt> Parser::parseMerge() {
-    /*
-     * Function: Parser::parseMerge
-     * Strict grammar: MERGE "file"
-     */
     if (!check(TokenType::String)) throw ParseError("Expected filename string after MERGE");
     std::string file = peek().lexeme; advance();
     return make_node<MergeStmt>({peek().line, peek().col}, std::move(file));
 }
 
 } // namespace gwbasic
-

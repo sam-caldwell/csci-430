@@ -20,6 +20,12 @@ using namespace e2e_helpers;
  * Components Under Test: Full compiler pipeline; scanf-based input; clang.
  * Expected Behavior: Program prints the correct factorial value for input.
  */
+/*
+Test: E2E.FactorialFromInput
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, FactorialFromInput) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -44,5 +50,5 @@ TEST(E2E, FactorialFromInput) {
     int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0);
     std::string out = runCommandWithInput(bin.string(), "5\\n");
-    ASSERT_NE(out.find("120.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("120\n"), std::string::npos);
 }

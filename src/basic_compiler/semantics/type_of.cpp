@@ -27,9 +27,37 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
     if (!e) return ValueType::Number;
     if (dyn_cast<const NumberExpr>(e)) return ValueType::Number;
     if (dyn_cast<const StringExpr>(e)) return ValueType::String;
-    if (dyn_cast<const CallExpr>(e)) return ValueType::Number;
+    if (auto c = dyn_cast<const CallExpr>(e)) {
+        // Array element reference has form A(i)
+        if (arrays_.contains(c->callee)) {
+            if (varNameIsString(c->callee)) return ValueType::String;
+            return ValueType::Number;
+        }
+        // Built-in intrinsics: CHR$ returns string; ASC returns number.
+        std::string fn = c->callee; for (auto &ch: fn) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+        if (fn == "CHR$") return ValueType::String;
+        if (isKnownNumericFunction(fn)) return ValueType::Number;
+        if (isKnownStringFunction(fn)) return ValueType::String;
+        if (userFunctions_.contains(fn)) {
+            const DefFnStmt* def = userFunctions_.at(fn);
+            if (!def->fnName.empty() && def->fnName.back() == '$') return ValueType::String;
+            return ValueType::Number;
+        }
+        // If function name ends with '$', treat as string (covers built-ins like CHR$)
+        if (!c->callee.empty() && c->callee.back() == '$') return ValueType::String;
+        return ValueType::Number;
+    }
     if (auto v = dyn_cast<const VarExpr>(e)) {
-        if (!v->name.empty() && v->name.back() == '$') return ValueType::String;
+        // String if name has '$' suffix or falls under DEFSTR
+        auto isStrName = [&](const std::string& nm) -> bool {
+            if (!nm.empty() && nm.back() == '$') return true;
+            if (nm.empty()) return false;
+            char c0 = static_cast<char>(std::toupper(static_cast<unsigned char>(nm[0])));
+            if (c0 < 'A' || c0 > 'Z') return false;
+            DefaultKind dk = defaultKinds_[c0 - 'A'];
+            return dk == DefaultKind::Str;
+        };
+        if (isStrName(v->name)) return ValueType::String;
         return ValueType::Number;
     }
     if (auto u = dyn_cast<const UnaryExpr>(e)) {

@@ -23,7 +23,7 @@ namespace gwbasic {
 struct IfStmt : ASTLeaf<NodeKind::IfStmt, Stmt> {
     std::unique_ptr<Expr> cond;
     int targetLine;
-    IfStmt(std::unique_ptr<Expr> c, int ln) : ASTLeaf(), cond(std::move(c)), targetLine(ln) {}
+    IfStmt(std::unique_ptr<Expr> c, const int ln) : ASTLeaf(), cond(std::move(c)), targetLine(ln) {}
 };
 
 } // namespace gwbasic

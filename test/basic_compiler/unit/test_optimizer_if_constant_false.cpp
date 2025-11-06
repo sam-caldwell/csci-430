@@ -11,6 +11,12 @@ using namespace gwbasic;
  * Components Under Test: AstOptimizer::optimize; CodeGenerator.
  * Expected Behavior: No branch to target; subsequent PRINT remains.
  */
+/*
+Test: OptimizerIf.ConstantFalseRemoved
+Inputs: See test body
+Code under test: Relevant module(s) under test
+Expected behavior: Asserts expected results/behavior described in test
+*/
 TEST(OptimizerIf, ConstantFalseRemoved) {
     const auto src =
         "10 IF 2 < 1 THEN 100\n"
@@ -18,6 +24,5 @@ TEST(OptimizerIf, ConstantFalseRemoved) {
         "30 END\n";
     auto ir = Compiler::compileStringOptimized(src);
     EXPECT_EQ(ir.find("line100"), std::string::npos);
-    EXPECT_NE(ir.find(", double 5.0)"), std::string::npos);
+    EXPECT_NE(ir.find(", i64 5)"), std::string::npos);
 }
-

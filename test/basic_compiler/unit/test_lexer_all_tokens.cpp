@@ -23,6 +23,12 @@ using namespace gwbasic;
  *  and operators/punct (+ - * / = < > <= >= <> ( ) : ,).
  *  Note: REM is recognized but treated as a comment-to-EOL, yielding NewLine rather than a KwRem token.
  */
+/*
+Test: Lexer.AllRecognizedTokens
+Inputs: Raw source text and helper inputs
+Code under test: Lexer/tokenization and helpers
+Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
+*/
 TEST(Lexer, AllRecognizedTokens) {
     std::string src =
         // arithmetic, assignment, parens, comma, colon
@@ -53,7 +59,9 @@ TEST(Lexer, AllRecognizedTokens) {
         // COMMON (decl-list)
         "170 COMMON A, B\n"
         // ALL keyword (appears in CHAIN syntax; lex only)
-        "180 ALL\n";
+        "180 ALL\n"
+        // ON keyword (used by ON GOTO/GOSUB)
+        "190 ON 1 GOTO 10\n";
 
     std::istringstream iss(src);
     Lexer lex(iss);
@@ -100,6 +108,7 @@ TEST(Lexer, AllRecognizedTokens) {
         TokenType::Comma,
         TokenType::KwCommon,
         TokenType::KwAll,
+        TokenType::KwOn,
     };
 
     for (auto tt : expected) {

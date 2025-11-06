@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Components Under Test: Lexer; Parser parseStatement.
  * Expected Behavior: Single EndStmt present for the line.
  */
+/*
+Test: Parser.EndStmt
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, EndStmt) {
     std::string src = "10 END\n";
     std::istringstream iss(src);

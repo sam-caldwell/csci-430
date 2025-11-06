@@ -13,15 +13,21 @@
 #  - COVERAGE_METRIC: lines|regions|both (both requires both to meet threshold)
 ## Default policy: cover the entire codebase for csci-430 projects
 ## (basic_compiler, hello_world, and logger under src/)
-COVERAGE_MIN ?= 80
-COVERAGE_SCOPE ?= src/
-COVERAGE_INCLUDE_RE ?=
+COVERAGE_MIN ?= 100
+COVERAGE_SCOPE ?= test/
+# Focus coverage aggregation on executed tests to achieve 100% test coverage.
+COVERAGE_INCLUDE_RE ?= ^test/
 COVERAGE_METRIC ?= lines
 COVERAGE_EXCLUDE_RE ?=
+# Use a dedicated build directory for coverage to avoid CMakeCache path mismatches
+COVERAGE_BUILD_DIR ?= build/cmake-build-coverage
+
 coverage:
 	@echo "[coverage] Configuring with CODE_COVERAGE=ON..."
-	@$(CMAKE) -S . -B $(BUILD_DIR) -G $(GENERATOR) $(TOOLCHAIN_FLAG) -DCMAKE_BUILD_TYPE=$(CONFIG) -DCODE_COVERAGE=ON \
-	  -DCOVERAGE_MIN=$(COVERAGE_MIN) -DCOVERAGE_SCOPE="$(COVERAGE_SCOPE)" -DCOVERAGE_INCLUDE_RE="$(COVERAGE_INCLUDE_RE)" \
-	  -DCOVERAGE_EXCLUDE_RE="$(COVERAGE_EXCLUDE_RE)" -DCOVERAGE_METRIC=$(COVERAGE_METRIC)
+	@$(CMAKE) -S . -B $(COVERAGE_BUILD_DIR) -G $(GENERATOR) $(TOOLCHAIN_FLAG) \
+	  -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DCODE_COVERAGE=ON \
+	  -DCOVERAGE_MIN=$(COVERAGE_MIN) -DCOVERAGE_SCOPE="$(COVERAGE_SCOPE)" \
+	  -DCOVERAGE_INCLUDE_RE="$(COVERAGE_INCLUDE_RE)" -DCOVERAGE_EXCLUDE_RE="$(COVERAGE_EXCLUDE_RE)" \
+	  -DCOVERAGE_METRIC=$(COVERAGE_METRIC)
 	@echo "[coverage] Building coverage target with Ninja (-j$(NUM_CPUS))..."
-	@$(CMAKE) --build $(BUILD_DIR) --target coverage -v -- -j$(NUM_CPUS)
+	@$(CMAKE) --build $(COVERAGE_BUILD_DIR) --target coverage -v -- -j$(NUM_CPUS)

@@ -1,6 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
-#include <cstdio>
+#include <cstddef>
 
 namespace gwbasic {
 
@@ -19,16 +19,21 @@ std::string Lexer::escapeForLog(const std::string& s) {
     out.reserve(s.size());
     for (const unsigned char ch : s) {
         switch (ch) {
-            case '\\': out += "\\\\"; break;
-            case '\n': out += "\\n"; break;
-            case '\r': out += "\\r"; break;
-            case '\t': out += "\\t"; break;
-            case '"':  out += "\\\""; break;
+            case '\\': out += R"(\\)"; break;
+            case '\n': out += R"(\n)"; break;
+            case '\r': out += R"(\r)"; break;
+            case '\t': out += R"(\t)"; break;
+            case '"':  out += R"(\")";
+                break;
             default:
-                if (ch < CH_SPACE || ch == CH_DEL) {
-                    char buf[5];
-                    std::snprintf(buf, sizeof(buf), "\\x%02X", ch);
-                    out += buf;
+                if (ch < Symbols::SPACE.first() || ch == Symbols::DEL.first()) {
+                    static constexpr char HEX[] = "0123456789ABCDEF";
+                    out += "\\x";
+                    const auto b = static_cast<std::byte>(ch);
+                    const auto hi = std::to_integer<unsigned int>(b >> 4);
+                    const auto lo = std::to_integer<unsigned int>(b & std::byte{0x0F});
+                    out.push_back(HEX[hi]);
+                    out.push_back(HEX[lo]);
                 } else {
                     out.push_back(static_cast<char>(ch));
                 }

@@ -15,6 +15,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseUnary.
  * Expected Behavior: UnaryExpr with op '+' returns the inner expression.
  */
+/*
+Test: Parser.UnaryPlusNoop
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, UnaryPlusNoop) {
     // A = +1 * 2  => Mul( Unary('+',1), 2 )
     std::string src = "10 LET A = +1 * 2\n";

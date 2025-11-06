@@ -18,6 +18,12 @@ using namespace e2e_helpers;
  * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
  * Expected Behavior: Program output matches assertions in test.
  */
+/*
+Test: E2E.ForLoopDescendingCounts
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, ForLoopDescendingCounts) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -43,5 +49,5 @@ TEST(E2E, ForLoopDescendingCounts) {
     int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0);
     std::ostringstream r2; r2 << '"' << bin.string() << '"'; std::string out = runCommand(r2.str());
-    ASSERT_NE(out.find("5.000000\n4.000000\n3.000000\n2.000000\n1.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("5\n4\n3\n2\n1\n"), std::string::npos);
 }

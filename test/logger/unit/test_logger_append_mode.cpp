@@ -20,11 +20,17 @@ static std::string read_all(const fs::path& p) {
  * Test: Logger.AppendMode
  * Purpose: Ensure reopening a file in append mode preserves existing content.
  */
+/*
+Test: Logger.AppendMode
+Inputs: Filesystem paths, log messages, toggles
+Code under test: Logger component
+Expected behavior: Creates directories, writes/appends as expected, handles errors
+*/
 TEST(Logger, AppendMode) {
   Logger log;
-  fs::path outdir = fs::current_path() / "logger_tests";
+  const fs::path outdir = fs::current_path() / "logger_tests";
   fs::create_directories(outdir);
-  fs::path file = outdir / "append.log";
+  const fs::path file = outdir / "append.log";
 
   ASSERT_TRUE(log.open(file.string()));
   log.setEnabled(true);
@@ -43,4 +49,3 @@ TEST(Logger, AppendMode) {
 
   fs::remove(file);
 }
-

@@ -22,7 +22,7 @@ namespace gwbasic {
 struct UnaryExpr : ASTLeaf<NodeKind::UnaryExpr, Expr> {
     char op; // '+' or '-'
     std::unique_ptr<Expr> inner;
-    UnaryExpr(char o, std::unique_ptr<Expr> e) : ASTLeaf(), op(o), inner(std::move(e)) {}
+    UnaryExpr(const char o, std::unique_ptr<Expr> e) : ASTLeaf(), op(o), inner(std::move(e)) {}
 };
 
 } // namespace gwbasic

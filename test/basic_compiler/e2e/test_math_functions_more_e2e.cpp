@@ -22,6 +22,12 @@ using namespace e2e_helpers;
  * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
  * Expected Behavior: Program output matches assertions in test.
  */
+/*
+Test: E2E.MoreMathIntrinsicsWork
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, MoreMathIntrinsicsWork) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -54,8 +60,8 @@ TEST(E2E, MoreMathIntrinsicsWork) {
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 5u);
 
-    EXPECT_EQ(lines[0], std::string("2.000000"));     // CINT(1.6)
-    EXPECT_EQ(lines[1], std::string("-2.000000"));    // CINT(-1.6)
+    EXPECT_EQ(lines[0], std::string("2"));     // CINT(1.6)
+    EXPECT_EQ(lines[1], std::string("-2"));    // CINT(-1.6)
     EXPECT_EQ(lines[2], std::string("1.500000"));     // CDBL(1.5)
     EXPECT_EQ(lines[3], std::string("1.500000"));     // CSNG(1.5)
     // RND(1): 0.0 <= x < 1.0 (value varies)

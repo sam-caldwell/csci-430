@@ -19,6 +19,12 @@ using namespace e2e_helpers;
  * Components Under Test: Full compiler pipeline; external clang; runtime.
  * Expected Behavior: Compiled program prints expected numeric and string lines.
  */
+/*
+Test: E2E.CompileAndRun
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, CompileAndRun) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -46,6 +52,6 @@ TEST(E2E, CompileAndRun) {
     ASSERT_EQ(ec, 0) << "Clang failed: " << cmd;
 
     std::ostringstream r1; r1 << '"' << bin.string() << '"'; std::string out = runCommand(r1.str());
-    ASSERT_NE(out.find("7.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("7\n"), std::string::npos);
     ASSERT_NE(out.find("Done\n"), std::string::npos);
 }

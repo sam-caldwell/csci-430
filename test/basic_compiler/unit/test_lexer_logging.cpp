@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Test Suite: Lexer Logging
  * Purpose: Exercise lex log path to improve coverage of log_token.cpp
  */
+/*
+Test: Lexer.LoggingProducesOutput
+Inputs: Raw source text and helper inputs
+Code under test: Lexer/tokenization and helpers
+Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
+*/
 TEST(Lexer, LoggingProducesOutput) {
     const std::string src = "10 PRINT \"A\\n\\t\\\"B\\\\C\"\n20 ' comment here\r\n30 END\n";
     std::filesystem::path tmpdir = std::filesystem::path("..") / "tmp" / "unit_logs";

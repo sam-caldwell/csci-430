@@ -5,6 +5,9 @@
 #include <optional>
 #include <filesystem>
 #include <sstream>
+#include <thread>
+#include <chrono>
+#include <cstdlib>
 
 #include "basic_compiler/Compiler.h"
 #include "basic_compiler/AsmUtils.h"
@@ -39,6 +42,16 @@
 int main(int argc, char **argv) {
 
     using gwbasic::cli::takeOptValue; // bring CLI helpers into scope
+
+    // Global watchdog: hard timeout to avoid runaway compile loops
+    // If the process is still alive after TIMEOUT_S, force-exit.
+    constexpr int TIMEOUT_S = 200;
+    std::thread([=]{
+        std::this_thread::sleep_for(std::chrono::seconds(TIMEOUT_S));
+        std::fprintf(stderr, "Error: compiler timed out after %ds\n", TIMEOUT_S);
+        std::fflush(stderr);
+        std::_Exit(124);
+    }).detach();
 
     if (argc < 2) {
         usage(argv[0]);

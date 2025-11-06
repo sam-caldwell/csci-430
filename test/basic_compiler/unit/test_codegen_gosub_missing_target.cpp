@@ -11,6 +11,12 @@ using namespace gwbasic;
  * Components Under Test: CodeGenerator emitSubroutineInline.
  * Expected Behavior: Entry label for subroutine and branch to continuation.
  */
+/*
+Test: CodeGenFlow.GosubToMissingTargetIsError
+Inputs: AST (and semantic info) from BASIC snippet
+Code under test: LLVM IR code generator
+Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
+*/
 TEST(CodeGenFlow, GosubToMissingTargetIsError) {
     const auto src =
         "10 GOSUB 9999\n"

@@ -18,6 +18,12 @@ using namespace e2e_helpers;
  * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
  * Expected Behavior: Program output matches assertions in test.
  */
+/*
+Test: E2E.WhileInline_CountsUp
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
 TEST(E2E, WhileInline_CountsUp) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     std::string src =
@@ -36,6 +42,5 @@ TEST(E2E, WhileInline_CountsUp) {
     int ec = std::system(c2.str().c_str());
     ASSERT_EQ(ec, 0);
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
-    ASSERT_NE(out.find("1.000000\n2.000000\n3.000000\n"), std::string::npos);
+    ASSERT_NE(out.find("1\n2\n3\n"), std::string::npos);
 }
-

@@ -19,7 +19,7 @@ namespace gwbasic {
  *    std::unique_ptr<Stmt> in containing structures.
  */
 struct Stmt : Node {
-    virtual ~Stmt() = default;
+    ~Stmt() override = default;
 protected:
     explicit Stmt(NodeKind k) : Node(k) {}
     Stmt() : Node(NodeKind::AbstractStmt) {}
@@ -41,6 +41,8 @@ public:
             case NodeKind::ForStmt:
             case NodeKind::NextStmt:
             case NodeKind::EndStmt:
+            case NodeKind::StopStmt:
+            case NodeKind::SystemStmt:
             case NodeKind::RandomizeStmt:
             case NodeKind::WhileStmt:
             case NodeKind::WendStmt:
@@ -50,6 +52,7 @@ public:
             case NodeKind::MergeStmt:
             case NodeKind::DimStmt:
             case NodeKind::ArrayAssignStmt:
+            case NodeKind::MidAssignStmt:
                 return true;
             default:
                 return false;

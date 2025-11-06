@@ -5,14 +5,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseCommon
+ * Purpose:
+ *  - Parse COMMON var[,var...]
+ * Inputs:
+ *  - none (assumes 'COMMON' matched by caller)
+ * Outputs:
+ *  - CommonStmt: list of variable names
+ */
 std::unique_ptr<Stmt> Parser::parseCommon() {
-    /*
-     * Function: Parser::parseCommon
-     * Inputs: none (assumes COMMON already consumed)
-     * Outputs: CommonStmt with list of identifiers
-     * Theory: Parse a non-empty comma-separated list of identifiers. Arrays
-     *         and typed suffixes are not supported in this compiler.
-     */
     std::vector<std::string> names;
     if (!check(TokenType::Identifier)) throw ParseError("Expected variable name after COMMON");
     names.push_back(peek().lexeme);
@@ -26,4 +28,3 @@ std::unique_ptr<Stmt> Parser::parseCommon() {
 }
 
 } // namespace gwbasic
-

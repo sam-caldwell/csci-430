@@ -26,9 +26,8 @@ namespace gwbasic::cli {
 bool takeOptValue(const std::string& arg,
                   std::initializer_list<const char*> names,
                   int& i,
-                  int argc,
+                  const int argc,
                   char** argv,
                   std::optional<std::string>& out);
 
 } // namespace gwbasic::cli
-

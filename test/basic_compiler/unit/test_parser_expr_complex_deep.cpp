@@ -14,6 +14,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseExpression/term/factor/unary.
  * Expected Behavior: AST reflects correct associativity and precedence.
  */
+/*
+Test: Parser.ExprComplexDeep
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ExprComplexDeep) {
     // A = (1 + 2) * (3 - (4 / (5 + 6)))
     std::string src = "10 LET A = (1 + 2) * (3 - (4 / (5 + 6)))\n";

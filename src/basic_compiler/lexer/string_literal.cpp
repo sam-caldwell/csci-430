@@ -23,13 +23,13 @@ Token Lexer::stringLiteral() {
         if (const char c = advance(); c == '\\') {
             if (atEnd()) break;
             switch (const char n = advance()) {
-                case 'n': buf.push_back(CH_LF); break;
-                case 't': buf.push_back(CH_TAB); break;
-                case '"': buf.push_back('"'); break;
+                case 'n': buf.push_back(Symbols::LF.first()); break;
+                case 't': buf.push_back(Symbols::TAB.first()); break;
+                case Symbols::DOUBLE_QUOTE.first(): buf.push_back(Symbols::DOUBLE_QUOTE.first()); break;
                 case '\\': buf.push_back('\\'); break;
                 default: buf.push_back(n); break;
             }
-        } else if (c == '"') {
+        } else if (c == Symbols::DOUBLE_QUOTE.first()) {
             return Token{TokenType::String, buf, startLine, startCol};
         } else {
             buf.push_back(c);

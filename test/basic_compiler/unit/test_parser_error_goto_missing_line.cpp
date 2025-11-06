@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Components Under Test: Parser parseStatement for GOTO.
  * Expected Behavior: Error reported when the line number is absent.
  */
+/*
+Test: Parser.ErrorGotoMissingLine
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorGotoMissingLine) {
     std::string src = "10 GOTO\n";
     std::istringstream iss(src);

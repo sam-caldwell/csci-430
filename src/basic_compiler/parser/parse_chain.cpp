@@ -5,20 +5,19 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseChain
+ * Inputs: none (assumes CHAIN already consumed)
+ * Outputs: ChainStmt with optional filename, target line, and ALL flag.
+ * Grammar accepted: CHAIN ["file"][, <line>][, ALL]
+ */
 std::unique_ptr<Stmt> Parser::parseChain() {
-    /*
-     * Function: Parser::parseChain
-     * Inputs: none (assumes CHAIN already consumed)
-     * Outputs: ChainStmt with optional filename, target line, and ALL flag.
-     * Grammar accepted: CHAIN ["file"][, <line>][, ALL]
-     */
-    std::optional<std::string> file;
     std::optional<int> target;
     bool all = false;
 
     // Strict: filename required
     if (!check(TokenType::String)) throw ParseError("Expected filename string after CHAIN");
-    file = peek().lexeme; advance();
+    std::optional<std::string> file = peek().lexeme; advance();
     if (match(TokenType::Comma)) {
         if (check(TokenType::Integer)) { target = std::stoi(peek().lexeme); advance(); }
         else if (check(TokenType::KwAll)) { all = true; advance(); }

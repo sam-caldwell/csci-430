@@ -12,6 +12,12 @@ using namespace gwbasic;
  * Test: Parser.ErrorMissingLeadingLineNumber
  * Purpose: Ensure parser rejects programs without an initial line number.
  */
+/*
+Test: Parser.ErrorMissingLeadingLineNumber
+Inputs: BASIC source snippet
+Code under test: Parser (BASIC → AST)
+Expected behavior: AST structure or parse errors match expectations
+*/
 TEST(Parser, ErrorMissingLeadingLineNumber) {
     const std::string src = "PRINT 1\n";
     std::istringstream iss(src);
