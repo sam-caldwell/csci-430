@@ -75,11 +75,10 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
         // MERGE is a compile-time directive; codegen no-op
     } else if (const auto ds = dyn_cast<const DataStmt>(s)) {
         // Normalize DATA items into string literals and record ids
-        for (const auto& v : ds->items) {
-            std::string norm = v;
-            // Ensure string literal id exists
-            if (!strLiteralId_.count(norm)) strLiteralId_[norm] = strCounter_++;
-            dataLiteralIds_.push_back(strLiteralId_[norm]);
+        for (const auto& it : ds->items) {
+            const std::string& txt = it.text;
+            if (!strLiteralId_.count(txt)) strLiteralId_[txt] = strCounter_++;
+            dataLiteralIds_.push_back(strLiteralId_[txt]);
         }
         logSem() << "Data items=" << ds->items.size() << Symbols::LF;
     } else if (const auto rd = dyn_cast<const ReadStmt>(s)) {

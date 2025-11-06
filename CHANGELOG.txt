@@ -192,7 +192,7 @@
                 clang-tidy treating '-stdlib=libc++' as an error on C sources; link with libc++ for C++.
               - GitHub Actions coverage workflow: macOS installs llvm@17; exports LLVM_PREFIX/CC/CXX/PATH;
                 Ubuntu uses apt.llvm.org llvm.sh 17 path; both use unified toolchain.
-              - make lint/linux now succeeds (clang-tidy present and clean) and make test/linux passes.
+              - Make lint/linux now succeeds (clang-tidy present and clean) and make test/linux passes.
 
             - Style/tooling: .editorconfig compatibility improvements
               - Split grouped sections for compatibility with older plugins:
@@ -218,6 +218,28 @@
               - Lexer already treated apostrophe as comment to EOL; added tests to guarantee strict behavior.
               - Integration: confirms garbage tokens after apostrophe are ignored (no lex/parse errors); IR contains
                 expected print formatting for statements before comments.
+
+06 Nov 2025 - DATA/READ/RESTORE overhaul
+            - Lexer/Parser/AST: DATA items now preserve tokenization as quoted strings vs. numbers.
+              - New AST type DataItem { bool isString; std::string text } and DataStmt now holds vector<DataItem>.
+              - Parser::parseData produces DataItem entries; existing unit tests updated accordingly.
+            - Codegen: Removed atof-based numeric parsing in READ; now follows GW-BASIC tokenization.
+              - Globals: emit @gwb_data (ptrs to string payloads), @gwb_data_isstr (i8 flags), @gwb_data_num (double values).
+              - READ: bounds-checks @gwb_data_idx, enforces that numeric targets cannot consume quoted-string items
+                (runtime error dispatched via ON ERROR if installed), and loads numeric values from @gwb_data_num.
+                String targets continue to store pointers to literal payloads.
+              - Scalar numeric stores now use typed stores via storeNumberToVar; array elements use storeNumberToArrayElem.
+              - RESTORE: lowers to a store of 0 into @gwb_data_idx (no operand variant only); RESTORE <line> is not supported.
+              - Out-of-data: attempting to READ past the end of the DATA table triggers runtime error code 9 and dispatches via ON ERROR when installed.
+              - IR: removed declaration and all uses of @atof; READ no longer depends on libc conversion.
+            - Tests:
+              - Unit: updated DATA parser test to assert isString/text; existing READ/RESTORE parser tests remain green.
+              - Integration: new tests verify presence of @gwb_data_isstr/@gwb_data_num and absence of @atof; RESTORE emits data_idx reset.
+              - E2E: added coverage for
+                - RESTORE rewinding behavior (READ after RESTORE yields from start),
+                - type-mismatch on reading quoted strings into numeric targets (handler prints), and
+                - out-of-data handling via ON ERROR.
+            - All suites green locally with artifacts under build/ via 'make clean configure'.
               - E2E: program with apostrophe comments runs and prints expected results for statements before comments.
               - Unit: added test ensuring a literal apostrophe inside a double-quoted string (e.g., "Bob's") is not
                 treated as a comment and remains in the StringExpr.
@@ -257,7 +279,8 @@
 
             - Consumed enough caffeine to make Mötley Crüe seem tame.
 
-06 Nov 2025 - SWAP statement (variables and arrays)
+            - SWAP statement (variables and arrays)
+
             - Language: SWAP x, y
               - Lexer: added SWAP keyword.
               - AST: new SwapStmt with left/right variable references (scalar or array element) using ReadTarget.
@@ -268,5 +291,6 @@
                 - Strings: load ptr from each side and store cross.
                 - Numerics: load each as double with proper casts, then typed stores back to each destination
                   (vars or array elements). Array element refs include runtime bounds checks matching assignment/expr.
+
             - Tests: unit (parser + semantics), integration (IR patterns for string vars and numeric array elems),
               and e2e (numeric and string swaps produce expected outputs). All tests pass locally.

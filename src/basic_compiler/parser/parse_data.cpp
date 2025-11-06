@@ -19,7 +19,7 @@ namespace gwbasic {
 std::unique_ptr<Stmt> Parser::parseData() {
     // DATA item[,item...]; items must be string or numeric literals
     const int l = peek().line, c = peek().col;
-    std::vector<std::string> items;
+    std::vector<DataItem> items;
     bool first = true;
     while (true) {
         // Stop at end of statement
@@ -28,10 +28,10 @@ std::unique_ptr<Stmt> Parser::parseData() {
         first = false;
         // Accept string or number
         if (check(TokenType::String)) {
-            items.push_back(peek().lexeme);
+            DataItem di; di.isString = true; di.text = peek().lexeme; items.push_back(std::move(di));
             advance();
         } else if (check(TokenType::Integer) || check(TokenType::Float)) {
-            items.push_back(peek().lexeme);
+            DataItem di; di.isString = false; di.text = peek().lexeme; items.push_back(std::move(di));
             advance();
         } else {
             throw ParseError("DATA expects literal items");

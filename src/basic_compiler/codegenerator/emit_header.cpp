@@ -31,8 +31,7 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare i32 @fprintf(ptr, ptr, ...)" << Symbols::LF
         << "declare i64 @fread(ptr, i64, i64, ptr)" << Symbols::LF
         << "declare i64 @fwrite(ptr, i64, i64, ptr)" << Symbols::LF << Symbols::LF
-        << "declare i32 @chdir(ptr)" << Symbols::LF
-        << "declare double @atof(ptr)" << Symbols::LF << Symbols::LF
+        << "declare i32 @chdir(ptr)" << Symbols::LF << Symbols::LF
     // Math library functions used by intrinsic calls
         << "declare double @sqrt(double)" << Symbols::LF
         << "declare double @fabs(double)" << Symbols::LF

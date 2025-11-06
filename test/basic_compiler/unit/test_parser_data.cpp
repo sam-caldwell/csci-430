@@ -30,8 +30,10 @@ TEST(Parser, DataParsesLiteralList) {
     auto* ds = dynamic_cast<DataStmt*>(lines[0].statements[0].get());
     ASSERT_NE(ds, nullptr);
     ASSERT_EQ(ds->items.size(), 3u);
-    EXPECT_EQ(ds->items[0], "X");
-    EXPECT_EQ(ds->items[1], "3.14");
-    EXPECT_EQ(ds->items[2], "42");
+    EXPECT_TRUE(ds->items[0].isString);
+    EXPECT_EQ(ds->items[0].text, "X");
+    EXPECT_FALSE(ds->items[1].isString);
+    EXPECT_EQ(ds->items[1].text, "3.14");
+    EXPECT_FALSE(ds->items[2].isString);
+    EXPECT_EQ(ds->items[2].text, "42");
 }
-

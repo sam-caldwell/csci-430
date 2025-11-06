@@ -3,6 +3,7 @@
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/ArrayAssignStmt.h"
 #include "basic_compiler/ast/DataStmt.h"
+#include "basic_compiler/ast/RestoreStmt.h"
 #include "basic_compiler/ast/ReadStmt.h"
 #include "basic_compiler/ast/WriteStmt.h"
 #include "basic_compiler/ast/DimStmt.h"
@@ -744,6 +745,9 @@ namespace gwbasic {
             } else if (auto ds = dyn_cast<DataStmt>(st.get())) {
                 // DATA: no runtime effect; items lowered into globals
                 { std::ostringstream m; m << "line " << currentLine_ << " DataStmt (no-op)"; log() << m.str() << Symbols::LF; }
+            } else if (dyn_cast<RestoreStmt>(st.get())) {
+                // RESTORE: reset DATA pointer to beginning
+                { std::string ir = std::format("  store i32 0, ptr @gwb_data_idx"); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " RestoreStmt data_idx -> " << ir; log() << m.str() << Symbols::LF; } }
             } else if (isa<OptionBaseStmt>(st.get())) {
                 // OPTION BASE affects semantics only; no runtime code
                 { std::ostringstream m; m << "line " << currentLine_ << " OptionBaseStmt (no-op)"; log() << m.str() << Symbols::LF; }
@@ -752,11 +756,37 @@ namespace gwbasic {
                 for (const auto& t : rd->targets) {
                     // load index
                     std::string idx = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_data_idx", idx); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read load idx -> " << ir; log() << m.str() << Symbols::LF; } }
-                    // compute element pointer
+                    // bounds-check: idx < N
+                    const size_t N = dataLiteralIds_.size();
+                    std::string inBounds = nextTemp(); { std::string ir = std::format("  {} = icmp ult i32 {}, {}", inBounds, idx, static_cast<int>(N)); out << ir << Symbols::LF; }
+                    // error/ok labels
+                    std::string okLbl = lineLabelName(line.number) + std::string("_read_ok_") + std::to_string(++localContCounter);
+                    std::string errLbl = lineLabelName(line.number) + std::string("_read_err_") + std::to_string(localContCounter);
+                    { std::string ir = std::format("  br i1 {}, label %{}, label %{}", inBounds, okLbl, errLbl); out << ir << Symbols::LF; }
+                    // Error path: set error code and dispatch to handler/exit
+                    out << errLbl << ":" << Symbols::LF;
+                    { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_stmt", stmtIndex); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                    // Mirror into ERR/ERL variables omitted in this path to avoid dominance issues
+                    {
+                        std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                        { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                        for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                        out << "  ]" << Symbols::LF;
+                    }
+                    // Ok path
+                    out << okLbl << ":" << Symbols::LF;
+                    // compute composite pointers
                     std::string idx64 = nextTemp(); { std::string ir = std::format("  {} = sext i32 {} to i64", idx64, idx); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read sext -> " << ir; log() << m.str() << Symbols::LF; } }
-                    std::string ep = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr @gwb_data, i64 0, i64 {}", ep, dataLiteralIds_.size(), idx64); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read gep -> " << ir; log() << m.str() << Symbols::LF; } }
+                    std::string ep = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr @gwb_data, i64 0, i64 {}", ep, N, idx64); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read gep -> " << ir; log() << m.str() << Symbols::LF; } }
                     std::string sval = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", sval, ep); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read load ptr -> " << ir; log() << m.str() << Symbols::LF; } }
-                    // increment index
+                    std::string isptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x i8], ptr @gwb_data_isstr, i64 0, i64 {}", isptr, N, idx64); out << ir << Symbols::LF; }
+                    std::string isb = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", isb, isptr); out << ir << Symbols::LF; }
+                    std::string isStr = nextTemp(); { std::string ir = std::format("  {} = icmp ne i8 {}, 0", isStr, isb); out << ir << Symbols::LF; }
+                    // increment index (after successful read checks)
                     std::string idx1 = nextTemp(); { std::string ir = std::format("  {} = add i32 {}, 1", idx1, idx); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read add -> " << ir; log() << m.str() << Symbols::LF; } }
                     { std::string ir = std::format("  store i32 {}, ptr @gwb_data_idx", idx1); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read store idx -> " << ir; log() << m.str() << Symbols::LF; } }
                     // assign to target
@@ -816,7 +846,29 @@ namespace gwbasic {
                             ensureArrayAllocated(out, t.name, static_cast<int>(total));
                             std::string basea = arrayAllocaName_[t.name];
                             std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, total, arrayElemType(t.name), basea, lin); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read arr gep -> " << ir; log() << m.str() << Symbols::LF; } }
-                            std::string dval = nextTemp(); { std::string ir = std::format("  {} = call double @atof(ptr {})", dval, sval); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read atof -> " << ir; log() << m.str() << Symbols::LF; } }
+                            // Type enforcement: numeric array target cannot read quoted string data
+                            // Branch on isStr and raise runtime error if true
+                            std::string okNumLbl = lineLabelName(line.number) + std::string("_read_arr_ok_") + std::to_string(++localContCounter);
+                            std::string errNumLbl = lineLabelName(line.number) + std::string("_read_arr_tyerr_") + std::to_string(localContCounter);
+                            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isStr, errNumLbl, okNumLbl); out << ir << Symbols::LF; }
+                            // error: set error info and dispatch
+                            out << errNumLbl << ":" << Symbols::LF;
+                            { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_stmt", stmtIndex); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                            // ERR/ERL mirroring omitted to avoid local allocas in error path
+                            {
+                                std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                                { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                                out << "  ]" << Symbols::LF;
+                            }
+                            // ok: load numeric constant and store into array element
+                            out << okNumLbl << ":" << Symbols::LF;
+                            std::string nptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr @gwb_data_num, i64 0, i64 {}", nptr, N, idx64); out << ir << Symbols::LF; }
+                            std::string dval = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dval, nptr); out << ir << Symbols::LF; }
                             storeNumberToArrayElem(out, t.name, elem, dval);
                         }
                     } else {
@@ -825,8 +877,28 @@ namespace gwbasic {
                         if (isStringVarNameCG(t.name)) {
                             std::string ir = std::format("  store ptr {}, ptr {}", sval, varAllocaName_[t.name]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read store$ -> " << ir; log() << m.str() << Symbols::LF; }
                         } else {
-                            std::string dval = nextTemp(); { std::string ir = std::format("  {} = call double @atof(ptr {})", dval, sval); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read atof -> " << ir; log() << m.str() << Symbols::LF; } }
-                            std::string ir = std::format("  store double {}, ptr {}", dval, varAllocaName_[t.name]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read store -> " << ir; log() << m.str() << Symbols::LF; }
+                            // numeric scalar: enforce type of DATA item and load pre-parsed numeric value
+                            std::string okNumLbl = lineLabelName(line.number) + std::string("_read_ok_s_") + std::to_string(++localContCounter);
+                            std::string errNumLbl = lineLabelName(line.number) + std::string("_read_err_s_") + std::to_string(localContCounter);
+                            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isStr, errNumLbl, okNumLbl); out << ir << Symbols::LF; }
+                            out << errNumLbl << ":" << Symbols::LF;
+                            { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_stmt", stmtIndex); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                            // ERR/ERL mirroring omitted to avoid local allocas in error path
+                            {
+                                std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                                { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                                out << "  ]" << Symbols::LF;
+                            }
+                            out << okNumLbl << ":" << Symbols::LF;
+                            std::string nptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr @gwb_data_num, i64 0, i64 {}", nptr, N, idx64); out << ir << Symbols::LF; }
+                            std::string dval = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dval, nptr); out << ir << Symbols::LF; }
+                            // typed store according to destination variable kind
+                            storeNumberToVar(out, t.name, dval);
                         }
                     }
                 }

@@ -75,7 +75,8 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@gwb_resume_line = global i32 0" << Symbols::LF
         << "@gwb_resume_stmt = global i32 0" << Symbols::LF
         << "@gwb_in_handler = global i1 false" << Symbols::LF << Symbols::LF;
-    // Emit DATA/READ backing store if present (array of pointers to literals) and an index
+    // Emit DATA/READ backing store if present (array of pointers to literals),
+    // a parallel kind and numeric value tables, and an index
     {
         // Always provide an index variable; table may be size 0
         out << "@gwb_data_idx = global i32 0" << Symbols::LF;
@@ -84,6 +85,21 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         for (size_t i = 0; i < N; ++i) {
             if (i) out << ", ";
             out << "ptr " << globalStringName(dataLiteralIds_[i]);
+        }
+        out << "]" << Symbols::LF;
+        // is-string marker table (i8 1 when original item was quoted string)
+        out << "@gwb_data_isstr = internal constant [" << N << " x i8] [";
+        for (size_t i = 0; i < N; ++i) {
+            if (i) out << ", ";
+            out << "i8 " << static_cast<int>(dataIsString_[i]);
+        }
+        out << "]" << Symbols::LF;
+        // numeric value table (double) for numeric items; undefined for strings (0.0)
+        out << "@gwb_data_num = internal constant [" << N << " x double] [";
+        for (size_t i = 0; i < N; ++i) {
+            if (i) out << ", ";
+            // Emit as floating literal with exponent to satisfy LLVM parser (e.g., 0.000000e+00)
+            out << "double " << std::format("{:.6e}", dataNumValues_[i]);
         }
         out << "]" << Symbols::LF << Symbols::LF;
     }

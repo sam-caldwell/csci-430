@@ -262,6 +262,10 @@ private:
     std::map<int, int> regionDataStartIdx_{};
     // DATA items as string literal ids in program order
     std::vector<int> dataLiteralIds_{};
+    // DATA item kind markers (1 when originally quoted string, 0 when numeric)
+    std::vector<uint8_t> dataIsString_{};
+    // DATA numeric values (double) for numeric items; undefined for string items
+    std::vector<double> dataNumValues_{};
 
     // Phase logging via ostream-based logger
     logger::Logger codegenLogger_{};

@@ -104,14 +104,28 @@ void CodeGenerator::collectDecls(const Program& program) {
 
     // Populate DATA items into dataLiteralIds_ and ensure each item has an id
     dataLiteralIds_.clear();
+    dataIsString_.clear();
+    dataNumValues_.clear();
     for (int ln : lineNumbers_) {
         const auto* lptr = lineMap_[ln];
         if (!lptr) continue;
         for (const auto& st : lptr->statements) {
             if (const auto ds = dyn_cast<const DataStmt>(st.get())) {
-                for (const auto& v : ds->items) {
-                    if (!strLiteralId_.contains(v)) strLiteralId_[v] = strCounter_++;
-                    dataLiteralIds_.push_back(strLiteralId_[v]);
+                for (const auto& it : ds->items) {
+                    const std::string& txt = it.text;
+                    if (!strLiteralId_.contains(txt)) strLiteralId_[txt] = strCounter_++;
+                    dataLiteralIds_.push_back(strLiteralId_[txt]);
+                    dataIsString_.push_back(it.isString ? 1u : 0u);
+                    if (!it.isString) {
+                        try {
+                            dataNumValues_.push_back(std::stod(txt));
+                        } catch (...) {
+                            // Fallback: treat invalid numeric text as 0.0; parser should prevent this.
+                            dataNumValues_.push_back(0.0);
+                        }
+                    } else {
+                        dataNumValues_.push_back(0.0);
+                    }
                 }
             }
         }

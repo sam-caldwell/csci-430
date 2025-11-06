@@ -2,17 +2,9 @@
 
 - REDBULL BEFORE CODING.  Tired Sam is dumb Sam!
 
-## Arrays and DATA
-
-- Implement DATA/READ/RESTORE:
-    - RESTORE [line] not supported (current RESTORE has no operand).
-    - READ parsing/assignment rules for quoted strings vs. numbers should follow GW-BASIC’s tokenization (currently
-      uses `atof` for numeric targets; string targets store pointer to literal).
-    - Ensure unit/integration and e2e tests for DATA/READ/RESTORE cover happy/sad path with 100% coverage.
- 
 ## Parser and Grammar Coverage
 
-+ SWAP x, y: exchange variables and array elements (numeric and string variants).
+- Implement Numeric literals: support scientific notation (E/D exponents), octal (`&O`/`&`), and binary where applicable; only `&H` hex is implemented. Add unit/integration/e2e tests, and ensure all tests are green.
 
 - LSET/RSET field$ = expr$: fixed-length string field assignment semantics.
  
@@ -30,12 +22,6 @@
 
 - Add metrics for optimizations in semantics (algebraic simplifications, constant folding, etc.) and codegen 
   optimizations.
-
-## Lexer Gaps
-
-- Numeric literals: support scientific notation (E/D exponents), octal (`&O`/`&`), and binary where applicable; only
-  `&H` hex is implemented.
-
 
 
 ## Code Generation: Implementations Missing (parses exist)
