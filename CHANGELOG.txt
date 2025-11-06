@@ -30,8 +30,8 @@
               via IR helper function @gwb_rnd and a global @gwb_last_rnd. Helper emitted only when used.
             - RANDOMIZE [expr]: Seeds RNG via srand48; without expr uses time(NULL). Added parser, semantics, and
               codegen support.
-            - Tests: unit (semantics/codegen) and e2e validating repeat-on-zero, reseed-on-negative, advance-on-positive,
-              and RANDOMIZE behaviors. All tests pass.
+            - Tests: unit (semantics/codegen) and e2e validating repeat-on-zero, reseed-on-negative,
+              advance-on-positive, and RANDOMIZE behaviors. All tests pass.
 
 02 Nov 2025 - Control flow and loops expansion + demos
             - FOR: Added multi-line FOR...NEXT support.
@@ -227,17 +227,22 @@
               - New AST type DataItem { bool isString; std::string text } and DataStmt now holds vector<DataItem>.
               - Parser::parseData produces DataItem entries; existing unit tests updated accordingly.
             - Codegen: Removed atof-based numeric parsing in READ; now follows GW-BASIC tokenization.
-              - Globals: emit @gwb_data (ptrs to string payloads), @gwb_data_isstr (i8 flags), @gwb_data_num (double values).
+              - Globals: emit @gwb_data (ptrs to string payloads), @gwb_data_isstr (i8 flags), @gwb_data_num (double
+                values).
               - READ: bounds-checks @gwb_data_idx, enforces that numeric targets cannot consume quoted-string items
                 (runtime error dispatched via ON ERROR if installed), and loads numeric values from @gwb_data_num.
                 String targets continue to store pointers to literal payloads.
-              - Scalar numeric stores now use typed stores via storeNumberToVar; array elements use storeNumberToArrayElem.
-              - RESTORE: lowers to a store of 0 into @gwb_data_idx (no operand variant only); RESTORE <line> is not supported.
-              - Out-of-data: attempting to READ past the end of the DATA table triggers runtime error code 9 and dispatches via ON ERROR when installed.
+              - Scalar numeric stores now use typed stores via storeNumberToVar; array elements use
+                storeNumberToArrayElem.
+              - RESTORE: lowers to a store of 0 into @gwb_data_idx (no operand variant only); RESTORE <line> is not
+                supported.
+              - Out-of-data: attempting to READ past the end of the DATA table triggers runtime error code 9 and
+                dispatches via ON ERROR when installed.
               - IR: removed declaration and all uses of @atof; READ no longer depends on libc conversion.
             - Tests:
               - Unit: updated DATA parser test to assert isString/text; existing READ/RESTORE parser tests remain green.
-              - Integration: new tests verify presence of @gwb_data_isstr/@gwb_data_num and absence of @atof; RESTORE emits data_idx reset.
+              - Integration: new tests verify presence of @gwb_data_isstr/@gwb_data_num and absence of @atof; RESTORE
+                emits data_idx reset.
               - E2E: added coverage for
                 - RESTORE rewinding behavior (READ after RESTORE yields from start),
                 - type-mismatch on reading quoted strings into numeric targets (handler prints), and
@@ -303,8 +308,8 @@
                   normalizing 'D' to 'E' for downstream parsing. Added '&' numeric forms beyond hex:
                   - &H[0-9A-F]+ (hex), &O[0-7]+ (octal), &[0-7]+ (octal shorthand), &B[01]+ (binary).
                   - Emits Integer tokens with decimal lexemes for base-prefixed forms.
-                - Parser/Codegen: no changes required beyond lexer normalization; primary numeric parsing and DATA number
-                  table construction now accept scientific notation with 'D.'
+                - Parser/Codegen: no changes required beyond lexer normalization; primary numeric parsing and DATA
+                  number table construction now accept scientific notation with 'D.'
                 - Tests: unit (lexer exponent normalization and &O/&/&B decoding), integration (DATA 1D2 → double
                   1.000000e+02 in @gwb_data_num), and E2E (PRINT &H/&O/&/&B and 1D2 produce expected values). All
                   tests are green.
