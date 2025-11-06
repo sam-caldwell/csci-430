@@ -12,6 +12,7 @@
 #include <string_view>
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/LexError.h"
+#include "basic_compiler/compiler/Metrics.h"
 
 namespace gwbasic {
 
@@ -237,6 +238,8 @@ private:
     void emitToken(std::vector<Token>& out, const Token& t) {
         out.emplace_back(t);
         logToken(t);
+        // Metrics: count produced tokens when enabled
+        if (gMetrics) gMetrics->incToken();
     }
 
     /*

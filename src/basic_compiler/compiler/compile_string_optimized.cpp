@@ -1,7 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "basic_compiler/Compiler.h"
+#include "basic_compiler/compiler/Compiler.h"
 #include "basic_compiler/opt/AstOptimizer.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/compiler/Metrics.h"
 
 namespace gwbasic {
 
@@ -20,12 +21,16 @@ std::string Compiler::compileStringOptimized(const std::string& source) {
     auto tokens = lex.tokenize();
     Parser parser(std::move(tokens));
     auto program = parser.parseProgram();
+    if (gMetrics) Metrics::computeAstSnapshot(program, gMetrics->ast_parsed);
     gwbasic::AstOptimizer::optimize(program);
+    if (gMetrics) Metrics::computeAstSnapshot(program, gMetrics->ast_after_opt);
     CodeGenerator gen;
     SemanticAnalyzer sema;
     auto res = sema.analyze(program);
     gen.setSemantics(res);
-    return Compiler::addDefaultTripleIfMissing(gen.generate(program));
+    auto ir = gen.generate(program);
+    if (gMetrics) gMetrics->codegen.ir_instructions = countIrInstructions(ir);
+    return Compiler::addDefaultTripleIfMissing(ir);
 }
 
 } // namespace gwbasic

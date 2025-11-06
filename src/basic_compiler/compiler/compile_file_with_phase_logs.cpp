@@ -1,9 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "basic_compiler/Compiler.h"
+#include "basic_compiler/compiler/Compiler.h"
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
 #include "basic_compiler/util/TransparentSVHasher.h"
 #include <string_view>
 #include <unordered_map>
+#include "basic_compiler/compiler/Metrics.h"
+#include "basic_compiler/opt/AstOptimizer.h"
 
 namespace gwbasic {
 
@@ -72,7 +74,17 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
 
         phase_log_helpers::replaceOrAppendLine(program, std::move(ln), fr.mergeMode);
     }
+    if (gMetrics) {
+        Metrics::computeAstSnapshot(program, gMetrics->ast_parsed);
+        gMetrics->analyze_only = true;
+        gwbasic::AstOptimizer::optimize(program);
+        gMetrics->analyze_only = false;
+        Metrics::computeAstSnapshot(program, gMetrics->ast_after_semantics);
+    }
     auto irBody = phase_log_helpers::generateIRWithLogs(program, semanticLogPath, codegenLogPath);
+    if (gMetrics) {
+        gMetrics->codegen.ir_instructions = countIrInstructions(irBody);
+    }
     return Compiler::addDefaultTripleIfMissing(irBody);
 }
 

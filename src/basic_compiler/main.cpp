@@ -9,7 +9,7 @@
 #include <chrono>
 #include <cstdlib>
 
-#include "basic_compiler/Compiler.h"
+#include "basic_compiler/compiler/Compiler.h"
 #include "basic_compiler/AsmUtils.h"
 #include "basic_compiler/TargetUtils.h"
 #include "basic_compiler/DetectDefaultTriple.h"
@@ -22,6 +22,7 @@
 #include "basic_compiler/Usage.h"
 #include "basic_compiler/cli/TakeOptValue.h"
 #include "basic_compiler/cli/TakeOptValues.h"
+#include "basic_compiler/compiler/Metrics.h"
 
 #ifndef CLANG_PATH
 # error "CLANG_PATH not defined at build time; cannot emit bitcode"
@@ -75,6 +76,7 @@ int main(int argc, char **argv) {
     std::optional<std::string> syntaxLogPath;
     std::optional<std::string> semanticLogPath;
     bool noLogs = false;
+    bool wantMetrics = false;
     for (int i = 2; i < argc; ++i) {
         std::string a = argv[i];
 
@@ -87,6 +89,10 @@ int main(int argc, char **argv) {
         // Custom flags
         if (a == "--no-logs") {
             noLogs = true;
+            continue;
+        }
+        if (a == "--metrics") {
+            wantMetrics = true;
             continue;
         }
 
@@ -117,6 +123,9 @@ int main(int argc, char **argv) {
         return 2;
     }
     try {
+        // Optional metrics context
+        gwbasic::Metrics metrics;
+        if (wantMetrics) gwbasic::gMetrics = &metrics;
         deriveDefaultLogPaths(input, noLogs, logPath, lexLogPath, syntaxLogPath, semanticLogPath);
         std::string ir;
         if (!noLogs) {
@@ -169,6 +178,13 @@ int main(int argc, char **argv) {
         }
         if (!outLL && !outBC && !outBIN && !outASM) {
             std::cout << irWithTriple;
+        }
+        if (wantMetrics) {
+            // Populate codegen optimization phase counts using clang if available
+            metrics.codegen.opt_phase_ir_counts = optimizedIrInstructionCounts(irWithTriple, CLANG_PATH, {"-O1", "-O2", "-O3"});
+            // Print to stderr to avoid polluting IR/stdout
+            printMetricsTable(metrics, std::cerr);
+            gwbasic::gMetrics = nullptr; // clear
         }
         return 0;
     } catch (const std::exception &ex) {

@@ -1,8 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "basic_compiler/Compiler.h"
+#include "basic_compiler/compiler/Compiler.h"
 #include <unordered_map>
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
 #include "basic_compiler/util/TransparentSVHasher.h"
+#include "basic_compiler/compiler/Metrics.h"
+#include "basic_compiler/opt/AstOptimizer.h"
 
 namespace gwbasic {
 /*
@@ -56,10 +58,21 @@ std::string Compiler::compileFile(const std::string& path) {
 
         replaceOrAppendLine(program, std::move(ln), fr.mergeMode);
     }
+    if (gMetrics) {
+        Metrics::computeAstSnapshot(program, gMetrics->ast_parsed);
+        gMetrics->analyze_only = true;
+        gwbasic::AstOptimizer::optimize(program);
+        gMetrics->analyze_only = false;
+        Metrics::computeAstSnapshot(program, gMetrics->ast_after_semantics);
+    }
     // Keep semantics integration consistent with compileString
     SemanticAnalyzer sema; auto res = sema.analyze(program);
     CodeGenerator gen; gen.setSemantics(res);
-    return Compiler::addDefaultTripleIfMissing(gen.generate(program));
+    auto ir = gen.generate(program);
+    if (gMetrics) {
+        gMetrics->codegen.ir_instructions = countIrInstructions(ir);
+    }
+    return Compiler::addDefaultTripleIfMissing(ir);
 }
 
 } // namespace gwbasic

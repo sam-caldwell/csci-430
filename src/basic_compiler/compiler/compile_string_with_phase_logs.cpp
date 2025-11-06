@@ -1,5 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "basic_compiler/Compiler.h"
+#include "basic_compiler/compiler/Compiler.h"
 
 namespace gwbasic {
 
@@ -27,7 +27,14 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     auto tokens = lex.tokenize();
     Parser parser(std::move(tokens));
     parser.setSyntaxLogPath(syntaxLogPath);
-    const auto program = parser.parseProgram();
+    auto program = parser.parseProgram();
+    if (gMetrics) {
+        Metrics::computeAstSnapshot(program, gMetrics->ast_parsed);
+        gMetrics->analyze_only = true;
+        gwbasic::AstOptimizer::optimize(program);
+        gMetrics->analyze_only = false;
+        Metrics::computeAstSnapshot(program, gMetrics->ast_after_semantics);
+    }
     // Semantic analysis (scope + references + strings)
     SemanticAnalyzer sema;
     sema.setLogPath(semanticLogPath);
@@ -35,8 +42,9 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     CodeGenerator gen;
     if (!codegenLogPath.empty()) gen.setLogPath(codegenLogPath);
     gen.setSemantics(semRes);
-    return Compiler::addDefaultTripleIfMissing(gen.generate(program));
+    auto ir = gen.generate(program);
+    if (gMetrics) gMetrics->codegen.ir_instructions = countIrInstructions(ir);
+    return Compiler::addDefaultTripleIfMissing(ir);
 }
 
 } // namespace gwbasic
-

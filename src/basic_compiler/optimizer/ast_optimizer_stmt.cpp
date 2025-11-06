@@ -15,6 +15,7 @@
 #include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/GotoStmt.h"
 #include "basic_compiler/ast/ForStmt.h"
+#include "basic_compiler/compiler/Metrics.h"
 
 namespace gwbasic {
 
@@ -49,12 +50,22 @@ void AstOptimizer::optimize(Program& program) {
                 is->cond = optExpr(std::move(is->cond));
                 if (double v; asNumber(is->cond.get(), v)) {
                     if (v != 0.0) {
-                        // Replace with GOTO target
-                        auto g = std::make_unique<GotoStmt>(is->targetLine);
-                        g->pos = is->pos;
-                        newStmts.emplace_back(std::move(g));
+                        if (gMetrics) ++gMetrics->semantics_opt.if_const_true_to_goto;
+                        if (gMetrics && gMetrics->analyze_only) {
+                            newStmts.emplace_back(std::move(st));
+                        } else {
+                            // Replace with GOTO target
+                            auto g = std::make_unique<GotoStmt>(is->targetLine);
+                            g->pos = is->pos;
+                            newStmts.emplace_back(std::move(g));
+                        }
                     } else {
-                        // Remove statement (no-op)
+                        if (gMetrics) ++gMetrics->semantics_opt.if_const_false_removed;
+                        if (gMetrics && gMetrics->analyze_only) {
+                            newStmts.emplace_back(std::move(st));
+                        } else {
+                            // Remove statement (no-op)
+                        }
                     }
                 } else {
                     newStmts.emplace_back(std::move(st));
@@ -64,7 +75,10 @@ void AstOptimizer::optimize(Program& program) {
                 fs->end   = optExpr(std::move(fs->end));
                 if (fs->step) fs->step = optExpr(std::move(fs->step));
                 // If step simplifies to 1.0, drop it to trigger default path in codegen
-                if (fs->step && isOne(fs->step.get())) fs->step.reset();
+                if (fs->step && isOne(fs->step.get())) {
+                    if (gMetrics) ++gMetrics->semantics_opt.for_step_elided;
+                    if (!(gMetrics && gMetrics->analyze_only)) fs->step.reset();
+                }
                 // Optimize body
                 std::vector<std::unique_ptr<Stmt>> body;
                 body.reserve(fs->body.size());
@@ -75,7 +89,7 @@ void AstOptimizer::optimize(Program& program) {
                     } else if (const auto bpr = dyn_cast<PrintStmt>(bs.get())) {
                         if (bpr->value) bpr->value = optExpr(std::move(bpr->value));
                         for (auto& v : bpr->more) v = optExpr(std::move(v));
-                        body.emplace_back(std::move(bs));
+                        body.emplace_back(std::move(bpr));
                     } else {
                         // leave as-is; other constructs in FOR body unchanged
                         body.emplace_back(std::move(bs));
@@ -89,6 +103,13 @@ void AstOptimizer::optimize(Program& program) {
             }
         }
         statements = std::move(newStmts);
+    }
+    // Aggregate algebraic simplifications for convenience
+    if (gMetrics) {
+        gMetrics->semantics_opt.algebraic_simplifications +=
+            gMetrics->semantics_opt.id_add_zero + gMetrics->semantics_opt.id_sub_zero +
+            gMetrics->semantics_opt.id_mul_one + gMetrics->semantics_opt.id_mul_zero +
+            gMetrics->semantics_opt.id_div_one + gMetrics->semantics_opt.unary_elim_plus;
     }
 }
 

@@ -6,7 +6,7 @@
 #include <fstream>
 #include <string>
 
-#include "basic_compiler/Compiler.h"
+#include "basic_compiler/compiler/Compiler.h"
 
 using namespace gwbasic;
 

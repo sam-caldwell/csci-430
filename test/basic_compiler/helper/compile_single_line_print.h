@@ -2,7 +2,7 @@
 #pragma once
 
 #include <string>
-#include "basic_compiler/Compiler.h"
+#include "basic_compiler/compiler/Compiler.h"
 
 /* Helper: compileSingleLinePrint
  * Purpose: Compile a minimal program that prints an expression and returns IR.
@@ -13,4 +13,3 @@ inline std::string compileSingleLinePrint(const std::string& expr) {
     const auto src = std::string("10 PRINT ") + expr + "\n20 END\n";
     return gwbasic::Compiler::compileString(src);
 }
-

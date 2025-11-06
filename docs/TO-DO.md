@@ -18,9 +18,6 @@
   KEY/KEYn/ON KEY, ON event variants, PEN/STRIG, TIMER ON/OFF, TRON/TROFF, CONT, LOAD/SAVE/NEW/DELETE/LIST/LLIST/AUTO/
   RENUM/EDIT/PCOPY, RESET, SHELL, ENVIRON, OUT, WAIT.
 
-- 
-
-
 ## Code Generation: Implementations Missing (parses exist)
 
 - WRITE [#n,] expr[, ...]: parser exists; no codegen lowering yet.
