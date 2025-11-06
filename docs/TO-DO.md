@@ -90,3 +90,14 @@
 - Add unit tests for the above once implemented: WRITE codegen, INPUT#/LINE INPUT codegen semantics, DEF SEG 
   runtime effect on @gwb_seg, RUN/CHAIN file overlay behavior, OPTION BASE effects on DIM/array indexing, and 
   exponent/logical operator parsing and lowering.
+
+## Bug Reports
+Resolve the following warning by first ensuring this warning will be an error in the future, then resolving the bug:
+```text
+[147/995] /usr/lib/llvm-17/bin/clang++  -I/work/include -g -std=c++23 -Wall -Wextra -Wpedantic -stdlib=libc++ -MD -MT CMakeFiles/basic_compiler_lib.dir/src/basic_compiler/parser/parse_primary.cpp.o -MF CMakeFiles/basic_compiler_lib.dir/src/basic_compiler/parser/parse_primary.cpp.o.d -o CMakeFiles/basic_compiler_lib.dir/src/basic_compiler/parser/parse_primary.cpp.o -c /work/src/basic_compiler/parser/parse_primary.cpp
+In file included from /work/src/basic_compiler/parser/parse_primary.cpp:3:
+/work/include/basic_compiler/token/ToString.h:20:13: warning: enumeration values 'Backslash' and 'KwMod' not handled in switch [-Wswitch]
+   20 |     switch (t) {
+      |             ^
+1 warning generated.
+```

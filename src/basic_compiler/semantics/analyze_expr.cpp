@@ -33,6 +33,12 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
         const bool isBuiltinNum = isKnownNumericFunction(fn);
         const bool isBuiltinStr = isKnownStringFunction(fn);
         const bool isUser = (!isBuiltinNum && !isBuiltinStr) && userFunctions_.contains(fn);
+        if (fn == "SQRT" && !allowSqrtAlias_) {
+            // Disallow SQRT alias in strict-compat mode
+            std::ostringstream m; m << "Unknown function '" << call->callee << "' @ " << call->pos.line << ':' << call->pos.col;
+            log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
         if (!isBuiltinNum && !isBuiltinStr && !isUser) {
             // Heuristic: in GW-BASIC, identifiers of the form A(1) are typically array references.
             // If it's not a builtin or user function and has arguments, treat as array use and

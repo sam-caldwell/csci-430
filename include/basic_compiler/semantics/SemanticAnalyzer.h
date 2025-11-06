@@ -84,6 +84,9 @@ public:
      */
     void setStrictControlFlow(bool strict) { strictControlFlow_ = strict; }
 
+    // Control SQRT aliasing (non-standard extension). When false, only SQR is allowed.
+    void setAllowSqrtAlias(bool allow) { allowSqrtAlias_ = allow; }
+
     /*
      * Function: SemanticAnalyzer::analyze
      * Purpose:
@@ -165,6 +168,7 @@ private:
      *  - When true, missing control-flow targets raise errors; otherwise warnings.
      */
     bool strictControlFlow_{true};
+    bool allowSqrtAlias_{true};
 
     /**
      * Function: SemanticAnalyzer::enterScope

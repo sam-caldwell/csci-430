@@ -496,6 +496,10 @@ public:
         semLogger_.open(path, /*append=*/false);
         semLogger_.setEnabled(true);
     }
+    // Control SQRT alias (non-standard). When false, only SQR is recognized.
+    void setAllowSqrtAlias(bool allow) { allowSqrtAlias_ = allow; }
+private:
+    bool allowSqrtAlias_{true};
 };
 
 } // namespace gwbasic

@@ -328,3 +328,5 @@
                 - Mixed-type arithmetic conversion rules (Single vs. Double, Int16/Long promotion) are simplified:
                     - expressions are computed in double then stored with truncation/rounding;
                     - consider matching GW-BASIC’s rounding/truncation semantics per operator.
+                - Implement the INSTR clamp and the optional CHR$/ASC strict checks now, and add a strict-compat
+                  flag for SQRT alias behavior.

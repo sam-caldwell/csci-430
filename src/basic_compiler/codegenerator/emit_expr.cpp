@@ -356,7 +356,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         std::vector<std::string> argv; argv.reserve(call->args.size());
         for (const auto& a : call->args) argv.push_back(emitExpr(out, a.get(), ""));
         std::string res = nextTemp();
-        if (fn == "SQR" || fn == "SQRT") {
+        if (fn == "SQR" || (allowSqrtAlias_ && fn == "SQRT")) {
             std::string ir = std::format("  {} = call double @sqrt(double {})", res, argv[0]);
             out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr sqrt -> " << ir; log() << m.str() << Symbols::LF; }
             return res;
@@ -387,8 +387,12 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             std::string off0 = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, 1", off0, starti); out << ir << Symbols::LF; }
             std::string isNeg = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", isNeg, off0); out << ir << Symbols::LF; }
             std::string off = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 0, i64 {}", off, isNeg, off0); out << ir << Symbols::LF; }
+            // Clamp to length: off = min(off, strlen(s))
+            std::string slen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", slen, s); out << ir << Symbols::LF; }
+            std::string offGt = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, {}", offGt, off, slen); out << ir << Symbols::LF; }
+            std::string offClamped = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 {}, i64 {}", offClamped, offGt, slen, off); out << ir << Symbols::LF; }
             // sOff = s + off; p = strstr(sOff, sub)
-            std::string sOff = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", sOff, s, off); out << ir << Symbols::LF; }
+            std::string sOff = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", sOff, s, offClamped); out << ir << Symbols::LF; }
             std::string p = nextTemp(); { std::string ir = std::format("  {} = call ptr @strstr(ptr {}, ptr {})", p, sOff, sub); out << ir << Symbols::LF; }
             std::string p_i = nextTemp(); { std::string ir = std::format("  {} = ptrtoint ptr {} to i64", p_i, p); out << ir << Symbols::LF; }
             std::string s_i = nextTemp(); { std::string ir = std::format("  {} = ptrtoint ptr {} to i64", s_i, s); out << ir << Symbols::LF; }
@@ -424,7 +428,30 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         }
         if (fn == "RND") { std::string ir = std::format("  {} = call double @gwb_rnd(double {})", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr rnd(full) -> " << ir; log() << m.str() << Symbols::LF; } return res; }
         if (fn == "ASC") {
-            // argv[0] is ptr to string; load first byte and return as double
+            // argv[0] is ptr to string; strict check: empty -> error 5
+            std::string slen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", slen, argv[0]); out << ir << Symbols::LF; }
+            std::string isEmpty = nextTemp(); { std::string ir = std::format("  {} = icmp eq i64 {}, 0", isEmpty, slen); out << ir << Symbols::LF; }
+            std::string okLbl = lineLabelName(currentLine_) + std::string("_asc_ok_") + std::to_string(++tempCounter_);
+            std::string errLbl = lineLabelName(currentLine_) + std::string("_asc_err_") + std::to_string(tempCounter_);
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isEmpty, errLbl, okLbl); out << ir << Symbols::LF; }
+            // Error path: Illegal function call (5)
+            out << errLbl << ":" << Symbols::LF;
+            { std::string ir = std::format("  store i32 5, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+            ensureVarAllocated(out, "ERR"); ensureVarAllocated(out, "ERL");
+            { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 5 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+            { std::string dln  = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+            {
+                std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                out << "  ]" << Symbols::LF;
+            }
+            // Ok path: load first byte and return as double
+            out << okLbl << ":" << Symbols::LF;
             std::string b = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", b, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr asc load -> " << ir; log() << m.str() << Symbols::LF; } }
             std::string i32v = nextTemp(); { std::string ir = std::format("  {} = zext i8 {} to i32", i32v, b); out << ir << Symbols::LF; }
             { std::string ir = std::format("  {} = uitofp i32 {} to double", res, i32v); out << ir << Symbols::LF; }
@@ -546,6 +573,30 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         }
         if (fn == "CHR$") {
             // Allocate 2 bytes and store low 8 bits of numeric arg as char
+            // Strict: if arg outside 0..255 -> error 5
+            std::string lt0 = nextTemp(); { std::string ir = std::format("  {} = fcmp olt double {}, 0.0", lt0, argv[0]); out << ir << Symbols::LF; }
+            std::string gt255 = nextTemp(); { std::string ir = std::format("  {} = fcmp ogt double {}, 255.0", gt255, argv[0]); out << ir << Symbols::LF; }
+            std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, lt0, gt255); out << ir << Symbols::LF; }
+            std::string okLbl = lineLabelName(currentLine_) + std::string("_chr_ok_") + std::to_string(++tempCounter_);
+            std::string errLbl = lineLabelName(currentLine_) + std::string("_chr_err_") + std::to_string(tempCounter_);
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", bad, errLbl, okLbl); out << ir << Symbols::LF; }
+            out << errLbl << ":" << Symbols::LF;
+            { std::string ir = std::format("  store i32 5, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+            ensureVarAllocated(out, "ERR"); ensureVarAllocated(out, "ERL");
+            { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 5 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+            { std::string dln  = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+            {
+                std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                out << "  ]" << Symbols::LF;
+            }
+            // Ok path
+            out << okLbl << ":" << Symbols::LF;
             std::string two = nextTemp(); { std::string ir = std::format("  {} = add i64 1, 1", two); out << ir << Symbols::LF; }
             std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 2)", buf); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr chr$ malloc -> " << ir; log() << m.str() << Symbols::LF; } }
             std::string ival = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", ival, argv[0]); out << ir << Symbols::LF; }
