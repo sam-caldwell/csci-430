@@ -84,6 +84,8 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
             case BinaryOp::Sub:
             case BinaryOp::Mul:
             case BinaryOp::Div:
+            case BinaryOp::IntDiv:
+            case BinaryOp::Mod:
             case BinaryOp::Pow:
             case BinaryOp::And:
             case BinaryOp::Or:

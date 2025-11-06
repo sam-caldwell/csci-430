@@ -126,6 +126,7 @@ private:
         {"DEFDBL",    TokenType::KwDefDbl},
         {"DEFSTR",    TokenType::KwDefStr},
         {"SEG",       TokenType::KwSeg},
+        {"MOD",       TokenType::KwMod},
         {"BLOAD",     TokenType::KwBload},
         {"BSAVE",     TokenType::KwBsave},
         {"CALL",      TokenType::KwCall},

@@ -92,6 +92,7 @@ enum class TokenType {
     Minus,
     Star,
     Slash,
+    Backslash,
     Assign,
     Less,
     Greater,
@@ -104,6 +105,7 @@ enum class TokenType {
     Colon,
     Comma,
     Hash,
+    KwMod,
 };
 
 } // namespace gwbasic

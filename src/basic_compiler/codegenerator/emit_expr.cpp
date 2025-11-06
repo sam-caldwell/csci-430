@@ -176,7 +176,93 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         std::string ir = std::format("  {} = fadd double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(+) -> " << ir; log() << m.str() << Symbols::LF; } break; }
             case BinaryOp::Sub: { std::string ir = std::format("  {} = fsub double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(-) -> " << ir; log() << m.str() << Symbols::LF; } break; }
             case BinaryOp::Mul: { std::string ir = std::format("  {} = fmul double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(*) -> " << ir; log() << m.str() << Symbols::LF; } break; }
-            case BinaryOp::Div: { std::string ir = std::format("  {} = fdiv double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(/) -> " << ir; log() << m.str() << Symbols::LF; } break; }
+            case BinaryOp::Div: {
+                // Division with zero-divide error trap
+                std::string isz = nextTemp(); { std::string ir = std::format("  {} = fcmp oeq double {}, 0.0", isz, R); out << ir << Symbols::LF; }
+                std::string okLbl = lineLabelName(currentLine_) + std::string("_div_ok_") + std::to_string(++tempCounter_);
+                std::string errLbl = lineLabelName(currentLine_) + std::string("_div_err_") + std::to_string(tempCounter_);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isz, errLbl, okLbl); out << ir << Symbols::LF; }
+                // Error path: set division-by-zero error and dispatch
+                out << errLbl << ":" << Symbols::LF;
+                { std::string ir = std::format("  store i32 11, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                ensureVarAllocated(out, "ERR"); ensureVarAllocated(out, "ERL");
+                { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 11 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                { std::string dln  = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                {
+                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    out << "  ]" << Symbols::LF;
+                }
+                // Ok path computes the division
+                out << okLbl << ":" << Symbols::LF;
+                { std::string ir = std::format("  {} = fdiv double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(/) -> " << ir; log() << m.str() << Symbols::LF; } }
+                break;
+            }
+            case BinaryOp::IntDiv: {
+                // Integer division: truncates toward zero on integerized operands; trap on zero divisor
+                std::string li = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", li, L); out << ir << Symbols::LF; }
+                std::string ri = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", ri, R); out << ir << Symbols::LF; }
+                std::string isz = nextTemp(); { std::string ir = std::format("  {} = icmp eq i64 {}, 0", isz, ri); out << ir << Symbols::LF; }
+                std::string okLbl = lineLabelName(currentLine_) + std::string("_idiv_ok_") + std::to_string(++tempCounter_);
+                std::string errLbl = lineLabelName(currentLine_) + std::string("_idiv_err_") + std::to_string(tempCounter_);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isz, errLbl, okLbl); out << ir << Symbols::LF; }
+                // Error path: division by zero
+                out << errLbl << ":" << Symbols::LF;
+                { std::string ir = std::format("  store i32 11, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                ensureVarAllocated(out, "ERR"); ensureVarAllocated(out, "ERL");
+                { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 11 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                { std::string dln  = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                {
+                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    out << "  ]" << Symbols::LF;
+                }
+                // Ok path computes integer division
+                out << okLbl << ":" << Symbols::LF;
+                std::string q  = nextTemp(); { std::string ir = std::format("  {} = sdiv i64 {}, {}", q, li, ri); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  {} = sitofp i64 {} to double", res, q); out << ir << Symbols::LF; }
+                break;
+            }
+            case BinaryOp::Mod: {
+                // Integer remainder with sign of dividend; trap on zero divisor
+                std::string li = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", li, L); out << ir << Symbols::LF; }
+                std::string ri = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", ri, R); out << ir << Symbols::LF; }
+                std::string isz = nextTemp(); { std::string ir = std::format("  {} = icmp eq i64 {}, 0", isz, ri); out << ir << Symbols::LF; }
+                std::string okLbl = lineLabelName(currentLine_) + std::string("_mod_ok_") + std::to_string(++tempCounter_);
+                std::string errLbl = lineLabelName(currentLine_) + std::string("_mod_err_") + std::to_string(tempCounter_);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isz, errLbl, okLbl); out << ir << Symbols::LF; }
+                // Error path: division by zero
+                out << errLbl << ":" << Symbols::LF;
+                { std::string ir = std::format("  store i32 11, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                ensureVarAllocated(out, "ERR"); ensureVarAllocated(out, "ERL");
+                { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 11 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                { std::string dln  = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                {
+                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    out << "  ]" << Symbols::LF;
+                }
+                // Ok path computes remainder
+                out << okLbl << ":" << Symbols::LF;
+                std::string rmd= nextTemp(); { std::string ir = std::format("  {} = srem i64 {}, {}", rmd, li, ri); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  {} = sitofp i64 {} to double", res, rmd); out << ir << Symbols::LF; }
+                break;
+            }
             case BinaryOp::And: {
                 std::string lb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", lb, L); out << ir << Symbols::LF; }
                 std::string rb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", rb, R); out << ir << Symbols::LF; }
