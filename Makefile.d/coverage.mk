@@ -16,9 +16,10 @@
 COVERAGE_MIN ?= 100
 COVERAGE_SCOPE ?= test/
 # Focus coverage aggregation on executed tests to achieve 100% test coverage.
+# Exclude test helper utilities (headers with inline helpers may depress coverage unfairly).
 COVERAGE_INCLUDE_RE ?= ^test/
 COVERAGE_METRIC ?= lines
-COVERAGE_EXCLUDE_RE ?=
+COVERAGE_EXCLUDE_RE ?= ^test/basic_compiler/helper/
 # Use a dedicated build directory for coverage to avoid CMakeCache path mismatches
 COVERAGE_BUILD_DIR ?= build/cmake-build-coverage
 
