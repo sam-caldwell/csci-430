@@ -42,3 +42,4 @@ TEST(Logger, DisabledDoesNotWrite) {
   // Cleanup
   fs::remove(file);
 }
+

@@ -30,3 +30,4 @@ TEST(Logger, OpenFailureReturnsFalse) {
   log.setEnabled(true);
   log() << "this should be discarded" << '\n';
 }
+

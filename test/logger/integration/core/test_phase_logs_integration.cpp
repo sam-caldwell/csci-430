@@ -59,3 +59,4 @@ TEST(LoggerIntegration, CompilerPhaseLogsProduceContent) {
   EXPECT_NE(slurp(sem).find("VarDecl"), std::string::npos);
   EXPECT_NE(slurp(cg).find("entry ->"), std::string::npos);
 }
+

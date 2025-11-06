@@ -51,3 +51,4 @@ TEST(Logger, EnabledWritesContent) {
   // Cleanup
   fs::remove(file);
 }
+

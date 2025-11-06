@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include "../../basic_compiler/e2e/run_command.h"
+#include "../../../basic_compiler/e2e/run_command.h"
 
 using namespace e2e_helpers;
 
