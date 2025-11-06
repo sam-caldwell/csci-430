@@ -9,7 +9,8 @@ include_guard(GLOBAL)
 set(COVERAGE_MIN "95" CACHE STRING "Minimum percent (Lines/Regions) to pass")
 set(COVERAGE_SCOPE "src/basic_compiler/" CACHE STRING "Path prefix to report/aggregate")
 # Default scope: include all compiler sources only; exclude tests from coverage requirements.
-set(COVERAGE_INCLUDE_RE "^(include/|src/)" CACHE STRING "egrep regex to include rows")
+# Include CLI helpers, usage, and the CLI entrypoint (main.cpp) in coverage by default.
+set(COVERAGE_INCLUDE_RE "^(src/basic_compiler/lexer/|src/basic_compiler/main.cpp|src/basic_compiler/compiler/usage.cpp|src/basic_compiler/compiler/cli/|src/basic_compiler/compiler/derive_default_logs.cpp|src/basic_compiler/compiler/target_support.cpp)" CACHE STRING "egrep regex to include rows")
 set(COVERAGE_EXCLUDE_RE "" CACHE STRING "egrep regex to exclude rows")
 set(COVERAGE_METRIC "lines" CACHE STRING "lines|regions|both (both requires both >= min)")
 
@@ -17,6 +18,13 @@ set(COVERAGE_METRIC "lines" CACHE STRING "lines|regions|both (both requires both
 set(UNIT_BIN "${CMAKE_BINARY_DIR}/basic_compiler_unit_tests")
 set(INT_BIN  "${CMAKE_BINARY_DIR}/basic_compiler_integration_tests")
 set(E2E_BIN  "${CMAKE_BINARY_DIR}/basic_compiler_e2e_tests")
+# Logger test executables (include to capture src/logger/ coverage)
+set(LUNIT_BIN "${CMAKE_BINARY_DIR}/logger_unit_tests")
+set(LINT_BIN  "${CMAKE_BINARY_DIR}/logger_integration_tests")
+set(LE2E_BIN  "${CMAKE_BINARY_DIR}/logger_e2e_tests")
+# Compiler CLI binary (include for coverage mapping of main.cpp)
+set(CLI_BIN   "${CMAKE_BINARY_DIR}/basic_compiler/basic_compiler")
+string(JOIN "," COVERAGE_BINS ${UNIT_BIN} ${INT_BIN} ${E2E_BIN} ${LUNIT_BIN} ${LINT_BIN} ${LE2E_BIN} ${CLI_BIN})
 
 # Coverage artifacts output directory
 set(COVERAGE_OUT_DIR "${CMAKE_BINARY_DIR}/coverage")
@@ -41,11 +49,17 @@ endif()
 
 # Ensure tests exist before attempting to run
 add_custom_target(coverage
-  DEPENDS basic_compiler_unit_tests basic_compiler_integration_tests basic_compiler_e2e_tests
-  COMMAND /bin/bash "${CMAKE_SOURCE_DIR}/cmake/scripts/do_coverage.sh"
-                  "${COVERAGE_OUT_DIR}"
-                  "${UNIT_BIN}" "${INT_BIN}" "${E2E_BIN}"
-                  "${LLVM_PROFDATA_EXECUTABLE}" "${LLVM_COV_EXECUTABLE}"
-                  "${COVERAGE_OUT_DIR}/include.re" "${COVERAGE_OUT_DIR}/exclude.re" "${COVERAGE_OUT_DIR}/scope.txt" "${COVERAGE_MIN}" "${COVERAGE_METRIC}"
+  DEPENDS basic_compiler_unit_tests basic_compiler_integration_tests basic_compiler_e2e_tests logger_unit_tests logger_integration_tests logger_e2e_tests basic_compiler
+  COMMAND ${CMAKE_COMMAND}
+          -D OUT_DIR="${COVERAGE_OUT_DIR}"
+          -D BINS_CSV="${COVERAGE_BINS}"
+          -D LLVM_PROFDATA="${LLVM_PROFDATA_EXECUTABLE}"
+          -D LLVM_COV="${LLVM_COV_EXECUTABLE}"
+          -D INCLUDE_FILE="${COVERAGE_OUT_DIR}/include.re"
+          -D EXCLUDE_FILE="${COVERAGE_OUT_DIR}/exclude.re"
+          -D SCOPE_FILE="${COVERAGE_OUT_DIR}/scope.txt"
+          -D MIN="${COVERAGE_MIN}"
+          -D METRIC="${COVERAGE_METRIC}"
+          -P "${CMAKE_SOURCE_DIR}/cmake/DoCoverage.cmake"
   USES_TERMINAL
 )
