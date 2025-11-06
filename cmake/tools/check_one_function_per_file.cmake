@@ -24,9 +24,8 @@ if(NOT EXISTS "${SRC_DIR}")
 endif()
 
 # Match start-of-line using (^|\r|\n) to emulate multiline anchors.
-set(FUNC_RE "(\r|\n|^)[ \t]*(template[ \t]*<[^>]+>[ \t]*)?(inline[ \t]+)?(static[ \t]+)?(constexpr[ \t]+)?"
-            "(void|bool|int|double|float|size_t|uint64_t|int64_t|std::[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*::[A-Za-z_][A-Za-z0-9_]*)"
-            "[ \t]+[*& \t]*~?[A-Za-z_][A-Za-z0-9_:<>]*[ \t]*\([^;{}\n]*\)[ \t]*(const)?[ \t]*(noexcept)?[ \t]*\{")
+# Use a bracket-quoted string to avoid CMake treating backslashes as escapes (e.g., "\{").
+set(FUNC_RE [[(\r|\n|^)[ \t]*(template[ \t]*<[^>]+>[ \t]*)?(inline[ \t]+)?(static[ \t]+)?(constexpr[ \t]+)?(void|bool|int|double|float|size_t|uint64_t|int64_t|std::[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*::[A-Za-z_][A-Za-z0-9_]*)[ \t]+[*& \t]*~?[A-Za-z_][A-Za-z0-9_:<>]*[ \t]*\([^;{}\n]*\)[ \t]*(const)?[ \t]*(noexcept)?[ \t]*\{]])
 
 file(GLOB_RECURSE _cpp_files RELATIVE "${PROJECT_ROOT}" "${SRC_DIR}/*.cpp")
 
@@ -51,4 +50,3 @@ if(_violations)
 else()
     message(STATUS "One-function-per-file check: OK")
 endif()
-
