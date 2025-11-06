@@ -38,6 +38,7 @@
 #include "basic_compiler/ast/CircleStmt.h"
 #include "basic_compiler/ast/ClearStmt.h"
 #include "basic_compiler/ast/EraseStmt.h"
+#include "basic_compiler/ast/SwapStmt.h"
 #include "basic_compiler/ast/OptionBaseStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
@@ -252,6 +253,30 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             }
             std::ostringstream m; m << "Erase " << n << " @ " << er->pos.line << ':' << er->pos.col; log() << m.str() << '\n';
         }
+        return;
+    }
+    if (auto sw = dyn_cast<const SwapStmt>(s)) {
+        auto checkRef = [&](const ReadTarget& t, bool& isString) {
+            if (t.indices.empty()) {
+                // Scalar var
+                reference(t.name, sw->pos);
+                isString = varNameIsString(t.name);
+            } else {
+                // Array element
+                if (!arrays_.contains(t.name)) { std::ostringstream m; m << "TypeError: array '" << t.name << "' not DIM'd @ " << sw->pos.line << ':' << sw->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                const auto& dims = arrays_.at(t.name);
+                if (t.indices.size() != dims.size()) { std::ostringstream m; m << "ArityError: array '" << t.name << "' expects " << dims.size() << " indices @ " << sw->pos.line << ':' << sw->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                for (const auto& idx : t.indices) {
+                    if (typeOf(idx.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: array index must be numeric @ " << sw->pos.line << ':' << sw->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    analyzeExpr(idx.get());
+                }
+                isString = varNameIsString(t.name);
+            }
+        };
+        bool lstr = false, rstr = false;
+        checkRef(sw->left, lstr);
+        checkRef(sw->right, rstr);
+        if (lstr != rstr) { std::ostringstream m; m << "TypeError: SWAP operands must be both numeric or both string @ " << sw->pos.line << ':' << sw->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         return;
     }
     if (auto bl = dyn_cast<const BloadStmt>(s)) {

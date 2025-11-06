@@ -70,6 +70,7 @@ enum class NodeKind {
     CircleStmt,
     ClearStmt,
     EraseStmt,
+    SwapStmt,
     MidAssignStmt,
     OptionBaseStmt,
 };

@@ -311,6 +311,8 @@ private:
     std::unique_ptr<Stmt> parseClear() const;
     /** Parse ERASE array[,array...] */
     std::unique_ptr<Stmt> parseErase();
+    /** Parse SWAP varref, varref */
+    std::unique_ptr<Stmt> parseSwap();
     /** Parse OPTION BASE 0|1 */
     std::unique_ptr<Stmt> parseOptionBase();
     /**

@@ -15,6 +15,7 @@
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/EraseStmt.h"
+#include "basic_compiler/ast/SwapStmt.h"
 
 namespace gwbasic {
 
@@ -36,6 +37,14 @@ void CodeGenerator::collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std
         return;
     }
     if (auto ds = dyn_cast<const DimStmt>(s)) { arrays.insert(ds->name); return; }
+    if (auto sw = dyn_cast<const SwapStmt>(s)) {
+        auto handle = [&](const ReadTarget& t) {
+            if (!t.indices.empty()) { arrays.insert(t.name); for (const auto& ix : t.indices) collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays); }
+            else { vars.insert(t.name); }
+        };
+        handle(sw->left); handle(sw->right);
+        return;
+    }
     if (auto er = dyn_cast<const EraseStmt>(s)) { for (const auto& n : er->names) arrays.erase(n); return; }
     if (auto wr = dyn_cast<const WriteStmt>(s)) { for (const auto& e : wr->items) collectVarsForBeforeLineFromExpr(e.get(), vars, arrays); return; }
     if (auto og = dyn_cast<const OnGotoStmt>(s)) { collectVarsForBeforeLineFromExpr(og->index.get(), vars, arrays); return; }

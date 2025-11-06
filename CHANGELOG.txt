@@ -198,7 +198,7 @@
               - Split grouped sections for compatibility with older plugins:
                 - Replace [{Makefile,*.mk}] with [Makefile] and [*.mk].
                 - Replace [{CMakeLists.txt,*.cmake}] with [CMakeLists.txt] and [*.cmake].
-06 Nov 2025 - ERASE statement + apostrophe comments tests + diagnostics
+            - ERASE statement + apostrophe comments tests + diagnostics
             - ERASE arrays: full pipeline implementation and tests
               - Lexer: added ERASE keyword.
               - AST: new EraseStmt node with list of array names.
@@ -256,3 +256,17 @@
                 issues during clang-tidy in this sandbox; no functional code changes.
 
             - Consumed enough caffeine to make Mötley Crüe seem tame.
+
+06 Nov 2025 - SWAP statement (variables and arrays)
+            - Language: SWAP x, y
+              - Lexer: added SWAP keyword.
+              - AST: new SwapStmt with left/right variable references (scalar or array element) using ReadTarget.
+              - Parser: SWAP varref, varref parsing wired in tryParseOtherKeywords.
+              - Semantics: validates both refs exist (arrays DIM'd; indices numeric and correct arity) and types match
+                (both numeric or both string). Clear error messages on mismatch.
+              - Codegen: emits efficient swap for
+                - Strings: load ptr from each side and store cross.
+                - Numerics: load each as double with proper casts, then typed stores back to each destination
+                  (vars or array elements). Array element refs include runtime bounds checks matching assignment/expr.
+            - Tests: unit (parser + semantics), integration (IR patterns for string vars and numeric array elems),
+              and e2e (numeric and string swaps produce expected outputs). All tests pass locally.
