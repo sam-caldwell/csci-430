@@ -87,6 +87,7 @@ inline std::string to_string(const TokenType t) {
         case TokenType::Minus: return "-";
         case TokenType::Star: return "*";
         case TokenType::Slash: return "/";
+        case TokenType::Backslash: return "\\";
         case TokenType::Assign: return "=";
         case TokenType::Less: return "<";
         case TokenType::Greater: return ">";
@@ -99,6 +100,7 @@ inline std::string to_string(const TokenType t) {
         case TokenType::Colon: return ":";
         case TokenType::Comma: return ",";
         case TokenType::Hash: return "#";
+        case TokenType::KwMod: return "MOD";
     }
     return "?";
 }

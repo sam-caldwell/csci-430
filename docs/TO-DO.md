@@ -7,6 +7,8 @@
  
 - Additional PRINT forms: full “PRINT USING” with zone/tabbing and trailing separators (comma/semicolon) behavior.
 
+- Add LEN(numeric variable) behavior for full GW‑BASIC parity.
+
 - INPUT improvements:
   - INPUT var[, var...], INPUT ; prompt$, var[, ...], INPUT "prompt"; var[, ...] (current parser only accepts single 
     var or redirects to file form).

@@ -18,10 +18,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Common warnings for Clang
 if (CMAKE_C_COMPILER_ID MATCHES "Clang")
-  add_compile_options("$<$<COMPILE_LANGUAGE:C>:-Wall;-Wextra;-Wpedantic>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:C>:-Wall;-Wextra;-Wpedantic;-Werror=switch>")
 endif()
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic;-Werror=switch>")
 endif()
 
 # On Linux with Clang, prefer libc++ to avoid libstdc++ ABI/header conflicts.
