@@ -3,7 +3,9 @@
 # Purpose: Hello-world unit tests.
 
 # Collect all unit test sources under test/hello_world/unit
-file(GLOB HELLO_WORLD_UNIT_TEST_SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/test/hello_world/unit/*.cpp)
+file(GLOB_RECURSE HELLO_WORLD_UNIT_TEST_SOURCES CONFIGURE_DEPENDS
+  ${PROJECT_SOURCE_DIR}/test/hello_world/unit/*.cpp
+  ${PROJECT_SOURCE_DIR}/test/hello_world/unit/*/*.cpp)
 
 add_executable(hello_world_tests ${HELLO_WORLD_UNIT_TEST_SOURCES})
 

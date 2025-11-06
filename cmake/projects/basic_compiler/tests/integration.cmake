@@ -3,13 +3,18 @@
 # Purpose: Basic compiler integration tests (IR structure).
 
 # Collect all integration test sources under test/basic_compiler/integration
-file(GLOB BASIC_COMPILER_INTEGRATION_TEST_SOURCES CONFIGURE_DEPENDS
-  ${PROJECT_SOURCE_DIR}/test/basic_compiler/integration/*.cpp)
+file(GLOB_RECURSE BASIC_COMPILER_INTEGRATION_TEST_SOURCES CONFIGURE_DEPENDS
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/integration/*.cpp
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/integration/*/*.cpp)
 
 add_executable(basic_compiler_integration_tests ${BASIC_COMPILER_INTEGRATION_TEST_SOURCES})
 
 target_include_directories(basic_compiler_integration_tests PRIVATE
   ${PROJECT_SOURCE_DIR}/include
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/unit
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/integration
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/e2e
   $<TARGET_PROPERTY:GTest::gtest,INTERFACE_INCLUDE_DIRECTORIES>
 )
 

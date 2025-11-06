@@ -3,12 +3,20 @@
 # Purpose: Basic compiler unit tests (lexer/parser).
 
 # Collect all unit test sources under test/basic_compiler/unit
-file(GLOB BASIC_COMPILER_UNIT_TEST_SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/test/basic_compiler/unit/*.cpp)
+# Collect unit tests allowing optional component subfolders:
+#   test/basic_compiler/unit/<component>/*.cpp
+file(GLOB_RECURSE BASIC_COMPILER_UNIT_TEST_SOURCES CONFIGURE_DEPENDS
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/unit/*.cpp
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/unit/*/*.cpp)
 
 add_executable(basic_compiler_unit_tests ${BASIC_COMPILER_UNIT_TEST_SOURCES})
 
 target_include_directories(basic_compiler_unit_tests PRIVATE
   ${PROJECT_SOURCE_DIR}/include
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/unit
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/integration
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/e2e
   $<TARGET_PROPERTY:GTest::gtest,INTERFACE_INCLUDE_DIRECTORIES>
 )
 

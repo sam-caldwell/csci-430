@@ -1,0 +1,83 @@
+// (c) 2025 Sam Caldwell. All Rights Reserved.
+
+#include <gtest/gtest.h>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include "basic_compiler/Compiler.h"
+#include "clang_path.h"
+#include "run_command.h"
+#include "../../helper/tool_exists.h"
+
+using namespace gwbasic;
+using namespace e2e_helpers;
+
+/***
+ * Test: E2E.MathFunctionsProduceExpectedResults
+ * Purpose: Validate End-to-End (compile + run) behavior for test_math_functions_e2e.cpp.
+ * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
+ * Expected Behavior: Program output matches assertions in test.
+ */
+/*
+Test: E2E.MathFunctionsProduceExpectedResults
+Inputs: BASIC program(s) executed end-to-end (runtime output)
+Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+Expected behavior: Program compiles and runs; output/behavior matches expectations
+*/
+TEST(E2E, MathFunctionsProduceExpectedResults) {
+    if (!toolExists(CLANG_PATH)) {
+        GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
+    }
+    // Print a range of function results, one per line
+    const auto src =
+        "10 PRINT SQR(9)\n"
+        "20 PRINT ABS(-5)\n"
+        "30 PRINT SIN(0)\n"
+        "40 PRINT COS(0)\n"
+        "50 PRINT TAN(0)\n"
+        "60 PRINT ATN(1)\n"
+        "70 PRINT LOG(1)\n"
+        "80 PRINT EXP(1)\n"
+        "90 PRINT INT(1.9)\n"
+        "100 PRINT FIX(-1.9)\n"
+        "110 PRINT SGN(-2)\n"
+        "120 PRINT SGN(0)\n"
+        "130 PRINT SGN(2)\n"
+        "140 END\n";
+
+    std::string ir = Compiler::compileString(src);
+
+    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_math";
+    std::filesystem::create_directories(tmp);
+    std::filesystem::path ll = tmp / "program.ll";
+    std::filesystem::path bin = tmp / "program.out";
+    { std::ofstream f(ll); f << ir; }
+
+    std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
+#ifndef __APPLE__
+    cmd << " -lm";
+#endif
+    int ec = std::system(cmd.str().c_str());
+    ASSERT_EQ(ec, 0);
+
+    std::ostringstream run; run << '"' << bin.string() << '"';
+    std::string out = runCommand(run.str());
+
+    // Compare expected values with dynamic integer/float formatting
+    const std::string expected =
+        "3\n"
+        "5\n"
+        "0\n"
+        "1\n"
+        "0\n"
+        "0.785398\n" // atan(1)
+        "0\n" // log(1)
+        "2.718282\n" // exp(1)
+        "1\n" // int(1.9)
+        "-1\n" // fix(-1.9)
+        "-1\n" // sgn(-2)
+        "0\n"  // sgn(0)
+        "1\n"; // sgn(2)
+    ASSERT_EQ(out, expected);
+}

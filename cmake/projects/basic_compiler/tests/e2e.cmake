@@ -3,13 +3,16 @@
 # Purpose: Basic compiler end-to-end tests (compile & run programs).
 
 # Collect all E2E test sources under test/basic_compiler/e2e
-file(GLOB BASIC_COMPILER_E2E_TEST_SOURCES CONFIGURE_DEPENDS
-  ${PROJECT_SOURCE_DIR}/test/basic_compiler/e2e/*.cpp)
+file(GLOB_RECURSE BASIC_COMPILER_E2E_TEST_SOURCES CONFIGURE_DEPENDS
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/e2e/*.cpp
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/e2e/*/*.cpp)
 
 add_executable(basic_compiler_e2e_tests ${BASIC_COMPILER_E2E_TEST_SOURCES})
 
 target_include_directories(basic_compiler_e2e_tests PRIVATE
   ${PROJECT_SOURCE_DIR}/include
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler
+  ${PROJECT_SOURCE_DIR}/test/basic_compiler/e2e
   $<TARGET_PROPERTY:GTest::gtest,INTERFACE_INCLUDE_DIRECTORIES>
 )
 

@@ -1,7 +1,9 @@
 # File: cmake/projects/logger/tests/e2e.cmake
 # Purpose: Logger end-to-end tests (exercise CLI with log flags)
 
-file(GLOB LOGGER_E2E_TEST_SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/test/logger/e2e/*.cpp)
+file(GLOB_RECURSE LOGGER_E2E_TEST_SOURCES CONFIGURE_DEPENDS
+  ${PROJECT_SOURCE_DIR}/test/logger/e2e/*.cpp
+  ${PROJECT_SOURCE_DIR}/test/logger/e2e/*/*.cpp)
 
 add_executable(logger_e2e_tests ${LOGGER_E2E_TEST_SOURCES})
 
@@ -19,4 +21,3 @@ else()
 endif()
 
 gtest_discover_tests(logger_e2e_tests PROPERTIES LABELS e2e WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-
