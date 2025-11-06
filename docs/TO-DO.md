@@ -4,7 +4,7 @@
 
 ## Arrays and DATA
 
-- DIM: only 1-D numeric arrays backed by `[len x double]`. Missing:
++ DIM: only 1-D numeric arrays backed by `[len x double]`. Missing:
     - Multi-dimensional arrays and string arrays.
     - OPTION BASE lower-bound handling (current indexing is raw 0-based fptosi).
     - Bounds checking and negative-index handling (currently none).
