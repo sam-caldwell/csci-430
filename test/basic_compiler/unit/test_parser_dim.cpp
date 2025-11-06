@@ -10,7 +10,7 @@ using namespace gwbasic;
 
 /***
  * Test: Parser.DimParsesArrayDeclaration
- * Purpose: Ensure DIM A(10) parses into DimStmt with correct name/length.
+ * Purpose: Ensure DIM A(10) parses into DimStmt with correct name/bounds.
  */
 /*
 Test: Parser.DimParsesArrayDeclaration
@@ -30,6 +30,19 @@ TEST(Parser, DimParsesArrayDeclaration) {
     auto* ds = dynamic_cast<DimStmt*>(lines[0].statements[0].get());
     ASSERT_NE(ds, nullptr);
     EXPECT_EQ(ds->name, "A");
-    EXPECT_EQ(ds->length, 10);
+    ASSERT_EQ(ds->upperBounds.size(), 1u);
+    EXPECT_EQ(ds->upperBounds[0], 10);
 }
 
+TEST(Parser, DimParsesMultiDimDeclaration) {
+    std::string src = "10 DIM A(3,5)\n";
+    Lexer lex(src); auto toks = lex.tokenize(); Parser p(std::move(toks));
+    auto prog = p.parseProgram();
+    ASSERT_EQ(prog.lines.size(), 1u);
+    auto* ds = dynamic_cast<DimStmt*>(prog.lines[0].statements[0].get());
+    ASSERT_NE(ds, nullptr);
+    EXPECT_EQ(ds->name, "A");
+    ASSERT_EQ(ds->upperBounds.size(), 2u);
+    EXPECT_EQ(ds->upperBounds[0], 3);
+    EXPECT_EQ(ds->upperBounds[1], 5);
+}

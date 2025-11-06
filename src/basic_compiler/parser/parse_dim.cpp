@@ -8,21 +8,26 @@ namespace gwbasic {
 /*
  * Function: Parser::parseDim
  * Purpose:
- *  - Parse DIM name(length)
+ *  - Parse DIM name(bound[,bound...]) where bounds are integers (upper bounds inclusive)
  * Inputs:
  *  - none (assumes 'DIM' matched by caller)
  * Outputs:
  *  - DimStmt: array name and length
  */
 std::unique_ptr<Stmt> Parser::parseDim() {
-    // DIM <Identifier> '(' <Integer> ')'
+    // DIM <Identifier> '(' <Integer> [',' <Integer>]* ')'
     if (!check(TokenType::Identifier)) throw ParseError("Expected array name after DIM");
     std::string name = peek().lexeme; int l = peek().line, c = peek().col; advance();
     consume(TokenType::LParen, "(");
-    if (!check(TokenType::Integer)) throw ParseError("Expected array length in DIM");
-    int len = std::stoi(peek().lexeme); advance();
+    std::vector<int> bounds;
+    if (!check(TokenType::Integer)) throw ParseError("Expected array bound in DIM");
+    do {
+        if (!check(TokenType::Integer)) throw ParseError("Expected integer bound in DIM");
+        int b = std::stoi(peek().lexeme); advance();
+        bounds.push_back(b);
+    } while (match(TokenType::Comma));
     consume(TokenType::RParen, ")");
-    return make_node<DimStmt>({l, c}, name, len);
+    return make_node<DimStmt>({l, c}, name, std::move(bounds));
 }
 
 } // namespace gwbasic

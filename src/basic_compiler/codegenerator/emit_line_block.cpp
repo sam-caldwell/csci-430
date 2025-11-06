@@ -20,6 +20,7 @@
 #include "basic_compiler/ast/ScreenStmt.h"
 #include "basic_compiler/ast/CircleStmt.h"
 #include "basic_compiler/ast/ClearStmt.h"
+#include "basic_compiler/ast/OptionBaseStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/StringExpr.h"
@@ -102,13 +103,55 @@ namespace gwbasic {
                 // MID$(name$[,idx], start[, len]) = value$
                 std::string dest;
                 std::string storePtr;
-                if (mid->index) {
-                    const int len = arraySizes_[mid->name];
-                    ensureStringArrayAllocated(out, mid->name, len);
-                    std::string base = arrayAllocaName_[mid->name];
-                    std::string idxReg = emitExpr(out, mid->index.get(), "");
-                    std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
-                    std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; }
+                if (!mid->indices.empty()) {
+                    // Compute total length and element linear index with bounds checks
+                    const auto &dims = arrayDims_[mid->name];
+                    long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+                    ensureStringArrayAllocated(out, mid->name, static_cast<int>(total));
+                    std::string baseArr = arrayAllocaName_[mid->name];
+                    // Convert each index and check bounds
+                    std::vector<std::string> idxI64s; idxI64s.reserve(mid->indices.size());
+                    std::vector<std::string> bads; bads.reserve(mid->indices.size());
+                    for (size_t di = 0; di < mid->indices.size(); ++di) {
+                        auto &iexpr = mid->indices[di];
+                        std::string idxD = emitExpr(out, iexpr.get(), "");
+                        std::string idxI = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI, idxD); out << ir << Symbols::LF; }
+                        idxI64s.push_back(idxI);
+                        // bounds: idx < base or idx > ub
+                        std::string ltBase = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", ltBase, idxI, optionBase_); out << ir << Symbols::LF; }
+                        std::string gtUb = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, {}", gtUb, idxI, dims[di]); out << ir << Symbols::LF; }
+                        std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, ltBase, gtUb); out << ir << Symbols::LF; }
+                        bads.push_back(bad);
+                    }
+                    std::string anyBad = bads[0];
+                    for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]); out << ir << Symbols::LF; } anyBad = nb; }
+                    std::string doLbl = lineLabelName(line.number) + std::string("_mid_idx_ok_") + std::to_string(++localContCounter);
+                    std::string errLbl = lineLabelName(line.number) + std::string("_mid_idx_err_") + std::to_string(localContCounter);
+                    { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl); out << ir << Symbols::LF; }
+                    // Error path: set error code 9 and dispatch to handler or exit
+                    out << errLbl << ":" << Symbols::LF;
+                    { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_stmt", stmtIndex); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    out << "  ]" << Symbols::LF;
+                    // Ok path: compute linear index
+                    out << doLbl << ":" << Symbols::LF;
+                    // Compute linear index from indices (subtract base, then multiply strides)
+                    std::vector<long long> extents; extents.reserve(dims.size());
+                    for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+                    std::vector<long long> strides(dims.size(), 1);
+                    for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
+                    // adj0 = idx0 - base
+                    std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
+                    for (const auto& ii : idxI64s) { std::string a = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", a, ii, optionBase_); out << ir << Symbols::LF; } adjs.push_back(a); }
+                    std::string lin = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]); out << ir << Symbols::LF; }
+                    for (size_t di = 1; di < adjs.size(); ++di) { std::string t = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]); out << ir << Symbols::LF; } std::string s = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", s, lin, t); out << ir << Symbols::LF; } lin = s; }
+                    std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, baseArr, lin); out << ir << Symbols::LF; }
                     storePtr = elem;
                     dest = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", dest, elem); out << ir << Symbols::LF; }
                 } else {
@@ -155,22 +198,67 @@ namespace gwbasic {
                 { std::string ir = std::format("  br label %{}", endLbl); out << ir << Symbols::LF; }
                 out << endLbl << ":" << Symbols::LF;
             } else if (auto aaset = dyn_cast<ArrayAssignStmt>(st.get())) {
-                // A(i) = expr (numeric or string)
-                const int len = arraySizes_[aaset->name];
-                std::string idxReg = emitExpr(out, aaset->index.get(), "");
-                std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array idx -> " << ir; log() << m.str() << Symbols::LF; } }
+                // A(i[,j...]) = expr (numeric or string)
+                const auto &dims = arrayDims_[aaset->name];
+                long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+                // Convert indices and bounds-check
+                std::vector<std::string> idxI64s; idxI64s.reserve(aaset->indices.size());
+                std::vector<std::string> bads; bads.reserve(aaset->indices.size());
+                for (size_t di = 0; di < aaset->indices.size(); ++di) {
+                    std::string idxD = emitExpr(out, aaset->indices[di].get(), "");
+                    std::string idxI = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI, idxD); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array idx -> " << ir; log() << m.str() << Symbols::LF; } }
+                    idxI64s.push_back(idxI);
+                    std::string ltBase = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", ltBase, idxI, optionBase_); out << ir << Symbols::LF; }
+                    std::string gtUb = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, {}", gtUb, idxI, dims[di]); out << ir << Symbols::LF; }
+                    std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, ltBase, gtUb); out << ir << Symbols::LF; }
+                    bads.push_back(bad);
+                }
+                std::string anyBad = bads[0];
+                for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]); out << ir << Symbols::LF; } anyBad = nb; }
+                std::string doLbl = lineLabelName(line.number) + std::string("_arr_ok_") + std::to_string(++localContCounter);
+                std::string errLbl = lineLabelName(line.number) + std::string("_arr_err_") + std::to_string(localContCounter);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl); out << ir << Symbols::LF; }
+                // Error path: set error 9 and switch to handler/exit
+                out << errLbl << ":" << Symbols::LF;
+                { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_stmt", stmtIndex); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                // Mirror into ERR/ERL variables for runtime bounds errors
+                ensureVarAllocated(out, "ERR");
+                ensureVarAllocated(out, "ERL");
+                { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 9 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                { std::string dln = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                {
+                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    out << "  ]" << Symbols::LF;
+                }
+                // Ok path
+                out << doLbl << ":" << Symbols::LF;
+                // Compute strides and linear index
+                std::vector<long long> extents; extents.reserve(dims.size());
+                for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+                std::vector<long long> strides(dims.size(), 1);
+                for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
+                std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
+                for (const auto& ii : idxI64s) { std::string a = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", a, ii, optionBase_); out << ir << Symbols::LF; } adjs.push_back(a); }
+                std::string lin = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]); out << ir << Symbols::LF; }
+                for (size_t di = 1; di < adjs.size(); ++di) { std::string t = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]); out << ir << Symbols::LF; } std::string s = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", s, lin, t); out << ir << Symbols::LF; } lin = s; }
                 if (isStringArrayNameCG(aaset->name)) {
-                    ensureStringArrayAllocated(out, aaset->name, len);
+                    ensureStringArrayAllocated(out, aaset->name, static_cast<int>(total));
                     std::string base = arrayAllocaName_[aaset->name];
-                    std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " StrArray gep -> " << ir; log() << m.str() << Symbols::LF; } }
+                    std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, base, lin); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " StrArray gep -> " << ir; log() << m.str() << Symbols::LF; } }
                     std::string val = emitExpr(out, aaset->value.get(), "");
                     { std::string ir = std::format("  store ptr {}, ptr {}", val, elem); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " StrArray store -> " << ir; log() << m.str() << Symbols::LF; } }
                 } else {
-                    ensureArrayAllocated(out, aaset->name, len);
+                    ensureArrayAllocated(out, aaset->name, static_cast<int>(total));
                     std::string base = arrayAllocaName_[aaset->name];
-                    std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array gep -> " << ir; log() << m.str() << Symbols::LF; } }
+                    std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, total, arrayElemType(aaset->name), base, lin); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array gep -> " << ir; log() << m.str() << Symbols::LF; } }
                     std::string val = emitExpr(out, aaset->value.get(), "");
-                    { std::string ir = std::format("  store double {}, ptr {}", val, elem); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array store -> " << ir; log() << m.str() << Symbols::LF; } }
+                    storeNumberToArrayElem(out, aaset->name, elem, val);
                 }
             } else if (auto pr = dyn_cast<PrintStmt>(st.get())) {
                 std::vector<const Expr *> items;
@@ -504,9 +592,9 @@ namespace gwbasic {
                     const std::set<std::string>& aset = (itAB == arraysBeforeLine_.end()) ? emptyArr : itAB->second;
                     for (const auto &an : aset) {
                         if (preserve.contains(an)) continue; // preserve COMMON arrays
-                        auto itLen = arraySizes_.find(an);
-                        if (itLen == arraySizes_.end()) continue;
-                        const int len = itLen->second;
+                        auto itLen = arrayDims_.find(an);
+                        if (itLen == arrayDims_.end()) continue;
+                        long long len = 1; for (int ub : itLen->second) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; len *= ext; }
                         if (isStringArrayNameCG(an)) {
                             ensureStringArrayAllocated(out, an, len);
                             std::string base = arrayAllocaName_[an];
@@ -520,8 +608,13 @@ namespace gwbasic {
                             std::string base = arrayAllocaName_[an];
                             for (int i = 0; i < len; ++i) {
                                 std::string elem = nextTemp();
-                                { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, i); out << ir << Symbols::LF; }
-                                { std::string ir = std::format("  store double 0.0, ptr {}", elem); out << ir << Symbols::LF; }
+                                { std::string ir = std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, len, arrayElemType(an), base, i); out << ir << Symbols::LF; }
+                                switch (numKindOf(an)) {
+                                    case NumKind::Int16: { std::string ir = std::format("  store i32 0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                                    case NumKind::Long32:{ std::string ir = std::format("  store i64 0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                                    case NumKind::Single:{ std::string ir = std::format("  store float 0.0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                                    case NumKind::Double:{ std::string ir = std::format("  store double 0.0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                                }
                             }
                         }
                     }
@@ -649,6 +742,9 @@ namespace gwbasic {
             } else if (auto ds = dyn_cast<DataStmt>(st.get())) {
                 // DATA: no runtime effect; items lowered into globals
                 { std::ostringstream m; m << "line " << currentLine_ << " DataStmt (no-op)"; log() << m.str() << Symbols::LF; }
+            } else if (isa<OptionBaseStmt>(st.get())) {
+                // OPTION BASE affects semantics only; no runtime code
+                { std::ostringstream m; m << "line " << currentLine_ << " OptionBaseStmt (no-op)"; log() << m.str() << Symbols::LF; }
             } else if (auto rd = dyn_cast<ReadStmt>(st.get())) {
                 // READ variables from @gwb_data
                 for (const auto& t : rd->targets) {
@@ -662,22 +758,64 @@ namespace gwbasic {
                     std::string idx1 = nextTemp(); { std::string ir = std::format("  {} = add i32 {}, 1", idx1, idx); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read add -> " << ir; log() << m.str() << Symbols::LF; } }
                     { std::string ir = std::format("  store i32 {}, ptr @gwb_data_idx", idx1); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read store idx -> " << ir; log() << m.str() << Symbols::LF; } }
                     // assign to target
-                    if (t.index) {
-                        // Array element assignment (string or numeric)
-                        const int len = arraySizes_[t.name];
-                        std::string idxReg = emitExpr(out, t.index.get(), "");
-                        std::string i64i = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", i64i, idxReg); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read idx fptosi -> " << ir; log() << m.str() << Symbols::LF; } }
+                    if (!t.indices.empty()) {
+                        // Array element assignment (string or numeric) with multi-dim support
+                        const auto &dims = arrayDims_[t.name];
+                        long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+                        // Convert indices and bounds-check
+                        std::vector<std::string> idxI64s; idxI64s.reserve(t.indices.size());
+                        std::vector<std::string> bads; bads.reserve(t.indices.size());
+                        for (size_t di = 0; di < t.indices.size(); ++di) {
+                            std::string idxD = emitExpr(out, t.indices[di].get(), "");
+                            std::string idxI = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI, idxD); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read idx fptosi -> " << ir; log() << m.str() << Symbols::LF; } }
+                            idxI64s.push_back(idxI);
+                            std::string ltBase = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", ltBase, idxI, optionBase_); out << ir << Symbols::LF; }
+                            std::string gtUb = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, {}", gtUb, idxI, dims[di]); out << ir << Symbols::LF; }
+                            std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, ltBase, gtUb); out << ir << Symbols::LF; }
+                            bads.push_back(bad);
+                        }
+                        std::string anyBad = bads[0];
+                        for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]); out << ir << Symbols::LF; } anyBad = nb; }
+                        std::string doLbl2 = lineLabelName(line.number) + std::string("_read_arr_ok_") + std::to_string(++localContCounter);
+                        std::string errLbl2 = lineLabelName(line.number) + std::string("_read_arr_err_") + std::to_string(localContCounter);
+                        { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl2, doLbl2); out << ir << Symbols::LF; }
+                        out << errLbl2 << ":" << Symbols::LF;
+                        { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                        { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                        { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                        { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_stmt", stmtIndex); out << ir << Symbols::LF; }
+                        { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                        // Mirror into ERR/ERL variables for runtime bounds errors
+                        ensureVarAllocated(out, "ERR");
+                        ensureVarAllocated(out, "ERL");
+                        { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 9 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                        { std::string dln = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                        {
+                            std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                            for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                            out << "  ]" << Symbols::LF;
+                        }
+                        out << doLbl2 << ":" << Symbols::LF;
+                        std::vector<long long> extents; extents.reserve(dims.size());
+                        for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+                        std::vector<long long> strides(dims.size(), 1);
+                        for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
+                        std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
+                        for (const auto& ii : idxI64s) { std::string a = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", a, ii, optionBase_); out << ir << Symbols::LF; } adjs.push_back(a); }
+                        std::string lin = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]); out << ir << Symbols::LF; }
+                        for (size_t di = 1; di < adjs.size(); ++di) { std::string t2 = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", t2, adjs[di], strides[di]); out << ir << Symbols::LF; } std::string s2 = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", s2, lin, t2); out << ir << Symbols::LF; } lin = s2; }
                         if (isStringArrayNameCG(t.name)) {
-                            ensureStringArrayAllocated(out, t.name, len);
-                            std::string base = arrayAllocaName_[t.name];
-                            std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, i64i); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read arr$ gep -> " << ir; log() << m.str() << Symbols::LF; } }
+                            ensureStringArrayAllocated(out, t.name, static_cast<int>(total));
+                            std::string basea = arrayAllocaName_[t.name];
+                            std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, basea, lin); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read arr$ gep -> " << ir; log() << m.str() << Symbols::LF; } }
                             { std::string ir = std::format("  store ptr {}, ptr {}", sval, elem); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read arr$ store -> " << ir; log() << m.str() << Symbols::LF; } }
                         } else {
-                            ensureArrayAllocated(out, t.name, len);
-                            std::string base = arrayAllocaName_[t.name];
-                            std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, i64i); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read arr gep -> " << ir; log() << m.str() << Symbols::LF; } }
+                            ensureArrayAllocated(out, t.name, static_cast<int>(total));
+                            std::string basea = arrayAllocaName_[t.name];
+                            std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, total, arrayElemType(t.name), basea, lin); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read arr gep -> " << ir; log() << m.str() << Symbols::LF; } }
                             std::string dval = nextTemp(); { std::string ir = std::format("  {} = call double @atof(ptr {})", dval, sval); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read atof -> " << ir; log() << m.str() << Symbols::LF; } }
-                            { std::string ir = std::format("  store double {}, ptr {}", dval, elem); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Read arr store -> " << ir; log() << m.str() << Symbols::LF; } }
+                            storeNumberToArrayElem(out, t.name, elem, dval);
                         }
                     } else {
                         // Scalar var
@@ -873,13 +1011,13 @@ namespace gwbasic {
                 const std::set<std::string> emptyArr;
                 const std::set<std::string>& aset = (itAB == arraysBeforeLine_.end()) ? emptyArr : itAB->second;
                 for (const auto &an : aset) {
-                    auto itLen = arraySizes_.find(an);
-                    if (itLen == arraySizes_.end()) continue;
-                    const int len = itLen->second;
+                    auto itLen = arrayDims_.find(an);
+                    if (itLen == arrayDims_.end()) continue;
+                    long long len = 1; for (int ub : itLen->second) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; len *= ext; }
                     if (isStringArrayNameCG(an)) {
                         ensureStringArrayAllocated(out, an, len);
                         std::string base = arrayAllocaName_[an];
-                        for (int i = 0; i < len; ++i) {
+                        for (long long i = 0; i < len; ++i) {
                             std::string elem = nextTemp();
                             { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, i); out << ir << Symbols::LF; }
                             { std::string ir = std::format("  store ptr null, ptr {}", elem); out << ir << Symbols::LF; }
@@ -887,10 +1025,15 @@ namespace gwbasic {
                     } else {
                         ensureArrayAllocated(out, an, len);
                         std::string base = arrayAllocaName_[an];
-                        for (int i = 0; i < len; ++i) {
+                        for (long long i = 0; i < len; ++i) {
                             std::string elem = nextTemp();
-                            { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, i); out << ir << Symbols::LF; }
-                            { std::string ir = std::format("  store double 0.0, ptr {}", elem); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, len, arrayElemType(an), base, i); out << ir << Symbols::LF; }
+                    switch (numKindOf(an)) {
+                        case NumKind::Int16: { std::string ir = std::format("  store i32 0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                        case NumKind::Long32:{ std::string ir = std::format("  store i64 0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                        case NumKind::Single:{ std::string ir = std::format("  store float 0.0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                        case NumKind::Double:{ std::string ir = std::format("  store double 0.0, ptr {}", elem); out << ir << Symbols::LF; break; }
+                    }
                         }
                     }
                 }

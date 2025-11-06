@@ -31,7 +31,8 @@ TEST(Parser, ArrayAssignmentParses) {
     auto* aa = dynamic_cast<ArrayAssignStmt*>(lines[0].statements[0].get());
     ASSERT_NE(aa, nullptr);
     EXPECT_EQ(aa->name, "A");
-    auto* idx = dynamic_cast<NumberExpr*>(aa->index.get());
+    ASSERT_EQ(aa->indices.size(), 1u);
+    auto* idx = dynamic_cast<NumberExpr*>(aa->indices[0].get());
     ASSERT_NE(idx, nullptr);
     EXPECT_DOUBLE_EQ(idx->value, 3.0);
     auto* val = dynamic_cast<NumberExpr*>(aa->value.get());
@@ -39,3 +40,17 @@ TEST(Parser, ArrayAssignmentParses) {
     EXPECT_DOUBLE_EQ(val->value, 4.0);
 }
 
+TEST(Parser, ArrayAssignmentParsesMultiDim) {
+    std::string src = "10 LET A(1,2) = 9\n";
+    Lexer lex(src); auto toks = lex.tokenize(); Parser p(std::move(toks));
+    auto prog = p.parseProgram();
+    ASSERT_EQ(prog.lines.size(), 1u);
+    auto* aa = dynamic_cast<ArrayAssignStmt*>(prog.lines[0].statements[0].get());
+    ASSERT_NE(aa, nullptr);
+    ASSERT_EQ(aa->indices.size(), 2u);
+    auto* i0 = dynamic_cast<NumberExpr*>(aa->indices[0].get());
+    auto* i1 = dynamic_cast<NumberExpr*>(aa->indices[1].get());
+    ASSERT_NE(i0, nullptr); ASSERT_NE(i1, nullptr);
+    EXPECT_DOUBLE_EQ(i0->value, 1.0);
+    EXPECT_DOUBLE_EQ(i1->value, 2.0);
+}

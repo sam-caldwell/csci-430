@@ -174,28 +174,70 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         return res;
     }
     if (auto call = dyn_cast<const CallExpr>(e)) {
-        // Normalize function name to upper for matching
-        std::string fn = call->callee; for (auto& ch : fn) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
-        // Treat known arrays as array element references (1-D)
-        if (arraySizes_.contains(call->callee)) {
-            const int len = arraySizes_[call->callee];
-            // Evaluate index (assume numeric), convert to i64
-            std::string idxReg = emitExpr(out, call->args[0].get(), "");
-            std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array idx -> " << ir; log() << m.str() << Symbols::LF; } }
-            if (isStringArrayNameCG(call->callee)) {
-                ensureStringArrayAllocated(out, call->callee, len);
-                std::string base = arrayAllocaName_[call->callee];
-                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " StrArray elem gep -> " << ir; log() << m.str() << Symbols::LF; } }
-                std::string res = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", res, elem); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " StrArray load -> " << ir; log() << m.str() << Symbols::LF; } }
-                return res;
+        // Array element reference A(i[,j...]) handled as call-form
+        if (arrayDims_.contains(call->callee)) {
+            const auto &dims = arrayDims_[call->callee];
+            long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+            // Convert indices and bounds-check
+            std::vector<std::string> idxI64s; idxI64s.reserve(call->args.size());
+            std::vector<std::string> bads; bads.reserve(call->args.size());
+            for (size_t di = 0; di < call->args.size(); ++di) {
+                std::string idxD = emitExpr(out, call->args[di].get(), "");
+                std::string idxI = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI, idxD); out << ir << Symbols::LF; }
+                idxI64s.push_back(idxI);
+                std::string ltBase = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", ltBase, idxI, optionBase_); out << ir << Symbols::LF; }
+                std::string gtUb = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, {}", gtUb, idxI, dims[di]); out << ir << Symbols::LF; }
+                std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, ltBase, gtUb); out << ir << Symbols::LF; }
+                bads.push_back(bad);
+            }
+            std::string anyBad = bads.empty() ? std::string("false") : bads[0];
+            for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]); out << ir << Symbols::LF; } anyBad = nb; }
+            std::string okLbl = lineLabelName(currentLine_) + std::string("_arr_ref_ok_") + std::to_string(++tempCounter_);
+            std::string errLbl = lineLabelName(currentLine_) + std::string("_arr_ref_err_") + std::to_string(tempCounter_);
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, okLbl); out << ir << Symbols::LF; }
+            // Error path: set error and dispatch
+            out << errLbl << ":" << Symbols::LF;
+            { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+            // Mirror into ERR/ERL variables for runtime bounds errors
+            ensureVarAllocated(out, "ERR");
+            ensureVarAllocated(out, "ERL");
+            { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 9 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+            { std::string dln = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+            {
+                std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                out << "  ]" << Symbols::LF;
+            }
+            // Ok path
+            out << okLbl << ":" << Symbols::LF;
+            std::vector<long long> extents; extents.reserve(dims.size());
+            for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+            std::vector<long long> strides(dims.size(), 1);
+            for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
+            std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
+            for (const auto& ii : idxI64s) { std::string a = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", a, ii, optionBase_); out << ir << Symbols::LF; } adjs.push_back(a); }
+            std::string lin = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]); out << ir << Symbols::LF; }
+            for (size_t di = 1; di < adjs.size(); ++di) { std::string t = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]); out << ir << Symbols::LF; } std::string s = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", s, lin, t); out << ir << Symbols::LF; } lin = s; }
+            if (isStringVarNameCG(call->callee)) {
+                ensureStringArrayAllocated(out, call->callee, static_cast<int>(total));
+                std::string baseArr = arrayAllocaName_[call->callee];
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, baseArr, lin); out << ir << Symbols::LF; }
+                std::string val = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", val, elem); out << ir << Symbols::LF; }
+                return val;
             } else {
-                ensureArrayAllocated(out, call->callee, len);
-                std::string base = arrayAllocaName_[call->callee];
-                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x double], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array elem gep -> " << ir; log() << m.str() << Symbols::LF; } }
-                std::string res = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", res, elem); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Array load -> " << ir; log() << m.str() << Symbols::LF; } }
-                return res;
+                ensureArrayAllocated(out, call->callee, static_cast<int>(total));
+                std::string baseArr = arrayAllocaName_[call->callee];
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, total, arrayElemType(call->callee), baseArr, lin); out << ir << Symbols::LF; }
+                return loadArrayElemAsDouble(out, call->callee, elem);
             }
         }
+        // Normalize function name to upper for matching
+        std::string fn = call->callee; for (auto& ch : fn) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
         // Emit args
         std::vector<std::string> argv; argv.reserve(call->args.size());
         for (const auto& a : call->args) argv.push_back(emitExpr(out, a.get(), ""));

@@ -19,7 +19,9 @@ Code under test: Lexer/tokenization and helpers
 Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
 */
 TEST(Lexer, LoggingProducesOutput) {
-    const std::string src = "10 PRINT \"A\\n\\t\\\"B\\\\C\"\n20 ' comment here\r\n30 END\n";
+    // GW-BASIC string rules: doubled quotes inside strings, no C-style escapes
+    // This program prints: A\n\t"B\C
+    const std::string src = "10 PRINT \"A\\n\\t\"\"B\\\\C\"\n20 ' comment here\r\n30 END\n";
     std::filesystem::path tmpdir = std::filesystem::path("..") / "tmp" / "unit_logs";
     std::filesystem::create_directories(tmpdir);
     std::filesystem::path tmp = tmpdir / "lexer_logging_test.log";

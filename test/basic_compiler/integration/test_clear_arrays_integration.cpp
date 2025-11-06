@@ -27,8 +27,7 @@ TEST(Integration, CLEAR_ZerosArrays_IR) {
     std::string ir = Compiler::compileString(src);
     // Look for array alloca name and zero store pattern
     ASSERT_NE(ir.find("%A_arr"), std::string::npos);
-    // Expect a store of 0.0 targeting a gep derived from %A_arr
-    ASSERT_NE(ir.find("getelementptr inbounds [3 x double], ptr %A_arr, i64 0, i64"), std::string::npos);
-    ASSERT_NE(ir.find("store double 0.0"), std::string::npos);
+    // Expect a store of 0.0 targeting a gep derived from %A_arr; default arrays are float
+    ASSERT_NE(ir.find("getelementptr inbounds [4 x float], ptr %A_arr, i64 0, i64"), std::string::npos);
+    ASSERT_NE(ir.find("store float 0.0"), std::string::npos);
 }
-

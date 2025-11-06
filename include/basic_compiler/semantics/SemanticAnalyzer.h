@@ -44,7 +44,10 @@ public:
         std::set<std::string> stringLiterals;
         std::set<int> lineNumbers;
         std::set<std::string> commonVariables;
-        std::map<std::string,int> arrays; // 1-D arrays name->length
+        // Arrays with per-dimension upper bounds (inclusive)
+        std::map<std::string, std::vector<int>> arrays;
+        // OPTION BASE value (0 or 1)
+        int optionBase{0};
         // User-defined functions keyed by uppercase function name (e.g., "FNSQ")
         std::map<std::string, const DefFnStmt*> userFunctions;
         // Variables determined to be strings (by suffix or DEFSTR)
@@ -130,7 +133,8 @@ private:
      *  - Set of variables appearing in COMMON declarations.
      */
     std::set<std::string> common_;
-    std::map<std::string,int> arrays_;
+    std::map<std::string, std::vector<int>> arrays_;
+    int optionBase_{0};
     // User-defined functions by uppercase name
     std::map<std::string, const DefFnStmt*> userFunctions_;
     // Current DEF FN parameter name (skip global reference tracking when set)

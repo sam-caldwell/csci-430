@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 #include "basic_compiler/ast/Expr.h"
 
 namespace gwbasic {
@@ -19,7 +20,7 @@ namespace gwbasic {
  */
 struct ReadTarget {
     std::string name;                 // variable or array name
-    std::unique_ptr<Expr> index;      // optional array index if not null
+    std::vector<std::unique_ptr<Expr>> indices; // optional array indices (empty for scalar)
 };
 
 } // namespace gwbasic

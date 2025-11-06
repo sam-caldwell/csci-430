@@ -32,8 +32,6 @@
 
 - Numeric literals: support scientific notation (E/D exponents), octal (`&O`/`&`), and binary where applicable; only
   `&H` hex is implemented.
-- String literals: GW-BASIC uses doubled quotes inside strings ("He said ""OK""") rather than C-style escapes; lexer 
-  currently recognizes C-style `\n`, `\t`, `\"`, `\\` and not doubled-quote semantics.
 - Apostrophe (`'`) inline comment form not handled (only `REM`-style supported via keyword).
 
 ## Code Generation: Implementations Missing (parses exist)

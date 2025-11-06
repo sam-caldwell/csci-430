@@ -309,6 +309,8 @@ private:
     std::unique_ptr<Stmt> parseCircle();
     /** Parse CLEAR */
     std::unique_ptr<Stmt> parseClear() const;
+    /** Parse OPTION BASE 0|1 */
+    std::unique_ptr<Stmt> parseOptionBase();
     /**
      * Function: Parser::parseExpression
      * Purpose:

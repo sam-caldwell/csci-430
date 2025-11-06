@@ -11,8 +11,10 @@ namespace gwbasic {
  * Outputs:
  *  - Token: STRING token with unescaped contents and source location
  * Theory of operation:
- *  - Consumes the opening quote, then scans until the closing quote,
- *    handling simple escapes (\n, \t, \", \\). Throws on unterminated strings.
+ *  - Consumes the opening quote, then scans until the closing quote.
+ *    GW-BASIC does not use C-style escapes; to embed a double quote
+ *    inside the string, the quote is doubled (""). A backslash is
+ *    just a literal character. Throws on unterminated strings.
  */
 Token Lexer::stringLiteral() {
     const int startLine = line_;
@@ -20,20 +22,19 @@ Token Lexer::stringLiteral() {
     std::string buf;
     advance(); // opening quote
     while (!atEnd()) {
-        if (const char c = advance(); c == '\\') {
-            if (atEnd()) break;
-            switch (const char n = advance()) {
-                case 'n': buf.push_back(Symbols::LF.first()); break;
-                case 't': buf.push_back(Symbols::TAB.first()); break;
-                case Symbols::DOUBLE_QUOTE.first(): buf.push_back(Symbols::DOUBLE_QUOTE.first()); break;
-                case '\\': buf.push_back('\\'); break;
-                default: buf.push_back(n); break;
+        const char c = advance();
+        if (c == Symbols::DOUBLE_QUOTE.first()) {
+            // If next char is also a double quote, this encodes a literal quote
+            if (!atEnd() && peek() == Symbols::DOUBLE_QUOTE.first()) {
+                advance(); // consume the second quote
+                buf.push_back(Symbols::DOUBLE_QUOTE.first());
+                continue;
             }
-        } else if (c == Symbols::DOUBLE_QUOTE.first()) {
+            // Otherwise, this terminates the string
             return Token{TokenType::String, buf, startLine, startCol};
-        } else {
-            buf.push_back(c);
         }
+        // No escape processing: backslashes are just characters
+        buf.push_back(c);
     }
     {
         std::ostringstream m; m << "Unterminated string literal at line " << startLine; throw LexError(m.str());

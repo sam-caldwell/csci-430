@@ -8,6 +8,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <format>
 #include "logger/Logger.h"
 #include "basic_compiler/Symbols.h"
 #include "basic_compiler/ast/Program.h"
@@ -116,7 +117,8 @@ public:
         semStrings_ = r.stringLiterals;
         semLineNumbers_ = r.lineNumbers;
         semCommonVariables_ = r.commonVariables;
-        arraySizes_ = r.arrays;
+        arrayDims_ = r.arrays;
+        optionBase_ = r.optionBase;
         userFunctions_ = r.userFunctions;
         semStringVariables_ = r.stringVariables;
         // Map numeric kinds from semantics into codegen's representation
@@ -163,8 +165,10 @@ private:
      *  - Map string literal value to a unique id used for global names.
      */
     std::map<std::string, int> strLiteralId_;
-    std::map<std::string, int> arraySizes_{};
+    std::map<std::string, std::vector<int>> arrayDims_{};
     std::map<std::string, std::string> arrayAllocaName_{};
+    // OPTION BASE setting (0 default; 1 if OPTION BASE 1 seen)
+    int optionBase_{0};
     // User-defined functions by uppercase name
     std::map<std::string, const DefFnStmt*> userFunctions_{};
     // Variables determined as string-typed (by suffix or DEFSTR)
@@ -385,6 +389,73 @@ private:
         return semStringVariables_.contains(name);
     }
     bool isStringArrayNameCG(const std::string& name) const { return isStringVarNameCG(name); }
+
+    // Array helpers
+    // Determine LLVM element type string for a numeric array name
+    std::string arrayElemType(const std::string& name) const {
+        switch (numKindOf(name)) {
+            case NumKind::Int16: return "i32";   // Integer arrays map to i32
+            case NumKind::Long32: return "i64";  // Long arrays map to i64
+            case NumKind::Single: return "float"; // Single arrays are true float
+            case NumKind::Double: default: return "double";
+        }
+    }
+    // Emit a typed store into a numeric array element given the RHS as double
+    void storeNumberToArrayElem(std::ostringstream& out,
+                                const std::string& arrayName,
+                                const std::string& elemPtrSSA,
+                                const std::string& doubleValSSA) {
+        switch (numKindOf(arrayName)) {
+            case NumKind::Int16: {
+                std::string cvt = nextTemp();
+                { std::string ir = std::format("  {} = fptosi double {} to i32", cvt, doubleValSSA); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr {}", cvt, elemPtrSSA); out << ir << Symbols::LF; }
+                break;
+            }
+            case NumKind::Long32: {
+                std::string cvt = nextTemp();
+                { std::string ir = std::format("  {} = fptosi double {} to i64", cvt, doubleValSSA); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i64 {}, ptr {}", cvt, elemPtrSSA); out << ir << Symbols::LF; }
+                break;
+            }
+            case NumKind::Single: {
+                std::string cvt = nextTemp();
+                { std::string ir = std::format("  {} = fptrunc double {} to float", cvt, doubleValSSA); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store float {}, ptr {}", cvt, elemPtrSSA); out << ir << Symbols::LF; }
+                break;
+            }
+            case NumKind::Double: {
+                { std::string ir = std::format("  store double {}, ptr {}", doubleValSSA, elemPtrSSA); out << ir << Symbols::LF; }
+                break;
+            }
+        }
+    }
+    // Load a numeric array element as a double SSA value
+    std::string loadArrayElemAsDouble(std::ostringstream& out,
+                                      const std::string& arrayName,
+                                      const std::string& elemPtrSSA) {
+        switch (numKindOf(arrayName)) {
+            case NumKind::Int16: {
+                std::string v = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr {}", v, elemPtrSSA); out << ir << Symbols::LF; }
+                std::string d = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", d, v); out << ir << Symbols::LF; }
+                return d;
+            }
+            case NumKind::Long32: {
+                std::string v = nextTemp(); { std::string ir = std::format("  {} = load i64, ptr {}", v, elemPtrSSA); out << ir << Symbols::LF; }
+                std::string d = nextTemp(); { std::string ir = std::format("  {} = sitofp i64 {} to double", d, v); out << ir << Symbols::LF; }
+                return d;
+            }
+            case NumKind::Single: {
+                std::string v = nextTemp(); { std::string ir = std::format("  {} = load float, ptr {}", v, elemPtrSSA); out << ir << Symbols::LF; }
+                std::string d = nextTemp(); { std::string ir = std::format("  {} = fpext float {} to double", d, v); out << ir << Symbols::LF; }
+                return d;
+            }
+            case NumKind::Double: default: {
+                std::string d = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", d, elemPtrSSA); out << ir << Symbols::LF; }
+                return d;
+            }
+        }
+    }
 
     // Logging utilities
     /** Stream accessor: codegen-phase logger (ostream sink when disabled). */

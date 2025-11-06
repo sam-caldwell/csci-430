@@ -8,33 +8,26 @@
 using namespace gwbasic;
 
 /***
- * Test: Lexer.StringLiteral_KnownAndUnknownEscapes
- * Purpose: Validate stringLiteral parsing of known escapes and behavior for unknown escapes.
+ * Test: Lexer.StringLiteral_DoubledQuotes_And_BackslashesLiteral
+ * Purpose: Validate GW-BASIC string rules: doubled quotes inside strings,
+ *          and no C-style escape processing (backslashes are literal).
  * Components Under Test: Lexer::stringLiteral
- * Expected Behavior: Recognizes and materializes \n, \t, \" and \\ escapes; for an
- *                    unknown escape (e.g., \q), emits the literal character ("q").
  */
-/*
-Test: Lexer.StringLiteral_KnownAndUnknownEscapes
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
-TEST(Lexer, StringLiteral_KnownAndUnknownEscapes) {
-    // Known escapes: \n, \t, quote, backslash
+TEST(Lexer, StringLiteral_DoubledQuotes_And_BackslashesLiteral) {
+    // Doubled quotes decode to a single quote in the value
     {
-        std::string src = R"("A\nB\tC\"D\\E")";
+        std::string src = R"("He said ""OK""")";
         Lexer L(src);
         Token t = L.stringLiteral();
         ASSERT_EQ(t.type, TokenType::String);
-        EXPECT_NE(t.lexeme.find("A\nB\tC\"D\\E"), std::string::npos);
+        EXPECT_EQ(t.lexeme, "He said \"OK\"");
     }
-    // Unknown escape should keep the character as-is
+    // Backslashes are preserved literally; sequences like \n or \t are two characters
     {
-        std::string src = R"("Z\qY")";
+        std::string src = R"("A\nB\tC\qD\\")";
         Lexer L(src);
         Token t = L.stringLiteral();
         ASSERT_EQ(t.type, TokenType::String);
-        EXPECT_EQ(t.lexeme, "ZqY");
+        EXPECT_EQ(t.lexeme, "A\\nB\\tC\\qD\\\\");
     }
 }

@@ -45,8 +45,13 @@ std::unique_ptr<Stmt> Parser::tryParseSpecialIdentifierStatement(const Token& st
         consume(TokenType::LParen, "(");
         if (!check(TokenType::Identifier)) throw ParseError("Expected string variable name in MID$ assignment");
         std::string name = peek().lexeme; advance();
-        std::unique_ptr<Expr> idx;
-        if (match(TokenType::LParen)) { idx = parseExpression(); consume(TokenType::RParen, ")"); }
+        std::vector<std::unique_ptr<Expr>> indices;
+        if (match(TokenType::LParen)) {
+            // Parse one or more indices separated by commas
+            indices.push_back(parseExpression());
+            while (match(TokenType::Comma)) indices.push_back(parseExpression());
+            consume(TokenType::RParen, ")");
+        }
         consume(TokenType::Comma, ",");
         auto start = parseExpression();
         std::unique_ptr<Expr> len;
@@ -54,7 +59,7 @@ std::unique_ptr<Stmt> Parser::tryParseSpecialIdentifierStatement(const Token& st
         consume(TokenType::RParen, ")");
         consume(TokenType::Assign, "'='");
         auto value = parseExpression();
-        auto n = make_node<MidAssignStmt>({startTok.line, startTok.col}, name, std::move(idx), std::move(start), std::move(len), std::move(value));
+        auto n = make_node<MidAssignStmt>({startTok.line, startTok.col}, name, std::move(indices), std::move(start), std::move(len), std::move(value));
         return n;
     }
     return nullptr;

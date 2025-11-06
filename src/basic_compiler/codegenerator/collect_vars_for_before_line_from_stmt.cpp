@@ -20,7 +20,7 @@ namespace gwbasic {
 void CodeGenerator::collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string>& vars, std::set<std::string>& arrays) {
     if (!s) return;
     if (auto a = dyn_cast<const AssignStmt>(s)) { vars.insert(a->name); collectVarsForBeforeLineFromExpr(a->value.get(), vars, arrays); return; }
-    if (auto aa = dyn_cast<const ArrayAssignStmt>(s)) { arrays.insert(aa->name); collectVarsForBeforeLineFromExpr(aa->index.get(), vars, arrays); collectVarsForBeforeLineFromExpr(aa->value.get(), vars, arrays); return; }
+    if (auto aa = dyn_cast<const ArrayAssignStmt>(s)) { arrays.insert(aa->name); for (const auto& ix : aa->indices) collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays); collectVarsForBeforeLineFromExpr(aa->value.get(), vars, arrays); return; }
     if (auto ib = dyn_cast<const IfBlockStmt>(s)) { collectVarsForBeforeLineFromExpr(ib->cond.get(), vars, arrays); for (const auto& st : ib->thenBody) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays); for (const auto& st : ib->elseBody) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays); return; }
     if (auto is = dyn_cast<const IfStmt>(s)) { collectVarsForBeforeLineFromExpr(is->cond.get(), vars, arrays); return; }
     if (auto fs = dyn_cast<const ForStmt>(s)) { vars.insert(fs->var); collectVarsForBeforeLineFromExpr(fs->start.get(), vars, arrays); collectVarsForBeforeLineFromExpr(fs->end.get(), vars, arrays); if (fs->step) collectVarsForBeforeLineFromExpr(fs->step.get(), vars, arrays); for (const auto& st : fs->body) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays); return; }
@@ -29,7 +29,7 @@ void CodeGenerator::collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std
     if (auto in = dyn_cast<const InputStmt>(s)) { vars.insert(in->name); return; }
     if (auto rd = dyn_cast<const ReadStmt>(s)) {
         for (const auto& t : rd->targets) {
-            if (t.index) { arrays.insert(t.name); collectVarsForBeforeLineFromExpr(t.index.get(), vars, arrays); }
+            if (!t.indices.empty()) { arrays.insert(t.name); for (const auto& ix : t.indices) collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays); }
             else { vars.insert(t.name); }
         }
         return;

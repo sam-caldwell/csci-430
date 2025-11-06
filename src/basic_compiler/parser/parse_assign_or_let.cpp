@@ -27,8 +27,15 @@ std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
                 consume(TokenType::LParen, "(");
                 if (!check(TokenType::Identifier)) throw ParseError("Expected string variable name in MID$ assignment");
                 std::string name = peek().lexeme; advance();
-                std::unique_ptr<Expr> idx;
-                if (match(TokenType::LParen)) { idx = parseExpression(); consume(TokenType::RParen, ")"); }
+                std::vector<std::unique_ptr<Expr>> indices;
+                if (match(TokenType::LParen)) {
+                    if (!check(TokenType::RParen)) {
+                        do {
+                            indices.push_back(parseExpression());
+                        } while (match(TokenType::Comma));
+                    }
+                    consume(TokenType::RParen, ")");
+                }
                 consume(TokenType::Comma, ",");
                 auto start = parseExpression();
                 std::unique_ptr<Expr> len;
@@ -36,7 +43,7 @@ std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
                 consume(TokenType::RParen, ")");
                 consume(TokenType::Assign, "'='");
                 auto value = parseExpression();
-                return make_node<MidAssignStmt>({l, c}, name, std::move(idx), std::move(start), std::move(len), std::move(value));
+                return make_node<MidAssignStmt>({l, c}, name, std::move(indices), std::move(start), std::move(len), std::move(value));
             }
         }
         // proceed to identifier (normal assignment)
@@ -48,11 +55,16 @@ std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
     advance();
     // Array element assignment A(expr) = ...
     if (match(TokenType::LParen)) {
-        auto idx = parseExpression();
+        std::vector<std::unique_ptr<Expr>> indices;
+        if (!check(TokenType::RParen)) {
+            do {
+                indices.push_back(parseExpression());
+            } while (match(TokenType::Comma));
+        }
         consume(TokenType::RParen, ")");
         consume(TokenType::Assign, "'='");
         auto expr = parseExpression();
-        return make_node<ArrayAssignStmt>({l, c}, name, std::move(idx), std::move(expr));
+        return make_node<ArrayAssignStmt>({l, c}, name, std::move(indices), std::move(expr));
     }
     consume(TokenType::Assign, "'='");
     auto expr = parseExpression();

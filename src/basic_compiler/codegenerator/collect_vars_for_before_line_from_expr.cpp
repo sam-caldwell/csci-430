@@ -12,10 +12,10 @@ void CodeGenerator::collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std
     if (!e) return;
     if (auto v = dyn_cast<const VarExpr>(e)) { vars.insert(v->name); return; }
     if (auto c = dyn_cast<const CallExpr>(e)) {
-        // Array element reference syntax uses call-form: A(index)
-        if (arraySizes_.contains(c->callee)) {
+        // Array element reference syntax uses call-form: A(index[,index...])
+        if (arrayDims_.contains(c->callee)) {
             arrays.insert(c->callee);
-            if (!c->args.empty()) collectVarsForBeforeLineFromExpr(c->args[0].get(), vars, arrays);
+            for (const auto& a : c->args) collectVarsForBeforeLineFromExpr(a.get(), vars, arrays);
             return;
         }
         for (const auto& a : c->args) collectVarsForBeforeLineFromExpr(a.get(), vars, arrays);
@@ -26,4 +26,3 @@ void CodeGenerator::collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std
 }
 
 } // namespace gwbasic
-

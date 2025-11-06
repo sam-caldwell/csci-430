@@ -1,0 +1,28 @@
+// (c) 2025 Sam Caldwell. All Rights Reserved.
+
+#include <gtest/gtest.h>
+#include <string>
+#include "basic_compiler/Compiler.h"
+
+using namespace gwbasic;
+
+/*
+ * Test Suite: CodeGen OPTION BASE (numeric)
+ * Purpose: Ensure DIM allocation length honors OPTION BASE 1.
+ */
+/*
+Test: Integration.Codegen_DIM_With_OptionBase1_Alloc_UsesUb
+Inputs: Source compiled to IR
+Code under test: Code generation (IR text)
+Expected behavior: IR contains correct alloca length under OPTION BASE 1
+*/
+TEST(Integration, Codegen_DIM_With_OptionBase1_Alloc_UsesUb) {
+    const char* src =
+        "10 OPTION BASE 1\n"
+        "20 DIM A(5)\n"
+        "30 A(1)=1\n"
+        "40 END\n";
+    std::string ir = Compiler::compileString(src);
+    // Under BASE 1, extent == upper bound (5); default numeric kind is Single => float
+    ASSERT_NE(ir.find("alloca [5 x float]"), std::string::npos);
+}

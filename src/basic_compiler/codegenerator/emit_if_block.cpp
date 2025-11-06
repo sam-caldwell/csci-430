@@ -61,13 +61,59 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
         } else if (auto mid = dyn_cast<MidAssignStmt>(s.get())) {
             std::string dest;
             std::string storePtr;
-            if (mid->index) {
-                const int len = arraySizes_[mid->name];
-                ensureStringArrayAllocated(out, mid->name, len);
+            if (!mid->indices.empty()) {
+                const auto &dims = arrayDims_[mid->name];
+                long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+                ensureStringArrayAllocated(out, mid->name, static_cast<int>(total));
                 std::string base = arrayAllocaName_[mid->name];
-                std::string idxReg = emitExpr(out, mid->index.get(), currLineLabel);
-                std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
-                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; }
+                std::vector<std::string> idxI64s; idxI64s.reserve(mid->indices.size());
+                std::vector<std::string> bads; bads.reserve(mid->indices.size());
+                for (size_t di = 0; di < mid->indices.size(); ++di) {
+                    std::string idxReg = emitExpr(out, mid->indices[di].get(), currLineLabel);
+                    std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
+                    idxI64s.push_back(idxI64);
+                    std::string ltBase = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", ltBase, idxI64, optionBase_); out << ir << Symbols::LF; }
+                    std::string gtUb = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, {}", gtUb, idxI64, dims[di]); out << ir << Symbols::LF; }
+                    std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, ltBase, gtUb); out << ir << Symbols::LF; }
+                    bads.push_back(bad);
+                }
+                std::string anyBad = bads[0];
+                for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]); out << ir << Symbols::LF; } anyBad = nb; }
+                std::string doLbl = currLineLabel + std::string("_mid_ok2_") + std::to_string(++localCounter);
+                std::string errLbl = currLineLabel + std::string("_mid_err2_") + std::to_string(localCounter);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl); out << ir << Symbols::LF; }
+                out << errLbl << ":" << Symbols::LF;
+                { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                // Mirror into ERR/ERL variables for runtime bounds errors
+                ensureVarAllocated(out, "ERR");
+                ensureVarAllocated(out, "ERL");
+                { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 9 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                { std::string dln = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                // Mirror into ERR/ERL variables for runtime bounds errors
+                ensureVarAllocated(out, "ERR");
+                ensureVarAllocated(out, "ERL");
+                { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 9 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                { std::string dln = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                {
+                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    out << "  ]" << Symbols::LF;
+                }
+                out << doLbl << ":" << Symbols::LF;
+                std::vector<long long> extents; extents.reserve(dims.size());
+                for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+                std::vector<long long> strides(dims.size(), 1);
+                for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
+                std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
+                for (const auto& ii : idxI64s) { std::string a = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", a, ii, optionBase_); out << ir << Symbols::LF; } adjs.push_back(a); }
+                std::string lin = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]); out << ir << Symbols::LF; }
+                for (size_t di = 1; di < adjs.size(); ++di) { std::string t = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]); out << ir << Symbols::LF; } std::string s2 = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", s2, lin, t); out << ir << Symbols::LF; } lin = s2; }
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, base, lin); out << ir << Symbols::LF; }
                 storePtr = elem;
                 dest = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", dest, elem); out << ir << Symbols::LF; }
             } else {
@@ -131,21 +177,62 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                 }
             }
         } else if (auto aaset = dyn_cast<ArrayAssignStmt>(s.get())) {
-            const int len = arraySizes_[aaset->name];
-            std::string idxReg = emitExpr(out, aaset->index.get(), currLineLabel);
-            std::string idxI64 = nextTemp(); { std::string ir = "  "; ir += idxI64; ir += " = fptosi double "; ir += idxReg; ir += " to i64"; out << ir << Symbols::LF; }
+            const auto &dims = arrayDims_[aaset->name];
+            long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+            std::vector<std::string> idxI64s; idxI64s.reserve(aaset->indices.size());
+            std::vector<std::string> bads; bads.reserve(aaset->indices.size());
+            for (size_t di = 0; di < aaset->indices.size(); ++di) {
+                std::string idxReg = emitExpr(out, aaset->indices[di].get(), currLineLabel);
+                std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
+                idxI64s.push_back(idxI64);
+                std::string ltBase = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", ltBase, idxI64, optionBase_); out << ir << Symbols::LF; }
+                std::string gtUb = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, {}", gtUb, idxI64, dims[di]); out << ir << Symbols::LF; }
+                std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, ltBase, gtUb); out << ir << Symbols::LF; }
+                bads.push_back(bad);
+            }
+            std::string anyBad = bads[0];
+            for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]); out << ir << Symbols::LF; } anyBad = nb; }
+            std::string doLbl = currLineLabel + std::string("_arr_ok_") + std::to_string(++localCounter);
+            std::string errLbl = currLineLabel + std::string("_arr_err_") + std::to_string(localCounter);
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl); out << ir << Symbols::LF; }
+            out << errLbl << ":" << Symbols::LF;
+            { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+            // Mirror into ERR/ERL variables for runtime bounds errors
+            ensureVarAllocated(out, "ERR");
+            ensureVarAllocated(out, "ERL");
+            { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 9 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+            { std::string dln = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+            {
+                std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                out << "  ]" << Symbols::LF;
+            }
+            out << doLbl << ":" << Symbols::LF;
+            std::vector<long long> extents; extents.reserve(dims.size());
+            for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+            std::vector<long long> strides(dims.size(), 1);
+            for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
+            std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
+            for (const auto& ii : idxI64s) { std::string a = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", a, ii, optionBase_); out << ir << Symbols::LF; } adjs.push_back(a); }
+            std::string lin = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]); out << ir << Symbols::LF; }
+            for (size_t di = 1; di < adjs.size(); ++di) { std::string t = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]); out << ir << Symbols::LF; } std::string s2 = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", s2, lin, t); out << ir << Symbols::LF; } lin = s2; }
             if (isStringArrayNameCG(aaset->name)) {
-                ensureStringArrayAllocated(out, aaset->name, len);
+                ensureStringArrayAllocated(out, aaset->name, static_cast<int>(total));
                 std::string base = arrayAllocaName_[aaset->name];
-                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; }
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, base, lin); out << ir << Symbols::LF; }
                 std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
                 { std::string ir = std::format("  store ptr {}, ptr {}", val, elem); out << ir << Symbols::LF; }
             } else {
-                ensureArrayAllocated(out, aaset->name, len);
+                ensureArrayAllocated(out, aaset->name, static_cast<int>(total));
                 std::string base = arrayAllocaName_[aaset->name];
-                std::string elem = nextTemp(); { std::string ir = "  "; ir += elem; ir += " = getelementptr inbounds ["; ir += std::to_string(len); ir += " x double], ptr "; ir += base; ir += ", i64 0, i64 "; ir += idxI64; out << ir << Symbols::LF; }
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, total, arrayElemType(aaset->name), base, lin); out << ir << Symbols::LF; }
                 std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
-                { std::string ir = std::format("  store double {}, ptr {}", val, elem); out << ir << Symbols::LF; }
+                storeNumberToArrayElem(out, aaset->name, elem, val);
             }
         } else if (auto fs = dyn_cast<ForStmt>(s.get())) {
             emitFor(out, fs, currLineLabel, localCounter);
@@ -234,13 +321,49 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
         } else if (auto mid = dyn_cast<MidAssignStmt>(s.get())) {
             std::string dest;
             std::string storePtr;
-            if (mid->index) {
-                const int len = arraySizes_[mid->name];
-                ensureStringArrayAllocated(out, mid->name, len);
+            if (!mid->indices.empty()) {
+                const auto &dims = arrayDims_[mid->name];
+                long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+                ensureStringArrayAllocated(out, mid->name, static_cast<int>(total));
                 std::string base = arrayAllocaName_[mid->name];
-                std::string idxReg = emitExpr(out, mid->index.get(), currLineLabel);
-                std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
-                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, len, base, idxI64); out << ir << Symbols::LF; }
+                std::vector<std::string> idxI64s; idxI64s.reserve(mid->indices.size());
+                std::vector<std::string> bads; bads.reserve(mid->indices.size());
+                for (size_t di = 0; di < mid->indices.size(); ++di) {
+                    std::string idxReg = emitExpr(out, mid->indices[di].get(), currLineLabel);
+                    std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
+                    idxI64s.push_back(idxI64);
+                    std::string ltBase = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", ltBase, idxI64, optionBase_); out << ir << Symbols::LF; }
+                    std::string gtUb = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, {}", gtUb, idxI64, dims[di]); out << ir << Symbols::LF; }
+                    std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, ltBase, gtUb); out << ir << Symbols::LF; }
+                    bads.push_back(bad);
+                }
+                std::string anyBad = bads[0];
+                for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]); out << ir << Symbols::LF; } anyBad = nb; }
+                std::string doLbl = currLineLabel + std::string("_mid_ok3_") + std::to_string(++localCounter);
+                std::string errLbl = currLineLabel + std::string("_mid_err3_") + std::to_string(localCounter);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl); out << ir << Symbols::LF; }
+                out << errLbl << ":" << Symbols::LF;
+                { std::string ir = std::format("  store i32 9, ptr @gwb_err_code"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                {
+                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
+                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    out << "  ]" << Symbols::LF;
+                }
+                out << doLbl << ":" << Symbols::LF;
+                std::vector<long long> extents; extents.reserve(dims.size());
+                for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+                std::vector<long long> strides(dims.size(), 1);
+                for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
+                std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
+                for (const auto& ii : idxI64s) { std::string a = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", a, ii, optionBase_); out << ir << Symbols::LF; } adjs.push_back(a); }
+                std::string lin = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]); out << ir << Symbols::LF; }
+                for (size_t di = 1; di < adjs.size(); ++di) { std::string t = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]); out << ir << Symbols::LF; } std::string s2 = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", s2, lin, t); out << ir << Symbols::LF; } lin = s2; }
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, base, lin); out << ir << Symbols::LF; }
                 storePtr = elem;
                 dest = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", dest, elem); out << ir << Symbols::LF; }
             } else {

@@ -14,8 +14,8 @@ TEST(Integration, StringArray_IR_UsesPtrElements) {
         "40 END\n";
     std::string ir = Compiler::compileString(src);
     // Expect element type as ptr in gep and store ptr
-    ASSERT_NE(ir.find("alloca [5 x ptr]"), std::string::npos);
-    ASSERT_NE(ir.find("getelementptr inbounds [5 x ptr]"), std::string::npos);
+    // Default OPTION BASE 0 -> upper bound 5 yields extent 6
+    ASSERT_NE(ir.find("alloca [6 x ptr]"), std::string::npos);
+    ASSERT_NE(ir.find("getelementptr inbounds [6 x ptr]"), std::string::npos);
     ASSERT_NE(ir.find("store ptr"), std::string::npos);
 }
-

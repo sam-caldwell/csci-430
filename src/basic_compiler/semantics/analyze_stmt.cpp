@@ -37,6 +37,7 @@
 #include "basic_compiler/ast/ScreenStmt.h"
 #include "basic_compiler/ast/CircleStmt.h"
 #include "basic_compiler/ast/ClearStmt.h"
+#include "basic_compiler/ast/OptionBaseStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/MidAssignStmt.h"
@@ -55,6 +56,12 @@ namespace gwbasic {
  *    validation, scope handling, and logs relevant events.
  */
 void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
+    if (auto ob = dyn_cast<const OptionBaseStmt>(s)) {
+        if (!(ob->base == 0 || ob->base == 1)) { std::ostringstream m; m << "TypeError: OPTION BASE must be 0 or 1 @ " << ob->pos.line << ':' << ob->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        optionBase_ = ob->base;
+        log() << "OptionBase=" << optionBase_ << '\n';
+        return;
+    }
     if (auto p = dyn_cast<const PrintStmt>(s)) {
         if (p->value) analyzeExpr(p->value.get());
         for (const auto& v : p->more) analyzeExpr(v.get());
@@ -77,12 +84,16 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     }
     if (auto ma = dyn_cast<const MidAssignStmt>(s)) {
         // Target must be string variable or string array element
-        if (ma->index) {
+        if (!ma->indices.empty()) {
             // String array element
             if (!arrays_.contains(ma->name)) { std::ostringstream m; m << "TypeError: array '" << ma->name << "' not DIM'd @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             if (!varNameIsString(ma->name)) { std::ostringstream m; m << "TypeError: MID$ target array must be string '" << ma->name << "' @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-            if (typeOf(ma->index.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: MID$ index must be numeric @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-            analyzeExpr(ma->index.get());
+            const auto& dims = arrays_.at(ma->name);
+            if (ma->indices.size() != dims.size()) { std::ostringstream m; m << "ArityError: array '" << ma->name << "' expects " << dims.size() << " indices @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            for (const auto& idx : ma->indices) {
+                if (typeOf(idx.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: MID$ index must be numeric @ " << ma->pos.line << ':' << ma->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                analyzeExpr(idx.get());
+            }
         } else {
             reference(ma->name, ma->pos);
             if (!varNameIsString(ma->name)) {
@@ -116,21 +127,30 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     }
     if (auto d = dyn_cast<const DimStmt>(s)) {
         declare(d->name);
-        if (d->length <= 0) { std::ostringstream m; m << "TypeError: DIM length must be positive @ " << d->pos.line << ':' << d->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-        arrays_[d->name] = d->length;
-        std::ostringstream m; m << "Dim " << d->name << "(" << d->length << ")"; log() << m.str() << '\n';
+        if (d->upperBounds.empty()) { std::ostringstream m; m << "TypeError: DIM requires at least one bound @ " << d->pos.line << ':' << d->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        for (int ub : d->upperBounds) {
+            if (ub < 0) { std::ostringstream m; m << "TypeError: DIM bounds must be non-negative @ " << d->pos.line << ':' << d->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        }
+        arrays_[d->name] = d->upperBounds;
+        std::ostringstream m; m << "Dim " << d->name << "(";
+        for (size_t i = 0; i < d->upperBounds.size(); ++i) { if (i) m << ','; m << d->upperBounds[i]; }
+        m << ")"; log() << m.str() << '\n';
         return;
     }
     if (auto aa = dyn_cast<const ArrayAssignStmt>(s)) {
         // Require array declared
         if (!arrays_.contains(aa->name)) { std::ostringstream m; m << "TypeError: array '" << aa->name << "' not DIM'd @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-        if (typeOf(aa->index.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: array index must be numeric @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        const auto& dims = arrays_.at(aa->name);
+        if (aa->indices.size() != dims.size()) { std::ostringstream m; m << "ArityError: array '" << aa->name << "' expects " << dims.size() << " indices @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        for (const auto& idx : aa->indices) {
+            if (typeOf(idx.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: array index must be numeric @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            analyzeExpr(idx.get());
+        }
         // Type-specific checks: string arrays accept string values; numeric arrays accept numeric values
         const bool isStrArray = varNameIsString(aa->name);
         const auto vty = typeOf(aa->value.get());
         if (isStrArray && vty != ValueType::String) { std::ostringstream m; m << "TypeError: cannot assign number into string array @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         if (!isStrArray && vty == ValueType::String) { std::ostringstream m; m << "TypeError: cannot assign string into numeric array @ " << aa->pos.line << ':' << aa->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-        analyzeExpr(aa->index.get());
         analyzeExpr(aa->value.get());
         return;
     }
@@ -150,10 +170,14 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     }
     if (auto rd = dyn_cast<const ReadStmt>(s)) {
         for (const auto& t : rd->targets) {
-            if (t.index) {
+            if (!t.indices.empty()) {
                 if (!arrays_.contains(t.name)) { std::ostringstream m; m << "TypeError: array '" << t.name << "' not DIM'd @ " << rd->pos.line << ':' << rd->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-                if (typeOf(t.index.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: READ index must be numeric @ " << rd->pos.line << ':' << rd->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-                analyzeExpr(t.index.get());
+                const auto& dims = arrays_.at(t.name);
+                if (t.indices.size() != dims.size()) { std::ostringstream m; m << "ArityError: array '" << t.name << "' expects " << dims.size() << " indices @ " << rd->pos.line << ':' << rd->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                for (const auto& idx : t.indices) {
+                    if (typeOf(idx.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: READ index must be numeric @ " << rd->pos.line << ':' << rd->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    analyzeExpr(idx.get());
+                }
             } else {
                 reference(t.name, rd->pos);
             }

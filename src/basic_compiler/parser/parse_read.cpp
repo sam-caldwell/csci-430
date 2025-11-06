@@ -24,7 +24,11 @@ std::unique_ptr<Stmt> Parser::parseRead() {
         ReadTarget t{};
         t.name = peek().lexeme; advance();
         if (match(TokenType::LParen)) {
-            t.index = parseExpression();
+            if (!check(TokenType::RParen)) {
+                do {
+                    t.indices.push_back(parseExpression());
+                } while (match(TokenType::Comma));
+            }
             consume(TokenType::RParen, ")");
         }
         targets.push_back(std::move(t));

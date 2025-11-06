@@ -20,7 +20,7 @@ Token Lexer::identifierOrKeyword() {
         const auto uch = static_cast<unsigned char>(ch);
         return std::isalnum(uch) != 0 || ch == '_';
     });
-    if (peek() == Symbols::DOLLARSIGN.first() || peek() == Symbols::PERCENT.first() || peek() == Symbols::EXCLAMATION.first() || peek() == Symbols::HASH.first())
+    if (peek() == Symbols::DOLLARSIGN.first() || peek() == Symbols::PERCENT.first() || peek() == Symbols::EXCLAMATION.first() || peek() == Symbols::HASH.first() || peek() == Symbols::AMPERSAND.first())
         buf.push_back(advance());
 
     std::string upper;

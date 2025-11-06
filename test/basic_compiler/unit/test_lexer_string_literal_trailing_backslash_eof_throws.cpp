@@ -8,20 +8,14 @@
 using namespace gwbasic;
 
 /***
- * Test: Lexer.StringLiteral_TrailingBackslashAtEOF_Throws
- * Purpose: Validate behavior when a string literal ends with a backslash at EOF.
- * Components Under Test: Lexer::stringLiteral
- * Expected Behavior: Parsing throws LexError for an unterminated/invalid escape at EOF.
+ * Test: Lexer.StringLiteral_TrailingBackslash_BeforeClose_IsLiteral
+ * Purpose: Ensure a backslash immediately before a closing quote is treated
+ *          literally (no C-style escape interpretation).
  */
-/*
-Test: Lexer.StringLiteral_TrailingBackslashAtEOF_Throws
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
-TEST(Lexer, StringLiteral_TrailingBackslashAtEOF_Throws) {
-    // A trailing backslash before EOF should result in an unterminated string error
-    std::string src = "\"Trailing\\"; // opens quote, backslash, then EOF
+TEST(Lexer, StringLiteral_TrailingBackslash_BeforeClose_IsLiteral) {
+    std::string src = "\"Trailing\\\""; // BASIC: "Trailing\"
     Lexer L(src);
-    EXPECT_THROW({ (void)L.stringLiteral(); }, LexError);
+    Token t = L.stringLiteral();
+    ASSERT_EQ(t.type, TokenType::String);
+    EXPECT_EQ(t.lexeme, "Trailing\\");
 }

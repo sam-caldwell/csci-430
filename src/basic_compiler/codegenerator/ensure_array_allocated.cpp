@@ -7,9 +7,10 @@ namespace gwbasic {
 
 void CodeGenerator::ensureArrayAllocated(std::ostringstream& out, const std::string& name, int length) {
     if (auto it = arrayAllocaName_.find(name); it != arrayAllocaName_.end() && !it->second.empty()) return;
-    std::string a = "%"; a += name; a += "_arr";
+    std::string a = sanitizeLocal(name + std::string("_arr"));
     arrayAllocaName_[name] = a;
-    std::string ir = std::format("  {} = alloca [{} x double]", a, length);
+    std::string ty = arrayElemType(name);
+    std::string ir = std::format("  {} = alloca [{} x {}]", a, length, ty);
     out << ir << Symbols::LF;
     log() << "line " << currentLine_ << " ArrayAlloc(" << name << ") -> " << ir << Symbols::LF;
 }

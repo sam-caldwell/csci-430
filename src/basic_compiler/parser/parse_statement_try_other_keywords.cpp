@@ -50,6 +50,7 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     if (match(TokenType::KwDefDbl)) { auto n = parseDefType(DefTypeStmt::Kind::Dbl); n->pos = {startTok.line, startTok.col}; return n; }
 
     // System / memory / environment
+    if (match(TokenType::KwOption)) { auto n = parseOptionBase(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwBload)) { auto n = parseBload(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwBsave)) { auto n = parseBsave(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwPoke)) { auto n = parsePoke(); n->pos = {startTok.line, startTok.col}; return n; }

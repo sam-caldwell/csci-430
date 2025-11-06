@@ -65,6 +65,7 @@ template <> struct NodeKindTraits<NodeKind::ScreenStmt>     { static constexpr a
 template <> struct NodeKindTraits<NodeKind::CircleStmt>     { static constexpr auto pretty = "CircleStmt"; };
 template <> struct NodeKindTraits<NodeKind::ClearStmt>      { static constexpr auto pretty = "ClearStmt"; };
 template <> struct NodeKindTraits<NodeKind::MidAssignStmt>  { static constexpr auto pretty = "MidAssignStmt"; };
+template <> struct NodeKindTraits<NodeKind::OptionBaseStmt> { static constexpr auto pretty = "OptionBaseStmt"; };
 template <> struct NodeKindTraits<NodeKind::OnGotoStmt>     { static constexpr auto pretty = "OnGotoStmt"; };
 template <> struct NodeKindTraits<NodeKind::OnGosubStmt>    { static constexpr auto pretty = "OnGosubStmt"; };
 template <> struct NodeKindTraits<NodeKind::OnErrorGotoStmt> { static constexpr auto pretty = "OnErrorGotoStmt"; };
@@ -133,6 +134,7 @@ inline auto prettyName(const NodeKind k) {
         case NodeKind::OnErrorGotoStmt: return NodeKindTraits<NodeKind::OnErrorGotoStmt>::pretty;
         case NodeKind::ResumeStmt: return NodeKindTraits<NodeKind::ResumeStmt>::pretty;
         case NodeKind::ErrorStmt: return NodeKindTraits<NodeKind::ErrorStmt>::pretty;
+        case NodeKind::OptionBaseStmt: return NodeKindTraits<NodeKind::OptionBaseStmt>::pretty;
     }
     return "Node";
 }

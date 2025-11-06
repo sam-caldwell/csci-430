@@ -3,19 +3,21 @@
 
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include <vector>
 
 namespace gwbasic {
 
 /**
  * Type: DimStmt
  * Purpose:
- *  - Declare one 1-D array with a fixed length: DIM A(10)
+ *  - Declare one array with one or more dimensions: DIM A(10[,m...])
  */
 struct DimStmt : ASTLeaf<NodeKind::DimStmt, Stmt> {
     std::string name;
-    int length{}; // number of elements (0-based indexing assumed)
+    // Per-dimension declared upper bounds (inclusive), e.g., DIM A(10,20) -> {10,20}
+    std::vector<int> upperBounds;
     DimStmt() = default;
-    DimStmt(std::string n, int len) : ASTLeaf(), name(std::move(n)), length(len) {}
+    DimStmt(std::string n, std::vector<int> ub) : ASTLeaf(), name(std::move(n)), upperBounds(std::move(ub)) {}
 };
 
 } // namespace gwbasic

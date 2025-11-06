@@ -132,6 +132,8 @@ private:
         {"COLOR",     TokenType::KwColor},
         {"CHDIR",     TokenType::KwChdir},
         {"CLEAR",     TokenType::KwClear},
+        {"OPTION",    TokenType::KwOption},
+        {"BASE",      TokenType::KwBase},
     };
 
     /*
@@ -390,11 +392,12 @@ private:
     /*
      * Function: Lexer::stringLiteral
      * Purpose:
-     *  - Scan a double-quoted string literal handling common escapes.
+     *  - Scan a double-quoted string literal using GW-BASIC rules.
      * Inputs:
      *  - none
      * Outputs:
-     *  - Token: String token with unescaped content and position
+     *  - Token: String token with content; doubled quotes ("") decode to
+     *           a single double quote. No C-style escapes are processed.
      */
     Token stringLiteral();
 

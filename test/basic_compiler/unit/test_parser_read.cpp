@@ -32,9 +32,8 @@ TEST(Parser, ReadParsesTargets) {
     ASSERT_EQ(rd->targets.size(), 3u);
     EXPECT_EQ(rd->targets[0].name, "A");
     EXPECT_EQ(rd->targets[1].name, "B");
-    ASSERT_EQ(rd->targets[0].index, nullptr);
-    ASSERT_EQ(rd->targets[1].index, nullptr);
-    ASSERT_NE(rd->targets[2].index, nullptr);
+    ASSERT_TRUE(rd->targets[0].indices.empty());
+    ASSERT_TRUE(rd->targets[1].indices.empty());
+    ASSERT_EQ(rd->targets[2].indices.size(), 1u);
     EXPECT_EQ(rd->targets[2].name, "C");
 }
-

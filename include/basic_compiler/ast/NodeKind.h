@@ -70,6 +70,7 @@ enum class NodeKind {
     CircleStmt,
     ClearStmt,
     MidAssignStmt,
+    OptionBaseStmt,
 };
 
 } // namespace gwbasic

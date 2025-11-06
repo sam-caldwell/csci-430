@@ -43,6 +43,8 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
         logSem() << "Assign " << a->name << " @ " << a->pos.line << ':' << a->pos.col << Symbols::LF;
     } else if (const auto m = dyn_cast<const MidAssignStmt>(s)) {
         variables_.insert(m->name);
+        // collect index expressions for array element targets, if any
+        for (const auto& ix : m->indices) collectExprVars(ix.get());
         collectExprVars(m->start.get());
         if (m->len) collectExprVars(m->len.get());
         collectExprVars(m->value.get());
@@ -82,9 +84,8 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
         logSem() << "Data items=" << ds->items.size() << Symbols::LF;
     } else if (const auto rd = dyn_cast<const ReadStmt>(s)) {
         for (const auto& t : rd->targets) {
-            if (t.index) {
-                // array read target; record index expr vars
-                collectExprVars(t.index.get());
+            if (!t.indices.empty()) {
+                for (const auto& ix : t.indices) collectExprVars(ix.get());
             } else {
                 variables_.insert(t.name);
             }
