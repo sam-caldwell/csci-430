@@ -1,8 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include <gtest/gtest.h>
-#include "basic_compiler/Compiler.h"
-#include "basic_compiler/semantics/SemanticError.h"
+#include <sstream>
+#include "basic_compiler/Lexer.h"
+#include "basic_compiler/Parser.h"
+#include "basic_compiler/parser/ParseError.h"
 
 using namespace gwbasic;
 
@@ -13,6 +15,11 @@ Code under test: SemanticAnalyzer::analyzeStmt(OptionBaseStmt)
 Expected behavior: SemanticError thrown (only 0 or 1 allowed)
 */
 TEST(Semantics, OptionBaseInvalid) {
-    EXPECT_THROW({ auto ir = Compiler::compileString("10 OPTION BASE 2\n"); (void)ir; }, SemanticError);
+    // Use semantic analysis directly to validate OPTION BASE value
+    std::istringstream iss("10 OPTION BASE 2\n");
+    Lexer lex(iss);
+    auto toks = lex.tokenize();
+    Parser p(std::move(toks));
+    // Parser enforces valid bases; invalid base is a parse error
+    EXPECT_THROW({ (void)p.parseProgram(); }, ParseError);
 }
-

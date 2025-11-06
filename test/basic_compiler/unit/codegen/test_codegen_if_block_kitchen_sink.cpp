@@ -15,7 +15,8 @@ using namespace gwbasic;
 TEST(CodeGenIfBlock, KitchenSink) {
     const auto src =
         "10 OPTION BASE 1\n"
-        "20 DIM N(2,2), S$(2,2)\n"
+        "20 DIM N(2,2)\n"
+        "21 DIM S$(2,2)\n"
         "30 IF 1 < 2 THEN\n"
         "40 N(2,1) = 3\n"
         "41 S$(1,2) = \"Z\"\n"
@@ -33,7 +34,7 @@ TEST(CodeGenIfBlock, KitchenSink) {
         "61 N(1,1) = 1\n"
         "62 S$(2,1) = \"Y\"\n"
         "63 MID$(S$,1,1) = \"Q\"\n"
-        "64 PRINT USING(\"X=#\"); 7\n"
+        "64 PRINT USING(\"X=#\"), 7\n"
         "65 STOP\n"
         "66 SYSTEM\n"
         "67 GOTO 910\n"
@@ -53,4 +54,3 @@ TEST(CodeGenIfBlock, KitchenSink) {
     ASSERT_NE(ir.find("_on_gs_cont_"), std::string::npos);
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);
 }
-

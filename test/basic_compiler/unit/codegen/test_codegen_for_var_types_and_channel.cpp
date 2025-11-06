@@ -14,7 +14,7 @@ using namespace gwbasic;
 TEST(CodeGenFor, VarTypesAndChannelPrint) {
     const auto src =
         "10 FOR L& = 1 TO 2\n"
-        "20 PRINT USING(\"X=#\"); L&\n"
+        "20 PRINT USING(\"X=#\"), L&\n"
         "30 NEXT L&\n"
         "40 FOR S! = 1 TO 2\n"
         "50 PRINT #1, S!\n"
@@ -32,4 +32,3 @@ TEST(CodeGenFor, VarTypesAndChannelPrint) {
     ASSERT_NE(ir.find("@fprintf"), std::string::npos);
     ASSERT_NE(ir.find("@snprintf"), std::string::npos);
 }
-

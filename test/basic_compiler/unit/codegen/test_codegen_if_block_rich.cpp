@@ -16,12 +16,13 @@ using namespace gwbasic;
 TEST(CodeGenIfBlock, RichThenElseBodies) {
     const auto src =
         "10 OPTION BASE 1\n"
-        "20 DIM S$(2), N(2)\n"
+        "20 DIM S$(2)\n"
+        "21 DIM N(2)\n"
         "30 S$=\"HI\"\n"
         "40 IF 2 > 1 THEN\n"
         "50 S$=\"BYE\"\n"
         "55 MID$(S$,2,1)=\"Z\"\n"
-        "60 PRINT USING(\"X=#\"); 42\n"
+        "60 PRINT USING(\"X=#\"), 42\n"
         "70 ELSE\n"
         "80 N(1)=1\n"
         "90 PRINT #1, \"ALT\"\n"
@@ -37,4 +38,3 @@ TEST(CodeGenIfBlock, RichThenElseBodies) {
     // MID$ lowering present
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);
 }
-

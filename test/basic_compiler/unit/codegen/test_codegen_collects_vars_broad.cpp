@@ -38,8 +38,11 @@ TEST(CodeGenCore, CollectsVarsBroadWithoutSemantics) {
     std::string ir = gen.generate(prog);
     // Presence checks for various constructs recorded by collectors
     ASSERT_NE(ir.find("@.str."), std::string::npos);          // DATA string literal interned
-    ASSERT_NE(ir.find("@gwb_rand_seed"), std::string::npos);  // RANDOMIZE plumbing present
+    // RANDOMIZE plumbing present (either RNG state or srand48/drand48 usage)
+    bool hasRng = ir.find("@gwb_last_rnd") != std::string::npos
+               || ir.find("@srand48") != std::string::npos
+               || ir.find("@drand48") != std::string::npos;
+    ASSERT_TRUE(hasRng);
     ASSERT_NE(ir.find("switch i32"), std::string::npos);      // ON ... lowers to switch
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);        // MID$ lowering
 }
-

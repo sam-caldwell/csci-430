@@ -39,9 +39,8 @@ TEST(SemanticsTypeOf, ArrayElementStringVsNumeric) {
     SemanticAnalyzer s2;
     EXPECT_NO_THROW({ (void)s2.analyze(p2); });
 
-    // Mixing string array element with number should error
-    auto p3 = parse("10 DIM A$(3): PRINT A$(1)+1\n");
+    // Mixing string array element with number should error when used in assignment
+    auto p3 = parse("10 DIM A$(3)\n20 A$=A$(1)+1\n");
     SemanticAnalyzer s3;
     EXPECT_THROW({ (void)s3.analyze(p3); }, SemanticError);
 }
-

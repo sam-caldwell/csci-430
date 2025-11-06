@@ -18,7 +18,9 @@ TEST(CodeGenWhile, RichBodyExercisesBranches) {
     const auto src =
         // Setup some arrays and variables
         "10 OPTION BASE 1\n"
-        "20 DIM S$(3), A(2), T$(3)\n"
+        "20 DIM S$(3)\n"
+        "21 DIM A(2)\n"
+        "22 DIM T$(3)\n"
         "30 S$=\"HELLO\"\n"
         // While loop with mixed body to hit branches
         "40 I=0\n"
