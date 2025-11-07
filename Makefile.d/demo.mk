@@ -62,7 +62,7 @@ demo:
 	  CGN="$$OUT_DIR/$$BN.codegen.log"; \
 	  mkdir -p "$$OUT_DIR"; \
 	  echo "Compiling $$SRC -> $$OUT_DIR (target=$$TRIPLE)"; \
-  "$$COMPILER_BIN" "$$SRC" --no-logs --ll "$$LL" --bc "$$BC" -o "$$BIN" --asm "$$ASM" \
+  "$$COMPILER_BIN" "$$SRC" --metrics --no-logs --ll "$$LL" --bc "$$BC" -o "$$BIN" --asm "$$ASM" \
     $$TGT_ARG; \
 	done; \
 	echo "Demo artifacts written under $$BUILD_ROOT/demos";
