@@ -21,6 +21,7 @@ bool Lexer::tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, c
         case Symbols::LPAREN.first():     advance(); emitFixed<TokenType::LParen>(out, "(", line, col); break;
         case Symbols::RPAREN.first():     advance(); emitFixed<TokenType::RParen>(out, ")", line, col); break;
         case Symbols::COLON.first():      advance(); emitFixed<TokenType::Colon>(out, ":", line, col); break;
+        case Symbols::SEMICOLON.first():  advance(); emitFixed<TokenType::Semicolon>(out, ";", line, col); break;
         case Symbols::COMMA.first():      advance(); emitFixed<TokenType::Comma>(out, ",", line, col); break;
         case Symbols::HASH.first():       advance(); emitFixed<TokenType::Hash>(out, "#", line, col); break;
         case Symbols::CARET.first():      advance(); emitFixed<TokenType::Caret>(out, "^", line, col); break;

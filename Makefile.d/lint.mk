@@ -12,3 +12,4 @@ lint: configure
 	@$(CMAKE) --build $(BUILD_DIR) --target check_one_function_per_file -v -- -j$(NUM_CPUS)
 	@echo "Invoking CMake linter target (parallel -j$(NUM_CPUS))..."
 	@$(CMAKE) --build $(BUILD_DIR) --target lint -v -- -j$(NUM_CPUS)
+	@echo "lint: ok"

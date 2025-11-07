@@ -33,6 +33,7 @@ struct Symbols {
     static inline constexpr Symbol LPAREN       {'('};
     static inline constexpr Symbol RPAREN       {')'};
     static inline constexpr Symbol COLON        {':'};
+    static inline constexpr Symbol SEMICOLON    {';'};
     static inline constexpr Symbol COMMA        {','};
     static inline constexpr Symbol HASH         {'#'};
     static inline constexpr Symbol EQUALS       {'='};

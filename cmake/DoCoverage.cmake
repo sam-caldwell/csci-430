@@ -22,6 +22,25 @@ foreach(_qv OUT_DIR BINS_CSV LLVM_PROFDATA LLVM_COV INCLUDE_FILE EXCLUDE_FILE SC
 endforeach()
 
 file(MAKE_DIRECTORY "${OUT_DIR}")
+# Ensure we don't merge stale profiles from previous runs which can cause
+# spurious "mismatched data" warnings when function bodies changed.
+file(GLOB _old_profraws "${OUT_DIR}/*.profraw")
+if(_old_profraws)
+  file(REMOVE ${_old_profraws})
+endif()
+file(GLOB _old_profdata "${OUT_DIR}/*.profdata")
+if(_old_profdata)
+  file(REMOVE ${_old_profdata})
+endif()
+if(EXISTS "${OUT_DIR}/coverage.profdata")
+  file(REMOVE "${OUT_DIR}/coverage.profdata")
+endif()
+if(EXISTS "${OUT_DIR}/report.txt")
+  file(REMOVE "${OUT_DIR}/report.txt")
+endif()
+if(EXISTS "${OUT_DIR}/lcov.info")
+  file(REMOVE "${OUT_DIR}/lcov.info")
+endif()
 message(STATUS "[coverage] Running tests with profiling...")
 
 # Split CSV into list
@@ -49,11 +68,6 @@ if(NOT _did_any)
 endif()
 
 message(STATUS "[coverage] Merging profiles...")
-file(GLOB _profraws "${OUT_DIR}/*.profraw")
-list(LENGTH _profraws _prof_count)
-if(_prof_count EQUAL 0)
-  message(FATAL_ERROR "No .profraw files found in ${OUT_DIR}")
-endif()
 
 if(NOT DEFINED LLVM_PROFDATA)
   set(LLVM_PROFDATA llvm-profdata)
@@ -62,12 +76,39 @@ if(NOT DEFINED LLVM_COV)
   set(LLVM_COV llvm-cov)
 endif()
 
+# Build per-binary .profdata files under ${OUT_DIR}/
+set(_per_profdata)
+foreach(bin IN LISTS _bins)
+  if(EXISTS "${bin}")
+    get_filename_component(_base "${bin}" NAME)
+    file(GLOB _raws "${OUT_DIR}/${_base}-*.profraw")
+    list(LENGTH _raws _nraw)
+    if(_nraw GREATER 0)
+      set(_per_out "${OUT_DIR}/${_base}.profdata")
+      execute_process(
+        COMMAND "${LLVM_PROFDATA}" merge -sparse ${_raws} -o "${_per_out}"
+        RESULT_VARIABLE _per_merge_rv
+      )
+      if(NOT _per_merge_rv EQUAL 0)
+        message(FATAL_ERROR "llvm-profdata merge failed for ${_base} with code ${_per_merge_rv}")
+      endif()
+      list(APPEND _per_profdata "${_per_out}")
+    endif()
+  endif()
+endforeach()
+
+list(LENGTH _per_profdata _npd)
+if(_npd EQUAL 0)
+  message(FATAL_ERROR "No per-binary .profdata files produced in ${OUT_DIR}")
+endif()
+
+# Also merge all per-binary .profdata into a single aggregated profile for reporting
 execute_process(
-  COMMAND "${LLVM_PROFDATA}" merge -sparse ${_profraws} -o "${OUT_DIR}/coverage.profdata"
+  COMMAND "${LLVM_PROFDATA}" merge -sparse ${_per_profdata} -o "${OUT_DIR}/coverage.profdata"
   RESULT_VARIABLE _merge_rv
 )
 if(NOT _merge_rv EQUAL 0)
-  message(FATAL_ERROR "llvm-profdata merge failed with code ${_merge_rv}")
+  message(FATAL_ERROR "llvm-profdata merge (aggregate) failed with code ${_merge_rv}")
 endif()
 
 # Delegate to RunCoverage.cmake to generate report, export LCOV, enforce threshold

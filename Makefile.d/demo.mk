@@ -67,3 +67,36 @@ demo:
     $$TGT_ARG; \
 	done; \
 	echo "Demo artifacts written under $$BUILD_ROOT/demos";
+
+#
+# Target: verify-ir
+# Purpose: Run a fast lli-based smoke check over all demo bitcode (.bc) to
+#          catch invalid IR issues (e.g., dominance errors) early in CI.
+#
+# Variables:
+#  - LLI: path to lli (default derives from LLVM_PREFIX or 'lli' in PATH)
+#  - LLI_SMOKE_TIMEOUT: per-demo timeout seconds (default 5)
+#  - LLI_SMOKE_MAX_OUTPUT: cap captured stdout/stderr bytes (default 8192)
+#
+# Behavior:
+#  - Builds demos (ensures .bc exists), then runs each with lli.
+#  - If a program exits non-zero, the target fails.
+#  - If a program runs longer than timeout, it is terminated and treated as OK
+#    (goal is IR validity, not program completion).
+#
+.PHONY: verify-ir
+verify-ir: demo
+	@set -e; \
+	LLI=$(if $(LLVM_PREFIX),$(LLVM_PREFIX)/bin/lli,lli); \
+	if ! command -v "$$LLI" >/dev/null 2>&1; then echo "[verify-ir] 'lli' not found (LLI='$$LLI'). Set LLVM_PREFIX or LLI."; exit 2; fi; \
+	TIMEOUT=$${LLI_SMOKE_TIMEOUT:-5}; \
+	MAXOUT=$${LLI_SMOKE_MAX_OUTPUT:-8192}; \
+	RC=0; \
+	for SRC in $(DEMO_SRCS); do \
+	  BN=$$(basename "$$SRC" .bas); \
+	  BC="./build/demos/$$BN/$$BN.bc"; \
+	  if [ ! -f "$$BC" ]; then echo "[verify-ir] Missing bitcode: $$BC"; RC=1; continue; fi; \
+	  echo "[verify-ir] lli smoke: $$BC (timeout=$$TIMEOUT s)"; \
+	  python3 scripts/lli_smoke.py "$$LLI" "$$BC" "$$TIMEOUT" "$$MAXOUT" || RC=$$?; \
+	done; \
+	exit $$RC

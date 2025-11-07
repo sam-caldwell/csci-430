@@ -4,11 +4,6 @@
 
 ## Parser and Grammar Coverage
 
- 
-- Additional PRINT forms: full “PRINT USING” with zone/tabbing and trailing separators (comma/semicolon) behavior.
-
-- Add LEN(numeric variable) behavior for full GW‑BASIC parity.
-
 - INPUT improvements:
   - INPUT var[, var...], INPUT ; prompt$, var[, ...], INPUT "prompt"; var[, ...] (current parser only accepts single 
     var or redirects to file form).
@@ -34,7 +29,6 @@
 
 ## Control Flow and Blocks
 
-- IF block support exists, but missing single-line THEN/ELSE statement lists and THEN/ELSE GOTO forms.
 - GOSUB/RETURN implemented via inlining; `RETURN <line>` nonlocal form not supported.
 - FOR/NEXT: NEXT var-list form missing; verify semantics for mixed variable names and nested loops per spec.
 - WHILE/WEND implemented; consider EXIT loops and interactions once other control statements land.
@@ -50,7 +44,6 @@
 - Variable kind defaults and suffixes are honored, but:
   - Default kinds by DEFxxx only affect first-letter currently; document and test crossing interactions with
     explicit suffixes.
-  - PRINT USING requires a string format; semantics do not enforce that `format` is string.
 
 ## Scope and COMMON Behavior
 

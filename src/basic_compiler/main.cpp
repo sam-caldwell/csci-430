@@ -4,13 +4,10 @@
 #include <string>
 #include <optional>
 #include <filesystem>
-#include <sstream>
 #include <thread>
 #include <chrono>
-#include <cstdlib>
 
 #include "basic_compiler/compiler/Compiler.h"
-#include "basic_compiler/AsmUtils.h"
 #include "basic_compiler/TargetUtils.h"
 #include "basic_compiler/DetectDefaultTriple.h"
 #include "basic_compiler/WithTripleHeader.h"

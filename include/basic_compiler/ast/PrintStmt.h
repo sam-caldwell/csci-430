@@ -21,9 +21,17 @@ namespace gwbasic {
  *  - String literals use "%s\n"; numeric expressions use "%f\n".
  */
 struct PrintStmt : ASTLeaf<NodeKind::PrintStmt, Stmt> {
+    // Separator between successive items
+    enum class Sep { Comma, Semicolon };
+    // Trailing terminator at end of PRINT
+    enum class Terminator { Newline, Semicolon, Comma };
     // Backward-compatible single value; additional items in 'more'
     std::unique_ptr<Expr> value;
     std::vector<std::unique_ptr<Expr>> more;
+    // Separators between items (size = total_items - 1)
+    std::vector<Sep> seps;
+    // Trailing terminator (default newline)
+    Terminator trail{Terminator::Newline};
     // Optional: channel (PRINT #n, ...). -1 means stdout
     int channel{-1};
     // Optional: format expression from PRINT USING ... (string expr)

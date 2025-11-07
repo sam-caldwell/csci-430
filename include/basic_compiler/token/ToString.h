@@ -99,6 +99,7 @@ inline std::string to_string(const TokenType t) {
         case TokenType::RParen: return ")";
         case TokenType::Colon: return ":";
         case TokenType::Comma: return ",";
+        case TokenType::Semicolon: return ";";
         case TokenType::Hash: return "#";
         case TokenType::KwMod: return "MOD";
     }

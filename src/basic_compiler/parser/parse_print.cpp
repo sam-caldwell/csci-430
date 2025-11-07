@@ -27,34 +27,60 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
         channel = std::stoi(peek().lexeme); advance();
         if (match(TokenType::Comma)) {}
     }
-    // Optional: USING formatExpr , (leading)
+    // Optional: USING formatExpr ; or , (leading)
     std::unique_ptr<Expr> fmt;
     if (match(TokenType::KwUsing)) {
         fmt = parseExpression();
-        if (match(TokenType::Comma)) {}
+        // Historically PRINT USING requires ';' before the value list, but
+        // we accept either ';' or ',' for compatibility.
+        if (match(TokenType::Semicolon)) {
+            // ok
+        } else if (match(TokenType::Comma)) {
+            // ok
+        }
     }
-    // Parse a list of items separated by commas. Allow USING(fmt) to appear
-    // mid-list; when encountered, set/replace the active format and do not
-    // emit a value item for it. Last one wins.
+    // Parse a list of items separated by commas/semicolons. Allow USING(fmt)
+    // to appear mid-list; when encountered, set/replace the active format and
+    // do not emit a value item for it. Last one wins.
     std::vector<std::unique_ptr<Expr>> items;
-    // First item or USING
-    if (check(TokenType::KwUsing)) {
-        advance();
-        fmt = parseExpression();
-    } else {
-        items.push_back(parseExpression());
-    }
-    while (match(TokenType::Comma)) {
+    std::vector<PrintStmt::Sep> seps;
+    bool any = false;
+    while (true) {
+        // Mid-list USING: update format and continue without consuming a value
         if (check(TokenType::KwUsing)) {
             advance();
             fmt = parseExpression();
+            // Optional separator after USING; ignore for item emission
+            if (match(TokenType::Semicolon)) {}
+            else if (match(TokenType::Comma)) {}
+            // Continue to accept next item or another USING
             continue;
         }
-        items.push_back(parseExpression());
+        // If the next token begins an expression, parse it; otherwise, break
+        if (check(TokenType::String) || check(TokenType::Integer) || check(TokenType::Float) || check(TokenType::Identifier) || check(TokenType::LParen) || check(TokenType::Plus) || check(TokenType::Minus) || check(TokenType::KwNot)) {
+            items.push_back(parseExpression());
+            any = true;
+        } else {
+            break;
+        }
+        // After an item, capture a separator if present and loop for the next
+        if (match(TokenType::Comma)) {
+            seps.push_back(PrintStmt::Sep::Comma);
+            continue;
+        }
+        if (match(TokenType::Semicolon)) {
+            seps.push_back(PrintStmt::Sep::Semicolon);
+            continue;
+        }
+        break;
     }
     auto node = make_node<PrintStmt>({l, c}, std::move(items));
+    node->seps = std::move(seps);
     node->channel = channel;
     node->format = std::move(fmt);
+    // Trailing terminator: optional ';' or ','
+    if (match(TokenType::Semicolon)) node->trail = PrintStmt::Terminator::Semicolon;
+    else if (match(TokenType::Comma)) node->trail = PrintStmt::Terminator::Comma;
     return node;
 }
 

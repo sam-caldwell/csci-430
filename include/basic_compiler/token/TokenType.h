@@ -103,6 +103,7 @@ enum class TokenType {
     LParen,
     RParen,
     Colon,
+    Semicolon,
     Comma,
     Hash,
     KwMod,

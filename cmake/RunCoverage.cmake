@@ -54,7 +54,7 @@ endif()
 
 # Produce human-readable report and LCOV export
 execute_process(
-  COMMAND "${LLVM_COV}" report ${_existing_bins} -instr-profile=${PROF_DATA} -use-color=false
+  COMMAND "${LLVM_COV}" report ${_existing_bins} -instr-profile=${PROF_DATA} -use-color=false --no-warn
   OUTPUT_FILE "${OUT_DIR}/report.txt"
   RESULT_VARIABLE _report_rv
 )
@@ -64,7 +64,7 @@ endif()
 
 message(STATUS "[coverage] Exporting LCOV to ${OUT_DIR}/lcov.info...")
 execute_process(
-  COMMAND "${LLVM_COV}" export -format=lcov ${_existing_bins} -instr-profile=${PROF_DATA}
+  COMMAND "${LLVM_COV}" export -format=lcov ${_existing_bins} -instr-profile=${PROF_DATA} --no-warn
   OUTPUT_FILE "${OUT_DIR}/lcov.info"
   RESULT_VARIABLE _lcov_rv
 )
