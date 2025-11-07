@@ -12,7 +12,7 @@
 11 '    into a random empty neighboring cell (8-neighborhood).
 12 ' Display: SCREEN 0, 80x25 text; grid area = GW x GH.
 13 '==============================================================
-
+15 PRINT "starting..."
 20 RANDOMIZE
 30 GW = 60: GH = 22        ' grid width/height (leave one line for status)
 40 DEFINT A-Z
@@ -45,7 +45,7 @@
 
 270 '==================== Main Loop ==============================
 280 T = 0
-290 WHILE INKEY$ = ""
+290 WHILE INKEY$ = "" AND T < 10
 300   T = T + 1
 310   ' clear per-cycle flags
 320   FOR Y = 1 TO GH
