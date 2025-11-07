@@ -277,8 +277,12 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                         out << contLbl << ":" << Symbols::LF;
                     }
                 }
-                // Separator behavior: pad to next zone on comma
-                
+                // Separator behavior: pad to next 14-col zone on a comma
+                if (!last) {
+                    if (pi < pr->seps.size() && pr->seps[pi] == PrintStmt::Sep::Comma) {
+                        emit_pad_to_next_zone();
+                    }
+                }
             }
             // Trailing terminator for PRINT in IF block
             if (items.empty()) {
@@ -297,10 +301,12 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
                         { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
                     }
                 } else if (pr->trail == PrintStmt::Terminator::Comma) {
-                    
+                    // Trailing comma: pad to next zone
+                    emit_pad_to_next_zone();
                 }
             } else if (!items.empty() && pr->trail == PrintStmt::Terminator::Comma) {
-                
+                // Items present and trailing comma: pad to next zone
+                emit_pad_to_next_zone();
             }
         } else if (auto aaset = dyn_cast<ArrayAssignStmt>(s.get())) {
             const auto &dims = arrayDims_[aaset->name];

@@ -51,18 +51,31 @@ Program Parser::parseProgram() {
         for (auto& st : statements) {
             // Handle structural markers regardless of context
             if (const auto nx = dyn_cast<NextStmt>(st.get())) {
-                // Find innermost FOR in the stack
-                int idx = -1;
-                for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
-                    if (stack[i].kind == BlockEntry::Kind::ForK) { idx = i; break; }
+                // Handle NEXT with optional var-list: NEXT v1[,v2...]
+                // Empty list => close exactly one innermost FOR.
+                auto popOne = [&]() {
+                    int idx = -1;
+                    for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
+                        if (stack[i].kind == BlockEntry::Kind::ForK) { idx = i; break; }
+                    }
+                    if (idx < 0) throw ParseError("NEXT without matching FOR");
+                    // Pop that FOR entry
+                    stack.erase(stack.begin() + idx);
+                };
+                if (nx->vars.empty()) {
+                    popOne();
+                    continue;
                 }
-                if (idx < 0) throw ParseError("NEXT without matching FOR");
-                if (nx->var && !nx->var->empty()) {
-                    if (stack[idx].f->var != *nx->var) throw ParseError("NEXT variable does not match open FOR variable");
+                for (const auto& vname : nx->vars) {
+                    // Find innermost FOR and enforce variable match
+                    int idx = -1;
+                    for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
+                        if (stack[i].kind == BlockEntry::Kind::ForK) { idx = i; break; }
+                    }
+                    if (idx < 0) throw ParseError("NEXT without matching FOR");
+                    if (stack[idx].f->var != vname) throw ParseError("NEXT variable does not match open FOR variable");
+                    stack.erase(stack.begin() + idx);
                 }
-                // Pop that FOR entry
-                (void)st;
-                stack.erase(stack.begin() + idx);
                 continue;
             }
             if (const auto els = dyn_cast<ElseStmt>(st.get())) {

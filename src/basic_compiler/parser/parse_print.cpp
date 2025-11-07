@@ -59,7 +59,6 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
     // do not emit a value item for it. Last one wins.
     std::vector<std::unique_ptr<Expr>> items;
     std::vector<PrintStmt::Sep> seps;
-    bool any = false;
     PrintStmt::Terminator trail = PrintStmt::Terminator::Newline;
     while (true) {
         // Mid-list USING: update format and continue without consuming a value
@@ -75,7 +74,6 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
         // If the next token begins an expression, parse it; otherwise, break
         if (check(TokenType::String) || check(TokenType::Integer) || check(TokenType::Float) || check(TokenType::Identifier) || check(TokenType::LParen) || check(TokenType::Plus) || check(TokenType::Minus) || check(TokenType::KwNot)) {
             items.push_back(parseExpression());
-            any = true;
         } else {
             break;
         }

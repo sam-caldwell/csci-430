@@ -98,9 +98,17 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     if (match(TokenType::KwElse)) { return make_node<ElseStmt>({startTok.line, startTok.col}); }
     if (match(TokenType::KwWend)) { return make_node<WendStmt>({startTok.line, startTok.col}); }
     if (match(TokenType::KwNext)) {
-        std::optional<std::string> v;
-        if (check(TokenType::Identifier)) { v = peek().lexeme; advance(); }
-        return make_node<NextStmt>({startTok.line, startTok.col}, std::move(v));
+        std::vector<std::string> vars;
+        if (check(TokenType::Identifier)) {
+            vars.push_back(peek().lexeme);
+            advance();
+            while (match(TokenType::Comma)) {
+                if (!check(TokenType::Identifier)) throw ParseError("Expected variable name after comma in NEXT");
+                vars.push_back(peek().lexeme);
+                advance();
+            }
+        }
+        return make_node<NextStmt>({startTok.line, startTok.col}, std::move(vars));
     }
     if (match(TokenType::KwEnd)) {
         if (match(TokenType::KwIf)) return make_node<EndIfStmt>({startTok.line, startTok.col});
