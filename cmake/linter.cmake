@@ -44,6 +44,7 @@ foreach(_src IN LISTS LINT_SOURCES)
     COMMAND ${CLANG_TIDY_EXE}
             -p "${CMAKE_BINARY_DIR}"
             -checks="${TIDY_CHECKS}"
+            -quiet
             -warnings-as-errors=\*
             "${_abs}"
     COMMAND ${CMAKE_COMMAND} -E touch "${_stamp}"
