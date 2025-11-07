@@ -18,7 +18,7 @@ Code under test: Parser + Semantics + Codegen integration
 Expected behavior: Emitted IR/state contains expected constructs and values
 */
 TEST(Integration, SCREEN_IRPatterns) {
-    const char* src =
+    const auto src =
         "10 PRINT \"A\"\n"
         "20 X=SCREEN(1,1)\n"
         "30 END\n";

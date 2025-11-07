@@ -13,7 +13,7 @@
 
 using namespace gwbasic;
 using namespace e2e_helpers;
-/*
+/***
  * Test Suite: E2E Factorial Input
  * Purpose: Verify INPUT, FOR loop, and multiplication work end-to-end by
  *          compiling and running a factorial program with stdin input.

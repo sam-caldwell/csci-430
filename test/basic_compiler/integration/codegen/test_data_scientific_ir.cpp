@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.DATA_Supports_D_Exponent
  * Inputs: Program with DATA containing a D-exponent numeric
  * Expected: IR encodes numeric in @gwb_data_num as expected (no atof usage).
@@ -21,4 +21,3 @@ TEST(Integration, DATA_Supports_D_Exponent) {
     // Still no atof in the IR
     ASSERT_EQ(ir.find("@atof"), std::string::npos);
 }
-

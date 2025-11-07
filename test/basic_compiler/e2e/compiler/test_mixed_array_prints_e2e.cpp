@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test Suite: E2E Mixed-Type Array Prints
  * Purpose: Confirm truncation for integer stores and float formatting.
  */
@@ -52,4 +52,3 @@ TEST(E2E, MixedArrayPrints_Truncation_And_FloatFormat) {
     EXPECT_EQ(lines[2], std::string("3.250000")); // float format
     EXPECT_EQ(lines[3], std::string("4.500000")); // double format
 }
-

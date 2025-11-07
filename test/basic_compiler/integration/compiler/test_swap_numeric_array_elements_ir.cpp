@@ -13,7 +13,7 @@ using namespace gwbasic;
  * Expected Behavior: IR contains GEPs into arrays and store float instructions.
  */
 TEST(Integration, SWAP_Numeric_Array_Elements_IR) {
-    const char* src =
+    const auto src =
         "10 DIM A(2)\n"
         "11 DIM B(2)\n"
         "20 SWAP A(1), B(1)\n"

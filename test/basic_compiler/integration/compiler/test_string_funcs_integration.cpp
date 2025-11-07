@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Expected behavior: Generated IR references @strncpy to implement substrings.
  */
 TEST(Integration, StringFuncs_IRContainsStrncpy) {
-    const char* src =
+    const auto src =
         "10 PRINT LEFT$(\"HELLO\",2)\n"
         "20 PRINT RIGHT$(\"HELLO\",3)\n"
         "30 PRINT MID$(\"HELLO\",2,2)\n"

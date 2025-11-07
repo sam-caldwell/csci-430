@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.LEN_Numeric_Array_Double_IR
  * Inputs: Program DIMs a DOUBLE (#) array and prints LEN of an element
  * Code under test: Code generation for LEN on DOUBLE array element
@@ -21,4 +21,3 @@ TEST(Integration, LEN_Numeric_Array_Double_IR) {
     ASSERT_EQ(ir.find("call i64 @strlen(ptr"), std::string::npos);
     ASSERT_NE(ir.find("8.0"), std::string::npos);
 }
-

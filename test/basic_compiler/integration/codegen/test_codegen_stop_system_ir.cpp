@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.CodegenStopSystemIR
  * Inputs: Programs using STOP and SYSTEM.
  * Expected: IR contains break message global and branches to exit.
@@ -30,4 +30,3 @@ TEST(Integration, CodegenStopSystemIR) {
         ASSERT_NE(ir.find("br label %exit"), std::string::npos);
     }
 }
-

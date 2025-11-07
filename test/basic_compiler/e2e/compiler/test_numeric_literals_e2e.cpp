@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.NumericLiterals_OctalBinaryScientific
  * Inputs: BASIC program printing various numeric literal forms
  * Code under test: Full compiler pipeline
@@ -56,4 +56,3 @@ TEST(E2E, NumericLiterals_OctalBinaryScientific) {
         "100\n";
     ASSERT_EQ(out, expected);
 }
-

@@ -15,7 +15,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.StringFuncs_Work
  * Inputs: Program exercising LEFT$, RIGHT$, MID$ and printing results.
  * Code under test: End-to-end compile/link/run of string intrinsics.

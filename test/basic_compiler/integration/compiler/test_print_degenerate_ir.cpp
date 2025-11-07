@@ -13,7 +13,7 @@ Code under test: Parser and codegen for degenerate PRINT separators/terminators
 Expected behavior: Compiles successfully and emits printf calls
 */
 TEST(Integration, PRINT_Degenerate_Separators_Compile) {
-    const char* src =
+    const auto src =
         "10 PRINT ;\n"
         "20 PRINT ,\n"
         "30 END\n";

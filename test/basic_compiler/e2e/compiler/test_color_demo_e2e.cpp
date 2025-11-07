@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.ColorDemo_PrintsExpectedAnsiAndText
  * Purpose: Compile and run demos/working-with-color.bas and verify ANSI SGR
  *          sequences and printed lines appear as expected.

@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.DotPrefixedFloat_ArithmeticAndPrint
  * Inputs: Program printing .5 + .25
  * Code under test: Full pipeline (lexer tolerates leading '.', parser, codegen, runtime)
@@ -39,4 +39,3 @@ TEST(E2E, DotPrefixedFloat_ArithmeticAndPrint) {
     std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_EQ(out, std::string("0.750000\n"));
 }
-

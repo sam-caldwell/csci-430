@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
 Test: E2E.If_ThenLine_ElseLine_Branches
 Inputs: Program with IF A=0 THEN 100 ELSE 200, two runs with A=0 and A=1
 Expected behavior: Outputs 1 for A=0 and 2 for A=1
@@ -45,4 +45,3 @@ TEST(E2E, If_ThenLine_ElseLine_Branches) {
     auto out1 = buildRun(1);
     ASSERT_NE(out1.find("2"), std::string::npos);
 }
-

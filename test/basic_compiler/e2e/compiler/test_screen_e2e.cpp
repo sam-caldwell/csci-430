@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.SCREEN_ReturnsAsciiAfterPrint
  * Inputs: Program that prints "ABC" then prints SCREEN(1,1..3).
  * Code under test: Virtual screen buffer + SCREEN() runtime semantics E2E.

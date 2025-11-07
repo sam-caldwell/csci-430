@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.RelationalOps_Numeric_And_String
  * Inputs: Program printing results of numeric and string comparisons
  * Expected behavior: Outputs lines of 0/1 matching truth values.
@@ -57,4 +57,3 @@ TEST(E2E, RelationalOps_Numeric_And_String) {
         "1\n";
     ASSERT_EQ(out, expected);
 }
-

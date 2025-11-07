@@ -12,7 +12,7 @@
 
 using namespace gwbasic;
 using namespace e2e_helpers;
-/*
+/***
  * Test Suite: E2E Compile and Run
  * Purpose: Exercise the full pipeline by compiling IR with clang and running
  *          the resulting binary to check observable behavior.

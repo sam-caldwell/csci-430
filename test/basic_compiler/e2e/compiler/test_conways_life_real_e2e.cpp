@@ -20,7 +20,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.ConwaysLife_RealDemo_BuildsRunsAndPrints
  * Inputs: demos/conways-life.bas compiled end-to-end
  * Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)

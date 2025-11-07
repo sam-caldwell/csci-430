@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.LenValInstr_ProduceExpectedResults
  * Inputs: Program that prints LEN("HELLO"), INSTR("HELLO","EL"), INSTR(3,"HELLO","L"), VAL("42")
  * Code under test: End-to-end compile/link/run
@@ -54,4 +54,3 @@ TEST(E2E, LenValInstr_ProduceExpectedResults) {
     EXPECT_EQ(lines[2], std::string("3"));
     EXPECT_EQ(lines[3], std::string("42"));
 }
-

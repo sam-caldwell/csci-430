@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.Chain_All_PassesVariable
  * Inputs: BASIC program(s) executed end-to-end (runtime output)
  * Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)

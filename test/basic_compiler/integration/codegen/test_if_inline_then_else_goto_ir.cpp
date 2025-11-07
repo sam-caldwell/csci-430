@@ -12,13 +12,13 @@ using namespace gwbasic;
  * Purpose: Ensure inline IF with THEN/ELSE GOTO lowers to expected branches.
  */
 TEST(Integration, IfInlineThenElseGoto_IRPatterns) {
-    const char* src =
+    auto const src =
         "10 IF A = 0 THEN GOTO 100 ELSE GOTO 200\n"
         "20 END\n"
         "100 PRINT 1\n"
         "200 PRINT 2\n";
     const std::string ir = Compiler::compileString(src);
-    // Expect dispatcher in line10 block
+    // Expect a dispatcher in line10 block
     const auto top = irBlockSlice(ir, "line10");
     ASSERT_FALSE(top.empty());
     ASSERT_NE(top.find(" br i1 "), std::string::npos);

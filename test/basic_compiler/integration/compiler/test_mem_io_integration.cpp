@@ -16,7 +16,7 @@ Code under test: Parser + Semantics + Codegen integration
 Expected behavior: Emitted IR/state contains expected constructs and values
 */
 TEST(Integration, MemIO_IRContainsFileCalls) {
-    const char* src =
+    const auto src =
         "10 DEF SEG=0\n"
         "20 BSAVE \"f.bin\", 0, 10\n"
         "30 BLOAD \"f.bin\", 0\n"

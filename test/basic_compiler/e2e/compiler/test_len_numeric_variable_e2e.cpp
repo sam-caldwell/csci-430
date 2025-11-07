@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.LEN_Numeric_Variable
  * Purpose: Verify LEN on numeric variables returns storage size in bytes:
  *          Int16 (%)=2, Long32 (&)=4, Single (!)=4, Double (#)=8; and plain
@@ -45,4 +45,3 @@ TEST(E2E, LEN_Numeric_Variable) {
     ASSERT_NE(out.find("4"), std::string::npos);
     ASSERT_NE(out.find("8"), std::string::npos);
 }
-

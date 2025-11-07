@@ -6,9 +6,11 @@
 
 using namespace gwbasic;
 
-/*
- * Test Suite: CodeGen Integer Arrays (i32)
- * Purpose: Ensure % arrays lower to i32 with proper fptosi/sitofp conversions.
+/***
+ * Test: Integration.Codegen_IntArray_i32_StoresAndLoads
+ * Purpose: Ensure % arrays lower to i32 with correct fptosi/sitofp conversions on store/load.
+ * Components Under Test: CodeGenerator numeric array typing and conversions.
+ * Expected Behavior: IR includes alloca/getelementptr for [N x i32], fptosi for store, and sitofp after load.
  */
 TEST(Integration, Codegen_IntArray_i32_StoresAndLoads) {
     const auto src =
@@ -27,4 +29,3 @@ TEST(Integration, Codegen_IntArray_i32_StoresAndLoads) {
     ASSERT_NE(ir.find("load i32, ptr"), std::string::npos);
     ASSERT_NE(ir.find("sitofp i32"), std::string::npos);
 }
-

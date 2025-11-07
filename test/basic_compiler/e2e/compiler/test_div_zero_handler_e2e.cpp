@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.DivisionByZero_TriggersErrorHandler
  * Inputs: Program with ON ERROR GOTO handler; executes /, \\, and MOD by zero and resumes next
  * Code under test: end-to-end pipeline division-by-zero error path
@@ -47,4 +47,3 @@ TEST(E2E, DivisionByZero_TriggersErrorHandler) {
     EXPECT_EQ(lines[1], std::string("Z"));
     EXPECT_EQ(lines[2], std::string("Z"));
 }
-

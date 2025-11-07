@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: CodeGen.MidAssign_EmitsStrncpyAndBounds
+ * Purpose: Verify MID$ assignment emits calls to strncpy, strlen, and computes 1-based to 0-based offsets.
+ * Components Under Test: CodeGenerator for MID$ assignment.
+ * Expected Behavior: IR declares/calls @strncpy, calls @strlen, and computes index offset via sub i64.
+ */
 TEST(CodeGen, MidAssign_EmitsStrncpyAndBounds) {
     const char* src =
         "10 S$=\"ABCDE\"\n"
@@ -21,4 +27,3 @@ TEST(CodeGen, MidAssign_EmitsStrncpyAndBounds) {
     // length queries for both dest and src
     ASSERT_NE(ir.find("call i64 @strlen(ptr"), std::string::npos);
 }
-

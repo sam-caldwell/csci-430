@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Expected behavior: IR defines @.fmt_sgr and references @printf for SGR.
  */
 TEST(Integration, COLOR_IRContainsSgrFormatAndPrintf) {
-    const char* src =
+    const auto src =
         "10 COLOR 2,4\n"
         "20 END\n";
     std::string ir = Compiler::compileString(src);

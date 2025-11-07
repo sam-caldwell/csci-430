@@ -12,8 +12,8 @@
 ## File I/O Semantics
 
 - OPEN "name" FOR ... AS #n:
-  - Only INPUT and OUTPUT modes are implemented. Missing: APPEND, RANDOM, BINARY; missing LEN=, ACCESS/LOCK, device forms
-    (COM/LPT/CONS), and error handling.
+  - Only INPUT and OUTPUT modes are implemented. Missing: APPEND, RANDOM, BINARY; missing LEN=, ACCESS/LOCK, device 
+    forms (COM/LPT/CONS), and error handling.
   - Channel range checking and duplicate-open policy unspecified; currently simple table [16 x ptr].
 - CLOSE #n: basic support exists; missing CLOSE without argument (close all) semantics and error cases.
 - PRINT #n, ...: partial support; double-check format/USING enforcement and trailing separator behavior vs. GW-BASIC 

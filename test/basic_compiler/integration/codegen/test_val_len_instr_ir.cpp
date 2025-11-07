@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.VAL_LEN_INSTR_IR_Contains_Deps
  * Inputs: Program using LEN, VAL, and INSTR
  * Code under test: Compiler::compileString IR generation
  * Expected behavior: IR contains calls to @strlen, @strtod, and @strstr
  */
 TEST(Integration, VAL_LEN_INSTR_IR_Contains_Deps) {
-    const char* src =
+    auto const src =
         "10 PRINT LEN(\"HELLO\")\n"
         "20 PRINT VAL(\"42\")\n"
         "30 PRINT INSTR(\"HELLO\",\"EL\")\n"
@@ -27,4 +27,3 @@ TEST(Integration, VAL_LEN_INSTR_IR_Contains_Deps) {
     ASSERT_NE(ir.find("call double @strtod(ptr"), std::string::npos);
     ASSERT_NE(ir.find("call ptr @strstr(ptr"), std::string::npos);
 }
-

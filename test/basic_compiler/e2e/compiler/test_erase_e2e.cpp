@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.ERASE_Redim_AllowsReuse
  * Inputs: Program DIMs arrays, ERASEs them, then re-DIMs; no prints
  * Code under test: Full pipeline

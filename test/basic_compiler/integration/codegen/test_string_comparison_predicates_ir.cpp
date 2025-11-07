@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.StringComparisonPredicatesICmp
  * Inputs: Program comparing strings with < and >=, then PRINT to keep codegen paths alive
  * Expected: IR uses @strcmp and icmp with correct signed predicates for strings.
@@ -24,4 +24,3 @@ TEST(Integration, StringComparisonPredicatesICmp) {
     ASSERT_NE(ir.find("icmp slt i32"), std::string::npos);
     ASSERT_NE(ir.find("icmp sge i32"), std::string::npos);
 }
-

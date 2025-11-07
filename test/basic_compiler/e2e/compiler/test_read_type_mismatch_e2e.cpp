@@ -13,6 +13,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/***
+ * Test: E2E.READ_TypeMismatch_StringIntoNumericTriggersHandler
+ * Purpose: Ensure reading string into numeric variable triggers error handler.
+ * Components Under Test: DATA/READ runtime type checking; error trap integration; End-to-End run.
+ * Expected Behavior: Only the handler output appears; numeric line suppressed.
+ */
 TEST(E2E, READ_TypeMismatch_StringIntoNumericTriggersHandler) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -40,4 +46,3 @@ TEST(E2E, READ_TypeMismatch_StringIntoNumericTriggersHandler) {
     ASSERT_NE(out.find("E\n"), std::string::npos);
     ASSERT_EQ(out.find("1\n"), std::string::npos);
 }
-

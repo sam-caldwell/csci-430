@@ -6,9 +6,11 @@
 
 using namespace gwbasic;
 
-/*
- * Test Suite: CodeGen Long Integer Arrays (i64)
- * Purpose: Ensure & arrays lower to i64 with proper fptosi/sitofp conversions.
+/***
+ * Test: Integration.Codegen_LongArray_i64_StoresAndLoads
+ * Purpose: Ensure & arrays lower to i64 with correct fptosi/sitofp conversions on store/load.
+ * Components Under Test: CodeGenerator numeric array typing and conversions.
+ * Expected Behavior: IR includes alloca/getelementptr for [N x i64], fptosi for store, and sitofp after load.
  */
 TEST(Integration, Codegen_LongArray_i64_StoresAndLoads) {
     const auto src =
@@ -27,4 +29,3 @@ TEST(Integration, Codegen_LongArray_i64_StoresAndLoads) {
     ASSERT_NE(ir.find("load i64, ptr"), std::string::npos);
     ASSERT_NE(ir.find("sitofp i64"), std::string::npos);
 }
-

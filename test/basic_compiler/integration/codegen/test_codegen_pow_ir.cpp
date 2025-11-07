@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.Codegen_Emits_Pow_Call
  * Inputs: Program with exponentiation in an expression
  * Expected: IR declares @pow and calls it for '^'.
@@ -18,4 +18,3 @@ TEST(Integration, Codegen_Emits_Pow_Call) {
     ASSERT_NE(ir.find("declare double @pow(double, double)"), std::string::npos);
     ASSERT_NE(ir.find("call double @pow"), std::string::npos);
 }
-

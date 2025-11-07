@@ -6,9 +6,11 @@
 
 using namespace gwbasic;
 
-/*
- * Test Suite: CodeGen OPTION BASE (numeric)
- * Purpose: Ensure DIM allocation length honors OPTION BASE 1.
+/***
+ * Test: Integration.Codegen_DIM_With_OptionBase1_Alloc_UsesUb
+ * Purpose: Ensure OPTION BASE 1 makes the extent equal to upper bound for numeric arrays.
+ * Components Under Test: CodeGenerator array allocation length under OPTION BASE 1.
+ * Expected Behavior: IR alloca uses [5 x float] for DIM A(5) with BASE 1.
  */
 TEST(Integration, Codegen_DIM_With_OptionBase1_Alloc_UsesUb) {
     const char* src =

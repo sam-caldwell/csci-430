@@ -10,7 +10,7 @@ using namespace gwbasic;
  * Purpose: Ensure CHDIR emits chdir() call in IR.
  */
 TEST(Integration, CHDIR_IRContainsChdir) {
-    const char* src =
+    const auto src =
         "10 CHDIR \"/tmp\"\n"
         "20 END\n";
     std::string ir = Compiler::compileString(src);

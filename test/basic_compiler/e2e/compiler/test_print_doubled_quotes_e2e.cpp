@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.PrintDoubledQuotes_Works
  * Inputs: BASIC program with a string literal that contains doubled quotes.
  * Code under test: Full pipeline + runtime output
@@ -44,4 +44,3 @@ TEST(E2E, PrintDoubledQuotes_Works) {
     std::string out = runCommand(r1.str());
     ASSERT_NE(out.find("He said \"OK\"\n"), std::string::npos);
 }
-

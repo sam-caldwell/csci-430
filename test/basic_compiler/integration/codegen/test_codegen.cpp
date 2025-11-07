@@ -4,14 +4,11 @@
 #include "basic_compiler/Compiler.h"
 
 using namespace gwbasic;
-/*
- * Test Suite: Integration CodeGen Layout
- * Purpose: Validate overall IR structure and labeling across multiple lines
- *          and statements within a small program.
- * Components Under Test: Compiler::compileString end-to-end; CodeGenerator
- *          module/label emission.
- * Expected Behavior: IR defines main, labels for each BASIC line, and
- *          declares @.fmt_num and @.fmt_str.
+/***
+ * Test: CodeGen.GeneratesIRWithBlocks
+ * Purpose: Validate overall IR structure and line labels across a multi-line program.
+ * Components Under Test: Compiler::compileString; CodeGenerator module/label emission.
+ * Expected Behavior: IR defines main, has labels for lines 10..50, and declares @.fmt_num/@.fmt_str.
  */
 TEST(CodeGen, GeneratesIRWithBlocks) {
     const std::string src = R"(10 LET A = 1+2*3

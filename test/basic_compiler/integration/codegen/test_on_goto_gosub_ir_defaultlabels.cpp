@@ -15,7 +15,7 @@ using namespace gwbasic;
  */
 TEST(Integration, OnGotoGosub_IR_DefaultLabels) {
     {
-        const char* src =
+        auto const src =
             "10 ON A GOTO 100,200\n"
             "20 PRINT 0\n"
             "100 PRINT 1\n"

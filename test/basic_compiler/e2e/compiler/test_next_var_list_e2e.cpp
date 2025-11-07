@@ -11,7 +11,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: E2E.NextVarList_NestedLoopsPrints
  * Inputs: Program with nested FOR loops closed by NEXT var-list
  * Expected behavior: Program prints 4 pairs (1..2 x 1..2) and terminates.

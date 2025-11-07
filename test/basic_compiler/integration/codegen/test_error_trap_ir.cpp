@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.ErrorTrapIR
  * Inputs: Small program using ON ERROR GOTO / ERROR / RESUME NEXT
  * Expected: IR contains trap global stores and switch to handler label

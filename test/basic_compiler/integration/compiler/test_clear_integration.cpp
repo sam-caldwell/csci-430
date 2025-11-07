@@ -13,14 +13,8 @@ using namespace gwbasic;
  * Components: Parser, Semantics, Codegen integration
  * Expected: IR contains 'store float 0.0, ptr %A' after an assignment to A (single-precision default).
  */
-/*
-Test: Integration.CLEAR_IRPatterns
-Inputs: Small program with assignment, CLEAR, END
-Code under test: Full compile pipeline
-Expected behavior: IR contains reset store to A
-*/
 TEST(Integration, CLEAR_IRPatterns) {
-    const char* src =
+    const auto src =
         "10 A=7\n"
         "20 CLEAR\n"
         "30 END\n";

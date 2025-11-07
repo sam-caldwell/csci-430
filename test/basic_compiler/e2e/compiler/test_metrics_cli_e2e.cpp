@@ -1,5 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-/**
+/***
 Test: E2E.Metrics_CLI_PrintsTable
 Inputs: Run compiler CLI with --metrics and a simple program
 Code under test: CLI flag parsing, metrics collection, ASCII report printing
@@ -43,4 +43,3 @@ TEST(E2E, Metrics_CLI_PrintsTable) {
     ASSERT_NE(out.find("Codegen"), std::string::npos);
     ASSERT_NE(out.find("IR instructions"), std::string::npos);
 }
-

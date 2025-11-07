@@ -6,11 +6,11 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenInput.PromptAndList_EmitsPrintfAndMultipleScanfs
- * Inputs: INPUT "Vals:"; A, B
- * Code under test: CodeGenerator emit for InputStmt with prompt literal + var list
- * Expected: IR contains a printf call and at least two scanf calls.
+ * Purpose: Ensure INPUT with a literal prompt and var list prints the prompt and scans multiple variables.
+ * Components Under Test: CodeGenerator emission for InputStmt (prompt literal + scanf list).
+ * Expected Behavior: IR contains a printf for the prompt and at least two scanf calls.
  */
 TEST(CodeGenInput, PromptAndList_EmitsPrintfAndMultipleScanfs) {
     const auto src =
@@ -22,4 +22,3 @@ TEST(CodeGenInput, PromptAndList_EmitsPrintfAndMultipleScanfs) {
     size_t p1 = ir.find("@scanf"); ASSERT_NE(p1, std::string::npos);
     size_t p2 = ir.find("@scanf", p1 + 1); ASSERT_NE(p2, std::string::npos);
 }
-

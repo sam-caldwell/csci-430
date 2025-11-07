@@ -11,7 +11,7 @@ using namespace gwbasic;
  * Notes: CDBL is a no-op cast to double in this compiler; we only assert basic IR presence.
  */
 TEST(Integration, CDBL_CompilesToNoopCast) {
-    const char* src =
+    const auto src =
         "10 PRINT CDBL(2)\n"
         "20 END\n";
     std::string ir = Compiler::compileString(src);

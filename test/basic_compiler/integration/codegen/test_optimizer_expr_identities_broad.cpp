@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: OptimizerExpr.IdentitiesAndFoldsBroad
  * Purpose: Exercise AstOptimizer::optExpr rules: unary +/- elimination/fold,
  *          add/sub/mul/div constant folding, and identities (x+0, x-0, x*1,
  *          x*0, x/1), plus a couple of comparisons.
  */
 TEST(OptimizerExpr, IdentitiesAndFoldsBroad) {
-    const char* src =
+    auto const src =
         "10 A=2\n"
         // Unary
         "11 PRINT -3\n"
@@ -44,4 +44,3 @@ TEST(OptimizerExpr, IdentitiesAndFoldsBroad) {
     // Ensure integer printing path exists for folded integer results
     EXPECT_NE(ir.find("_print_int_"), std::string::npos);
 }
-

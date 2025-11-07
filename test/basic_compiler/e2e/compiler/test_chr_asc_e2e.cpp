@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.CHR_ASC
  * Purpose: CHR$(65) prints "A" and ASC("A") prints 65 as a float string.
  * Inputs: BASIC program(s) executed end-to-end (runtime output)

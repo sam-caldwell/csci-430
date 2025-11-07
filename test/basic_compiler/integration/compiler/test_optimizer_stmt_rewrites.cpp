@@ -36,20 +36,21 @@ TEST(Optimizer, Stmt_Rewrites_IfAndFor) {
     // After optimization: line 10 -> GOTO 100; line 15 removed; FOR step reset
     auto it10 = std::find_if(prog.lines.begin(), prog.lines.end(), [](const Line& L){ return L.number==10; });
     ASSERT_NE(it10, prog.lines.end());
+    // ReSharper disable once CppUseStructuredBinding
     const auto& l10 = *it10;
     ASSERT_EQ(l10.statements.size(), 1u);
     EXPECT_NE(dynamic_cast<GotoStmt*>(l10.statements[0].get()), nullptr);
 
     auto it15 = std::find_if(prog.lines.begin(), prog.lines.end(), [](const Line& L){ return L.number==15; });
     ASSERT_NE(it15, prog.lines.end());
-    const auto& l15 = *it15;
     // The IF 0 should be optimized away; allow it to be present if analyze-only was on, but we set it off.
-    if (!l15.statements.empty()) {
-        EXPECT_EQ(dynamic_cast<IfStmt*>(l15.statements[0].get()), nullptr);
+    if (const auto&[number, statements] = *it15; !statements.empty()) {
+        EXPECT_EQ(dynamic_cast<IfStmt*>(statements[0].get()), nullptr);
     }
 
     auto it20 = std::find_if(prog.lines.begin(), prog.lines.end(), [](const Line& L){ return L.number==20; });
     ASSERT_NE(it20, prog.lines.end());
+    // ReSharper disable once CppUseStructuredBinding
     const auto& l20 = *it20;
     ASSERT_FALSE(l20.statements.empty());
     auto* fs = dynamic_cast<ForStmt*>(l20.statements[0].get());

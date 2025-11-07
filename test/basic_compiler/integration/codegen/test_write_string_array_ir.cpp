@@ -6,12 +6,12 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.StringArray_WRITE_IR_UsesFprintf
  * Purpose: Verify WRITE #n with a string array lowers to fprintf and fmt strings.
  */
 TEST(Integration, StringArray_WRITE_IR_UsesFprintf) {
-    const char* src =
+    auto const src =
         "10 DIM A$(2)\n"
         "20 A$(1)=\"ONE\"\n"
         "30 OPEN \"out.txt\" FOR OUTPUT AS #1\n"
@@ -23,4 +23,3 @@ TEST(Integration, StringArray_WRITE_IR_UsesFprintf) {
     ASSERT_NE(ir.find("getelementptr inbounds [16 x ptr], ptr @gwb_files"), std::string::npos);
     ASSERT_NE(ir.find("call i32 (ptr, ...) @fprintf"), std::string::npos);
 }
-

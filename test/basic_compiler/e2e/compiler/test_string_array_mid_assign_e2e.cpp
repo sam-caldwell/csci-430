@@ -15,6 +15,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/***
+ * Test: E2E.StringArray_MidAssign_Works
+ * Purpose: Ensure MID$ assignment works on string array elements and prints the updated result.
+ * Components Under Test: Parser/Codegen for MID$ with array element; End-to-End run.
+ * Expected Behavior: Printed lines reflect the mid-assignment changes.
+ */
 TEST(E2E, StringArray_MidAssign_Works) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -43,4 +49,3 @@ TEST(E2E, StringArray_MidAssign_Works) {
     ASSERT_EQ(lines.size(), 1u);
     EXPECT_EQ(lines[0], std::string("ABXYE"));
 }
-

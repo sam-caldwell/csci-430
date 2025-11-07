@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.CHDIR_BSAVETouchesFileInNewDir
  * Purpose: Change to a temp directory and BSAVE a zero-length file; verify file exists in that directory.
  */
@@ -52,4 +52,3 @@ TEST(E2E, CHDIR_BSAVETouchesFileInNewDir) {
     std::filesystem::path touched = base / "touch.bin";
     ASSERT_TRUE(std::filesystem::exists(touched));
 }
-

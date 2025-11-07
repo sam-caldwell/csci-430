@@ -6,10 +6,11 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.Codegen_Emits_Logical_AND_OR_NOT
- * Inputs: Program using logical AND/OR/NOT
- * Expected: IR uses fcmp for truthiness and and/or i1 operations; NOT path compares to 0.0 and casts.
+ * Purpose: Verify logical AND/OR/NOT lower to i1 operations with proper truthiness comparisons and casting.
+ * Components Under Test: CodeGenerator::emitExpr for logical ops.
+ * Expected Behavior: IR shows fcmp for truthiness, and/or i1, and NOT via fcmp .., 0.0 and uitofp i1.
  */
 TEST(Integration, Codegen_Emits_Logical_AND_OR_NOT) {
     const std::string src = R"(10 PRINT 1 AND 0
@@ -24,4 +25,3 @@ TEST(Integration, Codegen_Emits_Logical_AND_OR_NOT) {
     ASSERT_NE(ir.find("fcmp oeq double"), std::string::npos);
     ASSERT_NE(ir.find("uitofp i1"), std::string::npos);
 }
-

@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.MixedTypeArithmetic_ComputeInDouble_StoreByType
  * Inputs: Program mixing Int16/Long/Single/Double in expressions and assignments
  * Code under test: End-to-end compile/link/run
@@ -64,4 +64,3 @@ TEST(E2E, MixedTypeArithmetic_ComputeInDouble_StoreByType) {
     EXPECT_EQ(lines[3], std::string("1.500000"));   // D& (3) / 2 => 1.5
     EXPECT_EQ(lines[4], std::string("0.600000"));   // 0.2 (single) + 0.4 (double) => 0.6
 }
-

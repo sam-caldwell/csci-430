@@ -13,7 +13,7 @@ using namespace gwbasic;
  * Expected: IR contains GEP into A_arr and a subsequent store double 0.0
  */
 TEST(Integration, CLEAR_ZerosArrays_IR) {
-    const char* src =
+    const auto src =
         "10 DIM A(3)\n"
         "20 A(1)=9\n"
         "30 CLEAR\n"

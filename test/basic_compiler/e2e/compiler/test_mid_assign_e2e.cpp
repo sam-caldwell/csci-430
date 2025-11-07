@@ -15,6 +15,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/***
+ * Test: E2E.MidAssign_Behavior
+ * Purpose: Validate MID$ behavior with and without length over multiple cases.
+ * Components Under Test: Parser/Codegen for MID$ assignment; End-to-End run.
+ * Expected Behavior: Output matches the three expected transformed strings.
+ */
 TEST(E2E, MidAssign_Behavior) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -53,4 +59,3 @@ TEST(E2E, MidAssign_Behavior) {
     EXPECT_EQ(lines[1], std::string("AZZDE"));
     EXPECT_EQ(lines[2], std::string("HELLX"));
 }
-

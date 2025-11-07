@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.SWAP_Numeric_And_String
  * Inputs: Program swaps X and Y; swaps A$ and B$; prints results
  * Code under test: Full pipeline

@@ -10,7 +10,7 @@ using namespace gwbasic;
  * Purpose: Ensure CHR$/ASC produce characteristic IR patterns.
  */
 TEST(Integration, CHR_ASC_IRPatterns) {
-    const char* src =
+    const auto src =
         "10 PRINT CHR$(65)\n"
         "20 PRINT ASC(\"B\")\n"
         "30 END\n";

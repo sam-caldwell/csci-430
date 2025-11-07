@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.IntDiv_Mod_Behavior
  * Inputs: Program printing results of integer division (\\) and MOD with sign cases and decimals
  * Code under test: End-to-end pipeline
@@ -57,4 +57,3 @@ TEST(E2E, IntDiv_Mod_Behavior) {
     EXPECT_EQ(lines[7], std::string("2"));
     EXPECT_EQ(lines[8], std::string("1"));
 }
-

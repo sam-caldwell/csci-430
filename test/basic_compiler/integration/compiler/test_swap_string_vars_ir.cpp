@@ -13,7 +13,7 @@ using namespace gwbasic;
  * Expected Behavior: Generated IR includes load/store of ptr for both variables.
  */
 TEST(Integration, SWAP_String_Vars_IR) {
-    const char* src =
+    const auto src =
         "10 A$=\"X\"\n"
         "11 B$=\"Y\"\n"
         "20 SWAP A$,B$\n"

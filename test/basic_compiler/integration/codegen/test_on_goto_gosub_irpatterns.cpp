@@ -15,7 +15,7 @@ using namespace gwbasic;
  */
 TEST(Integration, OnGotoGosub_IRPatterns) {
     {
-        const char* src =
+        auto const src =
             "10 ON A GOTO 100,200\n"
             "20 PRINT 0\n"
             "100 PRINT 1\n"
@@ -27,7 +27,7 @@ TEST(Integration, OnGotoGosub_IRPatterns) {
         ASSERT_NE(blk.find("label %line200"), std::string::npos);
     }
     {
-        const char* src =
+        auto const src =
             "10 ON A GOSUB 100,200\n"
             "20 PRINT 0\n"
             "100 PRINT 1: RETURN\n"

@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.DEF_SEG
  * Purpose: DEF SEG compiles (no-op) and program runs normally.
  */

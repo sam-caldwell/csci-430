@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.CALL_PrintsWhenOpcode1
  * Inputs: BASIC program(s) executed end-to-end (runtime output)
  * Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
@@ -48,4 +48,3 @@ TEST(E2E, CALL_PrintsWhenOpcode1) {
     std::string out = runCommand(r1.str());
     ASSERT_NE(out.find("CALLED\n"), std::string::npos);
 }
-

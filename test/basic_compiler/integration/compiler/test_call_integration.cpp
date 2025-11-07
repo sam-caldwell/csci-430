@@ -10,7 +10,7 @@ using namespace gwbasic;
  * Purpose: Ensure CALL emits the helper definition and an invocation.
  */
 TEST(Integration, CALL_IRContainsHelper) {
-    const char* src =
+    const auto src =
         "10 POKE 100,1\n"
         "20 CALL 100\n"
         "30 END\n";

@@ -13,6 +13,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/***
+ * Test: E2E.READ_OutOfDataTriggersHandler
+ * Purpose: Ensure READ beyond available DATA triggers the error handler.
+ * Components Under Test: DATA/READ runtime and error handling; End-to-End run.
+ * Expected Behavior: Output contains handler print only.
+ */
 TEST(E2E, READ_OutOfDataTriggersHandler) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -38,4 +44,3 @@ TEST(E2E, READ_OutOfDataTriggersHandler) {
     std::string out = runCommand(run.str());
     ASSERT_NE(out.find("O\n"), std::string::npos);
 }
-

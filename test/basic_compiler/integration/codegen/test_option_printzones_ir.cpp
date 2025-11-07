@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.OptionPrintZones_IRContainsPad
  * Inputs: Program with OPTION PRINTZONES ON and PRINT "A","B"
  * Code under test: Code generation for zone padding
  * Expected behavior: IR contains references to @.fmt_pad and @.spaces_14
  */
 TEST(Integration, OptionPrintZones_IRContainsPad) {
-    const char* src =
+    auto const src =
         "10 OPTION PRINTZONES ON\n"
         "20 PRINT \"A\", \"B\"\n"
         "30 END\n";
@@ -21,4 +21,3 @@ TEST(Integration, OptionPrintZones_IRContainsPad) {
     ASSERT_NE(ir.find("@.fmt_pad"), std::string::npos);
     ASSERT_NE(ir.find("@.spaces_14"), std::string::npos);
 }
-

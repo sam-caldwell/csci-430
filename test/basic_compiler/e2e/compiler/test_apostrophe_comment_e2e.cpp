@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.ApostropheComment_IgnoresRestOfLine
  * Inputs: Program with inline apostrophe comments containing invalid tokens
  * Code under test: Full pipeline

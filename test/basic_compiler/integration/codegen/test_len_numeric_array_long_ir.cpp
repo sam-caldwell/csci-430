@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.LEN_Numeric_Array_Long_IR
  * Inputs: Program DIMs a LONG (&) array and prints LEN of an element
  * Code under test: Code generation for LEN on LONG array element
  * Expected behavior: No strlen call; IR contains constant 4.0
  */
 TEST(Integration, LEN_Numeric_Array_Long_IR) {
-    const char* src =
+    auto const src =
         "10 DIM D&(3)\n"
         "20 PRINT LEN(D&(1))\n"
         "30 END\n";
@@ -21,4 +21,3 @@ TEST(Integration, LEN_Numeric_Array_Long_IR) {
     ASSERT_EQ(ir.find("call i64 @strlen(ptr"), std::string::npos);
     ASSERT_NE(ir.find("4.0"), std::string::npos);
 }
-

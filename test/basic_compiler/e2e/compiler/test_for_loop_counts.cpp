@@ -12,7 +12,7 @@
 
 using namespace gwbasic;
 using namespace e2e_helpers;
-/*
+/***
  * Test Suite: E2E For Loop Counts
  * Purpose: Validate FOR/NEXT iteration behavior end-to-end by compiling
  *          and executing a program that prints 1...N.

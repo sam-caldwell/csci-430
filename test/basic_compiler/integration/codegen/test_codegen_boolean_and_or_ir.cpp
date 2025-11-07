@@ -6,11 +6,11 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenBoolean.AndOr_UseI1PredicatesAndBitOps
- * Inputs: Program printing results of AND/OR on numeric operands
- * Code under test: CodeGenerator::emitExpr for BinaryOp::And/BinaryOp::Or
- * Expected behavior: IR uses fcmp one -> i1, and/or i1, then uitofp i1 -> double.
+ * Purpose: Verify AND/OR generate i1 predicates and bitwise ops, with uitofp back to double.
+ * Components Under Test: CodeGenerator::emitExpr for BinaryOp::And/BinaryOp::Or.
+ * Expected Behavior: IR includes fcmp one -> i1, and/or i1, and uitofp i1 -> double.
  */
 TEST(CodeGenBoolean, AndOr_UseI1PredicatesAndBitOps) {
     const char* src =
@@ -24,4 +24,3 @@ TEST(CodeGenBoolean, AndOr_UseI1PredicatesAndBitOps) {
     ASSERT_NE(ir.find("or i1"), std::string::npos);
     ASSERT_NE(ir.find("uitofp i1"), std::string::npos);
 }
-

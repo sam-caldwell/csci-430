@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.NumericEdges_Int16_Long_Single
  * Inputs: Program assigns edge values near Int16/Long bounds and a large number to Single
  * Code under test: End-to-end compile/link/run

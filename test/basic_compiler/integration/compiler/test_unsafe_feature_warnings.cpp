@@ -16,7 +16,7 @@ using namespace gwbasic;
  */
 TEST(Integration, UnsafeFeatureWarnings_AppearInSemanticLog) {
     namespace fs = std::filesystem;
-    const char* src =
+    const auto src =
         "10 CALL 100\n"
         "20 DEF USR0 = 100\n"
         "30 PRINT USR(1)\n"

@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: Integration.StringArray_IR_UsesPtrElements
+ * Purpose: Ensure DIM of string arrays allocates pointer elements and accesses use pointer stores/loads.
+ * Components Under Test: CodeGenerator string array allocation and GEP addressing.
+ * Expected Behavior: IR shows [extent x ptr] alloca, GEP into ptr array, and store ptr instructions.
+ */
 TEST(Integration, StringArray_IR_UsesPtrElements) {
     const char* src =
         "10 DIM A$(5)\n"

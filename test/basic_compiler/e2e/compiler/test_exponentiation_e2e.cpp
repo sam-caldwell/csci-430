@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.Exponentiation_Precedence_And_Associativity
  * Inputs: BASIC program exercising '^' operator
  * Expected behavior: Correct results for simple power, right-associative chaining, and unary precedence.

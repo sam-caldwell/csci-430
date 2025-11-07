@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.IfInlineThenElseGoto_Branches
  * Inputs: Program uses inline THEN GOTO and ELSE GOTO; runs two variants to cover both
  * Code under test: Full pipeline + runtime
@@ -47,4 +47,3 @@ TEST(E2E, IfInlineThenElseGoto_Branches) {
     auto out0 = buildAndRun(0);
     ASSERT_NE(out0.find("2"), std::string::npos);
 }
-

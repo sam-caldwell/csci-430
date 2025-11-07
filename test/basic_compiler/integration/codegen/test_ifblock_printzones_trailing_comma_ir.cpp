@@ -13,7 +13,7 @@ using namespace gwbasic;
  * Expected Behavior: IR references @.fmt_pad and @.spaces_14.
  */
 TEST(Integration, IfBlock_PrintZones_TrailingComma_IR) {
-    const char* src =
+    auto const src =
         "10 OPTION PRINTZONES ON\n"
         "20 IF 1=1 THEN\n"
         "30   PRINT ,\n"

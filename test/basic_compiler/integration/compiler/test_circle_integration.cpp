@@ -13,7 +13,7 @@ using namespace gwbasic;
  * Expected: IR contains @gwb_gfx_circle definition, gfx_ready guard, and a call.
  */
 TEST(Integration, CIRCLE_IRPatterns) {
-    const char* src =
+    const auto src =
         "10 SCREEN 1\n"
         "20 CIRCLE (5,5), 2,, 0, 3.14\n"
         "30 END\n";

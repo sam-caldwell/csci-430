@@ -13,6 +13,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/***
+ * Test: E2E.READ_Restore_RewindsData
+ * Purpose: Verify RESTORE rewinds DATA so subsequent READ returns from the start.
+ * Components Under Test: DATA/READ tables and RESTORE effect; End-to-End run.
+ * Expected Behavior: Output sequence reads the same items again after RESTORE.
+ */
 TEST(E2E, READ_Restore_RewindsData) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -46,4 +52,3 @@ TEST(E2E, READ_Restore_RewindsData) {
     size_t p3 = out.find("A\n", p2 + 2); ASSERT_NE(p3, std::string::npos);
     size_t p4 = out.find("B\n", p3 + 2); ASSERT_NE(p4, std::string::npos);
 }
-

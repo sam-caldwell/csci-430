@@ -6,9 +6,11 @@
 
 using namespace gwbasic;
 
-/*
- * Test Suite: CodeGen Mixed Array Types
- * Purpose: Demonstrate correct lowering and conversions across %/&/!/#[].
+/***
+ * Test: Integration.Codegen_Mixed_Array_Types_IR
+ * Purpose: Demonstrate correct lowering and conversions across % (i32), & (i64), ! (float), # (double) arrays.
+ * Components Under Test: CodeGenerator array typing and store/load conversions.
+ * Expected Behavior: IR shows typed allocas, fptosi/fptrunc/store per type, and corresponding load/casts.
  */
 TEST(Integration, Codegen_Mixed_Array_Types_IR) {
     const char* src =

@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenDefFn.ParamBinding_DoesNotLoadParamVar
  * Inputs: DEF FNSQ(X)=X*X; DEF FNA$(S$)=S$+"!"; PRINT calls
  * Code under test: CodeGenerator inline DEF FN expansion and parameter binding
@@ -27,4 +27,3 @@ TEST(CodeGenDefFn, ParamBinding_DoesNotLoadParamVar) {
     ASSERT_EQ(ir.find("FNSQ"), std::string::npos);
     ASSERT_EQ(ir.find("FNA$"), std::string::npos);
 }
-

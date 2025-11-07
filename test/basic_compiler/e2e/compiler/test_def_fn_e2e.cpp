@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.DEF_FN
  * Purpose: Compile and run a program using DEF FN (numeric and string).
  * Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)

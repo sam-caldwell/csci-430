@@ -14,6 +14,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/***
+ * Test: E2E.MultiDim_String_Array_Assign_And_Print
+ * Purpose: Verify multi-dimensional string arrays assign/print correctly end-to-end.
+ * Components Under Test: Parser/Codegen for DIM S$(,)/element assign/PRINT; End-to-End run.
+ * Expected Behavior: Output shows the assigned string.
+ */
 TEST(E2E, MultiDim_String_Array_Assign_And_Print) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();
     const char* src =
@@ -36,4 +42,3 @@ TEST(E2E, MultiDim_String_Array_Assign_And_Print) {
     ASSERT_EQ(lines.size(), 1u);
     EXPECT_EQ(lines[0], std::string("HI"));
 }
-

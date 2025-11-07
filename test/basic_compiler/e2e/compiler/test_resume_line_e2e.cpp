@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.ResumeLine_FlowsToExplicitTarget
  * Inputs: Program triggers handler and RESUME 30
  * Code under test: End-to-end RESUME line behavior
@@ -48,4 +48,3 @@ TEST(E2E, ResumeLine_FlowsToExplicitTarget) {
     size_t p3 = out.find("3\n", pH+1); ASSERT_NE(p3, std::string::npos);
     ASSERT_EQ(out.find("2\n"), std::string::npos);
 }
-

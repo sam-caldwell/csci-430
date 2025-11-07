@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test Suite: E2E Mixed-Type Single-Line PRINT
  * Purpose: Mix scalar vars and arrays in one PRINT list; verify truncation and float formatting.
  */
@@ -50,4 +50,3 @@ TEST(E2E, MixedArrayPrints_SingleLine) {
     ASSERT_EQ(lines.size(), 1u);
     EXPECT_EQ(lines[0], std::string("1 3 2.250000 4.500000 5.125000 6.750000 -2 -7"));
 }
-

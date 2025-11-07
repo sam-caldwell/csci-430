@@ -12,7 +12,7 @@
 
 using namespace gwbasic;
 using namespace e2e_helpers;
-/*
+/***
  * Test Suite: E2E Gosub Simple
  * Purpose: Validate inlined GOSUB/RETURN sequencing end-to-end.
  * Components Under Test: Full compiler pipeline; GOSUB inlining; clang.

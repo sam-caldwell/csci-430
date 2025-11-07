@@ -6,9 +6,11 @@
 
 using namespace gwbasic;
 
-/*
- * Test Suite: CodeGen OPTION BASE (string arrays)
- * Purpose: Ensure DIM allocation length for string arrays honors OPTION BASE 1.
+/***
+ * Test: Integration.StringArray_With_OptionBase1_IR_UsesUb
+ * Purpose: Ensure OPTION BASE 1 sets the string array extent equal to upper bound.
+ * Components Under Test: CodeGenerator string array allocation under OPTION BASE 1.
+ * Expected Behavior: IR alloca uses [5 x ptr] for DIM S$(5) with BASE 1.
  */
 TEST(Integration, StringArray_With_OptionBase1_IR_UsesUb) {
     const char* src =

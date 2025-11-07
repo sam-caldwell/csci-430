@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.LogicalOps_Truthiness
  * Inputs: Program printing logical AND/OR/NOT with numeric truthiness
  * Expected behavior: Correct 0/1 results for combinations.
@@ -57,4 +57,3 @@ TEST(E2E, LogicalOps_Truthiness) {
         "0\n";
     ASSERT_EQ(out, expected);
 }
-

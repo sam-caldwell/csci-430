@@ -14,7 +14,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.GraphicsCircleDemo_PrintsOk
  * Inputs: demos/graphics-circle.bas compiled end-to-end
  * Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
@@ -47,4 +47,3 @@ TEST(E2E, GraphicsCircleDemo_PrintsOk) {
     // Validate text line
     ASSERT_NE(out.find("GRAPHICS CIRCLE DEMO OK\n"), std::string::npos);
 }
-

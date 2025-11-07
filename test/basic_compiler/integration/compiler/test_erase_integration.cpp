@@ -19,7 +19,7 @@ Code under test: Full compile pipeline
 Expected behavior: IR contains store float 0.0 to %A_arr and store ptr null to %S$_arr
 */
 TEST(Integration, ERASE_ZerosArrays_IR) {
-    const char* src =
+    const auto src =
         "10 DIM A(3)\n"
         "11 DIM S$(2)\n"
         "20 ERASE A,S$\n"

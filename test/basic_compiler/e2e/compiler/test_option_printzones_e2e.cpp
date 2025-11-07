@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.OptionPrintZones_ProducesZoneSpacing
  * Inputs: OPTION PRINTZONES ON; PRINT "A","B"
  * Expected behavior: Output has A, then 13 spaces, then B, then newline

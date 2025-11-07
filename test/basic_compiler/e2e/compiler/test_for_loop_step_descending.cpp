@@ -12,7 +12,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test Suite: E2E For Loop (descending)
  * Purpose: Validate FOR with STEP -1 iterates downward inclusively.
  * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output

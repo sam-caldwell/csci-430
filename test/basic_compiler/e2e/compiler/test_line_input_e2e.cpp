@@ -13,6 +13,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/***
+ * Test: E2E.LineInput_ReadsLineAndPrints
+ * Purpose: Verify LINE INPUT reads a full line from stdin and PRINT echoes it.
+ * Components Under Test: Parser (LINE INPUT), Codegen (fgets/scanf path), End-to-End run.
+ * Expected Behavior: Program prints the entered line exactly once.
+ */
 TEST(E2E, LineInput_ReadsLineAndPrints) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();
     auto src =
@@ -31,4 +37,3 @@ TEST(E2E, LineInput_ReadsLineAndPrints) {
     std::string out = runCommandWithInput(bin.string(), "hello world\\n");
     ASSERT_NE(out.find("hello world\n"), std::string::npos);
 }
-

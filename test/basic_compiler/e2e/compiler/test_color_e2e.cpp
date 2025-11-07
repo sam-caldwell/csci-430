@@ -13,7 +13,7 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/*
+/***
  * Test: E2E.COLOR_SetsAnsiCodes
  * Inputs: BASIC program with COLOR 2,4 and PRINT "X".
  * Code under test: Compiler::compileString -> clang link -> runCommand execution.
