@@ -35,6 +35,16 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         // Inline binding for DEF FN parameter?
         std::string bound;
         if (lookupBinding(v->name, bound)) return bound;
+        // Special-case INKEY$ (treated as built-in string function without parentheses)
+        {
+            std::string up = v->name; for (auto &ch : up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+            if (up == "INKEY$") {
+                std::string p = nextTemp();
+                { std::string ir = std::format("  {} = getelementptr inbounds [1 x i8], ptr @.str_empty, i64 0, i64 0", p); out << ir << Symbols::LF; }
+                log() << "line " << currentLine_ << " VarExpr(INKEY$) -> empty string" << Symbols::LF;
+                return p;
+            }
+        }
         ensureVarAllocated(out, v->name);
         std::string a = varAllocaName_[v->name];
         std::string r = nextTemp();

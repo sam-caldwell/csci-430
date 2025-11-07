@@ -2,6 +2,7 @@
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/ArrayAssignStmt.h"
+#include "basic_compiler/ast/ColorStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/StopStmt.h"
@@ -37,11 +38,15 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
 
     // Condition
     out << condLbl << ":" << Symbols::LF;
-    auto be = dyn_cast<const BinaryExpr>(ws->cond.get());
-    if (!be || (be->op != BinaryOp::Eq && be->op != BinaryOp::Ne && be->op != BinaryOp::Lt && be->op != BinaryOp::Le && be->op != BinaryOp::Gt && be->op != BinaryOp::Ge)) {
-        throw CodeGenError("WHILE condition must be a comparison");
+    std::string cond;
+    if (auto be = dyn_cast<const BinaryExpr>(ws->cond.get());
+        be && (be->op == BinaryOp::Eq || be->op == BinaryOp::Ne || be->op == BinaryOp::Lt || be->op == BinaryOp::Le || be->op == BinaryOp::Gt || be->op == BinaryOp::Ge)) {
+        cond = emitComparison(out, be);
+    } else {
+        std::string val = emitExpr(out, ws->cond.get(), "");
+        cond = nextTemp();
+        { std::string ir = std::format("  {} = fcmp one double {}, 0.0", cond, val); out << ir << Symbols::LF; }
     }
-    std::string cond = emitComparison(out, be);
     { std::string ir = std::format("  br i1 {}, label %{}, label %{}", cond, bodyLbl, endLbl); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While branch -> " << ir << Symbols::LF; }
 
     // Body
@@ -309,6 +314,20 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir2 << Symbols::LF; }
             std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
             storeNumberToVar(out, ins->name, dv);
+        } else if (auto col = dyn_cast<ColorStmt>(s.get())) {
+            auto emitColor = [&](const std::unique_ptr<Expr>& e, bool isFg){
+                if (!e) return;
+                std::string val = emitExpr(out, e.get(), "");
+                std::string i32v = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", i32v, val); out << ir << Symbols::LF; }
+                std::string masked = nextTemp(); { std::string ir = std::format("  {} = and i32 {}, 15", masked, i32v); out << ir << Symbols::LF; }
+                std::string idx64 = nextTemp(); { std::string ir = std::format("  {} = sext i32 {} to i64", idx64, masked); out << ir << Symbols::LF; }
+                std::string p = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x i32], ptr {}, i64 0, i64 {}", p, (isFg?"@.sgr_fg_tbl":"@.sgr_bg_tbl"), idx64); out << ir << Symbols::LF; }
+                std::string code = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr {}", code, p); out << ir << Symbols::LF; }
+                std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [7 x i8], ptr @.fmt_sgr, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 27, i32 {})", fmt, code); out << ir << Symbols::LF; }
+            };
+            emitColor(col->fg, true);
+            emitColor(col->bg, false);
         } else {
             throw CodeGenError("Unsupported statement in WHILE body");
         }

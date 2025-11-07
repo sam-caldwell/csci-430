@@ -31,12 +31,17 @@ void CodeGenerator::emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, 
     std::string elseLbl = currLineLabel; elseLbl += "_if_else"; elseLbl += ifId;
     std::string endLbl  = currLineLabel; endLbl  += "_if_end";  endLbl  += ifId;
 
-    // Emit condition
-    auto be = dyn_cast<const BinaryExpr>(ib->cond.get());
-    if (!be || (be->op != BinaryOp::Eq && be->op != BinaryOp::Ne && be->op != BinaryOp::Lt && be->op != BinaryOp::Le && be->op != BinaryOp::Gt && be->op != BinaryOp::Ge)) {
-        throw CodeGenError("IF condition must be a comparison");
+    // Emit condition: accept either a comparison or a general truthy numeric expression
+    std::string cond;
+    if (auto be = dyn_cast<const BinaryExpr>(ib->cond.get());
+        be && (be->op == BinaryOp::Eq || be->op == BinaryOp::Ne || be->op == BinaryOp::Lt || be->op == BinaryOp::Le || be->op == BinaryOp::Gt || be->op == BinaryOp::Ge)) {
+        cond = emitComparison(out, be);
+    } else {
+        // General boolean: treat non-zero as true
+        std::string val = emitExpr(out, ib->cond.get(), "");
+        cond = nextTemp();
+        { std::string ir = std::format("  {} = fcmp one double {}, 0.0", cond, val); out << ir << Symbols::LF; }
     }
-    std::string cond = emitComparison(out, be);
     if (!ib->elseBody.empty()) {
         std::string br = "  br i1 "; br += cond; br += ", label %"; br += thenLbl; br += ", label %"; br += elseLbl;
         out << br << Symbols::LF; log() << "line " << currentLine_ << " IfBlock -> " << br << Symbols::LF;

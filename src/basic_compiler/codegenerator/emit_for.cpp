@@ -11,6 +11,7 @@
 #include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/GotoStmt.h"
 #include "basic_compiler/ast/GosubStmt.h"
+#include "basic_compiler/ast/IfBlockStmt.h"
 #include <format>
 #include <sstream>
 #include <cmath>
@@ -421,6 +422,10 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
             }
         } else if (auto w = dyn_cast<WhileStmt>(s.get())) {
             emitWhile(out, w, currLineLabel, localCounter);
+        } else if (auto ib = dyn_cast<IfBlockStmt>(s.get())) {
+            emitIfBlock(out, ib, currLineLabel, localCounter);
+        } else if (auto nf = dyn_cast<ForStmt>(s.get())) {
+            emitFor(out, nf, currLineLabel, localCounter);
         } else {
             throw CodeGenError("Unsupported statement in FOR body");
         }
