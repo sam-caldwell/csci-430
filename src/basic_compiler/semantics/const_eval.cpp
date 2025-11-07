@@ -26,8 +26,14 @@ bool SemanticAnalyzer::constEval(const Expr* e, double& out) {
     if (const auto n = dyn_cast<const NumberExpr>(e)) { out = n->value; return true; }
     if (const auto u = dyn_cast<const UnaryExpr>(e)) {
         if (double v; constEval(u->inner.get(), v)) {
-            if (u->op == Symbols::PLUS.first()) { out = v; return true; }
-            if (u->op == Symbols::MINUS.first()) { out = -v; return true; }
+            if (u->op == Symbols::PLUS.first()) {
+                if (gMetrics) gMetrics->incUnaryElimPlus();
+                out = v; return true;
+            }
+            if (u->op == Symbols::MINUS.first()) {
+                if (gMetrics) gMetrics->incUnaryConstMinus();
+                out = -v; return true;
+            }
         }
         return false;
     }

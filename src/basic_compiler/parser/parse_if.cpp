@@ -19,7 +19,7 @@ namespace gwbasic {
  */
 std::unique_ptr<Stmt> Parser::parseIf() {
 
-    auto cond = parseComparison();
+    auto cond = parseExpression();
     int l = peek().line, c = peek().col;
     consume(TokenType::KwThen, "THEN");
     // Form 1: THEN <line>

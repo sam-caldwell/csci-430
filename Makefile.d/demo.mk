@@ -31,7 +31,8 @@ DEMO_SRCS := demos/factorial.bas \
 	demos/use-passed-params-all.bas \
 	demos/data-arrays-strings-integers-and-floats.bas \
 	demos/working-with-color.bas \
-	demos/graphics-circle.bas
+	demos/graphics-circle.bas \
+	demos/conways-life.bas
 demo:
 	@set -e; \
 	BUILD_ROOT="./build"; \

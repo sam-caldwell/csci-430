@@ -14,7 +14,7 @@ namespace gwbasic {
  */
 bool Lexer::tryEmitPrimary(std::vector<Token>& out) {
     const unsigned char cu = static_cast<unsigned char>(peek());
-    if (std::isdigit(cu)) {
+    if (std::isdigit(cu) || (peek() == '.' && std::isdigit(static_cast<unsigned char>(peekNext())))) {
         const Token t = number();
         emitToken(out, t);
         bol_ = false;
@@ -36,4 +36,3 @@ bool Lexer::tryEmitPrimary(std::vector<Token>& out) {
 }
 
 } // namespace gwbasic
-

@@ -419,6 +419,8 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
                 std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
                 storeNumberToArrayElem(out, aaset->name, elem, val);
             }
+        } else if (auto w = dyn_cast<WhileStmt>(s.get())) {
+            emitWhile(out, w, currLineLabel, localCounter);
         } else {
             throw CodeGenError("Unsupported statement in FOR body");
         }

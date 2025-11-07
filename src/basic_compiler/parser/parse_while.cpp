@@ -17,7 +17,7 @@ namespace gwbasic {
  *    WEND appears inline.
  */
 std::unique_ptr<Stmt> Parser::parseWhile() {
-    auto cond = parseComparison();
+    auto cond = parseExpression();
     const int l = peek().line;
     int c = peek().col;
     auto node = make_node<WhileStmt>({l, c}, std::move(cond));
