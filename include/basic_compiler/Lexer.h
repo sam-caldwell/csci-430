@@ -454,6 +454,25 @@ private:
     bool tryEmitPrimary(std::vector<Token>& out);
     void emitAmpLiteral(std::vector<Token>& out, int line, int col);
     bool tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, char c);
+
+    // Friend accessor for tests: exposes a minimal surface to validate
+    // internal cursor movement semantics without widening the public API.
+    friend class LexerAccessorForTests;
+};
+
+// Minimal friend accessor for tests: allows calling advance() and
+// inspecting cursor state (line/col/bol) and peek/atEnd for verification.
+class LexerAccessorForTests {
+public:
+    static char advance(Lexer& lx) { return lx.advance(); }
+    static int line(const Lexer& lx) { return lx.line_; }
+    static int col(const Lexer& lx) { return lx.col_; }
+    static bool bol(const Lexer& lx) { return lx.bol_; }
+    static bool atEnd(const Lexer& lx) { return lx.atEnd(); }
+    static char peek(const Lexer& lx) { return lx.peek(); }
+    static void emitAmpLiteral(Lexer& lx, std::vector<Token>& out, int line, int col) { lx.emitAmpLiteral(out, line, col); }
+    static std::string escapeForLog(const std::string& s) { return Lexer::escapeForLog(s); }
+    static Token identifierOrKeyword(Lexer& lx) { return lx.identifierOrKeyword(); }
 };
 
 } // namespace gwbasic

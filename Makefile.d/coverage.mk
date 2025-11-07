@@ -30,7 +30,9 @@ COVERAGE_SCOPE ?= test/
 COVERAGE_INCLUDE_RE ?= ^src/basic_compiler/
 COVERAGE_METRIC ?= lines
 # No test files included, so helper exclusion is unnecessary; keep empty unless overriding.
-COVERAGE_EXCLUDE_RE ?=
+# Exclude test helpers and any other paths matching this regex from coverage.
+# This keeps utility code under test/**/helper out of coverage metrics.
+COVERAGE_EXCLUDE_RE ?= (^|/)test/.*/helper/
 # Use a dedicated build directory for coverage to avoid CMakeCache path mismatches
 COVERAGE_BUILD_DIR ?= build/cmake-build-coverage
 

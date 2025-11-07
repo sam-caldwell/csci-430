@@ -11,7 +11,8 @@ set(COVERAGE_SCOPE "src/basic_compiler/" CACHE STRING "Path prefix to report/agg
 # Default scope: include all compiler sources only; exclude tests from coverage requirements.
 # Include CLI helpers, usage, and the CLI entrypoint (main.cpp) in coverage by default.
 set(COVERAGE_INCLUDE_RE "^(src/|include/)" CACHE STRING "egrep regex to include rows")
-set(COVERAGE_EXCLUDE_RE "" CACHE STRING "egrep regex to exclude rows")
+# Exclude test helpers by default to avoid penalizing coverage with utility code.
+set(COVERAGE_EXCLUDE_RE "(^|/)test/.*/helper/" CACHE STRING "egrep regex to exclude rows")
 set(COVERAGE_METRIC "lines" CACHE STRING "lines|regions|both (both requires both >= min)")
 
 # Test executables (from this project)

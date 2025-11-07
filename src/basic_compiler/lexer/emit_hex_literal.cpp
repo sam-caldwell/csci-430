@@ -22,13 +22,16 @@ namespace gwbasic {
 void Lexer::emitAmpLiteral(std::vector<Token>& out, const int line, const int col) {
     // Caller should have peek() == '&'
     advance();
-    if (atEnd()) { std::ostringstream oss; oss << "Unexpected '&' at " << line << ':' << col; throw LexError(oss.str()); }
+    if (atEnd()) {
+        std::ostringstream oss;
+        oss << "Unexpected '&' at " << line << ':' << col;
+        throw LexError(oss.str());
+    }
     const unsigned char cu = static_cast<unsigned char>(peek());
     const char up = static_cast<char>(std::toupper(cu));
 
     unsigned long long val = 0ULL;
     int base = 0;
-    bool expectDigits = true;
 
     if (up == 'H') { base = 16; advance(); }
     else if (up == 'O') { base = 8; advance(); }
@@ -58,7 +61,7 @@ void Lexer::emitAmpLiteral(std::vector<Token>& out, const int line, const int co
         advance();
         ++digits;
     }
-    if (expectDigits && digits == 0) {
+    if (digits == 0) {
         std::ostringstream oss; oss << "Invalid & literal at " << line << ':' << col; throw LexError(oss.str());
     }
     Token t(TokenType::Integer, std::to_string(val), line, col);
