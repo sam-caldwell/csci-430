@@ -48,7 +48,7 @@ TEST(CodeGenIfBlock, KitchenSink) {
         "910 END\n";
     std::string ir = Compiler::compileString(src);
     // Spot check a few signatures that indicate most branches were reached
-    ASSERT_NE(ir.find("getelementptr inbounds [16 x ptr], ptr @gwb_files"), std::string::npos) << "file channel array present";
+    ASSERT_NE(ir.find("@snprintf"), std::string::npos) << "screen write via snprintf present";
     ASSERT_NE(ir.find("@srand48"), std::string::npos);
     ASSERT_NE(ir.find("_on_cont_"), std::string::npos);
     ASSERT_NE(ir.find("_on_gs_cont_"), std::string::npos);

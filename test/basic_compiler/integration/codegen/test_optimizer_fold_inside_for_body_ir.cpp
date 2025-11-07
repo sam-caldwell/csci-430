@@ -23,4 +23,3 @@ TEST(OptimizerExpr, FoldInsideForBody) {
     EXPECT_NE(ir.find(", i64 3)"), std::string::npos);
     EXPECT_EQ(ir.find(" = fadd double 1.0, 2.0"), std::string::npos);
 }
-

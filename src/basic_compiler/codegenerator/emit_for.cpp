@@ -6,6 +6,11 @@
 #include "basic_compiler/ast/NumberExpr.h"
 #include "basic_compiler/ast/StopStmt.h"
 #include "basic_compiler/ast/SystemStmt.h"
+#include "basic_compiler/ast/MidAssignStmt.h"
+#include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
+#include "basic_compiler/ast/GosubStmt.h"
 #include <format>
 #include <sstream>
 #include <cmath>
@@ -26,7 +31,7 @@ namespace gwbasic {
  *    end. Uses double precision arithmetic and inclusive end condition.
  */
 void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const std::string& currLineLabel, int& localCounter) {
-
+    
     std::string loopId = std::to_string(++localCounter);
     std::string condLbl = currLineLabel; condLbl += "_for_cond"; condLbl += loopId;
     std::string bodyLbl = currLineLabel; bodyLbl += "_for_body"; bodyLbl += loopId;
@@ -187,17 +192,33 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
                     { const char* symI = last ? "@.fmt_int" : (nextStartsWithSpace ? "@.fmt_int_ns" : "@.fmt_int_sp"); std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtI, symI); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body Print fmtI -> " << ir1 << Symbols::LF; }
                     if (hasOverride) {
                         std::string useFmt = emitExpr(out, pr->format.get(), currLineLabel);
+                        // Dynamic int/float split while honoring override
+                        std::string iv = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", iv, val); out << ir << Symbols::LF; }
+                        std::string dv = nextTemp(); { std::string ir = std::format("  {} = sitofp i64 {} to double", dv, iv); out << ir << Symbols::LF; }
+                        std::string isInt = nextTemp(); { std::string ir = std::format("  {} = fcmp oeq double {}, {}", isInt, dv, val); out << ir << Symbols::LF; }
+                        std::string intLbl = currLineLabel + std::string("_print_int_") + std::to_string(++localCounter);
+                        std::string fltLbl = currLineLabel + std::string("_print_flt_") + std::to_string(localCounter);
+                        std::string contLbl = currLineLabel + std::string("_print_cont_") + std::to_string(localCounter);
+                        { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl, fltLbl); out << ir << Symbols::LF; }
+                        out << intLbl << ":" << Symbols::LF;
                         if (pr->channel >= 1) {
                             std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
                             std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, fptr); out << ir << Symbols::LF; }
-                            { std::string ir2 = std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr {}, double {})", fh, useFmt, val); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body Print fprintf (override) -> " << ir2 << Symbols::LF; }
+                            { std::string ir2 = std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr {}, i64 {})", fh, useFmt, iv); out << ir2 << Symbols::LF; }
                         } else {
-                            { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", useFmt, val); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " ForStmt body Print printf (override) -> " << ir2 << Symbols::LF; }
-                            std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
-                            std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, double {})", n, sbuf, useFmt, val); out << irn << Symbols::LF; }
-                            std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
-                            { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
+                            { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", useFmt, iv); out << ir2 << Symbols::LF; }
                         }
+                        { std::string ir = std::format("  br label %{}", contLbl); out << ir << Symbols::LF; }
+                        out << fltLbl << ":" << Symbols::LF;
+                        if (pr->channel >= 1) {
+                            std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
+                            std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, fptr); out << ir << Symbols::LF; }
+                            { std::string ir2 = std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr {}, double {})", fh, useFmt, val); out << ir2 << Symbols::LF; }
+                        } else {
+                            { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", useFmt, val); out << ir2 << Symbols::LF; }
+                        }
+                        { std::string ir = std::format("  br label %{}", contLbl); out << ir << Symbols::LF; }
+                        out << contLbl << ":" << Symbols::LF;
                     } else {
                         std::string iv = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", iv, val); out << ir << Symbols::LF; }
                         std::string dv = nextTemp(); { std::string ir = std::format("  {} = sitofp i64 {} to double", dv, iv); out << ir << Symbols::LF; }
@@ -246,6 +267,100 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
         } else if (isa<SystemStmt>(s.get())) {
             out << std::format("  br label %exit") << Symbols::LF;
             forTerminated = true; break;
+        } else if (auto mid = dyn_cast<MidAssignStmt>(s.get())) {
+            // Mirror MID$ lowering from line-block/if-block emitters
+            std::string dest;
+            if (!mid->indices.empty()) {
+                const auto &dims = arrayDims_[mid->name];
+                long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+                ensureStringArrayAllocated(out, mid->name, static_cast<int>(total));
+                std::string base = arrayAllocaName_[mid->name];
+                std::vector<std::string> idxI64s; idxI64s.reserve(mid->indices.size());
+                std::vector<std::string> bads; bads.reserve(mid->indices.size());
+                for (size_t di = 0; di < mid->indices.size(); ++di) {
+                    std::string idxReg = emitExpr(out, mid->indices[di].get(), currLineLabel);
+                    std::string idxI64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", idxI64, idxReg); out << ir << Symbols::LF; }
+                    idxI64s.push_back(idxI64);
+                    std::string ltBase = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", ltBase, idxI64, optionBase_); out << ir << Symbols::LF; }
+                    std::string gtUb = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, {}", gtUb, idxI64, dims[di]); out << ir << Symbols::LF; }
+                    std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, ltBase, gtUb); out << ir << Symbols::LF; }
+                    bads.push_back(bad);
+                }
+                std::string anyBad = bads[0];
+                for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]); out << ir << Symbols::LF; } anyBad = nb; }
+                std::string doLbl = currLineLabel + std::string("_mid_ok_") + std::to_string(++localCounter);
+                std::string endLbl2 = currLineLabel + std::string("_mid_end_") + std::to_string(localCounter);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, endLbl2, doLbl); out << ir << Symbols::LF; }
+                out << doLbl << ":" << Symbols::LF;
+                // Compute destination element pointer
+                std::vector<long long> extents; extents.reserve(dims.size());
+                for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+                std::vector<long long> strides(dims.size(), 1);
+                for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
+                std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
+                for (const auto& ii : idxI64s) { std::string a = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", a, ii, optionBase_); out << ir << Symbols::LF; } adjs.push_back(a); }
+                std::string lin = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]); out << ir << Symbols::LF; }
+                for (size_t di = 1; di < adjs.size(); ++di) { std::string t = nextTemp(); { std::string ir = std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]); out << ir << Symbols::LF; } std::string s2 = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, {}", s2, lin, t); out << ir << Symbols::LF; } lin = s2; }
+                std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, base, lin); out << ir << Symbols::LF; }
+                std::string dptr = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", dptr, elem); out << ir << Symbols::LF; }
+                dest = dptr;
+                // End label when OOB
+                { std::string ir = std::format("  br label %{}", endLbl2); out << ir << Symbols::LF; }
+                out << endLbl2 << ":" << Symbols::LF;
+            } else {
+                ensureVarAllocated(out, mid->name);
+                dest = varAllocaName_[mid->name];
+            }
+            // Compute offsets/length
+            std::string off = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", off, emitExpr(out, mid->start.get(), currLineLabel)); out << ir << Symbols::LF; }
+            std::string dlen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", dlen, dest); out << ir << Symbols::LF; }
+            std::string n = nextTemp(); { std::string ir = std::format("  {} = {}", n, (mid->len ? std::string("fptosi double ") + emitExpr(out, mid->len.get(), currLineLabel) + " to i64" : std::string("call i64 @strlen(ptr ") + emitExpr(out, mid->value.get(), currLineLabel) + ")")); out << ir << Symbols::LF; }
+            std::string src = nextTemp(); { std::string ir = std::format("  {} = {}", src, (mid->len ? std::string("getelementptr inbounds i8, ptr ") + emitExpr(out, mid->value.get(), currLineLabel) + ", i64 0" : std::string("getelementptr inbounds i8, ptr ") + emitExpr(out, mid->value.get(), currLineLabel) + ", i64 0")); out << ir << Symbols::LF; }
+            std::string negOff = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", negOff, off); out << ir << Symbols::LF; }
+            std::string geLen = nextTemp(); { std::string ir = std::format("  {} = icmp sge i64 {}, {}", geLen, off, dlen); out << ir << Symbols::LF; }
+            std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, negOff, geLen); out << ir << Symbols::LF; }
+            std::string doLbl = currLineLabel + std::string("_mid_do_") + std::to_string(++localCounter);
+            std::string endLbl2b = currLineLabel + std::string("_mid_end_") + std::to_string(localCounter);
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", bad, endLbl2b, doLbl); out << ir << Symbols::LF; }
+            out << doLbl << ":" << Symbols::LF;
+            std::string avail = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", avail, dlen, off); out << ir << Symbols::LF; }
+            std::string n_lt_av = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", n_lt_av, n, avail); out << ir << Symbols::LF; }
+            std::string m1 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 {}, i64 {}", m1, n_lt_av, n, avail); out << ir << Symbols::LF; }
+            std::string m1_lt_s = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", m1_lt_s, m1, dlen); out << ir << Symbols::LF; }
+            std::string m2 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 {}, i64 {}", m2, m1_lt_s, m1, dlen); out << ir << Symbols::LF; }
+            std::string dst = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", dst, dest, off); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", dst, src, m2); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  br label %{}", endLbl2b); out << ir << Symbols::LF; }
+            out << endLbl2b << ":" << Symbols::LF;
+        } else if (auto og = dyn_cast<OnGotoStmt>(s.get())) {
+            std::string idx = emitExpr(out, og->index.get(), currLineLabel);
+            std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; }
+            std::string contLbl = currLineLabel + std::string("_on_cont_") + std::to_string(++localCounter);
+            {
+                std::ostringstream ir; ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
+                for (size_t i = 0; i < og->targets.size(); ++i) ir << " i32 " << (i+1) << ", label %" << lineLabelName(og->targets[i]);
+                ir << " ]"; out << ir.str() << Symbols::LF; }
+            out << contLbl << ":" << Symbols::LF;
+        } else if (auto ogs = dyn_cast<OnGosubStmt>(s.get())) {
+            std::string idx = emitExpr(out, ogs->index.get(), currLineLabel);
+            std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; }
+            std::string contLbl = currLineLabel + std::string("_on_gs_cont_") + std::to_string(++localCounter);
+            std::vector<std::string> entryLbls; entryLbls.reserve(ogs->targets.size());
+            for (size_t i = 0; i < ogs->targets.size(); ++i) entryLbls.push_back(currLineLabel + std::string("_on_gs_entry_") + std::to_string(localCounter) + std::string("_") + std::to_string(i+1));
+            {
+                std::ostringstream ir; ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
+                for (size_t i = 0; i < ogs->targets.size(); ++i) ir << " i32 " << (i+1) << ", label %" << entryLbls[i];
+                ir << " ]"; out << ir.str() << Symbols::LF; }
+            for (size_t i = 0; i < ogs->targets.size(); ++i) emitSubroutineInline(out, ogs->targets[i], entryLbls[i], contLbl);
+            out << contLbl << ":" << Symbols::LF;
+        } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
+            std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine); out << ir << Symbols::LF; forTerminated = true; break;
+        } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
+            std::string contLbl = currLineLabel + std::string("_gosub_cont") + std::to_string(++localCounter);
+            std::string entryLbl = currLineLabel + std::string("_gosub_entry") + std::to_string(localCounter);
+            out << "  br label %" << entryLbl << Symbols::LF;
+            emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
+            out << contLbl << ":" << Symbols::LF;
         } else if (auto aaset = dyn_cast<ArrayAssignStmt>(s.get())) {
             const auto &dims = arrayDims_[aaset->name];
             long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }

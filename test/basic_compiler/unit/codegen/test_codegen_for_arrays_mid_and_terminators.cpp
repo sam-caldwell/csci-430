@@ -12,7 +12,7 @@ using namespace gwbasic;
  *          PRINT USING and channel variants, nextStartsWithSpace formatting, and STOP/SYSTEM paths
  *          within the FOR body (terminators placed at end of each loop body).
  */
-TEST(CodeGenFor, DISABLED_Arrays_Mid_Terminators) {
+TEST(CodeGenFor, Arrays_Mid_Terminators) {
     const auto src =
         "10 OPTION BASE 1\n"
         "20 DIM A(2,2)\n"

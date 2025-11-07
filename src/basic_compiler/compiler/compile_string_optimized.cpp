@@ -18,18 +18,27 @@ namespace gwbasic {
  */
 std::string Compiler::compileStringOptimized(const std::string& source) {
     Lexer lex(source);
+    // debug disabled
     auto tokens = lex.tokenize();
+    
     Parser parser(std::move(tokens));
     auto program = parser.parseProgram();
+    
     if (gMetrics) gMetrics->recordParsedSnapshot(program);
+    
     gwbasic::AstOptimizer::optimize(program);
+    
     if (gMetrics) gMetrics->recordOptimizedSnapshot(program);
     CodeGenerator gen;
     SemanticAnalyzer sema;
+    
     auto res = sema.analyze(program);
     gen.setSemantics(res);
+    
     auto ir = gen.generate(program);
+    
     if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(ir));
+    
     return Compiler::addDefaultTripleIfMissing(ir);
 }
 

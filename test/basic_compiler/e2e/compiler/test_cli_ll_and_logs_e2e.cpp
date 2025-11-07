@@ -9,7 +9,7 @@
 
 using namespace e2e_helpers;
 
-static std::string cliPath3() { return std::string("basic_compiler/basic_compiler"); }
+static std::string cliPath3() { return e2e_helpers::sourceRoot() + "/build/basic_compiler/basic_compiler"; }
 
 TEST(CLI, WritesLLFileWhenRequested) {
     namespace fs = std::filesystem;

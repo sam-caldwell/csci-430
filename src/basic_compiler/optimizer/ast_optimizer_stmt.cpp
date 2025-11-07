@@ -89,7 +89,8 @@ void AstOptimizer::optimize(Program& program) {
                     } else if (const auto bpr = dyn_cast<PrintStmt>(bs.get())) {
                         if (bpr->value) bpr->value = optExpr(std::move(bpr->value));
                         for (auto& v : bpr->more) v = optExpr(std::move(v));
-                        body.emplace_back(std::move(bpr));
+                        // Move the owning unique_ptr, not the raw pointer
+                        body.emplace_back(std::move(bs));
                     } else {
                         // leave as-is; other constructs in FOR body unchanged
                         body.emplace_back(std::move(bs));

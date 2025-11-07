@@ -9,7 +9,7 @@
 
 using namespace e2e_helpers;
 
-static std::string cliPath2() { return std::string("basic_compiler/basic_compiler"); }
+static std::string cliPath2() { return e2e_helpers::sourceRoot() + "/build/basic_compiler/basic_compiler"; }
 
 TEST(CLI, UnknownArgumentYieldsUsageExit2) {
     namespace fs = std::filesystem;
@@ -37,7 +37,8 @@ TEST(CLI, InvalidTargetTripleExits2) {
 }
 
 TEST(CLI, PrintTriplePrintsAndExits0) {
-    const std::string cmd = '"' + cliPath2() + '"' + " --print-triple 2>&1; echo EXIT:$?";
+    // CLI expects an input path; print-triple exits before reading it
+    const std::string cmd = '"' + cliPath2() + '"' + " dummy.bas --print-triple 2>&1; echo EXIT:$?";
     const std::string out = runCommand(cmd);
     // Expect something like x86_64-apple-darwin or arm64-apple-macosx...
     ASSERT_NE(out.find("-"), std::string::npos);

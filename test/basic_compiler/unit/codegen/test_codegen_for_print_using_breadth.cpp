@@ -12,7 +12,7 @@ using namespace gwbasic;
  *          and exercise nextStartsWithSpace to select *_ns formats; traverse both
  *          integer and float branches in loop body.
  */
-TEST(CodeGenFor, DISABLED_PrintUsing_Breadth) {
+TEST(CodeGenFor, PrintUsing_Breadth) {
     const auto src =
         "10 FOR I=1 TO 1\n"
         "20 PRINT USING(\"%d\"), I, \" X\"\n"

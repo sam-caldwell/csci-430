@@ -27,16 +27,31 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
         channel = std::stoi(peek().lexeme); advance();
         if (match(TokenType::Comma)) {}
     }
-    // Optional: USING formatExpr ,
+    // Optional: USING formatExpr , (leading)
     std::unique_ptr<Expr> fmt;
     if (match(TokenType::KwUsing)) {
         fmt = parseExpression();
         if (match(TokenType::Comma)) {}
     }
-    // Parse one or more expressions separated by commas
+    // Parse a list of items separated by commas. Allow USING(fmt) to appear
+    // mid-list; when encountered, set/replace the active format and do not
+    // emit a value item for it. Last one wins.
     std::vector<std::unique_ptr<Expr>> items;
-    items.push_back(parseExpression());
-    while (match(TokenType::Comma)) items.push_back(parseExpression());
+    // First item or USING
+    if (check(TokenType::KwUsing)) {
+        advance();
+        fmt = parseExpression();
+    } else {
+        items.push_back(parseExpression());
+    }
+    while (match(TokenType::Comma)) {
+        if (check(TokenType::KwUsing)) {
+            advance();
+            fmt = parseExpression();
+            continue;
+        }
+        items.push_back(parseExpression());
+    }
     auto node = make_node<PrintStmt>({l, c}, std::move(items));
     node->channel = channel;
     node->format = std::move(fmt);

@@ -20,4 +20,3 @@ TEST(OptimizerFor, StepElision) {
     // Condition for step sign check uses 1.0 literal when step is elided
     EXPECT_NE(ir.find(" = fcmp olt double 1.0, 0.0"), std::string::npos);
 }
-

@@ -4,13 +4,14 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include "source_root.h"
 #include "run_command.h"
 #include "../../helper/tool_exists.h"
 #include "clang_path.h"
 
 using namespace e2e_helpers;
 
-static std::string cliBin() { return std::string("basic_compiler/basic_compiler"); }
+static std::string cliBin() { return e2e_helpers::sourceRoot() + "/build/basic_compiler/basic_compiler"; }
 
 TEST(CLI, BitcodeFlagProducesBCFile) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP() << "clang not found; skipping";
@@ -58,4 +59,3 @@ TEST(CLI, LinkExecutableAndRun) {
     const std::string runOut = runCommand('"' + exe.string() + '"');
     ASSERT_NE(runOut.find("9\n"), std::string::npos);
 }
-

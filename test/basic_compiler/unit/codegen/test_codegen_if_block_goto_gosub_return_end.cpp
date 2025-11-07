@@ -32,4 +32,3 @@ TEST(CodeGenIfBlock, GotoGosubReturnEnd) {
     ASSERT_NE(ir.find("_gosub_entry"), std::string::npos);
     ASSERT_NE(ir.find(" br label %line"), std::string::npos);
 }
-

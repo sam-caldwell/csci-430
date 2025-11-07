@@ -11,7 +11,7 @@ using namespace gwbasic;
  * Purpose: Exercise emit_if_block array index plumbing for 3D numeric and string arrays,
  *          including out-of-bounds error branches and MID$ on array/scalar destinations.
  */
-TEST(CodeGenIfBlock, DISABLED_Arrays3D_And_BoundsErrors) {
+TEST(CodeGenIfBlock, Arrays3D_And_BoundsErrors) {
     const auto src =
         "10 OPTION BASE 1\n"
         "20 DIM X(2,2,2)\n"
