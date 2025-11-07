@@ -7,10 +7,10 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.Codegen_Emits_Pow_Call
-Inputs: Program with exponentiation in an expression
-Expected: IR declares @pow and calls it for '^'.
-*/
+ * Test: Integration.Codegen_Emits_Pow_Call
+ * Inputs: Program with exponentiation in an expression
+ * Expected: IR declares @pow and calls it for '^'.
+ */
 TEST(Integration, Codegen_Emits_Pow_Call) {
     std::string src = R"(10 PRINT 2 ^ 3
 )";

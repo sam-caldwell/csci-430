@@ -4,12 +4,6 @@
 
 ## Parser and Grammar Coverage
 
-- Implement INPUT improvements:
-  - INPUT var[, var...], INPUT ; prompt$, var[, ...], INPUT "prompt"; var[, ...] (current parser only accepts single 
-    var or redirects to file form).
-  - LINE INPUT forms already parse, but see runtime gaps below.
-  - Ensure all features have appropriate unit/integration/e2e tests.
-
 - Additional commands listed in docs/gw-basic.ebnf but not recognized in the lexer/token set: FILES, NAME, KILL, MKDIR,
   RMDIR, WIDTH, LOCATE, CLS, PSET, PRESET, LINE (graphics), PAINT, DRAW, VIEW/VIEW PRINT, WINDOW, BEEP/SOUND/PLAY, 
   KEY/KEYn/ON KEY, ON event variants, PEN/STRIG, TIMER ON/OFF, TRON/TROFF, CONT, LOAD/SAVE/NEW/DELETE/LIST/LLIST/AUTO/

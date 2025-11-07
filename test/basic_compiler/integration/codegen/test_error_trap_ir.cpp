@@ -7,10 +7,10 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.ErrorTrapIR
-Inputs: Small program using ON ERROR GOTO / ERROR / RESUME NEXT
-Expected: IR contains trap global stores and switch to handler label
-*/
+ * Test: Integration.ErrorTrapIR
+ * Inputs: Small program using ON ERROR GOTO / ERROR / RESUME NEXT
+ * Expected: IR contains trap global stores and switch to handler label
+ */
 TEST(Integration, ErrorTrapIR) {
     std::string src = R"(10 ON ERROR GOTO 300
 20 PRINT 1

@@ -6,8 +6,8 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
@@ -18,12 +18,6 @@ using namespace e2e_helpers;
  * Test Suite: E2E Mixed-Type Array Prints
  * Purpose: Confirm truncation for integer stores and float formatting.
  */
-/*
-Test: E2E.MixedArrayPrints_Truncation_And_FloatFormat
-Inputs: BASIC program compiled and executed
-Code under test: end-to-end pipeline
-Expected behavior: integer arrays truncate; single/double print with 6 decimals.
-*/
 TEST(E2E, MixedArrayPrints_Truncation_And_FloatFormat) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();
     const char* src =

@@ -6,25 +6,20 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/***
- * Test: E2E.SWAP_Numeric_And_String
- * Purpose: Validate SWAP exchanges values for scalars (numeric and string).
- * Expected: Program prints swapped values in order.
- */
 /*
-Test: E2E.SWAP_Numeric_And_String
-Inputs: Program swaps X and Y; swaps A$ and B$; prints results
-Code under test: Full pipeline
-Expected behavior: Output has lines "2 1" and then "bar" and "foo"
-*/
+ * Test: E2E.SWAP_Numeric_And_String
+ * Inputs: Program swaps X and Y; swaps A$ and B$; prints results
+ * Code under test: Full pipeline
+ * Expected behavior: Output has lines "2 1" and then "bar" and "foo"
+ */
 TEST(E2E, SWAP_Numeric_And_String) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     const char* src =

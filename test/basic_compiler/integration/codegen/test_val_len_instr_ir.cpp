@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.VAL_LEN_INSTR_IR_Contains_Deps
-Inputs: Program using LEN, VAL, and INSTR
-Code under test: Compiler::compileString IR generation
-Expected behavior: IR contains calls to @strlen, @strtod, and @strstr
-*/
+ * Test: Integration.VAL_LEN_INSTR_IR_Contains_Deps
+ * Inputs: Program using LEN, VAL, and INSTR
+ * Code under test: Compiler::compileString IR generation
+ * Expected behavior: IR contains calls to @strlen, @strtod, and @strstr
+ */
 TEST(Integration, VAL_LEN_INSTR_IR_Contains_Deps) {
     const char* src =
         "10 PRINT LEN(\"HELLO\")\n"

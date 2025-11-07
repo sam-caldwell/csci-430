@@ -37,6 +37,8 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         out << "@.msg_break = private unnamed_addr constant [13 x i8] c\"Break in %d\\0A\\00\"" << Symbols::LF;
     }
     out << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"" << Symbols::LF
+        // scanf format to read an entire line into a buffer, discarding the trailing newline
+        << "@.fmt_line_in = private unnamed_addr constant [12 x i8] c\"%255[^\\0A]%*c\\00\"" << Symbols::LF
         << "@.mode_r = private unnamed_addr constant [2 x i8] c\"r\\00\"" << Symbols::LF
         << "@.mode_w = private unnamed_addr constant [2 x i8] c\"w\\00\"" << Symbols::LF
         << "@.mode_rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"" << Symbols::LF

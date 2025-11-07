@@ -9,28 +9,14 @@
 #include <cmath>
 
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
-#include "source_root.h"
+#include "../../helper/source_root.h"
+#include "../../helper/parse_row.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
-
-namespace {
-
-struct Row { double x; double s; double c; double t; };
-
-// Parse a single data line of the form:
-// "<x> <sin> <cos> <tan>" (numbers with 6 decimals)
-// Returns true if four doubles were parsed.
-bool parseRow(const std::string& line, Row& out) {
-    std::istringstream iss(line);
-    if (!(iss >> out.x >> out.s >> out.c >> out.t)) return false;
-    return true;
-}
-
-} // namespace
 
 /***
  * Test: E2E.TrigDemo_MathAccuracy

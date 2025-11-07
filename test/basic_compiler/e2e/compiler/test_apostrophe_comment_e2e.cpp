@@ -6,28 +6,23 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/***
- * Test: E2E.ApostropheComment_IgnoresRestOfLine
- * Purpose: Validate runtime behavior: apostrophe comments are skipped.
- * Expected: Two lines with numbers 1 and 2.
- */
 /*
-Test: E2E.ApostropheComment_IgnoresRestOfLine
-Inputs: Program with inline apostrophe comments containing invalid tokens
-Code under test: Full pipeline
-Expected behavior: Runs and prints two lines: 1 and 2
-*/
+ * Test: E2E.ApostropheComment_IgnoresRestOfLine
+ * Inputs: Program with inline apostrophe comments containing invalid tokens
+ * Code under test: Full pipeline
+ * Expected behavior: Runs and prints two lines: 1 and 2
+ */
 TEST(E2E, ApostropheComment_IgnoresRestOfLine) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
-    const char* src =
+    auto src =
         "10 PRINT 1 ' !! $$$ invalid tokens after comment\n"
         "20 PRINT 2 ' more !@# junk\n"
         "30 END\n";

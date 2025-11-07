@@ -6,18 +6,18 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.LogicalOps_Truthiness
-Inputs: Program printing logical AND/OR/NOT with numeric truthiness
-Expected behavior: Correct 0/1 results for combinations.
-*/
+ * Test: E2E.LogicalOps_Truthiness
+ * Inputs: Program printing logical AND/OR/NOT with numeric truthiness
+ * Expected behavior: Correct 0/1 results for combinations.
+ */
 TEST(E2E, LogicalOps_Truthiness) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

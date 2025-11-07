@@ -6,18 +6,18 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.RelationalOps_Numeric_And_String
-Inputs: Program printing results of numeric and string comparisons
-Expected behavior: Outputs lines of 0/1 matching truth values.
-*/
+ * Test: E2E.RelationalOps_Numeric_And_String
+ * Inputs: Program printing results of numeric and string comparisons
+ * Expected behavior: Outputs lines of 0/1 matching truth values.
+ */
 TEST(E2E, RelationalOps_Numeric_And_String) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

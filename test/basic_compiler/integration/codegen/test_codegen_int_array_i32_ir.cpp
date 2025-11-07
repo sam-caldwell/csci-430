@@ -10,14 +10,8 @@ using namespace gwbasic;
  * Test Suite: CodeGen Integer Arrays (i32)
  * Purpose: Ensure % arrays lower to i32 with proper fptosi/sitofp conversions.
  */
-/*
-Test: Integration.Codegen_IntArray_i32_StoresAndLoads
-Inputs: Source compiled to IR
-Code under test: Code generation (IR text)
-Expected behavior: Alloca/getelementptr use i32; fptosi/sitofp present.
-*/
 TEST(Integration, Codegen_IntArray_i32_StoresAndLoads) {
-    const char* src =
+    const auto src =
         "10 DIM A%(3)\n"
         "20 A%(1)=2.7\n"
         "30 PRINT A%(1)\n"

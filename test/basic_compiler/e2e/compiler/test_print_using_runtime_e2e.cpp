@@ -6,19 +6,19 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.PRINT_USING_Runtime_PrintsFormatted
-Inputs: Program prints a number using PRINT USING("%d")
-Code under test: Full compile+link+run pipeline for PRINT USING
-Expected behavior: Output contains the formatted integer
-*/
+ * Test: E2E.PRINT_USING_Runtime_PrintsFormatted
+ * Inputs: Program prints a number using PRINT USING("%d")
+ * Code under test: Full compile+link+run pipeline for PRINT USING
+ * Expected behavior: Output contains the formatted integer
+ */
 TEST(E2E, PRINT_USING_Runtime_PrintsFormatted) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     const std::string src =

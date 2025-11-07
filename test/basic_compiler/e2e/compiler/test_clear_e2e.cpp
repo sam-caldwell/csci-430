@@ -5,8 +5,8 @@
 #include <fstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
@@ -17,12 +17,6 @@ using namespace e2e_helpers;
  * Purpose: Validate runtime behavior: CLEAR resets previously set variables to zero.
  * Expected: Output shows zeros after CLEAR.
  */
-/*
-Test: E2E.CLEAR_ResetsScalars
-Inputs: Program assigns A,B non-zero, CLEAR, then prints A,B
-Code under test: Full pipeline
-Expected behavior: Output contains "0.000000 0.000000\n"
-*/
 TEST(E2E, CLEAR_ResetsScalars) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     std::string src =

@@ -6,20 +6,20 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
-#include "source_root.h"
+#include "../../helper/source_root.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.GraphicsCircleDemo_PrintsOk
-Inputs: demos/graphics-circle.bas compiled end-to-end
-Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
-Expected behavior: Program compiles and runs; prints confirmation line
-*/
+ * Test: E2E.GraphicsCircleDemo_PrintsOk
+ * Inputs: demos/graphics-circle.bas compiled end-to-end
+ * Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
+ * Expected behavior: Program compiles and runs; prints confirmation line
+ */
 TEST(E2E, GraphicsCircleDemo_PrintsOk) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

@@ -6,18 +6,18 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.OptionPrintZones_ProducesZoneSpacing
-Inputs: OPTION PRINTZONES ON; PRINT "A","B"
-Expected behavior: Output has A, then 13 spaces, then B, then newline
-*/
+ * Test: E2E.OptionPrintZones_ProducesZoneSpacing
+ * Inputs: OPTION PRINTZONES ON; PRINT "A","B"
+ * Expected behavior: Output has A, then 13 spaces, then B, then newline
+ */
 TEST(E2E, OptionPrintZones_ProducesZoneSpacing) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     const std::string src =

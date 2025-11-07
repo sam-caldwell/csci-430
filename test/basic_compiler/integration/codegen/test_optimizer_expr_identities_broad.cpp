@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: OptimizerExpr.IdentitiesAndFoldsBroad
-Purpose: Exercise AstOptimizer::optExpr rules: unary +/- elimination/fold,
-         add/sub/mul/div constant folding, and identities (x+0, x-0, x*1,
-         x*0, x/1), plus a couple of comparisons.
-*/
+ * Test: OptimizerExpr.IdentitiesAndFoldsBroad
+ * Purpose: Exercise AstOptimizer::optExpr rules: unary +/- elimination/fold,
+ *          add/sub/mul/div constant folding, and identities (x+0, x-0, x*1,
+ *          x*0, x/1), plus a couple of comparisons.
+ */
 TEST(OptimizerExpr, IdentitiesAndFoldsBroad) {
     const char* src =
         "10 A=2\n"

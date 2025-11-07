@@ -6,8 +6,8 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
@@ -17,12 +17,6 @@ using namespace e2e_helpers;
  * Test: E2E.IfInlineThenElseTrueFalse
  * Purpose: Validate runtime behavior of inline IF THEN/ELSE lists on both branches.
  */
-/*
-Test: E2E.IfInlineThenElseTrueFalse
-Inputs: Two programs: one true branch (prints T), one false branch (prints F)
-Code under test: Full pipeline + runtime
-Expected behavior: Outputs contain expected letter
-*/
 TEST(E2E, IfInlineThenElseTrueFalse) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     // True branch

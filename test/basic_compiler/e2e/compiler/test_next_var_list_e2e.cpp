@@ -5,17 +5,17 @@
 #include <fstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
+#include "../../helper/clang_path.h"
 #include "../../helper/tool_exists.h"
 #include "../../e2e/run_command.h"
 
 using namespace gwbasic;
 
 /*
-Test: E2E.NextVarList_NestedLoopsPrints
-Inputs: Program with nested FOR loops closed by NEXT var-list
-Expected behavior: Program prints 4 pairs (1..2 x 1..2) and terminates.
-*/
+ * Test: E2E.NextVarList_NestedLoopsPrints
+ * Inputs: Program with nested FOR loops closed by NEXT var-list
+ * Expected behavior: Program prints 4 pairs (1..2 x 1..2) and terminates.
+ */
 TEST(E2E, NextVarList_NestedLoopsPrints) {
     if (!e2e_helpers::toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     const std::string src =

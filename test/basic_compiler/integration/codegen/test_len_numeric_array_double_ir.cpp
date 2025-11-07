@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.LEN_Numeric_Array_Double_IR
-Inputs: Program DIMs a DOUBLE (#) array and prints LEN of an element
-Code under test: Code generation for LEN on DOUBLE array element
-Expected behavior: No strlen call; IR contains constant 8.0
-*/
+ * Test: Integration.LEN_Numeric_Array_Double_IR
+ * Inputs: Program DIMs a DOUBLE (#) array and prints LEN of an element
+ * Code under test: Code generation for LEN on DOUBLE array element
+ * Expected behavior: No strlen call; IR contains constant 8.0
+ */
 TEST(Integration, LEN_Numeric_Array_Double_IR) {
     const char* src =
         "10 DIM C#(3)\n"

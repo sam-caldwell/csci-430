@@ -6,10 +6,10 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
-#include "run_with_input.h"
+#include "../../helper/run_with_input.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
@@ -20,12 +20,6 @@ using namespace e2e_helpers;
  * Components Under Test: Full compiler pipeline; scanf-based input; clang.
  * Expected Behavior: Program prints the correct factorial value for input.
  */
-/*
-Test: E2E.FactorialFromInput
-Inputs: BASIC program(s) executed end-to-end (runtime output)
-Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
-Expected behavior: Program compiles and runs; output/behavior matches expectations
-*/
 TEST(E2E, FactorialFromInput) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

@@ -232,7 +232,16 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         return;
     }
     if (auto in = dyn_cast<const InputStmt>(s)) {
-        for (const auto& v : in->variables) reference(v, in->pos);
+        // Console INPUT only accepts numeric variables. Suggest LINE INPUT for strings.
+        for (const auto& v : in->variables) {
+            if (varNameIsString(v)) {
+                std::ostringstream m; m << "TypeError: INPUT requires numeric variable; use LINE INPUT for strings @ "
+                                        << in->pos.line << ':' << in->pos.col;
+                log() << m.str() << '\n';
+                throw SemanticError(m.str());
+            }
+            reference(v, in->pos);
+        }
         if (in->promptLiteral) strings_.insert(*in->promptLiteral);
         return;
     }

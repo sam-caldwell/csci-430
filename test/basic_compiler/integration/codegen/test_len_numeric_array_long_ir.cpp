@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.LEN_Numeric_Array_Long_IR
-Inputs: Program DIMs a LONG (&) array and prints LEN of an element
-Code under test: Code generation for LEN on LONG array element
-Expected behavior: No strlen call; IR contains constant 4.0
-*/
+ * Test: Integration.LEN_Numeric_Array_Long_IR
+ * Inputs: Program DIMs a LONG (&) array and prints LEN of an element
+ * Code under test: Code generation for LEN on LONG array element
+ * Expected behavior: No strlen call; IR contains constant 4.0
+ */
 TEST(Integration, LEN_Numeric_Array_Long_IR) {
     const char* src =
         "10 DIM D&(3)\n"

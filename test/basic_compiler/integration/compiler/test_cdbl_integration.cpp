@@ -10,12 +10,6 @@ using namespace gwbasic;
  * Purpose: Ensure CDBL compiles and produces IR without extra helpers.
  * Notes: CDBL is a no-op cast to double in this compiler; we only assert basic IR presence.
  */
-/*
-Test: Integration.CDBL_CompilesToNoopCast
-Inputs: BASIC snippet compiled through multiple stages
-Code under test: Parser + Semantics + Codegen integration
-Expected behavior: Emitted IR/state contains expected constructs and values
-*/
 TEST(Integration, CDBL_CompilesToNoopCast) {
     const char* src =
         "10 PRINT CDBL(2)\n"

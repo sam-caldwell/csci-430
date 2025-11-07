@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: CodeGenBoolean.AndOr_UseI1PredicatesAndBitOps
-Inputs: Program printing results of AND/OR on numeric operands
-Code under test: CodeGenerator::emitExpr for BinaryOp::And/BinaryOp::Or
-Expected behavior: IR uses fcmp one -> i1, and/or i1, then uitofp i1 -> double.
-*/
+ * Test: CodeGenBoolean.AndOr_UseI1PredicatesAndBitOps
+ * Inputs: Program printing results of AND/OR on numeric operands
+ * Code under test: CodeGenerator::emitExpr for BinaryOp::And/BinaryOp::Or
+ * Expected behavior: IR uses fcmp one -> i1, and/or i1, then uitofp i1 -> double.
+ */
 TEST(CodeGenBoolean, AndOr_UseI1PredicatesAndBitOps) {
     const char* src =
         "10 PRINT 1 AND 0\n"

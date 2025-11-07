@@ -12,12 +12,6 @@ using namespace gwbasic;
  * Components: Parser, Semantics, Codegen
  * Expected: IR contains GEP into A_arr and a subsequent store double 0.0
  */
-/*
-Test: Integration.CLEAR_ZerosArrays_IR
-Inputs: Small program with DIM A(3), set element, CLEAR
-Code under test: Full compile pipeline
-Expected behavior: IR contains store of 0.0 to some element of %A_arr after CLEAR
-*/
 TEST(Integration, CLEAR_ZerosArrays_IR) {
     const char* src =
         "10 DIM A(3)\n"

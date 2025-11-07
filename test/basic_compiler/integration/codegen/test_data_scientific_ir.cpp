@@ -7,10 +7,10 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.DATA_Supports_D_Exponent
-Inputs: Program with DATA containing a D-exponent numeric
-Expected: IR encodes numeric in @gwb_data_num as expected (no atof usage).
-*/
+ * Test: Integration.DATA_Supports_D_Exponent
+ * Inputs: Program with DATA containing a D-exponent numeric
+ * Expected: IR encodes numeric in @gwb_data_num as expected (no atof usage).
+ */
 TEST(Integration, DATA_Supports_D_Exponent) {
     std::string src = R"(10 DATA 1D2
 )";

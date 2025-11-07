@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: CodeGenDefFn.ParamBinding_DoesNotLoadParamVar
-Inputs: DEF FNSQ(X)=X*X; DEF FNA$(S$)=S$+"!"; PRINT calls
-Code under test: CodeGenerator inline DEF FN expansion and parameter binding
-Expected behavior: IR does not allocate/load parameter variables (uses SSA binding instead).
-*/
+ * Test: CodeGenDefFn.ParamBinding_DoesNotLoadParamVar
+ * Inputs: DEF FNSQ(X)=X*X; DEF FNA$(S$)=S$+"!"; PRINT calls
+ * Code under test: CodeGenerator inline DEF FN expansion and parameter binding
+ * Expected behavior: IR does not allocate/load parameter variables (uses SSA binding instead).
+ */
 TEST(CodeGenDefFn, ParamBinding_DoesNotLoadParamVar) {
     const char* src =
         "10 DEF FNSQ(X) = X*X\n"

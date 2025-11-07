@@ -6,22 +6,18 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/***
- * Test: E2E.IfInlineThenElseGoto_Branches
- * Purpose: Validate runtime behavior of inline THEN/ELSE GOTO targets.
- */
 /*
-Test: E2E.IfInlineThenElseGoto_Branches
-Inputs: Program uses inline THEN GOTO and ELSE GOTO; runs two variants to cover both
-Code under test: Full pipeline + runtime
-Expected behavior: Output matches branch target
+ * Test: E2E.IfInlineThenElseGoto_Branches
+ * Inputs: Program uses inline THEN GOTO and ELSE GOTO; runs two variants to cover both
+ * Code under test: Full pipeline + runtime
+ * Expected behavior: Output matches branch target
 */
 TEST(E2E, IfInlineThenElseGoto_Branches) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }

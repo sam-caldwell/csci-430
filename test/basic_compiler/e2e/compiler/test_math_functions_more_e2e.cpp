@@ -8,8 +8,8 @@
 #include <vector>
 #include <cstdlib>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
@@ -22,12 +22,6 @@ using namespace e2e_helpers;
  * Components Under Test: Compiler (compileString/compileFile), Clang driver, runtime output
  * Expected Behavior: Program output matches assertions in test.
  */
-/*
-Test: E2E.MoreMathIntrinsicsWork
-Inputs: BASIC program(s) executed end-to-end (runtime output)
-Code under test: Full compiler pipeline (lexer → parser → semantics → codegen → runtime)
-Expected behavior: Program compiles and runs; output/behavior matches expectations
-*/
 TEST(E2E, MoreMathIntrinsicsWork) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

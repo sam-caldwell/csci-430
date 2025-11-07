@@ -6,8 +6,8 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
@@ -15,11 +15,11 @@ using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.MixedTypeArithmetic_ComputeInDouble_StoreByType
-Inputs: Program mixing Int16/Long/Single/Double in expressions and assignments
-Code under test: End-to-end compile/link/run
-Expected behavior: Arithmetic computes in double; stores truncate or round per target type; outputs match
-*/
+ * Test: E2E.MixedTypeArithmetic_ComputeInDouble_StoreByType
+ * Inputs: Program mixing Int16/Long/Single/Double in expressions and assignments
+ * Code under test: End-to-end compile/link/run
+ * Expected behavior: Arithmetic computes in double; stores truncate or round per target type; outputs match
+ */
 TEST(E2E, MixedTypeArithmetic_ComputeInDouble_StoreByType) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

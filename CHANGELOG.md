@@ -225,22 +225,30 @@
 
 ### Compiler Directives (MERGE/CHAIN/RUN)
 - MERGE is compile-time only; no runtime codegen. Integration defined and implemented in the CLI/compiler pipeline:
-  - Path resolution: `MERGE "file"` resolves relative paths against the including file via `resolvePath(baseFile, rel)` and canonicalizes with `weakly_canonical`.
-  - Conflicts: merged lines replace duplicates by line number (`appendMergeProgramReplacing` uses replace-or-append semantics).
-  - Renumbering: MERGE preserves line numbers (no renumber). CHAIN/RUN imports are parsed once per canonical path and renumbered by 1000-based regions (`assignBase`, `renumberProgram`). Targets are patched to `base + firstLine` when no explicit target is present.
-  - Flow: `compileFile*` performs a single pass: detect directives per line, process MERGE by appending parsed lines into the composite, and process CHAIN/RUN by ensuring import, renumbering, and patching target lines. MERGE causes no import stack push; CHAIN/RUN do.
+  - Path resolution: `MERGE "file"` resolves relative paths against the including file via `resolvePath(baseFile, rel)`
+    and canonicalizes with `weakly_canonical`.
+  - Conflicts: merged lines replace duplicates by line number (`appendMergeProgramReplacing` uses replace-or-append
+    semantics).
+  - Renumbering: MERGE preserves line numbers (no renumber). CHAIN/RUN imports are parsed once per canonical path and
+    renumbered by 1000-based regions (`assignBase`, `renumberProgram`). Targets are patched to `base + firstLine` when
+    no explicit target is present.
+  - Flow: `compileFile*` performs a single pass: detect directives per line, process MERGE by appending parsed lines 
+    into the composite, and process CHAIN/RUN by ensuring import, renumbering, and patching target lines. MERGE causes
+    no import stack push; CHAIN/RUN do.
 
 ### Parser/Control Flow
 - NEXT var-list: Implemented `NEXT v1[,v2...]` parsing and folding semantics.
   - Parser accepts comma-separated variable lists; AST `NextStmt` now holds `vars: vector<string>`.
-  - Folding enforces order: each listed name must match the current innermost open FOR and closes it (equivalent to `NEXT v1 : NEXT v2 : ...`). Bare `NEXT` still closes one level.
+  - Folding enforces order: each listed name must match the current innermost open FOR and closes it (equivalent to 
+    `NEXT v1 : NEXT v2 : ...`). Bare `NEXT` still closes one level.
 
 ### GOSUB/RETURN
 - Clarified behavior: GOSUB is lowered via inlining; nonlocal `RETURN <line>` is not supported.
 - Tests: added parser negative test that `RETURN n` is rejected.
 
 ### WHILE/WEND
-- Added additional tests around nested interactions; EXIT interactions to be considered later as other control statements land.
+- Added additional tests around nested interactions; EXIT interactions to be considered later as other control 
+  statements land.
 
 ### Tests/Infra
 - New tests:
@@ -278,7 +286,6 @@
 - Implement the `INSTR` clamp and the optional `CHR$`/`ASC` strict checks now; add a strict-compat flag for `SQRT` 
   alias behavior.
 
-
 ---
 
 ## 07 Nov 2025
@@ -295,15 +302,20 @@
 - Parser now supports console `INPUT` variants:
   - `INPUT var[, var ...]`
   - `INPUT ; prompt$, var[, ...]`
-  - `INPUT "prompt"; var[, ...]` (prompt literal parsed; runtime prints variable prompts; literal prompts parsed and carried in AST).
+  - `INPUT "prompt"; var[, ...]` (prompt literal parsed; runtime prints variable prompts; literal prompts parsed and
+    carried in AST).
 - Runtime/codegen:
-  - Console `INPUT` accepts a variable list; emits one `scanf(%lf)` per numeric variable and stores with proper type conversion.
-  - Optional prompt printing via `printf` for prompt variables; literal-prompt printing wired via string table (subject to semantics seeding).
-  - `LINE INPUT [#n,] var$` implemented using `fgets` into a fixed buffer, newline strip, heap copy, and store to string variable; channel form reads from `@gwb_files`.
+  - Console `INPUT` accepts a variable list; emits one `scanf(%lf)` per numeric variable and stores with proper type 
+    conversion.
+  - Optional prompt printing via `printf` for prompt variables; literal-prompt printing wired via string table (subject
+    to semantics seeding).
+  - `LINE INPUT [#n,] var$` implemented using `fgets` into a fixed buffer, newline strip, heap copy, and store to 
+    string variable; channel form reads from `@gwb_files`.
 - Tests:
   - Unit (parser): var-list parsing; literal/variable prompt forms.
   - Integration (IR): prompt+list emits `printf` and multiple `scanf` calls.
   - E2E: var-list input sums two numbers; prompt-var input feeds and prints value; `LINE INPUT` reads and echoes a line.
 
 ### Notes
-- Focused on high-signal areas: DEF FN param semantics, RESUME line flow, boolean logic IR paths, and IF-flattening via comparison folds. These improve both statement- and expression-level coverage.
+- Focused on high-signal areas: DEF FN param semantics, RESUME line flow, boolean logic IR paths, and IF-flattening via
+  comparison folds. These improve both statement- and expression-level coverage.

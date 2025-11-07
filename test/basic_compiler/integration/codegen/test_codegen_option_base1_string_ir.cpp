@@ -10,12 +10,6 @@ using namespace gwbasic;
  * Test Suite: CodeGen OPTION BASE (string arrays)
  * Purpose: Ensure DIM allocation length for string arrays honors OPTION BASE 1.
  */
-/*
-Test: Integration.StringArray_With_OptionBase1_IR_UsesUb
-Inputs: Source compiled to IR
-Code under test: Code generation (IR text)
-Expected behavior: IR contains correct alloca length under OPTION BASE 1
-*/
 TEST(Integration, StringArray_With_OptionBase1_IR_UsesUb) {
     const char* src =
         "10 OPTION BASE 1\n"

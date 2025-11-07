@@ -9,12 +9,6 @@ using namespace gwbasic;
  * Test: Integration.CHR_ASC_IRPatterns
  * Purpose: Ensure CHR$/ASC produce characteristic IR patterns.
  */
-/*
-Test: Integration.CHR_ASC_IRPatterns
-Inputs: BASIC snippet compiled through multiple stages
-Code under test: Parser + Semantics + Codegen integration
-Expected behavior: Emitted IR/state contains expected constructs and values
-*/
 TEST(Integration, CHR_ASC_IRPatterns) {
     const char* src =
         "10 PRINT CHR$(65)\n"

@@ -8,7 +8,7 @@ using namespace gwbasic;
 
 /*
  * Test: Integration.StringArray_WRITE_IR_UsesFprintf
- * Purpose: Verify WRITE #n with string array lowers to fprintf and fmt strings.
+ * Purpose: Verify WRITE #n with a string array lowers to fprintf and fmt strings.
  */
 TEST(Integration, StringArray_WRITE_IR_UsesFprintf) {
     const char* src =

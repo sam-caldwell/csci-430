@@ -6,8 +6,8 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
@@ -15,11 +15,11 @@ using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.IntDiv_Mod_Behavior
-Inputs: Program printing results of integer division (\\) and MOD with sign cases and decimals
-Code under test: End-to-end pipeline
-Expected behavior: \\\ uses truncation toward zero; MOD has sign of dividend and truncates operands
-*/
+ * Test: E2E.IntDiv_Mod_Behavior
+ * Inputs: Program printing results of integer division (\\) and MOD with sign cases and decimals
+ * Code under test: End-to-end pipeline
+ * Expected behavior: \\\ uses truncation toward zero; MOD has sign of dividend and truncates operands
+ */
 TEST(E2E, IntDiv_Mod_Behavior) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();
     const char* src =

@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.LEN_Numeric_Var_IR_NoStrlen
-Inputs: Program that assigns a numeric variable and prints LEN(var)
-Code under test: Code generation for LEN on numeric variables
-Expected behavior: IR does not contain a call to strlen for LEN; result is a constant literal
-*/
+ * Test: Integration.LEN_Numeric_Var_IR_NoStrlen
+ * Inputs: Program that assigns a numeric variable and prints LEN(var)
+ * Code under test: Code generation for LEN on numeric variables
+ * Expected behavior: IR does not contain a call to strlen for LEN; result is a constant literal
+ */
 TEST(Integration, LEN_Numeric_Var_IR_NoStrlen) {
     const char* src =
         "10 A%=1\n"

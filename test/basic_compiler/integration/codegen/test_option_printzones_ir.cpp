@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.OptionPrintZones_IRContainsPad
-Inputs: Program with OPTION PRINTZONES ON and PRINT "A","B"
-Code under test: Code generation for zone padding
-Expected behavior: IR contains references to @.fmt_pad and @.spaces_14
-*/
+ * Test: Integration.OptionPrintZones_IRContainsPad
+ * Inputs: Program with OPTION PRINTZONES ON and PRINT "A","B"
+ * Code under test: Code generation for zone padding
+ * Expected behavior: IR contains references to @.fmt_pad and @.spaces_14
+ */
 TEST(Integration, OptionPrintZones_IRContainsPad) {
     const char* src =
         "10 OPTION PRINTZONES ON\n"

@@ -10,14 +10,8 @@ using namespace gwbasic;
  * Test Suite: CodeGen Long Integer Arrays (i64)
  * Purpose: Ensure & arrays lower to i64 with proper fptosi/sitofp conversions.
  */
-/*
-Test: Integration.Codegen_LongArray_i64_StoresAndLoads
-Inputs: Source compiled to IR
-Code under test: Code generation (IR text)
-Expected behavior: Alloca/getelementptr use i64; fptosi/sitofp present.
-*/
 TEST(Integration, Codegen_LongArray_i64_StoresAndLoads) {
-    const char* src =
+    const auto src =
         "10 DIM B&(3)\n"
         "20 B&(2)=42.9\n"
         "30 PRINT B&(2)\n"

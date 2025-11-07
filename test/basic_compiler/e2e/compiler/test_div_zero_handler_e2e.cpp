@@ -6,8 +6,8 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
@@ -15,11 +15,11 @@ using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.DivisionByZero_TriggersErrorHandler
-Inputs: Program with ON ERROR GOTO handler; executes /, \\, and MOD by zero and resumes next
-Code under test: end-to-end pipeline division-by-zero error path
-Expected behavior: Handler runs three times; prints three lines with "Z"
-*/
+ * Test: E2E.DivisionByZero_TriggersErrorHandler
+ * Inputs: Program with ON ERROR GOTO handler; executes /, \\, and MOD by zero and resumes next
+ * Code under test: end-to-end pipeline division-by-zero error path
+ * Expected behavior: Handler runs three times; prints three lines with "Z"
+ */
 TEST(E2E, DivisionByZero_TriggersErrorHandler) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();
     const char* src =

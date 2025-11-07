@@ -6,19 +6,19 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.DotPrefixedFloat_ArithmeticAndPrint
-Inputs: Program printing .5 + .25
-Code under test: Full pipeline (lexer tolerates leading '.', parser, codegen, runtime)
-Expected behavior: Prints 0.750000 (float format) with newline
-*/
+ * Test: E2E.DotPrefixedFloat_ArithmeticAndPrint
+ * Inputs: Program printing .5 + .25
+ * Code under test: Full pipeline (lexer tolerates leading '.', parser, codegen, runtime)
+ * Expected behavior: Prints 0.750000 (float format) with newline
+ */
 TEST(E2E, DotPrefixedFloat_ArithmeticAndPrint) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

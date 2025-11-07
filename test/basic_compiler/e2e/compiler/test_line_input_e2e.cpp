@@ -6,8 +6,8 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_with_input.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_with_input.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
@@ -15,7 +15,7 @@ using namespace e2e_helpers;
 
 TEST(E2E, LineInput_ReadsLineAndPrints) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();
-    const char* src =
+    auto src =
         "10 LINE INPUT A$\n"
         "20 PRINT A$\n";
     std::string ir = Compiler::compileString(src);

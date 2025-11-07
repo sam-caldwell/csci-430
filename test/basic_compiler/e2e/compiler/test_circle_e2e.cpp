@@ -5,8 +5,8 @@
 #include <fstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
@@ -18,12 +18,6 @@ using namespace e2e_helpers;
  *          program remains safe on headless systems (no graphics window).
  * Expected: Runtime exits 0 and prints expected line.
  */
-/*
-Test: E2E.CIRCLE_CompilesAndRunsSafely
-Inputs: Program with SCREEN 1, CIRCLE ... and PRINT/END
-Code under test: Full pipeline including graphics guard
-Expected behavior: Binary runs and prints "CIRCLE OK" even if no display is available
-*/
 TEST(E2E, CIRCLE_CompilesAndRunsSafely) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     std::string src =

@@ -10,12 +10,6 @@ using namespace gwbasic;
  * Test Suite: CodeGen Mixed Array Types
  * Purpose: Demonstrate correct lowering and conversions across %/&/!/#[].
  */
-/*
-Test: Integration.Codegen_Mixed_Array_Types_IR
-Inputs: Source compiled to IR
-Code under test: Code generation (IR text)
-Expected behavior: Presence of typed allocas, stores, and loads for each type.
-*/
 TEST(Integration, Codegen_Mixed_Array_Types_IR) {
     const char* src =
         "10 DIM A%(3)\n"

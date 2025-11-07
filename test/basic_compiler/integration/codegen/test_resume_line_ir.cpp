@@ -9,11 +9,11 @@ using namespace gwbasic;
 using namespace irtest;
 
 /*
-Test: CodeGenResume.ResumeLine_GeneratesTrampolineToTarget
-Inputs: Program with ON ERROR, ERROR, and RESUME 30 in handler
-Code under test: CodeGenerator::emitLineBlock RESUME line lowering
-Expected behavior: IR contains a resume-case trampoline that branches to %line30.
-*/
+ * Test: CodeGenResume.ResumeLine_GeneratesTrampolineToTarget
+ * Inputs: Program with ON ERROR, ERROR, and RESUME 30 in handler
+ * Code under test: CodeGenerator::emitLineBlock RESUME line lowering
+ * Expected behavior: IR contains a resume-case trampoline that branches to %line30.
+ */
 TEST(CodeGenResume, ResumeLine_GeneratesTrampolineToTarget) {
     const char* src =
         "10 ON ERROR GOTO 100\n"

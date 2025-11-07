@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: OptimizerExpr.FoldInsideForBody
-Inputs: FOR loop with body `PRINT 1+2`
-Code under test: AstOptimizer::optimize (body expression simplification)
-Expected behavior: Body constant expression folds; IR prints integer 3 without fadd
-*/
+ * Test: OptimizerExpr.FoldInsideForBody
+ * Inputs: FOR loop with body `PRINT 1+2`
+ * Code under test: AstOptimizer::optimize (body expression simplification)
+ * Expected behavior: Body constant expression folds; IR prints integer 3 without fadd
+ */
 TEST(OptimizerExpr, FoldInsideForBody) {
     const char* src =
         "10 FOR I=1 TO 2\n"

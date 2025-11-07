@@ -6,19 +6,19 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.ResumeLine_FlowsToExplicitTarget
-Inputs: Program triggers handler and RESUME 30
-Code under test: End-to-end RESUME line behavior
-Expected behavior: Output order: 1, H, 3 (skips 2 on error path)
-*/
+ * Test: E2E.ResumeLine_FlowsToExplicitTarget
+ * Inputs: Program triggers handler and RESUME 30
+ * Code under test: End-to-end RESUME line behavior
+ * Expected behavior: Output order: 1, H, 3 (skips 2 on error path)
+ */
 TEST(E2E, ResumeLine_FlowsToExplicitTarget) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

@@ -6,8 +6,8 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
@@ -15,10 +15,10 @@ using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.NumericEdges_Int16_Long_Single
-Inputs: Program assigns edge values near Int16/Long bounds and a large number to Single
-Code under test: End-to-end compile/link/run
-Expected behavior: Int16/Long truncate into range without overflow; Single rounds to nearest representable
+ * Test: E2E.NumericEdges_Int16_Long_Single
+ * Inputs: Program assigns edge values near Int16/Long bounds and a large number to Single
+ * Code under test: End-to-end compile/link/run
+ * Expected behavior: Int16/Long truncate into range without overflow; Single rounds to nearest representable
 */
 TEST(E2E, NumericEdges_Int16_Long_Single) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();

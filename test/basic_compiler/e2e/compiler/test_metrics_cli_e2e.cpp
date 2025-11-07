@@ -10,8 +10,8 @@ Expected behavior: Metrics table appears on stderr; includes key sections and no
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "source_root.h"
-#include "run_command.h"
+#include "../../helper/source_root.h"
+#include "../../helper/run_command.h"
 
 using namespace e2e_helpers;
 

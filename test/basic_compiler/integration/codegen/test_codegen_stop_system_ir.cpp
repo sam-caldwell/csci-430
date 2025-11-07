@@ -7,10 +7,10 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.CodegenStopSystemIR
-Inputs: Programs using STOP and SYSTEM.
-Expected: IR contains break message global and branches to exit.
-*/
+ * Test: Integration.CodegenStopSystemIR
+ * Inputs: Programs using STOP and SYSTEM.
+ * Expected: IR contains break message global and branches to exit.
+ */
 TEST(Integration, CodegenStopSystemIR) {
     {
         std::string src = "10 PRINT 1\n20 STOP\n30 PRINT 2\n";

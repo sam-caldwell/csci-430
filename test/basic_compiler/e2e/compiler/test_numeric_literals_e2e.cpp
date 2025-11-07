@@ -6,19 +6,19 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.NumericLiterals_OctalBinaryScientific
-Inputs: BASIC program printing various numeric literal forms
-Code under test: Full compiler pipeline
-Expected behavior: Runtime prints expected decimal values.
-*/
+ * Test: E2E.NumericLiterals_OctalBinaryScientific
+ * Inputs: BASIC program printing various numeric literal forms
+ * Code under test: Full compiler pipeline
+ * Expected behavior: Runtime prints expected decimal values.
+ */
 TEST(E2E, NumericLiterals_OctalBinaryScientific) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

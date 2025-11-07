@@ -620,36 +620,36 @@ namespace gwbasic {
                     storeNumberToVar(out, vname, dv);
                 }
             } else if (auto li = dyn_cast<LineInputStmt>(st.get())) {
-                // Read a full line (up to '\n') into sbuf, then copy to heap and assign to string var or channel
-                // Determine source stream
+                // Read a full line into sbuf, then copy to heap and assign to string var.
+                // Console (stdin) path uses scanf to avoid explicit @stdin linkage; channel path uses fgets(FILE*).
                 std::string buf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", buf); out << ir << Symbols::LF; }
-                std::string stream;
                 if (li->channel < 0) {
-                    std::string in = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr @stdin", in); out << ir << Symbols::LF; }
-                    stream = in;
+                    // Use scanf("%255[^\n]%*c", buf) to read an entire line without the trailing newline.
+                    std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_line_in, i64 0", fmt); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, buf); out << ir << Symbols::LF; }
                 } else {
+                    // Read from an open file channel using fgets and strip a trailing '\n' if present.
                     const int idx = li->channel - 1;
                     std::string ep = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", ep, idx); out << ir << Symbols::LF; }
                     std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, ep); out << ir << Symbols::LF; }
-                    stream = fh;
+                    { std::string ir = std::format("  call ptr @fgets(ptr {}, i32 256, ptr {})", buf, fh); out << ir << Symbols::LF; }
+                    // Strip trailing '\n' if present
+                    std::string len = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", len, buf); out << ir << Symbols::LF; }
+                    std::string gt0 = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, 0", gt0, len); out << ir << Symbols::LF; }
+                    std::string contLbl = lineLabelName(line.number) + std::string("_li_cont_") + std::to_string(++localContCounter);
+                    std::string doLbl  = lineLabelName(line.number) + std::string("_li_do_") + std::to_string(localContCounter);
+                    { std::string ir = std::format("  br i1 {}, label %{}, label %{}", gt0, doLbl, contLbl); out << ir << Symbols::LF; }
+                    out << doLbl << ":" << Symbols::LF;
+                    std::string m1 = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, -1", m1, len); out << ir << Symbols::LF; }
+                    std::string pch = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pch, buf, m1); out << ir << Symbols::LF; }
+                    std::string ch = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", ch, pch); out << ir << Symbols::LF; }
+                    std::string islf = nextTemp(); { std::string ir = std::format("  {} = icmp eq i8 {}, 10", islf, ch); out << ir << Symbols::LF; }
+                    std::string endLbl = lineLabelName(line.number) + std::string("_li_end_") + std::to_string(localContCounter);
+                    { std::string ir = std::format("  br i1 {}, label %{}, label %{}", islf, endLbl, contLbl); out << ir << Symbols::LF; }
+                    out << endLbl << ":" << Symbols::LF;
+                    { std::string ir = std::format("  store i8 0, ptr {}", pch); out << ir << Symbols::LF; }
+                    out << contLbl << ":" << Symbols::LF;
                 }
-                { std::string ir = std::format("  call ptr @fgets(ptr {}, i32 256, ptr {})", buf, stream); out << ir << Symbols::LF; }
-                // Strip trailing '\n' if present
-                std::string len = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", len, buf); out << ir << Symbols::LF; }
-                std::string gt0 = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, 0", gt0, len); out << ir << Symbols::LF; }
-                std::string contLbl = lineLabelName(line.number) + std::string("_li_cont_") + std::to_string(++localContCounter);
-                std::string doLbl  = lineLabelName(line.number) + std::string("_li_do_") + std::to_string(localContCounter);
-                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", gt0, doLbl, contLbl); out << ir << Symbols::LF; }
-                out << doLbl << ":" << Symbols::LF;
-                std::string m1 = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, -1", m1, len); out << ir << Symbols::LF; }
-                std::string pch = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pch, buf, m1); out << ir << Symbols::LF; }
-                std::string ch = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", ch, pch); out << ir << Symbols::LF; }
-                std::string islf = nextTemp(); { std::string ir = std::format("  {} = icmp eq i8 {}, 10", islf, ch); out << ir << Symbols::LF; }
-                std::string endLbl = lineLabelName(line.number) + std::string("_li_end_") + std::to_string(localContCounter);
-                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", islf, endLbl, contLbl); out << ir << Symbols::LF; }
-                out << endLbl << ":" << Symbols::LF;
-                { std::string ir = std::format("  store i8 0, ptr {}", pch); out << ir << Symbols::LF; }
-                out << contLbl << ":" << Symbols::LF;
                 // Copy into heap buffer and assign
                 std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", n, buf); out << ir << Symbols::LF; }
                 std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }

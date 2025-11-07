@@ -7,12 +7,12 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.Codegen_Emits_Logical_AND_OR_NOT
-Inputs: Program using logical AND/OR/NOT
-Expected: IR uses fcmp for truthiness and and/or i1 operations; NOT path compares to 0.0 and casts.
-*/
+ * Test: Integration.Codegen_Emits_Logical_AND_OR_NOT
+ * Inputs: Program using logical AND/OR/NOT
+ * Expected: IR uses fcmp for truthiness and and/or i1 operations; NOT path compares to 0.0 and casts.
+ */
 TEST(Integration, Codegen_Emits_Logical_AND_OR_NOT) {
-    std::string src = R"(10 PRINT 1 AND 0
+    const std::string src = R"(10 PRINT 1 AND 0
 20 PRINT 1 OR 0
 30 PRINT NOT 0
 )";

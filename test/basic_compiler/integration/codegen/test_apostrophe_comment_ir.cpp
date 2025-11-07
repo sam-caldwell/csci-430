@@ -13,12 +13,6 @@ using namespace gwbasic;
  * Components: Lexer, Parser, Codegen
  * Expected: IR contains print formatting for two numeric prints.
  */
-/*
-Test: Integration.ApostropheComment_IgnoresRestOfLine
-Inputs: Program with inline apostrophe comments containing invalid tokens
-Code under test: Full compile pipeline
-Expected behavior: Compilation succeeds; IR has @.fmt_num references (>=2)
-*/
 TEST(Integration, ApostropheComment_IgnoresRestOfLine) {
     const char* src =
         "10 PRINT 1 ' !! $$$ invalid tokens after comment\n"

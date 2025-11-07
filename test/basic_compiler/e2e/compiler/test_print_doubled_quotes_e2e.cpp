@@ -6,19 +6,19 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.PrintDoubledQuotes_Works
-Inputs: BASIC program with a string literal that contains doubled quotes.
-Code under test: Full pipeline + runtime output
-Expected behavior: Prints a line with an embedded double quote.
-*/
+ * Test: E2E.PrintDoubledQuotes_Works
+ * Inputs: BASIC program with a string literal that contains doubled quotes.
+ * Code under test: Full pipeline + runtime output
+ * Expected behavior: Prints a line with an embedded double quote.
+ */
 TEST(E2E, PrintDoubledQuotes_Works) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

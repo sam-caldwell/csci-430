@@ -7,11 +7,11 @@
 using namespace gwbasic;
 
 /*
-Test: Integration.If_ThenLine_ElseLine_IR
-Inputs: IF A=0 THEN 100 ELSE 200
-Code under test: IR generation
-Expected behavior: IR branches lead to br label %line100 and %line200 in then/else blocks
-*/
+ * Test: Integration.If_ThenLine_ElseLine_IR
+ * Inputs: IF A=0 THEN 100 ELSE 200
+ * Code under test: IR generation
+ * Expected behavior: IR branches lead to br label %line100 and %line200 in then/else blocks
+ */
 TEST(Integration, If_ThenLine_ElseLine_IR) {
     const char* src =
         "10 IF A=0 THEN 100 ELSE 200\n"

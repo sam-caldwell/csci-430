@@ -8,7 +8,7 @@ using namespace gwbasic;
 
 TEST(Integration, Codegen_DIM_MultiDim_Alloc_UsesProduct) {
     // Default OPTION BASE 0 => extents are (3,4) for DIM A(2,3) => total 12
-    const char* src =
+    const auto src =
         "10 DIM A(2,3)\n"
         "20 A(1,2)=5\n"
         "30 END\n";

@@ -6,8 +6,8 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
@@ -15,11 +15,11 @@ using namespace gwbasic;
 using namespace e2e_helpers;
 
 /*
-Test: E2E.LenValInstr_ProduceExpectedResults
-Inputs: Program that prints LEN("HELLO"), INSTR("HELLO","EL"), INSTR(3,"HELLO","L"), VAL("42")
-Code under test: End-to-end compile/link/run
-Expected behavior: Output lines: 5, 2, 3, 42
-*/
+ * Test: E2E.LenValInstr_ProduceExpectedResults
+ * Inputs: Program that prints LEN("HELLO"), INSTR("HELLO","EL"), INSTR(3,"HELLO","L"), VAL("42")
+ * Code under test: End-to-end compile/link/run
+ * Expected behavior: Output lines: 5, 2, 3, 42
+ */
 TEST(E2E, LenValInstr_ProduceExpectedResults) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";

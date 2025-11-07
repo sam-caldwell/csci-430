@@ -6,25 +6,20 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_command.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_command.h"
 #include "../../helper/tool_exists.h"
 #include "../../helper/split_lines.h"
 
 using namespace gwbasic;
 using namespace e2e_helpers;
 
-/***
- * Test: E2E.ERASE_Redim_AllowsReuse
- * Purpose: Validate that ERASE followed by re-DIM compiles and runs.
- * Expected: Program runs without output or errors.
- */
 /*
-Test: E2E.ERASE_Redim_AllowsReuse
-Inputs: Program DIMs arrays, ERASEs them, then re-DIMs; no prints
-Code under test: Full pipeline
-Expected behavior: Program compiles and runs producing no output
-*/
+ * Test: E2E.ERASE_Redim_AllowsReuse
+ * Inputs: Program DIMs arrays, ERASEs them, then re-DIMs; no prints
+ * Code under test: Full pipeline
+ * Expected behavior: Program compiles and runs producing no output
+ */
 TEST(E2E, ERASE_Redim_AllowsReuse) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     const char* src =
