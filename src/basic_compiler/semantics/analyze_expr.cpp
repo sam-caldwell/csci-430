@@ -116,10 +116,37 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
             }
             for (const auto& arg : call->args) analyzeExpr(arg.get());
         } else if (isBuiltinNum) {
-            if (fn == "ASC" || fn == "LEN" || fn == "VAL") {
-                // Expect exactly one string argument for ASC/LEN/VAL
+            if (fn == "ASC" || fn == "VAL") {
+                // Expect exactly one string argument for ASC/VAL
                 if (typeOf(call->args[0].get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function '" << call->callee << "' expects string argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
                 analyzeExpr(call->args[0].get());
+            } else if (fn == "LEN") {
+                // LEN accepts either string expressions or numeric variables/array-elements
+                auto* arg = call->args[0].get();
+                // If string expression: ok
+                if (typeOf(arg) == ValueType::String) { analyzeExpr(arg); }
+                else {
+                    // Allow numeric variable or numeric array element reference only
+                    if (auto v = dyn_cast<const VarExpr>(arg)) {
+                        // Reject when variable is string-typed
+                        if (varNameIsString(v->name)) { std::ostringstream m; m << "TypeError: function 'LEN' expects string or numeric variable @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                        reference(v->name, v->pos);
+                    } else if (auto a = dyn_cast<const CallExpr>(arg)) {
+                        // Array element reference must be known array; allow when numeric element
+                        if (!arrays_.contains(a->callee)) { std::ostringstream m; m << "TypeError: function 'LEN' expects variable or array element @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                        if (varNameIsString(a->callee)) { std::ostringstream m; m << "TypeError: function 'LEN' on string array element expects string (use LEN on element value) @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                        // Validate indices numeric
+                        const auto& dims = arrays_.at(a->callee);
+                        if (a->args.size() != dims.size()) { std::ostringstream m; m << "ArityError: array '" << a->callee << "' expects " << dims.size() << " indices @ " << a->pos.line << ':' << a->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                        for (const auto& idx : a->args) {
+                            if (typeOf(idx.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: array index must be numeric @ " << a->pos.line << ':' << a->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                            analyzeExpr(idx.get());
+                        }
+                    } else {
+                        // Numeric non-variable expression is not allowed (e.g., LEN(1), LEN(A+1))
+                        std::ostringstream m; m << "TypeError: function 'LEN' expects string or numeric variable @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str());
+                    }
+                }
             } else if (fn == "INSTR") {
                 if (call->args.size() == 2) {
                     // INSTR(s$, sub$)

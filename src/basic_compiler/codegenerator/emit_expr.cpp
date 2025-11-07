@@ -387,7 +387,43 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         if (fn == "ATN") { std::string ir = std::format("  {} = call double @atan(double {})", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr atan -> " << ir; log() << m.str() << Symbols::LF; } return res; }
         if (fn == "LOG") { std::string ir = std::format("  {} = call double @log(double {})", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr log -> " << ir; log() << m.str() << Symbols::LF; } return res; }
         if (fn == "VAL") { std::string ir = std::format("  {} = call double @strtod(ptr {}, ptr null)", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr val -> " << ir; log() << m.str() << Symbols::LF; } return res; }
-        if (fn == "LEN") { std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", n, argv[0]); out << ir << Symbols::LF; } { std::string ir = std::format("  {} = sitofp i64 {} to double", res, n); out << ir << Symbols::LF; } { std::ostringstream m; m << "line " << currentLine_ << " CallExpr len -> len->double"; log() << m.str() << Symbols::LF; } return res; }
+        if (fn == "LEN") {
+            // LEN: string expression -> strlen; numeric variable/array element -> storage size (bytes)
+            const Expr* arg0 = call->args[0].get();
+            // If argument is variable
+            if (auto v = dyn_cast<const VarExpr>(arg0)) {
+                if (!isStringVarNameCG(v->name)) {
+                    int bytes = 4;
+                    switch (numKindOf(v->name)) {
+                        case NumKind::Int16: bytes = 2; break;
+                        case NumKind::Long32: bytes = 4; break;
+                        case NumKind::Single: bytes = 4; break;
+                        case NumKind::Double: bytes = 8; break;
+                    }
+                    char buf[16]; std::snprintf(buf, sizeof(buf), "%d.0", bytes);
+                    return std::string(buf);
+                }
+            }
+            // If argument is array element reference
+            if (auto ac = dyn_cast<const CallExpr>(arg0)) {
+                if (arrayDims_.contains(ac->callee) && !isStringVarNameCG(ac->callee)) {
+                    int bytes = 4;
+                    switch (numKindOf(ac->callee)) {
+                        case NumKind::Int16: bytes = 2; break;
+                        case NumKind::Long32: bytes = 4; break;
+                        case NumKind::Single: bytes = 4; break;
+                        case NumKind::Double: bytes = 8; break;
+                    }
+                    char buf[16]; std::snprintf(buf, sizeof(buf), "%d.0", bytes);
+                    return std::string(buf);
+                }
+            }
+            // Otherwise, treat as string and call strlen
+            std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", n, argv[0]); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  {} = sitofp i64 {} to double", res, n); out << ir << Symbols::LF; }
+            { std::ostringstream m; m << "line " << currentLine_ << " CallExpr len -> len->double"; log() << m.str() << Symbols::LF; }
+            return res;
+        }
         if (fn == "INSTR") {
             // INSTR(s$, sub$) or INSTR(start, s$, sub$)
             std::string s = argv.size() == 2 ? argv[0] : argv[1];

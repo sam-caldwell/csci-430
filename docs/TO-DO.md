@@ -27,12 +27,6 @@
 - INPUT #n / LINE INPUT #n: see codegen gaps above; require numeric parsing with separators, string quoting rules, 
   EOF behavior.
 
-## Control Flow and Blocks
-
-- GOSUB/RETURN implemented via inlining; `RETURN <line>` nonlocal form not supported.
-- FOR/NEXT: NEXT var-list form missing; verify semantics for mixed variable names and nested loops per spec.
-- WHILE/WEND implemented; consider EXIT loops and interactions once other control statements land.
-
 ## Built-in Functions Coverage and Types
 
 - String: add STR$, STRING$, SPACE$, LTRIM$/RTRIM$/MID$ statement vs. function nuances, LEFT$/RIGHT$ complete; 
@@ -75,24 +69,11 @@
 - SCREEN initializes a readiness flag; CIRCLE lowers to a no-op stub when ready. Missing: CLS, 
   PSET/PRESET/LINE/PAINT/DRAW, VIEW/WINDOW, PALETTE, and proper page switching.
 
-## Tooling/Directives
-
-- MERGE is treated as a compile-time directive only; define integration with CLI/compiler phases (include path 
-  resolution, conflicts, and renumbering strategies).
-
 ## Tests
 
 - Add unit tests for the above once implemented: WRITE codegen, INPUT#/LINE INPUT codegen semantics, DEF SEG 
   runtime effect on @gwb_seg, RUN/CHAIN file overlay behavior, OPTION BASE effects on DIM/array indexing, and 
   exponent/logical operator parsing and lowering.
-
-
-- Temporarily set COVERAGE_MIN=80 while we continue adding targeted tests over the next commits to push to 95%.
-- I can then fill remaining gaps with high-impact tests:
-    - Codegen: broaden PRINT paths (multiple items, mixed types, channel write, int/float branch split).
-    - Semantics: deeper coverage for DEF FN parameter handling, RESUME paths, ON ERROR traps for division-by-zero (/, \, MOD) in varied contexts.
-    - Optimizer: boolean AND/OR fold cases, nested IF-flattening with constant conditions in bodies, multi-level FOR elision.
-- After these, we re-raise the threshold to 95%.
 
 ## Bug Reports
 

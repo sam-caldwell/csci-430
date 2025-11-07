@@ -48,6 +48,8 @@ public:
         std::map<std::string, std::vector<int>> arrays;
         // OPTION BASE value (0 or 1)
         int optionBase{0};
+        // OPTION PRINTZONES flag (false by default)
+        bool printZones{false};
         // User-defined functions keyed by uppercase function name (e.g., "FNSQ")
         std::map<std::string, const DefFnStmt*> userFunctions;
         // Variables determined to be strings (by suffix or DEFSTR)
@@ -140,6 +142,7 @@ private:
     // Historical record of DIM'd arrays (last DIM wins) for codegen lengths
     std::map<std::string, std::vector<int>> allArrays_;
     int optionBase_{0};
+    bool printZones_{false};
     // User-defined functions by uppercase name
     std::map<std::string, const DefFnStmt*> userFunctions_;
     // Current DEF FN parameter name (skip global reference tracking when set)

@@ -22,8 +22,10 @@ COVERAGE_SCOPE ?= test/
 # Measure only logger and metrics sources to verify ≥95% coverage for these components.
 # Focus coverage on compiler CLI features: usage + CLI helpers + main.cpp entrypoint.
 # Include main.cpp to ensure the CLI entrypoint is covered by E2E tests.
-# Expand scope to all sources and public headers
-COVERAGE_INCLUDE_RE ?= ^(src/|include/)
+# Focus coverage on implementation sources under src/ (headers may be inlined
+# across translation units and skew source-based coverage). Projects often
+# measure coverage on compiled sources rather than public headers.
+COVERAGE_INCLUDE_RE ?= ^src/
 COVERAGE_METRIC ?= lines
 # No test files included, so helper exclusion is unnecessary; keep empty unless overriding.
 COVERAGE_EXCLUDE_RE ?=

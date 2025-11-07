@@ -50,7 +50,16 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     if (match(TokenType::KwDefDbl)) { auto n = parseDefType(DefTypeStmt::Kind::Dbl); n->pos = {startTok.line, startTok.col}; return n; }
 
     // System / memory / environment
-    if (match(TokenType::KwOption)) { auto n = parseOptionBase(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwOption)) {
+        // Dispatch OPTION BASE ... or OPTION PRINTZONES ...
+        if (check(TokenType::KwBase)) { auto n = parseOptionBase(); n->pos = {startTok.line, startTok.col}; return n; }
+        // Fallback to identifier-based branch
+        if (check(TokenType::Identifier)) {
+            std::string up = peek().lexeme; for (auto &ch : up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+            if (up == "PRINTZONES") { auto n = parseOptionPrintZones(); n->pos = {startTok.line, startTok.col}; return n; }
+        }
+        throw ParseError("Unknown OPTION directive");
+    }
     if (match(TokenType::KwBload)) { auto n = parseBload(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwBsave)) { auto n = parseBsave(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwPoke)) { auto n = parsePoke(); n->pos = {startTok.line, startTok.col}; return n; }

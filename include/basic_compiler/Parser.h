@@ -315,6 +315,8 @@ private:
     std::unique_ptr<Stmt> parseSwap();
     /** Parse OPTION BASE 0|1 */
     std::unique_ptr<Stmt> parseOptionBase();
+    /** Parse OPTION PRINTZONES ON|OFF */
+    std::unique_ptr<Stmt> parseOptionPrintZones();
     /**
      * Function: Parser::parseExpression
      * Purpose:

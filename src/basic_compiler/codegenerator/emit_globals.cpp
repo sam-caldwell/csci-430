@@ -27,7 +27,10 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@.fmt_str_sp = private unnamed_addr constant [3 x i8] c\"%s\\00\"" << Symbols::LF // string non-last: no extra space
         << "@.fmt_int = private unnamed_addr constant [5 x i8] c\"%ld\\0A\\00\"" << Symbols::LF
         << "@.fmt_int_sp = private unnamed_addr constant [5 x i8] c\"%ld\\20\\00\"" << Symbols::LF
-        << "@.fmt_int_ns = private unnamed_addr constant [4 x i8] c\"%ld\\00\"" << Symbols::LF;
+        << "@.fmt_int_ns = private unnamed_addr constant [4 x i8] c\"%ld\\00\"" << Symbols::LF
+        // Padding helper for PRINT zones: printf("%.*s", n, spaces)
+        << "@.fmt_pad = private unnamed_addr constant [5 x i8] c\"%.*s\\00\"" << Symbols::LF
+        << "@.spaces_14 = private unnamed_addr constant [15 x i8] c\"              \\00\"" << Symbols::LF;
     // Dedicated empty string literal for runtime helpers (e.g., INKEY$ default)
     out << "@.str_empty = private unnamed_addr constant [1 x i8] c\"\\00\"" << Symbols::LF;
     if (needsBreakMsg_) {

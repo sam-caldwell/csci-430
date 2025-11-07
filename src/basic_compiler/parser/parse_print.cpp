@@ -39,12 +39,28 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
             // ok
         }
     }
+    // Support degenerate forms: PRINT ; / PRINT , (no items)
+    if (match(TokenType::Semicolon)) {
+        auto node = make_node<PrintStmt>({l, c}, std::vector<std::unique_ptr<Expr>>{});
+        node->channel = channel;
+        node->format = std::move(fmt);
+        node->trail = PrintStmt::Terminator::Semicolon;
+        return node;
+    }
+    if (match(TokenType::Comma)) {
+        auto node = make_node<PrintStmt>({l, c}, std::vector<std::unique_ptr<Expr>>{});
+        node->channel = channel;
+        node->format = std::move(fmt);
+        node->trail = PrintStmt::Terminator::Comma;
+        return node;
+    }
     // Parse a list of items separated by commas/semicolons. Allow USING(fmt)
     // to appear mid-list; when encountered, set/replace the active format and
     // do not emit a value item for it. Last one wins.
     std::vector<std::unique_ptr<Expr>> items;
     std::vector<PrintStmt::Sep> seps;
     bool any = false;
+    PrintStmt::Terminator trail = PrintStmt::Terminator::Newline;
     while (true) {
         // Mid-list USING: update format and continue without consuming a value
         if (check(TokenType::KwUsing)) {
@@ -65,10 +81,13 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
         }
         // After an item, capture a separator if present and loop for the next
         if (match(TokenType::Comma)) {
+            // If end-of-list follows, treat as trailing terminator
+            if (check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile)) { trail = PrintStmt::Terminator::Comma; break; }
             seps.push_back(PrintStmt::Sep::Comma);
             continue;
         }
         if (match(TokenType::Semicolon)) {
+            if (check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile)) { trail = PrintStmt::Terminator::Semicolon; break; }
             seps.push_back(PrintStmt::Sep::Semicolon);
             continue;
         }
@@ -78,9 +97,8 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
     node->seps = std::move(seps);
     node->channel = channel;
     node->format = std::move(fmt);
-    // Trailing terminator: optional ';' or ','
-    if (match(TokenType::Semicolon)) node->trail = PrintStmt::Terminator::Semicolon;
-    else if (match(TokenType::Comma)) node->trail = PrintStmt::Terminator::Comma;
+    // Trailing terminator inherited from loop detection (default newline)
+    node->trail = trail;
     return node;
 }
 

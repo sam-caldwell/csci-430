@@ -24,6 +24,7 @@
 #include "basic_compiler/ast/EraseStmt.h"
 #include "basic_compiler/ast/SwapStmt.h"
 #include "basic_compiler/ast/OptionBaseStmt.h"
+#include "basic_compiler/ast/OptionPrintZonesStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/StringExpr.h"
@@ -267,13 +268,38 @@ namespace gwbasic {
                 std::vector<const Expr *> items;
                 if (pr->value) items.push_back(pr->value.get());
                 for (const auto &v: pr->more) items.push_back(v.get());
+                // Comma zone padding helper (OPTION PRINTZONES ON)
+                auto emit_pad_to_next_zone = [&]() {
+                    if (!printZones_) return;
+                    // Compute padding to next 14-column zone
+                    std::string col = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_cur_col", col); out << ir << Symbols::LF; }
+                    std::string mod = nextTemp(); { std::string ir = std::format("  {} = srem i32 {}, 14", mod, col); out << ir << Symbols::LF; }
+                    std::string isZero = nextTemp(); { std::string ir = std::format("  {} = icmp eq i32 {}, 0", isZero, mod); out << ir << Symbols::LF; }
+                    std::string sub = nextTemp(); { std::string ir = std::format("  {} = sub i32 14, {}", sub, mod); out << ir << Symbols::LF; }
+                    std::string pad = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i32 14, i32 {}", pad, isZero, sub); out << ir << Symbols::LF; }
+                    std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_pad, i64 0", fmt); out << ir << Symbols::LF; }
+                    std::string spaces = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [15 x i8], ptr @.spaces_14, i64 0, i64 0", spaces); out << ir << Symbols::LF; }
+                    if (pr->channel >= 1) {
+                        std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
+                        std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, fptr); out << ir << Symbols::LF; }
+                        { std::string ir = std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr {}, i32 {}, ptr {})", fh, fmt, pad, spaces); out << ir << Symbols::LF; }
+                    } else {
+                        { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 {}, ptr {})", fmt, pad, spaces); out << ir << Symbols::LF; }
+                        // Mirror to virtual screen
+                        std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
+                        std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, i32 {}, ptr {})", n, sbuf, fmt, pad, spaces); out << irn << Symbols::LF; }
+                        std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
+                        { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
+                    }
+                };
                 for (size_t pi = 0; pi < items.size(); ++pi) {
                     const bool last = (pi + 1 == items.size());
+                    const bool addNL = last && (pr->trail == PrintStmt::Terminator::Newline);
                     const Expr *v = items[pi];
                     if (isStringExpr(v)) {
                         auto sptr = emitExpr(out, v, "");
                         std::string fmt = nextTemp();
-                        { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (last ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log() << m.str() << Symbols::LF; } }
+                        { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (addNL ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log() << m.str() << Symbols::LF; } }
                         // Optional USING override
                         std::string useFmt = fmt;
                         if (pr->format) { useFmt = emitExpr(out, pr->format.get(), ""); }
@@ -303,7 +329,7 @@ namespace gwbasic {
                             }
                             if (isIntegral) {
                                 std::string fmtI = nextTemp();
-                                const char* symI = last ? "@.fmt_int" : (nextStartsWithSpace ? "@.fmt_int_ns" : "@.fmt_int_sp");
+                                const char* symI = addNL ? "@.fmt_int" : (nextStartsWithSpace ? "@.fmt_int_ns" : "@.fmt_int_sp");
                                 { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtI, symI); out << ir1 << Symbols::LF; }
                                 long long iv = static_cast<long long>(cv);
                                 if (pr->channel >= 1) {
@@ -317,10 +343,11 @@ namespace gwbasic {
                                     std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
                                     { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
                                 }
+                                
                                 continue;
                             } else {
                                 std::string fmtF = nextTemp();
-                                const char* symF = last ? "@.fmt_num" : (nextStartsWithSpace ? "@.fmt_num_ns" : "@.fmt_num_sp");
+                                const char* symF = addNL ? "@.fmt_num" : (nextStartsWithSpace ? "@.fmt_num_ns" : "@.fmt_num_sp");
                                 { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtF, symF); out << ir1 << Symbols::LF; }
                                 if (pr->channel >= 1) {
                                     std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
@@ -333,6 +360,7 @@ namespace gwbasic {
                                     std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
                                     { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
                                 }
+                                
                                 continue;
                             }
                         }
@@ -349,13 +377,13 @@ namespace gwbasic {
                         // Build float and int format pointers
                         std::string fmtF = nextTemp();
                         {
-                            const char* sym = last ? "@.fmt_num" : (nextStartsWithSpace ? "@.fmt_num_ns" : "@.fmt_num_sp");
+                            const char* sym = addNL ? "@.fmt_num" : (nextStartsWithSpace ? "@.fmt_num_ns" : "@.fmt_num_sp");
                             std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtF, sym);
                             out << ir1 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt fmtF -> " << ir1; log() << m.str() << Symbols::LF; }
                         }
                         std::string fmtI = nextTemp();
                         {
-                            const char* symI = last ? "@.fmt_int" : (nextStartsWithSpace ? "@.fmt_int_ns" : "@.fmt_int_sp");
+                            const char* symI = addNL ? "@.fmt_int" : (nextStartsWithSpace ? "@.fmt_int_ns" : "@.fmt_int_sp");
                             std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtI, symI);
                             out << ir1 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt fmtI -> " << ir1; log() << m.str() << Symbols::LF; }
                         }
@@ -412,7 +440,33 @@ namespace gwbasic {
                             { std::string ir = std::format("  br label %{}", contLbl); out << ir << Symbols::LF; }
                             out << contLbl << ":" << Symbols::LF;
                         }
+                        // Handle separator between items (zone for comma)
+                        if (!last && pi < pr->seps.size() && pr->seps[pi] == PrintStmt::Sep::Comma) {
+                            emit_pad_to_next_zone();
+                        }
                     }
+                }
+                // Trailing terminator after all items
+                if (items.empty()) {
+                    if (pr->trail == PrintStmt::Terminator::Newline) {
+                        std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_str, i64 0", fmt); out << ir << Symbols::LF; }
+                        std::string empty = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.str_empty, i64 0", empty); out << ir << Symbols::LF; }
+                        if (pr->channel >= 1) {
+                            std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
+                            std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, fptr); out << ir << Symbols::LF; }
+                            { std::string ir = std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr {}, ptr {})", fh, fmt, empty); out << ir << Symbols::LF; }
+                        } else {
+                            { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmt, empty); out << ir << Symbols::LF; }
+                            std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
+                            std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, empty); out << irn << Symbols::LF; }
+                            std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
+                            { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
+                        }
+                    } else if (pr->trail == PrintStmt::Terminator::Comma) {
+                        emit_pad_to_next_zone();
+                    }
+                } else if (!items.empty() && pr->trail == PrintStmt::Terminator::Comma) {
+                    emit_pad_to_next_zone();
                 }
             } else if (auto gt = dyn_cast<GotoStmt>(st.get())) {
                 std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine));
@@ -751,6 +805,9 @@ namespace gwbasic {
             } else if (isa<OptionBaseStmt>(st.get())) {
                 // OPTION BASE affects semantics only; no runtime code
                 { std::ostringstream m; m << "line " << currentLine_ << " OptionBaseStmt (no-op)"; log() << m.str() << Symbols::LF; }
+            } else if (isa<OptionPrintZonesStmt>(st.get())) {
+                // OPTION PRINTZONES is codegen no-op (affects spacing logic only via flag)
+                { std::ostringstream m; m << "line " << currentLine_ << " OptionPrintZonesStmt (no-op)"; log() << m.str() << Symbols::LF; }
             } else if (auto rd = dyn_cast<ReadStmt>(st.get())) {
                 // READ variables from @gwb_data
                 for (const auto& t : rd->targets) {

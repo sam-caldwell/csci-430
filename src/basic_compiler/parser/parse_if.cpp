@@ -3,6 +3,7 @@
 #include "basic_compiler/ast/make_node.h"
 #include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/IfBlockStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
 
 namespace gwbasic {
 
@@ -22,10 +23,44 @@ std::unique_ptr<Stmt> Parser::parseIf() {
     auto cond = parseExpression();
     int l = peek().line, c = peek().col;
     consume(TokenType::KwThen, "THEN");
-    // Form 1: THEN <line>
+    // Form 1: THEN <line> [ELSE <line>|ELSE GOTO <line>]
     if (check(TokenType::Integer)) {
         int target = std::stoi(peek().lexeme);
         advance();
+        // Optional ELSE arm supporting implied/explicit GOTO
+        if (match(TokenType::KwElse)) {
+            // Allow: ELSE <line>
+            if (check(TokenType::Integer)) {
+                int elseTarget = std::stoi(peek().lexeme); advance();
+                auto ib = make_node<IfBlockStmt>({l, c}, std::move(cond));
+                ib->inlineEnd = true;
+                ib->thenBody.push_back(make_node<GotoStmt>({l, c}, target));
+                ib->elseBody.push_back(make_node<GotoStmt>({l, c}, elseTarget));
+                return ib;
+            }
+            // Allow: ELSE GOTO <line>
+            if (match(TokenType::KwGoto)) {
+                if (!check(TokenType::Integer)) throw ParseError("Expected line number after ELSE GOTO");
+                int elseTarget = std::stoi(peek().lexeme); advance();
+                auto ib = make_node<IfBlockStmt>({l, c}, std::move(cond));
+                ib->inlineEnd = true;
+                ib->thenBody.push_back(make_node<GotoStmt>({l, c}, target));
+                ib->elseBody.push_back(make_node<GotoStmt>({l, c}, elseTarget));
+                return ib;
+            }
+            // Fallback: treat as inline ELSE statement list
+            auto ib = make_node<IfBlockStmt>({l, c}, std::move(cond));
+            ib->inlineEnd = true;
+            ib->thenBody.push_back(make_node<GotoStmt>({l, c}, target));
+            while (!atEnd()) {
+                if (check(TokenType::NewLine)) break;
+                auto st = parseStatement();
+                ib->elseBody.push_back(std::move(st));
+                if (match(TokenType::Colon)) continue;
+                if (check(TokenType::NewLine) || check(TokenType::EndOfFile)) break;
+            }
+            return ib;
+        }
         return make_node<IfStmt>({l, c}, std::move(cond), target);
     }
     // Form 2: Inline THEN [statement-list] [ELSE [statement-list]]

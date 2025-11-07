@@ -40,6 +40,7 @@
 #include "basic_compiler/ast/EraseStmt.h"
 #include "basic_compiler/ast/SwapStmt.h"
 #include "basic_compiler/ast/OptionBaseStmt.h"
+#include "basic_compiler/ast/OptionPrintZonesStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/MidAssignStmt.h"
@@ -64,7 +65,20 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         log() << "OptionBase=" << optionBase_ << '\n';
         return;
     }
+    if (auto opz = dyn_cast<const OptionPrintZonesStmt>(s)) {
+        printZones_ = opz->enabled;
+        log() << "OptionPrintZones=" << (printZones_ ? "ON" : "OFF") << '\n';
+        return;
+    }
     if (auto p = dyn_cast<const PrintStmt>(s)) {
+        // Enforce PRINT USING requires string format when present
+        if (p->format) {
+            if (typeOf(p->format.get()) != ValueType::String) {
+                std::ostringstream m; m << "TypeError: PRINT USING requires string format @ " << p->pos.line << ':' << p->pos.col; log() << m.str() << '\n';
+                throw SemanticError(m.str());
+            }
+            analyzeExpr(p->format.get());
+        }
         if (p->value) analyzeExpr(p->value.get());
         for (const auto& v : p->more) analyzeExpr(v.get());
         return;

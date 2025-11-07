@@ -119,6 +119,7 @@ public:
         semCommonVariables_ = r.commonVariables;
         arrayDims_ = r.arrays;
         optionBase_ = r.optionBase;
+        printZones_ = r.printZones;
         userFunctions_ = r.userFunctions;
         semStringVariables_ = r.stringVariables;
         // Map numeric kinds from semantics into codegen's representation
@@ -169,6 +170,7 @@ private:
     std::map<std::string, std::string> arrayAllocaName_{};
     // OPTION BASE setting (0 default; 1 if OPTION BASE 1 seen)
     int optionBase_{0};
+    bool printZones_{false};
     // User-defined functions by uppercase name
     std::map<std::string, const DefFnStmt*> userFunctions_{};
     // Variables determined as string-typed (by suffix or DEFSTR)

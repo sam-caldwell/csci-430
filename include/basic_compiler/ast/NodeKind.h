@@ -73,6 +73,7 @@ enum class NodeKind {
     SwapStmt,
     MidAssignStmt,
     OptionBaseStmt,
+    OptionPrintZonesStmt,
 };
 
 } // namespace gwbasic
