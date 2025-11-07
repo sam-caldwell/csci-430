@@ -8,6 +8,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: Parser.ParseProgram_ForNextVarMismatch
+Purpose: Ensure NEXT variable must match the corresponding FOR loop variable.
+Components Under Test: Parser::parseProgram; FOR/NEXT marker validation.
+Expected Behavior: Throws ParseError when NEXT J closes FOR I.
+*/
 TEST(Parser, ParseProgram_ForNextVarMismatch) {
     std::string src =
         "10 FOR I=1 TO 2\n"
@@ -16,4 +22,3 @@ TEST(Parser, ParseProgram_ForNextVarMismatch) {
     Parser p(std::move(toks));
     EXPECT_THROW({ auto _ = p.parseProgram(); }, ParseError);
 }
-

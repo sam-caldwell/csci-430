@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFor.
  * Expected Behavior: Error is reported if NEXT is missing.
  */
-/*
+/***
 Test: Parser.ErrorForMissingNextSameLine
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

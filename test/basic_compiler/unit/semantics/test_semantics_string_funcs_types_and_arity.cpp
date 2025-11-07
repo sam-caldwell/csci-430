@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsStringFuncs.LEFT_Right_RequireStringAndNumeric
  * Inputs: Various LEFT$/RIGHT$ calls with wrong argument types.
  * Code under test: Compiler::compileString() + semantic type checks for string funcs.

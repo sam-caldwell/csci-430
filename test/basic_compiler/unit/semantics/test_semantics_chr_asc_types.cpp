@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsBuiltins.ASC_RequiresStringArg
  * Inputs: ASC called with numeric literal instead of string.
  * Code under test: Compiler::compileString() + semantics for ASC.

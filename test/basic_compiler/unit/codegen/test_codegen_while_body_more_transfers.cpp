@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenWhile.Body_MoreTransfers
  * Purpose: Exercise additional emitWhile branches: GOTO, GOSUB inline, RETURN, END,
  *          and INPUT inside the loop body.
@@ -31,4 +31,3 @@ TEST(CodeGenWhile, Body_MoreTransfers) {
     // Look for goto target label and exit branching
     ASSERT_NE(ir.find(" br label %exit"), std::string::npos);
 }
-

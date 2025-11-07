@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.GotoGosubReturnEnd
  * Purpose: Exercise additional emitIfBlock branches for GOTO/GOSUB/RETURN/END in both THEN and ELSE.
  * Note: Bypass semantics to allow RETURN outside subroutine context.

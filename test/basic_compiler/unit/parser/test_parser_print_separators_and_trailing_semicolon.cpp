@@ -9,6 +9,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: Parser.Print_Separators_And_Trailing
+Purpose: Parse PRINT with semicolon/comma separators and a trailing semicolon terminator.
+Components Under Test: Parser::parsePrint; item/separator/terminator handling.
+Expected Behavior: Captures three items, separator kinds, and trailing semicolon.
+*/
 TEST(Parser, Print_Separators_And_Trailing) {
     const std::string src = "10 PRINT 1;2,3;\n";
     std::istringstream iss(src);
@@ -28,4 +34,3 @@ TEST(Parser, Print_Separators_And_Trailing) {
     EXPECT_EQ(ps->seps[1], PrintStmt::Sep::Comma);
     EXPECT_EQ(ps->trail, PrintStmt::Terminator::Semicolon);
 }
-

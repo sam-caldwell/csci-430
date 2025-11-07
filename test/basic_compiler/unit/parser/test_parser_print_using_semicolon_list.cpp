@@ -9,6 +9,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: Parser.Print_Using_Semicolon_List
+Purpose: Parse PRINT USING(fmt); followed by a list of items and trailing comma.
+Components Under Test: Parser::parsePrint; USING format and separators.
+Expected Behavior: Captures items, separators, and trailing comma terminator.
+*/
 TEST(Parser, Print_Using_Semicolon_List) {
     const std::string src = "10 PRINT USING(\"%d\"); 7, 8, 9,\n";
     std::istringstream iss(src);
@@ -26,4 +32,3 @@ TEST(Parser, Print_Using_Semicolon_List) {
     ASSERT_EQ(ps->seps.size(), 2u);
     EXPECT_EQ(ps->trail, PrintStmt::Terminator::Comma);
 }
-

@@ -16,7 +16,7 @@ static SemanticAnalyzer::Result analyze_src3(const std::string& src) {
     return sema.analyze(prog);
 }
 
-/*
+/***
  * Test: SemanticsScreen.Accepts_Three_Args
  * Inputs: SCREEN(1,1,0)
  * Code under test: Lexer, Parser, SemanticAnalyzer for SCREEN arity/type.
@@ -26,4 +26,3 @@ TEST(SemanticsScreen, Accepts_Three_Args) {
     const std::string src = "10 X=SCREEN(1,1,0)\n";
     EXPECT_NO_THROW({ (void)analyze_src3(src); });
 }
-

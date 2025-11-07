@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.DefFnValidation
 Inputs: Duplicate DEF; return type mismatches for DEF FN
 Code under test: SemanticAnalyzer::analyzeStmt(DefFnStmt)
@@ -26,4 +26,3 @@ TEST(Semantics, DefFnValidation) {
     EXPECT_THROW({ auto ir = Compiler::compileString(
         "10 DEF FNN(A)=\"X\"\n"); (void)ir; }, SemanticError);
 }
-

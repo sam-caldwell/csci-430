@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenGosub.MidArrayBounds_ErrorPath
-Purpose: Exercise emitSubroutineInline's MID$ handling on string array elements,
-         including bounds checks and error-path plumbing inside an inline
-         subroutine body.
-Expected IR markers: mid_ok_/mid_err_ labels, stores to gwb_err_* globals,
-                     and handler switch scaffolding.
-*/
+/***
+ * Test: CodeGenGosub.MidArrayBounds_ErrorPath
+ * Purpose: Exercise emitSubroutineInline's MID$ handling on string array elements,
+ *          including bounds checks and error-path plumbing inside an inline
+ *          subroutine body.
+ * Expected IR markers: mid_ok_/mid_err_ labels, stores to gwb_err_* globals,
+ *                      and handler switch scaffolding.
+ */
 TEST(CodeGenGosub, MidArrayBounds_ErrorPath) {
     const char* src =
         "10 OPTION BASE 1\n"
@@ -29,4 +29,3 @@ TEST(CodeGenGosub, MidArrayBounds_ErrorPath) {
     ASSERT_NE(ir.find("@gwb_in_handler"), std::string::npos);
     ASSERT_NE(ir.find("switch i32"), std::string::npos);
 }
-

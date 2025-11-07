@@ -8,6 +8,12 @@
 
 using gwbasic::TransparentSVHasher;
 
+/***
+Test: TransparentSVHasher.HeterogeneousLookupWorks
+Purpose: Validate transparent hashing/equality enable heterogeneous lookup in `unordered_map<std::string,...>`.
+Components Under Test: `TransparentSVHasher` (Hash) with `std::equal_to<>` (KeyEqual) on `std::unordered_map`.
+Expected Behavior: `find` succeeds using `std::string_view` and `const char*` for present keys; absent key returns `end()`.
+*/
 TEST(TransparentSVHasher, HeterogeneousLookupWorks) {
     std::unordered_map<std::string, int, TransparentSVHasher, std::equal_to<>> m;
     m["alpha"] = 1;
@@ -27,4 +33,3 @@ TEST(TransparentSVHasher, HeterogeneousLookupWorks) {
     auto it3 = m.find(std::string_view{"gamma"});
     EXPECT_EQ(it3, m.end());
 }
-

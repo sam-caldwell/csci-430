@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.StringFuncs_IRContainsStrncpy
  * Inputs: Program using LEFT$, RIGHT$, MID$ to print substrings.
  * Code under test: Compiler::compileString() IR generation for string funcs.

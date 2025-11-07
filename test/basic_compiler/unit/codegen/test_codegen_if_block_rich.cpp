@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.RichThenElseBodies
  * Purpose: Exercise emitIfBlock: THEN/ELSE bodies with string/numeric assigns,
  *          MID$, PRINT with format override and channel, and control flow.

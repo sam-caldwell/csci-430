@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.StringConcat_And_PrintSpacing
  * Purpose: Drive emit_if_block string-detection in BinaryExpr(Add) and both
  *          string/numeric PRINT format branches with last/non-last items.

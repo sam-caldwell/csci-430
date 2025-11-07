@@ -5,7 +5,7 @@
 #include "basic_compiler/Compiler.h"
 
 using namespace gwbasic;
-/*
+/***
  * Test Suite: CodeGen Strings
  * Purpose: Verify emission of interned global string literals and correctness
  *          of LLVM IR escape sequences used in globals.
@@ -14,12 +14,6 @@ using namespace gwbasic;
  * Expected Behavior: Presence of @.str.N constants with expected escapes,
  *          and GEP to @.fmt_str for string printing.
  */
-/*
-Test: CodeGenStrings.EscapesCommonCharactersInGlobals
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenStrings, EscapesCommonCharactersInGlobals) {
     // GW-BASIC style: backslashes are literal; quotes are doubled inside string
     // Include sequences: A\tB\nC"\D (where \t and \n are literal backslash+letter)

@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.CALL_IRContainsHelper
  * Purpose: Ensure CALL emits the helper definition and an invocation.
  */
@@ -19,4 +19,3 @@ TEST(Integration, CALL_IRContainsHelper) {
     ASSERT_NE(ir.find("define void @gwb_call(i64"), std::string::npos);
     ASSERT_NE(ir.find("call void @gwb_call(i64"), std::string::npos);
 }
-

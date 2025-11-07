@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenCALL.EmitsHelperAndCall
  * Inputs: Program that POKE's and then CALLs an address.
  * Code under test: Compiler::compileString() codegen for CALL helper + invocation.
  * Expected behavior: IR defines @gwb_call and emits a call to it with address.
  */
 TEST(CodeGenCALL, EmitsHelperAndCall) {
-    const char* src =
+    const auto src =
         "10 POKE 100,1\n"
         "20 CALL 100\n"
         "30 END\n";

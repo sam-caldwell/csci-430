@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenWhile.PrintNextStartsWithSpace
  * Purpose: Exercise nextStartsWithSpace selection for while-body print of constant ints/floats.
  */
@@ -22,4 +22,3 @@ TEST(CodeGenWhile, PrintNextStartsWithSpace) {
     ASSERT_NE(ir.find("@.fmt_int_ns"), std::string::npos);
     ASSERT_NE(ir.find("@.fmt_num_ns"), std::string::npos);
 }
-

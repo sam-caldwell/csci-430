@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.TypeOf_UnknownDollarFunction_ClassifiesStringThenErrors
 Inputs: LET A$ = FOO$()
 Code under test: typeOf fallback for names ending with '$' and subsequent analyzeExpr unknown function error
@@ -18,4 +18,3 @@ TEST(SemanticsTypeOf, UnknownDollarFunction) {
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
-

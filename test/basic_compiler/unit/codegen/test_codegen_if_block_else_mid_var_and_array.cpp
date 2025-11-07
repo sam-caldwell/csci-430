@@ -6,11 +6,11 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenIfBlock.Else_MidScalarAndArray
-Purpose: Exercise ELSE-body MID$ on scalar string and array element (with and
-         without length argument) to cover ELSE MID$ paths.
-*/
+/***
+ * Test: CodeGenIfBlock.Else_MidScalarAndArray
+ * Purpose: Exercise ELSE-body MID$ on scalar string and array element (with and
+ *          without length argument) to cover ELSE MID$ paths.
+ */
 TEST(CodeGenIfBlock, Else_MidScalarAndArray) {
     const char* src =
         "10 OPTION BASE 1\n"
@@ -27,4 +27,3 @@ TEST(CodeGenIfBlock, Else_MidScalarAndArray) {
     ASSERT_NE(ir.find("_if_else"), std::string::npos);
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);
 }
-

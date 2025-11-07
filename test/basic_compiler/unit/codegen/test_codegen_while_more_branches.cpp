@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenWhile.MoreBranches
  * Purpose: Hit additional emitWhile branches: variable numeric print path (int detection),
  *          STOP and SYSTEM in loop body, string array assign.
@@ -30,4 +30,3 @@ TEST(CodeGenWhile, MoreBranches) {
     // STOP/SYSTEM branches present
     ASSERT_NE(ir.find(".msg_break"), std::string::npos);
 }
-

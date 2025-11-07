@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsMemIO.BsaveTypes
  * Inputs: BSAVE "f", "X", 10 (non-numeric address)
  * Code under test: Compiler::compileString() + semantic checks for BSAVE.
@@ -18,4 +18,3 @@ TEST(SemanticsMemIO, BsaveTypes) {
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
-

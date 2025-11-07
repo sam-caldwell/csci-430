@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.SwapAndOnPositive
 Inputs: SWAP with matching types; ON GOTO/GOSUB with existing target lines
 Code under test: SemanticAnalyzer::analyzeStmt for Swap and OnGoto/OnGosub
@@ -41,4 +41,3 @@ TEST(Semantics, SwapAndOnPositive) {
         ASSERT_FALSE(ir.empty());
     }
 }
-

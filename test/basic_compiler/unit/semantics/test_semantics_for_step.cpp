@@ -10,7 +10,7 @@ using namespace gwbasic;
  * Test Suite: Semantics FOR STEP handling
  * Purpose: Ensure analyzeExpr(nullptr) is exercised when STEP is omitted.
  */
-/*
+/***
 Test: Semantics.ForWithoutStepAnalyzed
 Inputs: Parsed AST (from BASIC snippet) and default environment
 Code under test: Semantics analyzer (type/arity/domain checks)

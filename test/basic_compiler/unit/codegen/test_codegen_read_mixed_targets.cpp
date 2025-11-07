@@ -6,11 +6,11 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenLineBlock.READ_MixedTargets
-Purpose: Exercise READ codegen for string and numeric targets, including array
-         elements and scalars, to traverse both string and numeric paths.
-*/
+/***
+ * Test: CodeGenLineBlock.READ_MixedTargets
+ * Purpose: Exercise READ codegen for string and numeric targets, including array
+ *          elements and scalars, to traverse both string and numeric paths.
+ */
 TEST(CodeGenLineBlock, READ_MixedTargets) {
     const char* src =
         "10 DATA \"A\", 1, \"B\", 2\n"

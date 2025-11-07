@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.OnGoto_MissingTargetErrors
 Inputs: Program with ON 1 GOTO <missing>
 Code under test: SemanticAnalyzer
@@ -22,4 +22,3 @@ TEST(Semantics, OnGoto_MissingTargetErrors) {
     SemanticAnalyzer sem; sem.setStrictControlFlow(true);
     EXPECT_THROW({ (void)sem.analyze(prog); }, SemanticError);
 }
-

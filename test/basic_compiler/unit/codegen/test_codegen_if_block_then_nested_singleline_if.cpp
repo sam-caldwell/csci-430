@@ -6,10 +6,10 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenIfBlock.Then_Nested_SingleLineIf
-Purpose: Cover nested single-line IF inside an IF-block THEN body.
-*/
+/***
+ * Test: CodeGenIfBlock.Then_Nested_SingleLineIf
+ * Purpose: Cover nested single-line IF inside an IF-block THEN body.
+ */
 TEST(CodeGenIfBlock, Then_Nested_SingleLineIf) {
     const char* src =
         "10 IF 1<2 THEN\n"
@@ -22,4 +22,3 @@ TEST(CodeGenIfBlock, Then_Nested_SingleLineIf) {
     ASSERT_NE(ir.find("line200"), std::string::npos);
     ASSERT_NE(ir.find("_cont_"), std::string::npos);
 }
-

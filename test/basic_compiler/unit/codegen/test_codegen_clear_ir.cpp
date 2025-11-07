@@ -13,14 +13,8 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Codegen for CLEAR
  * Expected: IR contains store of non-zero followed by store of 0.0 (typed) for vars.
  */
-/*
-Test: CodeGenClear.EmitsVariableResets
-Inputs: Program assigning A and B then CLEAR
-Code under test: Code generator IR emission
-Expected behavior: IR contains 'store double 0.0, ptr %A' and for %B
-*/
 TEST(CodeGenClear, EmitsVariableResets) {
-    const char* src =
+    const auto src =
         "10 A=5: B=9\n"
         "20 CLEAR\n"
         "30 END\n";

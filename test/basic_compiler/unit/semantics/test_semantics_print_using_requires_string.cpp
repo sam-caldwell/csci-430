@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: SemanticsPrintUsing.RequiresStringFormat
 Inputs: PRINT USING("%d"), 7 (valid) and PRINT USING(1), 7 (invalid)
 Code under test: SemanticAnalyzer::analyzeStmt for PrintStmt
@@ -17,4 +17,3 @@ TEST(SemanticsPrintUsing, RequiresStringFormat) {
     EXPECT_NO_THROW({ (void)Compiler::compileString("10 PRINT USING(\"%d\"), 7\n"); });
     EXPECT_THROW({ (void)Compiler::compileString("10 PRINT USING(1), 7\n"); }, SemanticError);
 }
-

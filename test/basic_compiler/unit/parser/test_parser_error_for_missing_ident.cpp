@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFor.
  * Expected Behavior: Parsing indicates an error when the identifier is absent.
  */
-/*
+/***
 Test: Parser.ErrorForMissingIdentifier
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

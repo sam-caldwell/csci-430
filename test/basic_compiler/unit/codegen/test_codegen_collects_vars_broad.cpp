@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenCore.CollectsVarsBroadWithoutSemantics
  * Purpose: Ensure collectStmtVars/collectExprVars paths are exercised when semantics
  *          are not provided. Uses DATA/READ, RANDOMIZE, COMMON, ON GOTO/GOSUB, MID$.

@@ -14,12 +14,6 @@ using namespace gwbasic;
  * Expected Behavior: Skips leading whitespace and an apostrophe comment up to the newline;
  *                    after consuming the newline, the lexer points at the next token ('A').
  */
-/*
-Test: Lexer.SkipWhitespace_CoversSpacesTabsCRAndApostropheComment
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
 TEST(Lexer, SkipWhitespace_CoversSpacesTabsCRAndApostropheComment) {
     std::string src = " \t\r' comment\nA";
     Lexer L(src);

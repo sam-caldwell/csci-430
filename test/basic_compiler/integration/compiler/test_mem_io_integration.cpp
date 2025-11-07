@@ -5,16 +5,16 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.MemIO_IRContainsFileCalls
  * Purpose: Ensure BSAVE/BLOAD emit expected libc calls in IR.
  */
-/*
-Test: Integration.MemIO_IRContainsFileCalls
-Inputs: BASIC snippet compiled through multiple stages
-Code under test: Parser + Semantics + Codegen integration
-Expected behavior: Emitted IR/state contains expected constructs and values
-*/
+/***
+ * Test: Integration.MemIO_IRContainsFileCalls
+ * Inputs: BASIC snippet compiled through multiple stages
+ * Code under test: Parser + Semantics + Codegen integration
+ * Expected behavior: Emitted IR/state contains expected constructs and values
+ */
 TEST(Integration, MemIO_IRContainsFileCalls) {
     const auto src =
         "10 DEF SEG=0\n"
@@ -27,4 +27,3 @@ TEST(Integration, MemIO_IRContainsFileCalls) {
     ASSERT_NE(ir.find("@fwrite"), std::string::npos);
     ASSERT_NE(ir.find("@fread"), std::string::npos);
 }
-

@@ -7,6 +7,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: SemanticsMidAssign.ErrorsOnArrayNotDimmed
+Purpose: MID$ assignment to a string array element should require DIM prior to use.
+Components Under Test: SemanticAnalyzer::analyze for MidAssignStmt.
+Expected Behavior: Throws SemanticError when array has not been DIM'd.
+*/
 TEST(SemanticsMidAssign, ErrorsOnArrayNotDimmed) {
     // MID$(A$(1),2) without DIM A$()
     std::string src = "10 MID$(A$(1),2)=\"X\"\n";
@@ -14,4 +20,3 @@ TEST(SemanticsMidAssign, ErrorsOnArrayNotDimmed) {
     auto prog = p.parseProgram();
     SemanticAnalyzer sa; EXPECT_THROW(sa.analyze(prog), SemanticError);
 }
-

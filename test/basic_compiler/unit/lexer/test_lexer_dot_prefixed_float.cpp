@@ -9,12 +9,12 @@
 
 using namespace gwbasic;
 
-/*
-Test: Lexer.DotPrefixedFloat_TokenizesAsFloat
-Inputs: Source containing .5 and .25 float literals
-Code under test: Lexer::tryEmitPrimary + number() starting with '.'
-Expected behavior: Emits Float tokens with lexemes ".5" and ".25".
-*/
+/***
+ * Test: Lexer.DotPrefixedFloat_TokenizesAsFloat
+ * Inputs: Source containing .5 and .25 float literals
+ * Code under test: Lexer::tryEmitPrimary + number() starting with '.'
+ * Expected behavior: Emits Float tokens with lexemes ".5" and ".25".
+ */
 TEST(Lexer, DotPrefixedFloat_TokenizesAsFloat) {
     const std::string src = "10 PRINT .5, .25\n";
     std::istringstream iss(src);
@@ -28,4 +28,3 @@ TEST(Lexer, DotPrefixedFloat_TokenizesAsFloat) {
     EXPECT_EQ(floats[0].lexeme, std::string(".5"));
     EXPECT_EQ(floats[1].lexeme, std::string(".25"));
 }
-

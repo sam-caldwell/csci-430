@@ -7,19 +7,13 @@
 using namespace gwbasic;
 
 namespace { struct DummyExpr final : Expr {}; }
-/*
+/***
  * Test Suite: CodeGen Error (unknown expression)
  * Purpose: Ensure printing an unknown expression kind triggers CodeGenError.
  * Components Under Test: CodeGenerator emitExpr.
  * Expected Behavior: generate() throws CodeGenError when encountering
  *          a PrintStmt with a non-supported Expr type.
  */
-/*
-Test: CodeGenErrors.UnknownExpressionKind
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenErrors, UnknownExpressionKind) {
     Program p;
     Line l; l.number = 10;
@@ -30,4 +24,3 @@ TEST(CodeGenErrors, UnknownExpressionKind) {
     CodeGenerator gen;
     EXPECT_THROW({ (void)gen.generate(p); }, CodeGenError);
 }
-

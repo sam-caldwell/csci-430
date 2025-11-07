@@ -10,7 +10,7 @@ using namespace gwbasic;
  * Test: SemanticsDefFn.ParamTypeErrors
  * Purpose: Validate that DEF FN enforces parameter type at call sites.
  */
-/*
+/***
 Test: SemanticsDefFn.ParamTypeErrors
 Inputs: Parsed AST (from BASIC snippet) and default environment
 Code under test: Semantics analyzer (type/arity/domain checks)
@@ -31,4 +31,3 @@ TEST(SemanticsDefFn, ParamTypeErrors) {
         "30 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src2); (void)ir; }, SemanticError);
 }
-

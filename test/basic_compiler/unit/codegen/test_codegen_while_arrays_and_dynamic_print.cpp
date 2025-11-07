@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenWhile.Arrays_And_DynamicPrint
  * Purpose: Exercise array element reads in expressions inside WHILE, and the
  *          dynamic integer detection split for non-constant numeric prints.

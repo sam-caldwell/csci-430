@@ -14,7 +14,7 @@ using namespace gwbasic;
  * Test Suite: Semantics COMMON
  * Purpose: Ensure COMMON declares listed variables globally.
  */
-/*
+/***
 Test: SemanticsCommon.DeclaresVariables
 Inputs: Parsed AST (from BASIC snippet) and default environment
 Code under test: Semantics analyzer (type/arity/domain checks)
@@ -34,4 +34,3 @@ TEST(SemanticsCommon, DeclaresVariables) {
     EXPECT_TRUE(res.variables.contains("A"));
     EXPECT_TRUE(res.variables.contains("B"));
 }
-

@@ -6,11 +6,11 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenStrings.StringComparisonsUseStrcmp
  * Inputs: Program compares string literals with = and <, then PRINT.
  * Code under test: Compiler::compileString() comparison emission for strings.
- * Expected behavior: IR references @strcmp and prints numeric result.
+ * Expected behavior: IR references @strcmp and prints numeric results.
  */
 TEST(CodeGenStrings, StringComparisonsUseStrcmp) {
     const auto src =

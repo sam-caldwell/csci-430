@@ -16,7 +16,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFor/parseStatement sequencing.
  * Expected Behavior: ForStmt contains expected sequence of body statements.
  */
-/*
+/***
 Test: Parser.ForNextInlineBody
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

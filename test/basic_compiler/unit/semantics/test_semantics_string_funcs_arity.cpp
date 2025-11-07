@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsStringFuncs.ArityChecks
  * Inputs: LEFT$/RIGHT$/MID$ with too few/many args.
  * Code under test: Compiler::compileString() arg count validation for string funcs.
@@ -17,4 +17,3 @@ TEST(SemanticsStringFuncs, ArityChecks) {
     EXPECT_THROW({ auto ir = Compiler::compileString("10 PRINT RIGHT$(\"A\",1,2)\n20 END\n"); (void)ir; }, SemanticError);
     EXPECT_THROW({ auto ir = Compiler::compileString("10 PRINT MID$(\"A\")\n20 END\n"); (void)ir; }, SemanticError);
 }
-

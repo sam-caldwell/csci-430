@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.NonStrictControlFlowAllowsMissingTargets
 Inputs: GOTO/GOSUB/ON GOTO/ON GOSUB with missing target lines; strict=false
 Code under test: AnalyzeStmt branches that warn instead of throwing when strictControlFlow=false
@@ -26,4 +26,3 @@ TEST(Semantics, NonStrictControlFlowAllowsMissingTargets) {
     SemanticAnalyzer sem; sem.setStrictControlFlow(false);
     EXPECT_NO_THROW(sem.analyze(prog));
 }
-

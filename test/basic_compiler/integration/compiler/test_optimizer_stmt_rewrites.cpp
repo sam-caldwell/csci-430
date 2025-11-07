@@ -14,7 +14,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Optimizer.Stmt_Rewrites_IfAndFor
  * Purpose: Verify IF constant folding to GOTO/removal and FOR STEP 1 elision.
  */

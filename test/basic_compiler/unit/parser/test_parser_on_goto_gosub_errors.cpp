@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Parser.OnGotoGosubErrors
 Inputs: Malformed ON GOTO/GOSUB statements
 Code under test: Parser::parseOnGotoGosub error branches
@@ -37,4 +37,3 @@ TEST(Parser, OnGotoGosub_Errors) {
         EXPECT_THROW({ auto _ = p.parseProgram(); }, ParseError);
     }
 }
-

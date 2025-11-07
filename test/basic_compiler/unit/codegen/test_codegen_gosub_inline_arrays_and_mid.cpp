@@ -6,12 +6,12 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenGosub.InlineArraysAndMid
-Purpose: Exercise emitSubroutineInline coverage for numeric and string array
-         assignments, as well as MID$ on a scalar string and on a string
-         array element (with and without length argument).
-*/
+/***
+ * Test: CodeGenGosub.InlineArraysAndMid
+ * Purpose: Exercise emitSubroutineInline coverage for numeric and string array
+ *          assignments, as well as MID$ on a scalar string and on a string
+ *          array element (with and without length argument).
+ */
 TEST(CodeGenGosub, InlineArraysAndMid) {
     const char* src =
         "10 OPTION BASE 1\n"

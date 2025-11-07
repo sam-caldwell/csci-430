@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.DataReadWriteWalk
 Inputs: DATA with mixed items; READ into scalar and array; WRITE #n with items
 Code under test: SemanticAnalyzer::analyzeStmt for DATA/READ/WRITE
@@ -21,4 +21,3 @@ TEST(Semantics, DataReadWriteWalk) {
     const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }
-

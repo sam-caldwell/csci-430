@@ -20,12 +20,6 @@ namespace { struct DummyStmt final : Stmt {}; }
  * Components Under Test: CodeGenerator (emitFor/generate)
  * Expected Behavior: generate() throws CodeGenError when encountering unsupported stmt.
  */
-/*
-Test: CodeGenErrors.UnsupportedStatementInForBody
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenErrors, UnsupportedStatementInForBody) {
     Program p;
     Line l; l.number = 10;

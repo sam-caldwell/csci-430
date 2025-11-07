@@ -6,13 +6,13 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenChain.ResetsArrayElementKinds
-Purpose: Ensure CHAIN without ALL zeros arrays of all numeric kinds
-         (Int16 %, Long32 &, Single !, Double #) in emit_line_block.
-*/
+/***
+ * Test: CodeGenChain.ResetsArrayElementKinds
+ * Purpose: Ensure CHAIN without ALL zeros arrays of all numeric kinds
+ *          (Int16 %, Long32 &, Single !, Double #) in emit_line_block.
+ */
 TEST(CodeGenChain, ResetsArrayElementKinds) {
-    const char* src =
+    const auto src =
         "10 DIM A%(2)\n"
         "11 DIM B&(2)\n"
         "12 DIM C!(2)\n"
@@ -23,7 +23,7 @@ TEST(CodeGenChain, ResetsArrayElementKinds) {
 
     std::string ir = Compiler::compileString(src);
     // Look for per-kind zero stores in the CHAIN block
-    auto pos = ir.find("line20:");
+    const auto pos = ir.find("line20:");
     ASSERT_NE(pos, std::string::npos);
     const auto slice = ir.substr(pos, 800); // local slice of the CHAIN block
     EXPECT_NE(slice.find("store i32 0, ptr"), std::string::npos);   // Int16 array elements

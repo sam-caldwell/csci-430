@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsColor.ForegroundMustBeNumeric
  * Inputs: COLOR "A"
  * Code under test: Compiler::compileString() + semantics for COLOR types.

@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsCALL.RequiresNumericAddress
  * Inputs: CALL "X"
  * Code under test: Compiler::compileString() + semantic validation for CALL.

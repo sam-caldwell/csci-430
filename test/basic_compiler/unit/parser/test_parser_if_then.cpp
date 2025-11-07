@@ -14,7 +14,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseIf/parseComparison.
  * Expected Behavior: IfStmt with BinaryExpr comparison and correct target line.
  */
-/*
+/***
 Test: Parser.IfThenComparison
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

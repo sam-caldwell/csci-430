@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Parser.OptionPrintZonesParses
 Inputs: OPTION PRINTZONES ON and OFF
 Code under test: Parser::parseProgram
@@ -28,4 +28,3 @@ TEST(Parser, OptionPrintZonesParses) {
     EXPECT_TRUE(a->enabled);
     EXPECT_FALSE(b->enabled);
 }
-

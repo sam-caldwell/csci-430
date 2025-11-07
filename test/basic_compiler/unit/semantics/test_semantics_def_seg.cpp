@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsDefSeg.ParsesWithAndWithoutExpr
  * Inputs: DEF SEG (no expr) and DEF SEG = 0
  * Code under test: Parser/Compiler handling of DEF SEG statement.

@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: SemanticsExpectedArity.KnownIntrinsics
+Purpose: Validate expected minimum arity for a sampling of intrinsics.
+Components Under Test: SemanticAnalyzer::expectedArity accessor for tests.
+Expected Behavior: Returns known arity values; defaults to 1 for unknown names.
+*/
 TEST(SemanticsExpectedArity, KnownIntrinsics) {
     auto A = SemanticAnalyzerArityAccessorForTests::expectedArity;
     // Unary numeric
@@ -25,4 +31,3 @@ TEST(SemanticsExpectedArity, KnownIntrinsics) {
     // Default unknowns -> 1
     EXPECT_EQ(A("FOO"), 1);
 }
-

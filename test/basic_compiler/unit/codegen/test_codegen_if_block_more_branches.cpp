@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.MoreBranches
  * Purpose: Further exercise emitIfBlock paths: nested FOR, RANDOMIZE, ON GOTO/GOSUB, INPUT.
  */
@@ -37,4 +37,3 @@ TEST(CodeGenIfBlock, MoreBranches) {
     // INPUT path present
     ASSERT_NE(ir.find("@scanf"), std::string::npos);
 }
-

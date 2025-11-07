@@ -30,12 +30,12 @@ using namespace gwbasic;
 static std::unique_ptr<Expr> num(const double v) { return std::make_unique<NumberExpr>(v); }
 static std::unique_ptr<Expr> str(const std::string& v) { return std::make_unique<StringExpr>(v); }
 
-/*
-Test: Metrics.ComputeAstSnapshot_CoversStatementKinds
-Inputs: A Program with a wide variety of statement types and expressions
-Code under test: Metrics::recordParsedSnapshot (via computeAstSnapshot)
-Expected behavior: Computes non-zero counts; executes branches for many Stmt kinds
-*/
+/***
+ * Test: Metrics.ComputeAstSnapshot_CoversStatementKinds
+ * Inputs: A Program with a wide variety of statement types and expressions
+ * Code under test: Metrics::recordParsedSnapshot (via computeAstSnapshot)
+ * Expected behavior: Computes non-zero counts; executes branches for many Stmt kinds
+ */
 TEST(Metrics, ComputeAstSnapshot_CoversStatementKinds) {
     Program prog;
     Line line; line.number = 10;

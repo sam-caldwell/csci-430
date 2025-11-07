@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: ParserInput.MoreEdgeCases
  * Purpose: Validate additional INPUT parsing edges: trailing comma and malformed multiple channels.
  */
@@ -40,4 +40,3 @@ TEST(ParserInput, MoreEdgeCases) {
         EXPECT_THROW({ (void)p.parseProgram(); }, ParseError);
     }
 }
-

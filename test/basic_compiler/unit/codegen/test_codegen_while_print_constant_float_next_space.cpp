@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenWhile.Print_ConstantFloat_NextSpace
  * Purpose: Hit emitWhile constant-float PRINT path and nextStartsWithSpace selection.
  */
@@ -22,4 +22,3 @@ TEST(CodeGenWhile, Print_ConstantFloat_NextSpace) {
     // Expect printf on constant double literal
     ASSERT_NE(ir.find("call i32 (ptr, ...) @printf(ptr"), std::string::npos);
 }
-

@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test Suite: Lexer Errors (unexpected)
  * Purpose: Verify the lexer reports unexpected characters (e.g., '@').
  * Components Under Test: Lexer::tokenize diagnostic path.
@@ -14,12 +14,6 @@ using namespace gwbasic;
  *
  * Sad path: unexpected character should raise a LexError.
  */
-/*
-Test: Lexer.UnexpectedCharThrows
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
 TEST(Lexer, UnexpectedCharThrows) {
     // '@' is not a recognized token in this lexer.
     std::string src = "10 LET A = @\n";

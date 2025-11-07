@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenWhile.ArrayBoundsErrors
  * Purpose: Drive emitWhile array assign error branches for both numeric and string arrays.
  */

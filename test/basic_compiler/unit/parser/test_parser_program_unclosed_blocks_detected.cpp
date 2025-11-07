@@ -8,6 +8,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: Parser.ParseProgram_UnclosedBlocksDetected
+Purpose: Ensure parser reports errors for unclosed WHILE/IF/FOR blocks.
+Components Under Test: Parser::parseProgram; block stack error detection.
+Expected Behavior: Throws ParseError for each unclosed construct.
+*/
 TEST(Parser, ParseProgram_UnclosedBlocksDetected) {
     // Unclosed FOR
     {
@@ -31,4 +37,3 @@ TEST(Parser, ParseProgram_UnclosedBlocksDetected) {
         EXPECT_THROW({ auto _ = p.parseProgram(); }, ParseError);
     }
 }
-

@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsBuiltins.CHR_Dollar_RequiresNumericArg
  * Inputs: CHR$("A")
  * Code under test: Compiler::compileString() + semantics for CHR$.
@@ -18,4 +18,3 @@ TEST(SemanticsBuiltins, CHR_Dollar_RequiresNumericArg) {
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
-

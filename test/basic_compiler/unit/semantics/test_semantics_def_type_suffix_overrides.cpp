@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsDefType.SuffixOverridesDEFSTR
  * Inputs: DEFSTR C; assign numeric to C% and print.
  * Code under test: Compiler::compileString() + DEF type suffix precedence.
@@ -20,4 +20,3 @@ TEST(SemanticsDefType, SuffixOverridesDEFSTR) {
     const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }
-

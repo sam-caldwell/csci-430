@@ -6,6 +6,13 @@
 
 using namespace gwbasic;
 
+/***
+Test: SymbolHeader.ConstructAndAccessors
+Purpose: Validate Symbol construction from char, C-string, and string_view, plus accessors and operators.
+Components Under Test: `Symbol` constructors; `size`, `is_one`, `first`, `to_char`, `to_string_view`, `to_string`,
+                       equality operators with char/string_view; stream insertion operator.
+Expected Behavior: Symbols report correct size/bytes, compare equal to expected literals, and stream without nulls.
+*/
 TEST(SymbolHeader, ConstructAndAccessors) {
     // Single-char constructor
     Symbol s1('+');
@@ -42,4 +49,3 @@ TEST(SymbolHeader, ConstructAndAccessors) {
     oss << s3;
     EXPECT_EQ(oss.str(), "<=");
 }
-

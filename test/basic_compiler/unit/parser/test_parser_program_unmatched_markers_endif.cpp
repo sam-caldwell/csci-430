@@ -8,10 +8,15 @@
 
 using namespace gwbasic;
 
+/***
+Test: Parser.ParseProgram_UnmatchedMarkers_ENDIF
+Purpose: Reject stray END IF without a matching IF block.
+Components Under Test: Parser::parseProgram; marker validation.
+Expected Behavior: Throws ParseError.
+*/
 TEST(Parser, ParseProgram_UnmatchedMarkers_ENDIF) {
     std::string src = "10 END IF\n";
     Lexer lx(src); auto toks = lx.tokenize();
     Parser p(std::move(toks));
     EXPECT_THROW({ auto _ = p.parseProgram(); }, ParseError);
 }
-

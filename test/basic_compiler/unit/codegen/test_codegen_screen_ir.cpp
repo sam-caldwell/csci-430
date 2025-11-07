@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenScreen.EmitsGlobalsAndHelper
  * Inputs: Program that prints "AB" and reads SCREEN(1,1)
  * Code under test: Compiler::compileString() IR emission for virtual screen.

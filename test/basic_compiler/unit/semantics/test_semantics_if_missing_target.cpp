@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Semantics.IfMissingTargetErrors
  * Inputs: IF ... THEN 9999 where 9999 is not a program line.
  * Code under test: Compiler::compileString() semantic validation of branch targets.

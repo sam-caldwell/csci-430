@@ -8,16 +8,10 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test Suite: Lexer Logging
  * Purpose: Exercise lex log path to improve coverage of log_token.cpp
  */
-/*
-Test: Lexer.LoggingProducesOutput
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
 TEST(Lexer, LoggingProducesOutput) {
     // GW-BASIC string rules: doubled quotes inside strings, no C-style escapes
     // This program prints: A\n\t"B\C

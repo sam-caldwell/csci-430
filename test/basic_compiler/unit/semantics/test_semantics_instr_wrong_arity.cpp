@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: SemanticsINSTR.Rejects_Wrong_Arity
 Inputs: INSTR(), INSTR("A"), INSTR("A","B","C","D")
 Code under test: Compiler::compileString; Semantics arity checks
@@ -18,4 +18,3 @@ TEST(SemanticsINSTR, Rejects_Wrong_Arity) {
     EXPECT_THROW({ (void)Compiler::compileString("10 PRINT INSTR(\"A\")\n"); }, SemanticError);
     EXPECT_THROW({ (void)Compiler::compileString("10 PRINT INSTR(\"A\",\"B\",\"C\",\"D\")\n"); }, SemanticError);
 }
-

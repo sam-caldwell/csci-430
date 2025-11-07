@@ -7,12 +7,12 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGen.NumericPromotionAndStoreCasts
-Inputs: BASIC with mixed-typed vars: A%, B&, C!, D#, and a sum into E#
-Code under test: LLVM IR codegen for loads/stores and casts
-Expected behavior: Loads promote to double (sitofp/fpext); stores cast back (fptosi/fptrunc/store)
-*/
+/***
+ * Test: CodeGen.NumericPromotionAndStoreCasts
+ * Inputs: BASIC with mixed-typed vars: A%, B&, C!, D#, and a sum into E#
+ * Code under test: LLVM IR codegen for loads/stores and casts
+ * Expected behavior: Loads promote to double (sitofp/fpext); stores cast back (fptosi/fptrunc/store)
+ */
 TEST(CodeGen, NumericPromotionAndStoreCasts) {
     const auto src =
         "10 LET A% = 1.9\n"
@@ -30,7 +30,7 @@ TEST(CodeGen, NumericPromotionAndStoreCasts) {
     ASSERT_NE(ir.find("alloca float"), std::string::npos) << "expected float alloca for !";
     ASSERT_NE(ir.find("alloca double"), std::string::npos) << "expected double alloca for #";
 
-    // Stores cast from double to target type (be tolerant to platform-specific literal formatting)
+    // Stores cast from double to a target type (be tolerant to platform-specific literal formatting)
     ASSERT_TRUE(irtest::irContainsAny(ir, {
                     "fptosi double 1.9 to i16",
                     "fptosi double 1.8999999999999999 to i16"}))

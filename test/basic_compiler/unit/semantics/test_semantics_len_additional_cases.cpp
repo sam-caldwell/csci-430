@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics_LEN.Additional_Cases
 Inputs: Programs using LEN on non-variable numeric expressions (A+1), on array element
         arithmetic (A(1)+1), and on string array elements S$(i)
@@ -19,4 +19,3 @@ TEST(Semantics_LEN, Additional_Cases) {
     EXPECT_THROW({ (void)Compiler::compileString("10 DIM A(2): A(1)=1: PRINT LEN(A(1)+1)\n"); }, SemanticError);
     EXPECT_NO_THROW({ (void)Compiler::compileString("10 DIM S$(2): S$(1)=\"HI\": PRINT LEN(S$(1))\n"); });
 }
-

@@ -5,7 +5,7 @@
 #include "basic_compiler/semantics/SemanticError.h"
 
 using namespace gwbasic;
-/*
+/***
 Test: SemanticsCHDIR.RequiresStringPath
 Inputs: Parsed AST (from BASIC snippet) and default environment
 Code under test: Semantics analyzer (type/arity/domain checks)
@@ -18,4 +18,3 @@ TEST(SemanticsCHDIR, RequiresStringPath) {
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
-

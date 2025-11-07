@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: ParserPrint.ChannelMissingNumber_Error
 Purpose: Exercise error path when '#' is not followed by an integer channel.
 */
@@ -19,4 +19,3 @@ TEST(ParserPrint, ChannelMissingNumber_Error) {
     Parser p(std::move(toks));
     EXPECT_THROW({ (void)p.parseProgram(); }, ParseError);
 }
-

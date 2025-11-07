@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+ * Test: ParserHelpers.TryParseOtherKeywords_CommonCases
+ * Purpose: Ensure miscellaneous keyword-led statements are recognized by the helper path.
+ * Components Under Test: Parser::tryParseOtherKeywords.
+ * Expected Behavior: Returns non-null nodes for PRINT, CLEAR, and RANDOMIZE.
+ */
 TEST(ParserHelpers, TryParseOtherKeywords_CommonCases) {
     // PRINT
     {
@@ -32,4 +38,3 @@ TEST(ParserHelpers, TryParseOtherKeywords_CommonCases) {
         ASSERT_NE(node, nullptr);
     }
 }
-

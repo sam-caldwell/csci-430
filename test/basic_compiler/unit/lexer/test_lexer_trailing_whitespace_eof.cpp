@@ -14,12 +14,6 @@ using namespace gwbasic;
  * Expected Behavior: Trailing spaces are consumed; tokens terminate with EndOfFile;
  *                    no spurious tokens are emitted.
  */
-/*
-Test: Lexer.TrailingWhitespaceAtEOFHandled
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
 TEST(Lexer, TrailingWhitespaceAtEOFHandled) {
     // Ensure path where skipWhitespace reaches EOF inside the main loop gets covered
     std::string src = "10 PRINT \"X\"   "; // spaces at end, no trailing newline

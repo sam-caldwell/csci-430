@@ -11,11 +11,11 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Semantics (argument type checking)
  * Expected Behavior: Compilation succeeds for bare RANDOMIZE and RANDOMIZE 123.
  */
-/*
+/***
 Test: SemanticsRandomize.AcceptsNoArgOrNumeric
-Inputs: Parsed AST (from BASIC snippet) and default environment
-Code under test: Semantics analyzer (type/arity/domain checks)
-Expected behavior: Valid programs accepted; invalid ones produce expected semantic errors
+Purpose: Validate that RANDOMIZE accepts either no argument or a numeric seed.
+Components Under Test: Compiler::compileString; Semantics (argument type checking)
+Expected Behavior: Valid programs accepted for bare RANDOMIZE and numeric seed.
 */
 TEST(SemanticsRandomize, AcceptsNoArgOrNumeric) {
     const auto src1 =

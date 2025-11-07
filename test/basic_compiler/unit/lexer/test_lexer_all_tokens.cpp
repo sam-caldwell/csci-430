@@ -9,7 +9,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test Suite: Lexer All Tokens
  * Purpose: Ensure the lexer can emit every supported token kind it defines
  *          and treat REM/apostrophe as comments to EOL.
@@ -23,12 +23,6 @@ using namespace gwbasic;
  *  and operators/punct (+ - * / = < > <= >= <> ( ) : ,).
  *  Note: REM is recognized but treated as a comment-to-EOL, yielding NewLine rather than a KwRem token.
  */
-/*
-Test: Lexer.AllRecognizedTokens
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
 TEST(Lexer, AllRecognizedTokens) {
     std::string src =
         // arithmetic, assignment, parens, comma, colon

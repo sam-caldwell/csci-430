@@ -10,7 +10,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Parser.ParseProgramBlockFoldingWhileForIf
 Inputs: WHILE with nested IF block containing a FOR
 Code under test: Parser::parseProgram stack handling for WhileK
@@ -37,4 +37,3 @@ TEST(Parser, ParseProgram_BlockFolding_While_For_If) {
     auto* fs = dynamic_cast<ForStmt*>(ib->thenBody[0].get());
     ASSERT_NE(fs, nullptr);
 }
-

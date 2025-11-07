@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenGosub.InlineNested
-Purpose: Cover recursive inline subroutine emission by invoking GOSUB within
-         a subroutine body; also include fallthrough between statements around
-         the nested call.
-Expected IR markers: multiple _gosub_entry/_gosub_cont labels and nested
-                     entry labels.
-*/
+/***
+ * Test: CodeGenGosub.InlineNested
+ * Purpose: Cover recursive inline subroutine emission by invoking GOSUB within
+ *          a subroutine body; also include fallthrough between statements around
+ *          the nested call.
+ * Expected IR markers: multiple _gosub_entry/_gosub_cont labels and nested
+ *                      entry labels.
+ */
 TEST(CodeGenGosub, InlineNested) {
     const char* src =
         "10 GOSUB 100: END\n"
@@ -29,4 +29,3 @@ TEST(CodeGenGosub, InlineNested) {
     // Continuations should be present as well
     ASSERT_NE(ir.find("_gosub_cont"), std::string::npos);
 }
-

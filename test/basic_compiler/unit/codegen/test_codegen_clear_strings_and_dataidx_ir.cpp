@@ -12,14 +12,8 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; Codegen for CLEAR
  * Expected: IR contains store ptr null to %S$ and store 0 to @gwb_data_idx.
  */
-/*
-Test: CodeGenClear.EmitsStringNullAndDataIdxReset
-Inputs: Program assigning S$ then CLEAR
-Code under test: Code generator IR emission
-Expected behavior: IR contains 'store ptr null, ptr %S$' and 'store i32 0, ptr @gwb_data_idx'
-*/
 TEST(CodeGenClear, EmitsStringNullAndDataIdxReset) {
-    const char* src =
+    const auto src =
         "10 S$=\"HI\"\n"
         "20 CLEAR\n"
         "30 END\n";

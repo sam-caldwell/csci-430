@@ -12,12 +12,6 @@ using namespace gwbasic;
  * Components Under Test: Compiler; CodeGenerator (IR for RANDOMIZE seeding)
  * Expected Behavior: IR declares and calls @srand48(i64) for a numeric seed.
  */
-/*
-Test: CodeGenRandomize.EmitsSrandWhenNumeric
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenRandomize, EmitsSrandWhenNumeric) {
     const auto src =
         "10 RANDOMIZE 7\n"

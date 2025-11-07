@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.TypeOf_Operators_And_CHR
 Inputs: Programs using MOD, INTDIV (\\), AND, OR, POW (^), and CHR$
 Code under test: Semantics::typeOf classification for operators and string intrinsic
@@ -23,4 +23,3 @@ TEST(SemanticsTypeOf, OperatorsAndCHR) {
     const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }
-

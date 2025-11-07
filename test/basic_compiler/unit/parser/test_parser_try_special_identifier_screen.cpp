@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: ParserHelpers.TryParseSpecialIdentifier_Screen
+Purpose: Ensure special-identifier handler recognizes SCREEN statement.
+Components Under Test: Parser::tryParseSpecialIdentifierStatement.
+Expected Behavior: Returns non-null node when positioned at 'SCREEN'.
+*/
 TEST(ParserHelpers, TryParseSpecialIdentifier_Screen) {
     std::string src = "10 SCREEN 1\n";
     Lexer lx(src); auto toks = lx.tokenize();
@@ -17,4 +23,3 @@ TEST(ParserHelpers, TryParseSpecialIdentifier_Screen) {
     auto node = p.tryParseSpecialIdentifierStatement(p.peek());
     ASSERT_NE(node, nullptr);
 }
-

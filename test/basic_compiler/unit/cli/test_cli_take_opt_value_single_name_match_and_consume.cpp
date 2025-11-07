@@ -15,7 +15,7 @@ using namespace gwbasic::cli;
  */
 TEST(CLI_TakeOptValue, SingleName_MatchAndConsume) {
     const char* argv[] = {"prog", "--ll", "out.ll"};
-    int argc = 3;
+    constexpr int argc = 3;
     int i = 1;
     std::optional<std::string> out;
     EXPECT_TRUE(takeOptValue(argv[i], "--ll", i, argc, const_cast<char**>(argv), out));

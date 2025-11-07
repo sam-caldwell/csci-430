@@ -7,12 +7,12 @@
 
 using namespace gwbasic;
 
-/*
-Test: Metrics.OptimizedIrInstructionCounts_RunsPhases
-Inputs: Tiny IR and two phases; provide a non-empty clang path
-Code under test: Metrics::optimizedIrInstructionCounts
-Expected behavior: Returns an entry per phase (counts may be zero if clang invocation fails)
-*/
+/***
+ * Test: Metrics.OptimizedIrInstructionCounts_RunsPhases
+ * Inputs: Tiny IR and two phases; provide a non-empty clang path
+ * Code under test: Metrics::optimizedIrInstructionCounts
+ * Expected behavior: Returns an entry per phase (counts may be zero if clang invocation fails)
+ */
 TEST(Metrics, OptimizedIrInstructionCounts_RunsPhases) {
     const std::string ir = "define i32 @main(){\n  ret i32 0\n}\n";
     const std::vector<std::string> phases = {"-O0", "-O2"};
@@ -25,4 +25,3 @@ TEST(Metrics, OptimizedIrInstructionCounts_RunsPhases) {
     auto res = Metrics::optimizedIrInstructionCounts(ir, clang_path, phases);
     ASSERT_EQ(res.size(), phases.size());
 }
-

@@ -10,6 +10,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: SemanticsConstEval.BroadArithmeticAndComparisons
+Purpose: Cover constant evaluation across arithmetic and comparison operators.
+Components Under Test: SemanticAnalyzer::constEval via test accessor.
+Expected Behavior: Returns true and produces expected numeric results.
+*/
 TEST(SemanticsConstEval, BroadArithmeticAndComparisons) {
     double out = 0.0;
     // 1+2

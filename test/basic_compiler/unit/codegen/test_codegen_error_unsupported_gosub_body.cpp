@@ -8,25 +8,13 @@
 using namespace gwbasic;
 
 namespace { struct DummyStmt : Stmt {}; }
-/*
+/***
  * Test Suite: CodeGen Error (unsupported in GOSUB body)
  * Purpose: Ensure unsupported statements encountered during inlined GOSUB
  *          emission trigger CodeGenError.
  * Components Under Test: CodeGenerator emitSubroutineInline.
  * Expected Behavior: generate() throws CodeGenError.
  */
-/***
- * Test: CodeGenErrors.UnsupportedStatementInGosubBody
- * Purpose: Validate CodeGen rejects unsupported statements inside inlined GOSUB bodies.
- * Components Under Test: CodeGenerator (emitSubroutineInline/generate)
- * Expected Behavior: generate() throws CodeGenError when encountering unsupported stmt.
- */
-/*
-Test: CodeGenErrors.UnsupportedStatementInGosubBody
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenErrors, UnsupportedStatementInGosubBody) {
     Program p;
     {

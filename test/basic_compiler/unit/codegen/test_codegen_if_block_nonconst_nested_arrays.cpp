@@ -6,10 +6,10 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.NonConst_Nested_3D_Arrays
  * Purpose: Exercise emitIfBlock with a non-constant condition, deep nesting (WHILE, FOR, nested IF),
- *          multi-dimensional array indexing (numeric and string, 3D), MID$ with and without len on
+ *          multidimensional array indexing (numeric and string, 3D), MID$ with and without len on
  *          array elements, and ON GOTO/GOSUB in both THEN and ELSE bodies. Place early-terminating
  *          statements at the end to avoid short-circuiting generation.
  * Components Under Test: CodeGenerator emitIfBlock/emitWhile/emitFor/emitExpr array paths

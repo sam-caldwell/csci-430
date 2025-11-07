@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenStringFuncs.EmitsStrncpyAndMalloc
  * Inputs: Program using LEFT$, RIGHT$, MID$ variations.
  * Code under test: Compiler::compileString() IR generation for string funcs.

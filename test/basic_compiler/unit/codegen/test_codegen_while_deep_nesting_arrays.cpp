@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenWhile.DeepNesting_3D_Arrays
  * Purpose: Exercise emitWhile with non-constant condition, 3D arrays, nested WHILE and FOR,
  *          MID$ on array element without len, ON GOTO/GOSUB, and INPUT inside loop body.

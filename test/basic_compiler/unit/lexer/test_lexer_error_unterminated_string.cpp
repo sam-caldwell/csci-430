@@ -5,7 +5,7 @@
 #include "basic_compiler/Lexer.h"
 
 using namespace gwbasic;
-/*
+/***
  * Test Suite: Lexer Errors (unterminated string)
  * Purpose: Ensure missing closing quote in string literal is diagnosed.
  * Components Under Test: Lexer::stringLiteral and error propagation.
@@ -13,12 +13,6 @@ using namespace gwbasic;
  *
  * Sad path: unterminated string literal should raise a LexError.
  */
-/*
-Test: Lexer.UnterminatedStringThrows
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
 TEST(Lexer, UnterminatedStringThrows) {
     std::string src = "10 PRINT \"Hello\n"; // missing closing quote
     std::istringstream iss(src);

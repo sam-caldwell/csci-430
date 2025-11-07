@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenGosub.InlineBodyMidAndInput
  * Purpose: Drive emitSubroutineInline through INPUT, MID$ on array element, and control flow.
  * Components Under Test: CodeGenerator emitSubroutineInline
@@ -31,4 +31,3 @@ TEST(CodeGenGosub, InlineBodyMidAndInput) {
     // MID$ lowering uses strncpy
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);
 }
-

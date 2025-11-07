@@ -14,7 +14,7 @@ using namespace gwbasic;
  * Components Under Test: Lexer; Parser parseStatement.
  * Expected Behavior: Single EndStmt present for the line.
  */
-/*
+/***
 Test: Parser.EndStmt
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

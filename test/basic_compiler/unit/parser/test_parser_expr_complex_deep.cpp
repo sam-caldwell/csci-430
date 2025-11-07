@@ -14,7 +14,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseExpression/term/factor/unary.
  * Expected Behavior: AST reflects correct associativity and precedence.
  */
-/*
+/***
 Test: Parser.ExprComplexDeep
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

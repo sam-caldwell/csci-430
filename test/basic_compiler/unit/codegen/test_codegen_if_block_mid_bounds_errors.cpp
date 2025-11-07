@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.MidAssign_ArrayBoundsErrors
  * Purpose: Exercise emitIfBlock MID$ assignment to string array element with out-of-bounds indices
  *          to drive the error branch generation for MID$ array path in THEN.
@@ -25,4 +25,3 @@ TEST(CodeGenIfBlock, MidAssign_ArrayBoundsErrors) {
     ASSERT_NE(ir.find("_mid_err2_"), std::string::npos);
     ASSERT_NE(ir.find("@gwb_err_code"), std::string::npos);
 }
-

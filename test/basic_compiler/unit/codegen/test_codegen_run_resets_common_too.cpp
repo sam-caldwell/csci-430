@@ -14,12 +14,6 @@ using namespace gwbasic;
  * Expected Behavior: IR for the RUN line contains store 0.0 for both %A (COMMON) and %B,
  *                    and a branch to the specified target line.
  */
-/*
-Test: CodeGenRun.RunResetsCommonAndBranches
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenRun, RunResetsCommonAndBranches) {
     const auto src =
         "10 COMMON A\n"

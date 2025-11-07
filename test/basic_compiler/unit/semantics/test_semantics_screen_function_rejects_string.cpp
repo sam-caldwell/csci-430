@@ -17,7 +17,7 @@ static SemanticAnalyzer::Result analyze_src_bad(const std::string& src) {
     return sema.analyze(prog);
 }
 
-/*
+/***
  * Test: SemanticsScreen.Rejects_String_Arg
  * Inputs: SCREEN("A",1)
  * Code under test: Lexer, Parser, SemanticAnalyzer for SCREEN types.
@@ -27,4 +27,3 @@ TEST(SemanticsScreen, Rejects_String_Arg) {
     const std::string src = "10 X=SCREEN(\"A\",1)\n";
     EXPECT_THROW({ (void)analyze_src_bad(src); }, SemanticError);
 }
-

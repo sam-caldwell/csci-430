@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: SemanticsExpectedArity.NumericIntrinsicsAreUnary
 Inputs: Intrinsic names (uppercase) across numeric set
 Code under test: SemanticAnalyzer::expectedArity

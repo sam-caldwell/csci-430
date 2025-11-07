@@ -14,7 +14,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Optimizer.IfCmp_Flattens_ToGotoOrRemoval
 Inputs: Program with IF using constant-foldable comparisons
 Code under test: AstOptimizer::optimize (IF constant rewrite via folded comparisons)
@@ -48,4 +48,3 @@ TEST(Optimizer, IfCmp_Flattens_ToGotoOrRemoval) {
         EXPECT_EQ(dynamic_cast<IfStmt*>(it15->statements[0].get()), nullptr);
     }
 }
-

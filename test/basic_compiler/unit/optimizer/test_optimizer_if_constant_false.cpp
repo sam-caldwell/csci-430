@@ -5,18 +5,12 @@
 #include "basic_compiler/Compiler.h"
 
 using namespace gwbasic;
-/*
+/***
  * Test Suite: Optimizer IF (false)
  * Purpose: Validate that constant-false IF is removed, preserving following code.
  * Components Under Test: AstOptimizer::optimize; CodeGenerator.
  * Expected Behavior: No branch to target; subsequent PRINT remains.
  */
-/*
-Test: OptimizerIf.ConstantFalseRemoved
-Inputs: See test body
-Code under test: Relevant module(s) under test
-Expected behavior: Asserts expected results/behavior described in test
-*/
 TEST(OptimizerIf, ConstantFalseRemoved) {
     const auto src =
         "10 IF 2 < 1 THEN 100\n"

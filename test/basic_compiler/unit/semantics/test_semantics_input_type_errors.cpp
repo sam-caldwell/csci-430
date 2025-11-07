@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: SemanticsInput.ConsoleRejectsStringVars
 Inputs: Programs using console INPUT with string variables
 Code under test: SemanticAnalyzer (type checks for INPUT varlists)
@@ -20,4 +20,3 @@ TEST(SemanticsInput, ConsoleRejectsStringVars) {
     const char* src2 = "10 INPUT N, S$\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src2); (void)ir; }, SemanticError);
 }
-

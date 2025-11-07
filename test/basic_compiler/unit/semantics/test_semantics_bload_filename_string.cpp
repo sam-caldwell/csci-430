@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsMemIO.BloadFilenameString
  * Inputs: BLOAD 123 (non-string filename)
  * Code under test: Parser/Compiler for BLOAD argument types.

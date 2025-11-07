@@ -6,10 +6,10 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenIfBlock.Else_Input_And_On
-Purpose: Cover ELSE-body INPUT, ON GOTO/GOSUB and STOP/SYSTEM routes in emitIfBlock.
-*/
+/***
+ * Test: CodeGenIfBlock.Else_Input_And_On
+ * Purpose: Cover ELSE-body INPUT, ON GOTO/GOSUB and STOP/SYSTEM routes in emitIfBlock.
+ */
 TEST(CodeGenIfBlock, Else_Input_And_On) {
     const char* src =
         "10 IF 0<1 THEN\n"
@@ -35,4 +35,3 @@ TEST(CodeGenIfBlock, Else_Input_And_On) {
     ASSERT_NE(ir.find("_on_cont_"), std::string::npos);
     ASSERT_NE(ir.find("_on_gs_cont_"), std::string::npos);
 }
-

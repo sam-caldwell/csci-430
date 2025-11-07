@@ -5,18 +5,12 @@
 #include "basic_compiler/Compiler.h"
 
 using namespace gwbasic;
-/*
+/***
  * Test Suite: Optimizer Unary
  * Purpose: Validate folding of unary plus/minus to minimize IR.
  * Components Under Test: AstOptimizer::optExpr.
  * Expected Behavior: +1 becomes 1.0; -(2) becomes -2.0; no fsub for +1.
  */
-/*
-Test: OptimizerExpr.UnaryPlusMinusFolding
-Inputs: See test body
-Code under test: Relevant module(s) under test
-Expected behavior: Asserts expected results/behavior described in test
-*/
 TEST(OptimizerExpr, UnaryPlusMinusFolding) {
     auto ir = Compiler::compileStringOptimized("10 PRINT +1\n20 END\n");
     EXPECT_NE(ir.find(", i64 1)"), std::string::npos);

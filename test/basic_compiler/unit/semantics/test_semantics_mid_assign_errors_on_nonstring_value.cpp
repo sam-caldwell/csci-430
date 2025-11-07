@@ -7,6 +7,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: SemanticsMidAssign.ErrorsOnNonStringValue
+Purpose: Ensure MID$ assignment RHS must be string-typed.
+Components Under Test: SemanticAnalyzer::analyze (type checking for MidAssignStmt).
+Expected Behavior: Throws SemanticError when RHS is numeric.
+*/
 TEST(SemanticsMidAssign, ErrorsOnNonStringValue) {
     // Scalar target but RHS is numeric
     std::string src =
@@ -16,4 +22,3 @@ TEST(SemanticsMidAssign, ErrorsOnNonStringValue) {
     auto prog = p.parseProgram();
     SemanticAnalyzer sa; EXPECT_THROW(sa.analyze(prog), SemanticError);
 }
-

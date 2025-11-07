@@ -7,6 +7,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: SemanticsMidAssign.ErrorsOnStringIndex
+Purpose: Ensure array indices used in MID$ are numeric.
+Components Under Test: SemanticAnalyzer::analyze for MidAssignStmt and index expressions.
+Expected Behavior: Throws SemanticError when an index expression is string-typed.
+*/
 TEST(SemanticsMidAssign, ErrorsOnStringIndex) {
     // DIM string array but index is string-typed
     std::string src =
@@ -17,4 +23,3 @@ TEST(SemanticsMidAssign, ErrorsOnStringIndex) {
     auto prog = p.parseProgram();
     SemanticAnalyzer sa; EXPECT_THROW(sa.analyze(prog), SemanticError);
 }
-

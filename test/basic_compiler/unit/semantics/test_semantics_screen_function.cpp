@@ -16,7 +16,7 @@ static SemanticAnalyzer::Result analyze_src(const std::string& src) {
     return sema.analyze(prog);
 }
 
-/*
+/***
  * Test: SemanticsScreen.Accepts_Two_Args
  * Inputs: SCREEN(1,1)
  * Code under test: Lexer, Parser, SemanticAnalyzer for SCREEN arity/type.

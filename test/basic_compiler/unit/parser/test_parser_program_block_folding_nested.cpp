@@ -11,7 +11,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Parser.ParseProgramBlockFoldingNested
 Inputs: Nested IF → FOR → WHILE bodies with ELSE
 Code under test: Parser::parseProgram restructuring of nested blocks
@@ -47,4 +47,3 @@ TEST(Parser, ParseProgram_BlockFolding_Nested) {
     ASSERT_EQ(ib->elseBody.size(), 1u);
     ASSERT_NE(dynamic_cast<PrintStmt*>(ib->elseBody[0].get()), nullptr);
 }
-

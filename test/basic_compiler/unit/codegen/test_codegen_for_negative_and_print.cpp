@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenFor.NegativeStepAndPrints
  * Purpose: Cover negative STEP in FOR and both integer/float print branches.
  * Components Under Test: CodeGenerator emitFor
@@ -27,4 +27,3 @@ TEST(CodeGenFor, NegativeStepAndPrints) {
     ASSERT_NE(ir.find("_print_int_"), std::string::npos);
     ASSERT_NE(ir.find("_print_flt_"), std::string::npos);
 }
-

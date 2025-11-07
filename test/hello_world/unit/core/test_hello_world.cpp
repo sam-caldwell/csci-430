@@ -1,6 +1,6 @@
 // File: test/hello_world/unit/test_hello_world.cpp
 // (c) 2025 Sam Caldwell.  All Rights Reserved.
-/*
+/***
  * Test: HelloWorldTest.ReturnsExpectedString
  * Inputs: None (direct call to API)
  * Code under test: hello_world::get_hello_world()

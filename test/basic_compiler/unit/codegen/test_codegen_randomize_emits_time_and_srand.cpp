@@ -13,12 +13,6 @@ using namespace gwbasic;
  * Expected Behavior: IR declares and calls time(ptr null) to obtain a seed;
  *                    IR declares @srand48(i64) for seeding.
  */
-/*
-Test: CodeGenRandomize.EmitsTimeAndSrandWhenNoArg
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenRandomize, EmitsTimeAndSrandWhenNoArg) {
     const auto src =
         "10 RANDOMIZE\n"

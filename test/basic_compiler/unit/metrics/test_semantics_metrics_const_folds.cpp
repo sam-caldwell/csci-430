@@ -7,14 +7,14 @@
 
 using namespace gwbasic;
 
-/*
-Test: SemanticsMetrics.ConstFolds_CountersIncrement
-Purpose: Enable metrics and compile a program that triggers semantic constant
-         evaluation inside builtin numeric functions. Verifies unary and
-         binary fold counters (add/div/cmp) plus unary +/- cases.
-*/
+/***
+ * Test: SemanticsMetrics.ConstFolds_CountersIncrement
+ * Purpose: Enable metrics and compile a program that triggers semantic constant
+ *          evaluation inside builtin numeric functions. Verifies unary and
+ *          binary fold counters (add/div/cmp) plus unary +/- cases.
+ */
 TEST(SemanticsMetrics, ConstFolds_CountersIncrement) {
-    const char* src =
+    auto const src =
         "10 PRINT SQR(1+2)\n"      // fold add
         "20 PRINT LOG(4/2)\n"      // fold div
         "30 PRINT ABS(+3)\n"       // unary plus elimination

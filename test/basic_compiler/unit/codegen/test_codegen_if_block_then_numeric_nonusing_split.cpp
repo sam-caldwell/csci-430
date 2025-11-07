@@ -6,12 +6,12 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenIfBlock.Then_NumericNonUsing_Spacing
-Purpose: In THEN body, print numeric items without USING to exercise
-         int/float split and nextStartsWithSpace formats. Also include a
-         channel print to cover fprintf path in THEN.
-*/
+/***
+ * Test: CodeGenIfBlock.Then_NumericNonUsing_Spacing
+ * Purpose: In THEN body, print numeric items without USING to exercise
+ *          int/float split and nextStartsWithSpace formats. Also include a
+ *          channel print to cover fprintf path in THEN.
+ */
 TEST(CodeGenIfBlock, Then_NumericNonUsing_Spacing) {
     const char* src =
         "10 IF 2>1 THEN\n"
@@ -31,4 +31,3 @@ TEST(CodeGenIfBlock, Then_NumericNonUsing_Spacing) {
     // Spacing-sensitive numeric formats are referenced
     ASSERT_NE(ir.find("@.fmt_num_ns"), std::string::npos);
 }
-

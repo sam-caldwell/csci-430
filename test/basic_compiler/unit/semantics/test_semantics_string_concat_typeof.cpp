@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.StringConcatTypeOf
 Inputs: LET S$ = "A" + "B"
 Code under test: SemanticAnalyzer::typeOf for BinaryOp::Add with two strings
@@ -18,4 +18,3 @@ TEST(Semantics, StringConcatTypeOf) {
     const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }
-

@@ -13,11 +13,11 @@ using namespace gwbasic;
  * Components Under Test: Parser parseStatement for GOTO.
  * Expected Behavior: AST contains GotoStmt with expected line target.
  */
-/*
+/***
 Test: Parser.Goto
-Inputs: BASIC source snippet
-Code under test: Parser (BASIC → AST)
-Expected behavior: AST structure or parse errors match expectations
+Purpose: Validate parsing of GOTO with numeric target.
+Components Under Test: Parser parseStatement for GOTO.
+Expected Behavior: AST contains GotoStmt with expected line target.
 */
 TEST(Parser, Goto) {
     std::string src = "10 GOTO 200\n";

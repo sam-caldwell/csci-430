@@ -11,7 +11,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.ConstEvalBasicAndOps
 Inputs: Manually constructed AST expressions
 Code under test: SemanticAnalyzer::constEval via friend accessor
@@ -83,4 +83,3 @@ TEST(Semantics, ConstEvalBasicAndOps) {
         EXPECT_FALSE(SemanticAnalyzerConstEvalAccessorForTests::constEval(pow.get(), out));
     }
 }
-

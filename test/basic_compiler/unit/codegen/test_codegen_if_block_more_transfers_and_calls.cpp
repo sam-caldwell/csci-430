@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.MoreTransfers_And_Calls
  * Purpose: Hit remaining emitIfBlock branches: GOSUB inline in THEN/ELSE, SYSTEM in THEN,
  *          and RANDOMIZE with explicit seed in ELSE.
@@ -31,4 +31,3 @@ TEST(CodeGenIfBlock, MoreTransfers_And_Calls) {
     ASSERT_NE(ir.find("_gosub_cont"), std::string::npos);
     ASSERT_NE(ir.find("@srand48"), std::string::npos);
 }
-

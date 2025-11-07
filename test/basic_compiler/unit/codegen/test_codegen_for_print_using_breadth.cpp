@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenFor.PrintUsing_Breadth
  * Purpose: Cover PRINT USING with/without channel as first, middle, and last items,
  *          and exercise nextStartsWithSpace to select *_ns formats; traverse both

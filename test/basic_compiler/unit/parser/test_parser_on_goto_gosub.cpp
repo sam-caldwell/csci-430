@@ -9,7 +9,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Parser.OnGotoGosub
 Inputs: BASIC source snippets
 Code under test: Parser (ON GOTO/GOSUB forms)
@@ -42,4 +42,3 @@ TEST(Parser, OnGotoGosub) {
         EXPECT_EQ(s->targets[1], 20);
     }
 }
-

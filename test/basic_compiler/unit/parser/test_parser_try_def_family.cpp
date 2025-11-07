@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: ParserHelpers.TryParseDefFamily_Variants
+Purpose: Exercise helper to parse DEF family statements (SEG, USR, FN).
+Components Under Test: Parser::tryParseDefFamily (friend-accessed).
+Expected Behavior: Returns a non-null node for supported DEF forms.
+*/
 TEST(ParserHelpers, TryParseDefFamily_Variants) {
     // DEF SEG
     {
@@ -32,4 +38,3 @@ TEST(ParserHelpers, TryParseDefFamily_Variants) {
         ASSERT_NE(node, nullptr);
     }
 }
-

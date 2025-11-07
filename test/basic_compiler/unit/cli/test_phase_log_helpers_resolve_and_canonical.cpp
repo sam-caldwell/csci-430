@@ -20,10 +20,10 @@ static std::filesystem::path mktempdir_plh(const char* name) {
  * Expected Behavior: Resolved path equals canonical filesystem path for the child.
  */
 TEST(PhaseLogHelpers, ResolveAndCanonical) {
-    auto d = mktempdir_plh("gwb_phase_paths");
-    auto parent = d / "p"; std::filesystem::create_directories(parent);
-    auto baseFile = parent / "file.bas"; std::ofstream(baseFile.string()).put('\n');
-    auto child = parent / "child.bas"; std::ofstream(child.string()).put('\n');
-    auto out = resolvePath(baseFile.string(), "child.bas");
+    const auto d = mktempdir_plh("gwb_phase_paths");
+    const auto parent = d / "p"; std::filesystem::create_directories(parent);
+    const auto baseFile = parent / "file.bas"; std::ofstream(baseFile.string()).put('\n');
+    const auto child = parent / "child.bas"; std::ofstream(child.string()).put('\n');
+    const auto out = resolvePath(baseFile.string(), "child.bas");
     ASSERT_EQ(out, canonicalPath(child.string()));
 }

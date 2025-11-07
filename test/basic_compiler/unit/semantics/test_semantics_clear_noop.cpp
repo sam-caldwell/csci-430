@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.ClearNoop
 Inputs: CLEAR
 Code under test: SemanticAnalyzer::analyzeStmt(ClearStmt)
@@ -15,4 +15,3 @@ TEST(Semantics, ClearNoop) {
     const std::string ir = Compiler::compileString("10 CLEAR\n");
     ASSERT_FALSE(ir.empty());
 }
-

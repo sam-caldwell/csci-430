@@ -13,12 +13,6 @@ using namespace gwbasic;
  * Components Under Test: Compiler; CodeGenerator (IR emission)
  * Expected Behavior: Generated IR contains expected patterns.
  */
-/*
-Test: CodeGenChain.ResetsNonCommonAndBranches
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenChain, ResetsNonCommonAndBranches) {
     const auto src =
         "10 COMMON A\n"

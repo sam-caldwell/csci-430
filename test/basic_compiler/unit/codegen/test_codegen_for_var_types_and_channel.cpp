@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenFor.VarTypesAndChannelPrint
  * Purpose: Cover numKind load/store branches for Long32 (&), Single (!), Double (#) and
  *          PRINT USING/ channel paths inside FOR body.

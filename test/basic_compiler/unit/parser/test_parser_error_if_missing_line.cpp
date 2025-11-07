@@ -15,7 +15,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseIf/parseComparison.
  * Expected Behavior: Error reported when IF lacks a THEN target line.
  */
-/*
+/***
 Test: Parser.ErrorIfMissingLineNumber
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

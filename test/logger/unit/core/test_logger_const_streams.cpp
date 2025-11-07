@@ -1,5 +1,10 @@
 // File: test/logger/unit/test_logger_const_streams.cpp
-// Purpose: Exercise const stream() overload paths (open+enabled and sink).
+/***
+ * Test: Logger.ConstStreamOverloads
+ * Purpose: Exercise const stream() overload paths (enabled writes and disabled sink).
+ * Components Under Test: logger::Logger const operator() stream accessor.
+ * Expected Behavior: Enabled writes are persisted; disabled writes are discarded.
+ */
 
 #include <gtest/gtest.h>
 #include <filesystem>
@@ -39,4 +44,3 @@ TEST(Logger, ConstStreamOverloads) {
 
   fs::remove(file);
 }
-

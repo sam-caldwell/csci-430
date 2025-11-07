@@ -12,12 +12,6 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; CodeGenerator for SCREEN stmt
  * Expected Behavior: IR defines @gwb_graphics_init and calls it with mode.
  */
-/*
-Test: CodeGenScreenStmt.EmitsGraphicsInit
-Inputs: Small BASIC program using SCREEN 1 and END
-Code under test: Code generator IR emission for SCREEN statement
-Expected behavior: IR contains 'define void @gwb_graphics_init' and a call
-*/
 TEST(CodeGenScreenStmt, EmitsGraphicsInit) {
     const char* src =
         "10 SCREEN 1\n"

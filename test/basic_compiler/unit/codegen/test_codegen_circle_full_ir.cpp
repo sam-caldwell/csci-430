@@ -12,14 +12,8 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; CodeGenerator for CIRCLE
  * Expected Behavior: IR defines @gwb_gfx_circle with extended signature and emits a guarded call.
  */
-/*
-Test: CodeGenCircle.FullSignatureAndAngles
-Inputs: Program using CIRCLE (x,y), r, color, start, end, aspect and END
-Code under test: Code generator IR emission for full-argument CIRCLE statement
-Expected behavior: IR contains 'define void @gwb_gfx_circle' and 'call void @gwb_gfx_circle(double'
-*/
 TEST(CodeGenCircle, FullSignatureAndAngles) {
-    const char* src =
+    const auto src =
         "10 SCREEN 1\n"
         "20 CIRCLE (10, 20), 5, 3, 0, 6.28, 1.5\n"
         "30 END\n";

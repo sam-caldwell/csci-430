@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsDefFn.NumericFunctionCompiles
  * Inputs: DEF FNSQ(X)=X*X; PRINT FNSQ(3)
  * Code under test: Compiler::compileString() DEF FN numeric function handling.

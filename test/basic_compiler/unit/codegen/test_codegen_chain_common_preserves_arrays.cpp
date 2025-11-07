@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenChain.CommonPreservesArrays
-Purpose: Combine CHAIN (non-ALL) with COMMON declarations and multiple array
-         element kinds declared before the CHAIN line. Verifies that non-COMMON
-         arrays are zeroed per kind while COMMON-named arrays are preserved.
-*/
+/***
+ * Test: CodeGenChain.CommonPreservesArrays
+ * Purpose: Combine CHAIN (non-ALL) with COMMON declarations and multiple array
+ *          element kinds declared before the CHAIN line. Verifies that non-COMMON
+ *          arrays are zeroed per kind while COMMON-named arrays are preserved.
+ */
 TEST(CodeGenChain, CommonPreservesArrays) {
-    const char* src =
+    const auto src =
         "10 COMMON A, S$\n"
         "20 DIM A%(2)\n"
         "21 DIM B&(2)\n"

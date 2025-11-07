@@ -9,6 +9,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: ParserPrimary.FunctionCall_Args_And_ParenExpr
+Purpose: Parse PRINT of a function call with arguments including a parenthesized expression.
+Components Under Test: Parser::parsePrimary; function call and paren expr handling.
+Expected Behavior: Produces CallExpr with callee name and two arguments.
+*/
 TEST(ParserPrimary, FunctionCall_Args_And_ParenExpr) {
     const std::string src = "10 PRINT F(1, (2))\n";
     std::istringstream iss(src);
@@ -25,4 +31,3 @@ TEST(ParserPrimary, FunctionCall_Args_And_ParenExpr) {
     EXPECT_EQ(ce->callee, "F");
     EXPECT_EQ(ce->args.size(), 2u);
 }
-

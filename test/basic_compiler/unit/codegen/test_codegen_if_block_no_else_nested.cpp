@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.NoElse_NestedMix
  * Purpose: Cover the IF (no ELSE) branch in emitIfBlock, with nested IF/FOR/WHILE inside THEN,
  *          and additional multi-dimensional array indexing and MID$ variants to extend coverage.

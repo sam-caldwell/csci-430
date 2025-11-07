@@ -6,11 +6,11 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenLineBlock.SWAP_Arrays_And_Scalars
-Purpose: Exercise SWAP for numeric array elements and string scalar/array
-         combinations to cover both numeric and string swap paths.
-*/
+/***
+ * Test: CodeGenLineBlock.SWAP_Arrays_And_Scalars
+ * Purpose: Exercise SWAP for numeric array elements and string scalar/array
+ *          combinations to cover both numeric and string swap paths.
+ */
 TEST(CodeGenLineBlock, SWAP_Arrays_And_Scalars) {
     const char* src =
         "10 OPTION BASE 1\n"

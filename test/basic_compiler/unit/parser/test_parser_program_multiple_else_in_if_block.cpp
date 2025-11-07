@@ -8,6 +8,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: Parser.ParseProgram_MultipleElseInIfBlock
+Purpose: Reject IF blocks containing multiple ELSE markers.
+Components Under Test: Parser::parseProgram; IfBlock marker validation.
+Expected Behavior: Throws ParseError due to duplicate ELSE.
+*/
 TEST(Parser, ParseProgram_MultipleElseInIfBlock) {
     std::string src =
         "10 IF 1 THEN\n"
@@ -18,4 +24,3 @@ TEST(Parser, ParseProgram_MultipleElseInIfBlock) {
     Parser p(std::move(toks));
     EXPECT_THROW({ auto _ = p.parseProgram(); }, ParseError);
 }
-

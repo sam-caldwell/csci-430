@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics_LEN_VAL.Rejects_Wrong_Arity
 Inputs: LEN(), LEN("A","B"), VAL(), VAL("1","2")
 Code under test: Compiler::compileString; Semantics arity checks
@@ -18,4 +18,3 @@ TEST(Semantics_LEN_VAL, Rejects_Wrong_Arity) {
     EXPECT_THROW({ (void)Compiler::compileString("10 PRINT VAL()\n"); }, SemanticError);
     EXPECT_THROW({ (void)Compiler::compileString("10 PRINT VAL(\"1\",\"2\")\n"); }, SemanticError);
 }
-

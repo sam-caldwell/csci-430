@@ -8,17 +8,11 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test Suite: Lexer Ifstream Basic
  * Purpose: Directly exercise Lexer(std::ifstream) by reading a real file
  *          from build/tmp and verifying a few representative tokens.
  */
-/*
-Test: Lexer.IfstreamReadsProgram
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
 TEST(Lexer, IfstreamReadsProgram) {
     // Arrange: ensure build/tmp exists and write a small BASIC program
     // Use ../tmp relative to the build dir so files land under build/tmp

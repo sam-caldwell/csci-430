@@ -9,7 +9,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: SemanticsScreen.Rejects_Wrong_Arity_ZeroOneFour
 Inputs: X=SCREEN(), X=SCREEN(1), X=SCREEN(1,1,1,1)
 Code under test: Lexer, Parser, SemanticAnalyzer for SCREEN arity
@@ -29,4 +29,3 @@ TEST(SemanticsScreen, Rejects_Wrong_Arity_ZeroOneFour) {
     EXPECT_THROW({ (void)analyze_src("10 X=SCREEN(1)\n"); }, SemanticError);
     EXPECT_THROW({ (void)analyze_src("10 X=SCREEN(1,1,1,1)\n"); }, SemanticError);
 }
-

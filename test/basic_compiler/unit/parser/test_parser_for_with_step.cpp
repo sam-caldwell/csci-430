@@ -14,7 +14,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFor, expression parsing.
  * Expected Behavior: ForStmt.step is present and matches the parsed expression.
  */
-/*
+/***
 Test: Parser.ForWithStep
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

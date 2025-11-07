@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsDefType.DEFSTR_MakesPlainVarString
  * Inputs: DEFSTR A; assign string; then assign numeric (error case).
  * Code under test: Compiler::compileString() + semantics for DEFSTR typing.

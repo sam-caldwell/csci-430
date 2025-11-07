@@ -12,12 +12,6 @@ using namespace gwbasic;
  * Components Under Test: Compiler; CodeGenerator (IR for trig/log/exp intrinsics)
  * Expected Behavior: IR declares and calls @sin, @cos, @tan, @atan, @log, and @exp (double).
  */
-/*
-Test: CodeGenMathMore.TrigLogExpCalls
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenMathMore, TrigLogExpCalls) {
     const auto src =
         "10 PRINT SIN(0)\n"

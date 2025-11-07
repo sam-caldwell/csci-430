@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: ParserHelpers.TryParseSpecialIdentifier_NotSpecial
+Purpose: Ensure regular identifiers are not parsed as special statements.
+Components Under Test: Parser::tryParseSpecialIdentifierStatement.
+Expected Behavior: Returns null when token is a regular identifier.
+*/
 TEST(ParserHelpers, TryParseSpecialIdentifier_NotSpecial) {
     // Negative: regular identifier assignment should not be treated as special
     std::string src = "10 A=1\n";
@@ -17,4 +23,3 @@ TEST(ParserHelpers, TryParseSpecialIdentifier_NotSpecial) {
     auto node = p.tryParseSpecialIdentifierStatement(p.peek());
     ASSERT_EQ(node, nullptr);
 }
-

@@ -9,7 +9,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Parser.If_ThenLine_ElseLine_ParsesAsInlineGoto
 Inputs: "IF A=0 THEN 100 ELSE 200"
 Code under test: Parser::parseIf
@@ -37,4 +37,3 @@ TEST(Parser, If_ThenLine_ElseLine_ParsesAsInlineGoto) {
     EXPECT_EQ(gt1->targetLine, 100);
     EXPECT_EQ(gt2->targetLine, 200);
 }
-

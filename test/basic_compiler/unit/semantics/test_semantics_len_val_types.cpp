@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics_LEN_VAL.TypeChecks
 Inputs: Programs using LEN("ABC"), VAL("123"); and LEN(1), VAL(1)
 Code under test: Compiler::compileString; Semantics arity/type checks

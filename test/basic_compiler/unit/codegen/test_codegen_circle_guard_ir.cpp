@@ -12,14 +12,8 @@ using namespace gwbasic;
  * Components Under Test: Compiler::compileString; CodeGenerator for CIRCLE
  * Expected Behavior: IR has @gwb_gfx_ready global and conditional branch guarding call.
  */
-/*
-Test: CodeGenCircle.GuardedByGfxReady
-Inputs: SIMPLE program with SCREEN 1 then CIRCLE, then END
-Code under test: Code generator IR emission for CIRCLE statement
-Expected behavior: IR contains 'load i1, ptr @gwb_gfx_ready' and 'call void @gwb_gfx_circle'
-*/
 TEST(CodeGenCircle, GuardedByGfxReady) {
-    const char* src =
+    const auto src =
         "10 SCREEN 1\n"
         "20 CIRCLE (10, 20), 5\n"
         "30 END\n";

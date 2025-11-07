@@ -15,7 +15,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseStatement for GOSUB/RETURN.
  * Expected Behavior: AST contains GosubStmt and corresponding ReturnStmt.
  */
-/*
+/***
 Test: Parser.GosubAndReturn
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

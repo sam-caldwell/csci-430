@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsStringFuncs.MID_RequiresStringNumericAndOptionalNumeric
  * Inputs: MID$ with non-string first arg; non-numeric position/length.
  * Code under test: Compiler::compileString() semantic checks for MID$.
@@ -17,4 +17,3 @@ TEST(SemanticsStringFuncs, MID_RequiresStringNumericAndOptionalNumeric) {
     EXPECT_THROW({ auto ir = Compiler::compileString("10 PRINT MID$(\"A\",\"B\")\n20 END\n"); (void)ir; }, SemanticError);
     EXPECT_THROW({ auto ir = Compiler::compileString("10 PRINT MID$(\"A\",1,\"C\")\n20 END\n"); (void)ir; }, SemanticError);
 }
-

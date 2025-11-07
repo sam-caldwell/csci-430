@@ -6,10 +6,10 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenIfBlock.Then_Rich_Features
-Purpose: Exercise THEN-body INPUT, ON GOTO/GOSUB, MID$, array assign, PRINT USING and channel, STOP and SYSTEM.
-*/
+/***
+ * Test: CodeGenIfBlock.Then_Rich_Features
+ * Purpose: Exercise THEN-body INPUT, ON GOTO/GOSUB, MID$, array assign, PRINT USING and channel, STOP and SYSTEM.
+ */
 TEST(CodeGenIfBlock, Then_Rich_Features) {
     const char* src =
         "10 OPTION BASE 1\n"
@@ -39,4 +39,3 @@ TEST(CodeGenIfBlock, Then_Rich_Features) {
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);
     ASSERT_NE(ir.find("@fprintf"), std::string::npos);
 }
-

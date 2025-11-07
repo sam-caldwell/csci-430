@@ -12,12 +12,6 @@ using namespace gwbasic;
  * Components Under Test: Compiler; CodeGenerator (IR for INT/FIX/SGN)
  * Expected Behavior: INT uses floor, FIX emits fptosi/sitofp, SGN emits compares and add.
  */
-/*
-Test: CodeGenMathMore.IntFixSgn
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenMathMore, IntFixSgn) {
     const auto src =
         "10 PRINT INT(1.9)\n"

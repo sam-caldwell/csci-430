@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: SemanticsINSTR.TypeErrors
 Inputs: INSTR(1,1), INSTR(1,2,3), INSTR("A",1), INSTR(1,"A",1)
 Code under test: Compiler::compileString; Semantics type checks
@@ -19,4 +19,3 @@ TEST(SemanticsINSTR, TypeErrors) {
     EXPECT_THROW({ (void)Compiler::compileString("10 PRINT INSTR(\"A\",1)\n"); }, SemanticError);
     EXPECT_THROW({ (void)Compiler::compileString("10 PRINT INSTR(1,\"A\",1)\n"); }, SemanticError);
 }
-

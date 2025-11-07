@@ -6,7 +6,7 @@
 #undef private
 
 using namespace gwbasic;
-/*
+/***
  * Test: Lexer.BackslashQuote_DoesNotEscape_ClosesString
  * Purpose: Ensure C-style escape for a quote (\") no longer applies.
  *          In GW-BASIC, only doubled quotes ("") encode an embedded quote.
@@ -24,4 +24,3 @@ TEST(Lexer, BackslashQuote_DoesNotEscape_ClosesString) {
     // Sanity: there should be no embedded quote in the lexeme
     EXPECT_EQ(t.lexeme.find('"'), std::string::npos);
 }
-

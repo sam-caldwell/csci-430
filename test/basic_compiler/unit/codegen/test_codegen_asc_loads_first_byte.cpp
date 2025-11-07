@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenBuiltins.ASC_LoadsFirstByte
  * Inputs: PRINT ASC("C")
  * Code under test: Compiler::compileString() codegen for ASC.
@@ -19,4 +19,3 @@ TEST(CodeGenBuiltins, ASC_LoadsFirstByte) {
     std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("load i8, ptr"), std::string::npos);
 }
-

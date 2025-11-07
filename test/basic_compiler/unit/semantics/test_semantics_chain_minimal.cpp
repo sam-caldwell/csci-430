@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.ChainMinimal
 Inputs: CHAIN with only a filename (no target line or ALL)
 Code under test: SemanticAnalyzer::analyzeStmt(ChainStmt)
@@ -18,4 +18,3 @@ TEST(Semantics, ChainMinimal) {
     const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }
-

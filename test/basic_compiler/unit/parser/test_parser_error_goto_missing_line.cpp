@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseStatement for GOTO.
  * Expected Behavior: Error reported when the line number is absent.
  */
-/*
+/***
 Test: Parser.ErrorGotoMissingLine
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

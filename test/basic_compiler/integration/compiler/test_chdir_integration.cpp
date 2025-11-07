@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.CHDIR_IRContainsChdir
  * Purpose: Ensure CHDIR emits chdir() call in IR.
  */
@@ -17,4 +17,3 @@ TEST(Integration, CHDIR_IRContainsChdir) {
     ASSERT_FALSE(ir.empty());
     ASSERT_NE(ir.find("@chdir"), std::string::npos);
 }
-

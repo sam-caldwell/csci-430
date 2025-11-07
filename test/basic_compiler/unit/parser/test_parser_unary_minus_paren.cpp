@@ -17,7 +17,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseUnary/parseFactor.
  * Expected Behavior: UnaryExpr with op '-' over grouped inner expression.
  */
-/*
+/***
 Test: Parser.UnaryMinusParenthesized
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

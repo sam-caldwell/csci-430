@@ -6,13 +6,13 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenIfBlock.ElseWhile_UsingMidListOverrides
-Purpose: Place a WHILE loop in ELSE and emit PRINT with multiple USING(...) in
-         the same list to exercise mid-list override with last-one-wins, now
-         through IF-block lowering. Also ensure non-channel screen mirroring via
-         snprintf occurs.
-*/
+/***
+ * Test: CodeGenIfBlock.ElseWhile_UsingMidListOverrides
+ * Purpose: Place a WHILE loop in ELSE and emit PRINT with multiple USING(...) in
+ *          the same list to exercise mid-list override with last-one-wins, now
+ *          through IF-block lowering. Also ensure non-channel screen mirroring via
+ *          snprintf occurs.
+ */
 TEST(CodeGenIfBlock, ElseWhile_UsingMidListOverrides) {
     const char* src =
         "10 I=0\n"

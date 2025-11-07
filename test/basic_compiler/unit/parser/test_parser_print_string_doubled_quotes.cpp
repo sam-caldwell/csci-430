@@ -13,6 +13,12 @@ using namespace gwbasic;
  * Purpose: Ensure GW-BASIC doubled quote syntax ("") inside strings is
  *          decoded to a single double quote in the literal value.
  */
+/***
+Test: Parser.PrintStringWithDoubledQuotes
+Purpose: Parse a string literal containing GW-BASIC doubled quotes inside PRINT.
+Components Under Test: Lexer/Parser string literal decoding.
+Expected Behavior: StringExpr value includes a single quote where doubled in source.
+*/
 TEST(Parser, PrintStringWithDoubledQuotes) {
     // BASIC: 10 PRINT "He said ""OK"""
     const std::string src = "10 PRINT \"He said \"\"OK\"\"\"\n";
@@ -29,4 +35,3 @@ TEST(Parser, PrintStringWithDoubledQuotes) {
     ASSERT_NE(se, nullptr);
     EXPECT_EQ(se->value, "He said \"OK\"");
 }
-

@@ -16,7 +16,7 @@ using namespace gwbasic;
  * Expected Behavior: Missing filename errors; with filename (and optional
  *                    line) parses and records targetLine.
  */
-/*
+/***
 Test: Parser.Run_MissingFilename_Errors
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

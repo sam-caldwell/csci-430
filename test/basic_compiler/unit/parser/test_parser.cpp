@@ -4,19 +4,13 @@
 #include "basic_compiler/Parser.h"
 
 using namespace gwbasic;
-/*
+/***
  * Test Suite: Parser Smoke
  * Purpose: Basic integration of Lexer + Parser on a tiny program,
  *          verifying minimal structure builds without errors.
  * Components Under Test: Lexer; Parser; Program/Line composition.
  * Expected Behavior: Parsed Program contains expected number of lines/statements.
  */
-/*
-Test: Parser.ParseSimpleProgram
-Inputs: BASIC source snippet
-Code under test: Parser (BASIC → AST)
-Expected behavior: AST structure or parse errors match expectations
-*/
 TEST(Parser, ParseSimpleProgram) {
     std::string src = R"(10 LET A = 7
 20 PRINT A

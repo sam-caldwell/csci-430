@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: ParserPrint.UsingMidList_LastWins
 Purpose: Cover PRINT mid-list USING(fmt) handling where the last USING wins.
 Inputs: 10 PRINT 1, USING "%02d", 2, USING "%03d", 3
@@ -31,4 +31,3 @@ TEST(ParserPrint, UsingMidList_LastWins) {
     // We expect value + two more numeric items
     EXPECT_EQ(ps->more.size(), 2u);
 }
-

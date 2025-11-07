@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenWhile.RichBodyExercisesBranches
  * Purpose: Exercise many branches in emitWhile: string/numeric prints, MID$, array assign,
  *          STOP/SYSTEM, ON GOTO/ON GOSUB plumbing and bounds-check paths.

@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsMemIO.PokeRequiresNumeric
  * Inputs: POKE with string address argument.
  * Code under test: Compiler::compileString() + semantics for POKE types.

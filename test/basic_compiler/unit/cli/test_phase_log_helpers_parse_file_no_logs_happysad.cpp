@@ -3,15 +3,10 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <fstream>
+#include "../../helper/mktempdir_plh_parse.h"
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
 
 using namespace gwbasic::phase_log_helpers;
-
-static std::filesystem::path mktempdir_plh_parse(const char* name) {
-    auto d = std::filesystem::temp_directory_path() / name;
-    std::filesystem::create_directories(d);
-    return d;
-}
 
 /***
  * Test: PhaseLogHelpers.ParseFileNoLogs_HappySad

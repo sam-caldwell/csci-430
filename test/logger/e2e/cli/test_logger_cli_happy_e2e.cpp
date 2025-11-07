@@ -8,17 +8,12 @@
 #include "../../../basic_compiler/helper/run_command.h"
 
 using namespace e2e_helpers;
-
-/***
- * Test: LoggerE2E.CLI_HappyPath_ProducesLogs
- * Purpose: Run CLI with log flags and verify log files are created with content.
- */
 /*
-Test: LoggerE2E.CLI_HappyPath_ProducesLogs
-Inputs: Filesystem paths, log messages, toggles
-Code under test: Logger component
-Expected behavior: Creates directories, writes/appends as expected, handles errors
-*/
+ * Test: LoggerE2E.CLI_HappyPath_ProducesLogs
+ * Inputs: Filesystem paths, log messages, toggles
+ * Code under test: Logger component
+ * Expected behavior: Creates directories, writes/appends as expected, handles errors
+ */
 TEST(LoggerE2E, CLI_HappyPath_ProducesLogs) {
   namespace fs = std::filesystem;
   auto find_bin = []() -> std::optional<std::filesystem::path> {

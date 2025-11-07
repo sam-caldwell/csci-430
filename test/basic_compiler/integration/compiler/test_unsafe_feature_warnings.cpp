@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.UnsafeFeatureWarnings_AppearInSemanticLog
  * Inputs: Program using CALL/DEF USR/USR/BLOAD/BSAVE/POKE/PEEK/CHDIR.
  * Code under test: Compiler::compileStringWithPhaseLogs semantic warning emission.

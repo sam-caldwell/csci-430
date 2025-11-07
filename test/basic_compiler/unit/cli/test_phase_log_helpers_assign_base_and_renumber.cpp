@@ -17,11 +17,11 @@ using gwbasic::Line;
  */
 TEST(PhaseLogHelpers, AssignBaseAndRenumber) {
     std::unordered_map<std::string, std::pair<int,int>> imported;
-    auto a = canonicalPath("/tmp/a.bas");
-    auto b = canonicalPath("/tmp/b.bas");
+    const auto a = canonicalPath("/tmp/a.bas");
+    const auto b = canonicalPath("/tmp/b.bas");
     imported[a] = {0, 10};
-    int baseSame = assignBase(a, a, imported);
-    int baseOther = assignBase(b, a, imported);
+    const int baseSame = assignBase(a, a, imported);
+    const int baseOther = assignBase(b, a, imported);
     ASSERT_EQ(baseSame, 0);
     ASSERT_GT(baseOther, 0);
     Program p{}; p.lines.push_back(Line{100,{}});

@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenCore.GenerateWithoutSemanticsCollectsVars
  * Inputs: Simple program with LET/IF/PRINT/END.
  * Code under test: CodeGenerator::generate without SemanticAnalyzer attached.

@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: SemanticsExpectedArity.StringAndScreen_Minimums
 Inputs: Names: CHR$, LEFT$, RIGHT$, MID$, SCREEN
 Code under test: SemanticAnalyzer::expectedArity

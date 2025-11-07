@@ -8,6 +8,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: ParserPrint.ChannelAndUsingAndItems
+Purpose: Parse PRINT with channel number and USING format plus numeric items.
+Components Under Test: Parser::parsePrint; channel, format, and item parsing.
+Expected Behavior: Captures channel=3, non-null format, and two items.
+*/
 TEST(ParserPrint, ChannelAndUsingAndItems) {
     const std::string src =
         "10 PRINT #3, USING \"%d %f\", 7, 2.5\n";
@@ -26,4 +32,3 @@ TEST(ParserPrint, ChannelAndUsingAndItems) {
     ASSERT_TRUE(ps->value != nullptr);
     EXPECT_EQ(ps->more.size(), 1u);
 }
-

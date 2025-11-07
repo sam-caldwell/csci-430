@@ -8,10 +8,15 @@
 
 using namespace gwbasic;
 
+/***
+Test: Parser.ParseProgram_UnmatchedMarkers_NEXT
+Purpose: Reject stray NEXT without an open FOR.
+Components Under Test: Parser::parseProgram; marker validation.
+Expected Behavior: Throws ParseError.
+*/
 TEST(Parser, ParseProgram_UnmatchedMarkers_NEXT) {
     std::string src = "10 NEXT\n";
     Lexer lx(src); auto toks = lx.tokenize();
     Parser p(std::move(toks));
     EXPECT_THROW({ auto _ = p.parseProgram(); }, ParseError);
 }
-

@@ -1,10 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-/**
-Test: Unit.Metrics_Collection_SimpleProgram
-Inputs: Enable metrics and compile a simple program string
-Code under test: Compiler::compileString; Metrics hooks (lexer/AST/codegen)
-Expected behavior: Metrics reflect non-zero tokens, expected AST shape, and IR instruction count > 0
-*/
+
 #include <gtest/gtest.h>
 #include <string>
 #include "basic_compiler/compiler/Compiler.h"
@@ -12,6 +7,12 @@ Expected behavior: Metrics reflect non-zero tokens, expected AST shape, and IR i
 
 using namespace gwbasic;
 
+/***
+ * Test: Unit.Metrics_Collection_SimpleProgram
+ * Inputs: Enable metrics and compile a simple program string
+ * Code under test: Compiler::compileString; Metrics hooks (lexer/AST/codegen)
+ * Expected behavior: Metrics reflect non-zero tokens, expected AST shape, and IR instruction count > 0
+ */
 TEST(Unit, Metrics_Collection_SimpleProgram) {
     Metrics m; gMetrics = &m;
     std::string src = R"(10 LET A = 1 + 2 * 3

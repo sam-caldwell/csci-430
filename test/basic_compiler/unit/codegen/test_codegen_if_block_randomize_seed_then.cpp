@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: CodeGenIfBlock.Then_Randomize_SeedAndTime
 Purpose: Exercise RANDOMIZE with a seed and without (time path) in THEN body.
 */
@@ -22,4 +22,3 @@ TEST(CodeGenIfBlock, Then_Randomize_SeedAndTime) {
     ASSERT_NE(ir.find("@srand48"), std::string::npos);
     ASSERT_NE(ir.find("@time"), std::string::npos);
 }
-

@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.ColorAndChdirErrors
 Inputs: COLOR with string args; CHDIR with numeric path
 Code under test: SemanticAnalyzer::analyzeStmt(ColorStmt/ChdirStmt)
@@ -22,4 +22,3 @@ TEST(Semantics, ColorAndChdirErrors) {
     // CHDIR with non-string
     EXPECT_THROW({ auto ir = Compiler::compileString("10 CHDIR 3\n"); (void)ir; }, SemanticError);
 }
-

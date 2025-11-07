@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.MemIoPositive
 Inputs: BLOAD/BSAVE/POKE/CALL with correct argument types
 Code under test: SemanticAnalyzer::analyzeStmt for BLOAD/BSAVE/POKE/CALL ABS
@@ -22,4 +22,3 @@ TEST(Semantics, MemIoPositive) {
     const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }
-

@@ -6,12 +6,12 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenGosub.InlineRichBody
-Purpose: Exercise emitSubroutineInline coverage: RANDOMIZE (time path), INPUT,
-         IFStmt inside subroutine, array element assign, and MID$ on scalar.
-Expected IR markers: gosub entry/cont labels, scanf, srand48, strncpy.
-*/
+/***
+ * Test: CodeGenGosub.InlineRichBody
+ * Purpose: Exercise emitSubroutineInline coverage: RANDOMIZE (time path), INPUT,
+ *          IFStmt inside subroutine, array element assign, and MID$ on scalar.
+ * Expected IR markers: gosub entry/cont labels, scanf, srand48, strncpy.
+ */
 TEST(CodeGenGosub, InlineRichBody) {
     const char* src =
         "10 PRINT \"S\": GOSUB 100: PRINT \"E\": END\n"

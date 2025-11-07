@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenFor.PrintNextStartsWithSpace
  * Purpose: Exercise nextStartsWithSpace path used to choose *_ns formats.
  */
@@ -20,4 +20,3 @@ TEST(CodeGenFor, PrintNextStartsWithSpace) {
     ASSERT_NE(ir.find("@.fmt_int_ns"), std::string::npos);
     ASSERT_NE(ir.find("@.fmt_num_ns"), std::string::npos);
 }
-

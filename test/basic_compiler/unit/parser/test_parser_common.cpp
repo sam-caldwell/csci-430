@@ -13,11 +13,11 @@ using namespace gwbasic;
  * Test Suite: Parser COMMON
  * Purpose: Verify COMMON var[,var...] parses correctly.
  */
-/*
+/***
 Test: Parser.Common_DeclList_Parses
-Inputs: BASIC source snippet
-Code under test: Parser (BASIC → AST)
-Expected behavior: AST structure or parse errors match expectations
+Purpose: Verify COMMON var[,var...] parses correctly.
+Components Under Test: Parser parseStatement for COMMON.
+Expected Behavior: CommonStmt produced with expected names list.
 */
 TEST(Parser, Common_DeclList_Parses) {
     std::string src = "10 COMMON A, B, C\n";
@@ -34,4 +34,3 @@ TEST(Parser, Common_DeclList_Parses) {
     EXPECT_EQ(cs->names[1], "B");
     EXPECT_EQ(cs->names[2], "C");
 }
-

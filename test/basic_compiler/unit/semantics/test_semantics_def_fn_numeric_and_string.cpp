@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsDefFn.NumericAndStringFunctionsCompile
  * Inputs: DEF FNSQ(X)=X*X; DEF FNB$(S$)=S$+"!"; PRINT calls
  * Code under test: Compiler::compileString() DEF FN for numeric and string functions.
@@ -21,4 +21,3 @@ TEST(SemanticsDefFn, NumericAndStringFunctionsCompile) {
     const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }
-

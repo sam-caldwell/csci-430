@@ -8,6 +8,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: Parser.Open_Errors_ModeAndChannel
+Purpose: Ensure OPEN rejects invalid mode tokens and missing channel numbers.
+Components Under Test: Parser::parseOpen; error reporting paths.
+Expected Behavior: Throws ParseError for bad mode and missing channel.
+*/
 TEST(Parser, Open_Errors_ModeAndChannel) {
     // Missing/invalid mode after FOR
     {
@@ -24,4 +30,3 @@ TEST(Parser, Open_Errors_ModeAndChannel) {
         EXPECT_THROW({ auto _ = p.parseProgram(); }, ParseError);
     }
 }
-

@@ -5,7 +5,7 @@
 #include "basic_compiler/Compiler.h"
 
 using namespace gwbasic;
-/*
+/***
  * Test Suite: CodeGen Control Flow (GOSUB inline)
  * Purpose: Verify GOSUB inlines a subroutine with entry/cont labels and
  *          returns to continuation.
@@ -13,12 +13,6 @@ using namespace gwbasic;
  * Expected Behavior: IR contains line10_gosub_entry1/cont1 labels and
  *          branch from inlined body back to continuation.
  */
-/*
-Test: CodeGenFlow.GosubInlineAndReturn
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenFlow, GosubInlineAndReturn) {
     const auto src =
         "10 GOSUB 300\n"
@@ -31,4 +25,3 @@ TEST(CodeGenFlow, GosubInlineAndReturn) {
     EXPECT_NE(ir.find("line10_gosub_cont1:"), std::string::npos);
     EXPECT_NE(ir.find("  br label %line10_gosub_cont1"), std::string::npos);
 }
-

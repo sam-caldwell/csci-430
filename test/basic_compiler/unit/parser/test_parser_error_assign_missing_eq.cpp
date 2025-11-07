@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseAssignOrLet error path.
  * Expected Behavior: Parsing throws/indicates error for invalid assignment.
  */
-/*
+/***
 Test: Parser.ErrorAssignMissingEquals
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

@@ -5,7 +5,7 @@
 #include "basic_compiler/Lexer.h"
 
 using namespace gwbasic;
-/*
+/***
  * Test Suite: Lexer Errors (!)
  * Purpose: Verify the lexer rejects unsupported punctuation '!' with a
  *          diagnostic.
@@ -14,12 +14,6 @@ using namespace gwbasic;
  *
  * Sad path: '!' is not a valid token and should throw.
  */
-/*
-Test: Lexer.InvalidCharBangThrows
-Inputs: Raw source text and helper inputs
-Code under test: Lexer/tokenization and helpers
-Expected behavior: Tokens/escapes match expectations; errors are reported appropriately
-*/
 TEST(Lexer, InvalidCharBangThrows) {
     std::string src = "10 LET A = !\n";
     std::istringstream iss(src);

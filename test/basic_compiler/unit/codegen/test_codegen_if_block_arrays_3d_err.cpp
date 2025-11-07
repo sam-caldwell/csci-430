@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.Arrays3D_And_BoundsErrors
  * Purpose: Exercise emit_if_block array index plumbing for 3D numeric and string arrays,
  *          including out-of-bounds error branches and MID$ on array/scalar destinations.

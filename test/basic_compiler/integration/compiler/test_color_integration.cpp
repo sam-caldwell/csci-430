@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.COLOR_IRContainsSgrFormatAndPrintf
  * Inputs: Program with COLOR statement only.
  * Code under test: Compiler::compileString() IR generation for COLOR.

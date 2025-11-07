@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.RestoreNoop
 Inputs: RESTORE without arguments
 Code under test: SemanticAnalyzer::analyzeStmt(RestoreStmt)
@@ -15,4 +15,3 @@ TEST(Semantics, RestoreNoop) {
     const std::string ir = Compiler::compileString("10 RESTORE\n");
     ASSERT_FALSE(ir.empty());
 }
-

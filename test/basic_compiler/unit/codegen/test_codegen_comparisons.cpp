@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test Suite: CodeGen Comparisons
  * Purpose: Ensure each relational operator maps to the correct LLVM fcmp
  *          predicate in generated IR.
@@ -15,12 +15,6 @@ using namespace gwbasic;
  * Expected Behavior: Operators (=, <>, <, <=, >, >=) lower to oeq, one, olt,
  *          ole, ogt, oge respectively; operands appear in the IR as doubles.
  */
-/*
-Test: CodeGenComparisons.EqNeLtLeGtGePredicates
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenComparisons, EqNeLtLeGtGePredicates) {
     std::string ir = compileSingleLinePrint("1 = 2");
     EXPECT_NE(ir.find(" = fcmp oeq double 1.0, 2.0"), std::string::npos);

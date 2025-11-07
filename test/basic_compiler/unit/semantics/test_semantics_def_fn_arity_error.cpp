@@ -10,7 +10,7 @@ using namespace gwbasic;
  * Test: SemanticsDefFn.ArityError
  * Purpose: Ensure calling DEF FN with wrong arity fails.
  */
-/*
+/***
 Test: SemanticsDefFn.ArityError
 Inputs: Parsed AST (from BASIC snippet) and default environment
 Code under test: Semantics analyzer (type/arity/domain checks)
@@ -23,4 +23,3 @@ TEST(SemanticsDefFn, ArityError) {
         "30 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
-

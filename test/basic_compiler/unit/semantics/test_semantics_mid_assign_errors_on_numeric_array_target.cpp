@@ -7,6 +7,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: SemanticsMidAssign.ErrorsOnNumericArrayTarget
+Purpose: Forbid MID$ assignment to numeric array elements.
+Components Under Test: SemanticAnalyzer::analyze for MidAssignStmt.
+Expected Behavior: Throws SemanticError when target array is numeric.
+*/
 TEST(SemanticsMidAssign, ErrorsOnNumericArrayTarget) {
     // DIM numeric array and attempt MID$ on its element
     std::string src =
@@ -16,4 +22,3 @@ TEST(SemanticsMidAssign, ErrorsOnNumericArrayTarget) {
     auto prog = p.parseProgram();
     SemanticAnalyzer sa; EXPECT_THROW(sa.analyze(prog), SemanticError);
 }
-

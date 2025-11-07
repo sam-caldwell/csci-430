@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseExpression/parseFactor.
  * Expected Behavior: Parsing fails when right parenthesis is missing.
  */
-/*
+/***
 Test: Parser.ErrorMissingRightParen
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

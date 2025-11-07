@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.OnIndex_StringConditionErrors
 Inputs: Program with ON "str" GOTO ...
 Code under test: SemanticAnalyzer
@@ -22,4 +22,3 @@ TEST(Semantics, OnIndex_StringConditionErrors) {
     SemanticAnalyzer sem; sem.setStrictControlFlow(true);
     EXPECT_THROW({ (void)sem.analyze(prog); }, SemanticError);
 }
-

@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenIfBlock.KitchenSink
  * Purpose: Aggressively exercise emitIfBlock code paths with multidim arrays (string/numeric),
  *          MID$ (scalar and array element), PRINT (plain and USING), RANDOMIZE (time path),

@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: ParserHelpers.TryParseSpecialIdentifier_Circle
+Purpose: Ensure special-identifier handler recognizes and parses CIRCLE statement.
+Components Under Test: Parser::tryParseSpecialIdentifierStatement.
+Expected Behavior: Returns non-null node when positioned at 'CIRCLE'.
+*/
 TEST(ParserHelpers, TryParseSpecialIdentifier_Circle) {
     std::string src = "10 CIRCLE (10,10),5\n";
     Lexer lx(src); auto toks = lx.tokenize();
@@ -16,4 +22,3 @@ TEST(ParserHelpers, TryParseSpecialIdentifier_Circle) {
     auto node = p.tryParseSpecialIdentifierStatement(p.peek());
     ASSERT_NE(node, nullptr);
 }
-

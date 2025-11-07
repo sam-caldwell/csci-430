@@ -16,6 +16,12 @@ static Program parse_tf(const std::string& src) {
     return p.parseProgram();
 }
 
+/***
+Test: SemanticsTypeOf.UserFunctionStringAndNumeric
+Purpose: Validate type-of classification for user-defined numeric and string functions.
+Components Under Test: SemanticAnalyzer::analyze with DEF FN (string and numeric).
+Expected Behavior: Both programs analyze without semantic errors.
+*/
 TEST(SemanticsTypeOf, UserFunctionStringAndNumeric) {
     // String-returning DEF FN (name ends with $)
     auto prog1 = parse_tf("10 DEF FNS$(A$)=A$: PRINT FNS$(\"X\")+\"Y\"\n");
@@ -27,4 +33,3 @@ TEST(SemanticsTypeOf, UserFunctionStringAndNumeric) {
     SemanticAnalyzer sem2;
     EXPECT_NO_THROW({ (void)sem2.analyze(prog2); });
 }
-

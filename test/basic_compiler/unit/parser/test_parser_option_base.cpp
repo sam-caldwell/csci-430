@@ -12,11 +12,11 @@ using namespace gwbasic;
  * Test Suite: Parser OPTION BASE
  * Purpose: Ensure the parser recognizes and constructs OptionBaseStmt.
  */
-/*
+/***
 Test: Parser.OptionBaseParses
-Inputs: BASIC source snippet
-Code under test: Parser (BASIC → AST)
-Expected behavior: AST structure or parse errors match expectations
+Purpose: Ensure OPTION BASE parses to OptionBaseStmt with configured base.
+Components Under Test: Parser::parseOptionBase.
+Expected Behavior: AST contains OptionBaseStmt with base set to 1.
 */
 TEST(Parser, OptionBaseParses) {
     std::string src = "10 OPTION BASE 1\n20 END\n";
@@ -31,4 +31,3 @@ TEST(Parser, OptionBaseParses) {
     ASSERT_NE(ob, nullptr);
     EXPECT_EQ(ob->base, 1);
 }
-

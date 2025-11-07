@@ -14,12 +14,6 @@ using namespace gwbasic;
  *                    CSNG emits fptrunc (double->float) and fpext (float->double);
  *                    CDBL compiles as a no-op cast to double (no special pattern asserted).
  */
-/*
-Test: CodeGenMathExt.RndCintCsngCdbl
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenMathExt, RndCintCsngCdbl) {
     const auto src =
         "10 PRINT RND(1)\n"

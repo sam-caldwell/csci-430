@@ -15,7 +15,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseFactor/parenthesized expressions.
  * Expected Behavior: AST nests BinaryExpr/UnaryExpr as dictated by parens.
  */
-/*
+/***
 Test: Parser.ExprNestedParentheses
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

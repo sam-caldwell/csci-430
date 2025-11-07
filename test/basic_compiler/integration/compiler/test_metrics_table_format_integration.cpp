@@ -1,10 +1,4 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-/**
-Test: Integration.Metrics_TableFormatting
-Inputs: A populated Metrics object
-Code under test: printMetricsTable
-Expected behavior: Produces an ASCII table with expected section headers and rows
-*/
 #include <gtest/gtest.h>
 #include <sstream>
 #include <string>
@@ -12,6 +6,12 @@ Expected behavior: Produces an ASCII table with expected section headers and row
 
 using namespace gwbasic;
 
+/***
+ * Test: Integration.Metrics_TableFormatting
+ * Purpose: Produce a metrics table from a populated Metrics object and verify expected sections/rows.
+ * Components Under Test: printMetricsTable (via Metrics::print).
+ * Expected Behavior: ASCII table contains key section headers and some sample numeric values.
+ */
 TEST(Integration, Metrics_TableFormatting) {
     Metrics m;
     // Fill minimal but varied values

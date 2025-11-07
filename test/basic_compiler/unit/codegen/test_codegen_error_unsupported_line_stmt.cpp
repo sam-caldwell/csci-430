@@ -8,18 +8,12 @@
 using namespace gwbasic;
 
 namespace { struct DummyStmt final : Stmt {}; }
-/*
+/***
  * Test Suite: CodeGen Error (unsupported stmt in line)
  * Purpose: Ensure an unsupported Stmt in a line triggers CodeGenError.
  * Components Under Test: CodeGenerator emitLineBlock.
  * Expected Behavior: generate() throws CodeGenError.
  */
-/*
-Test: CodeGenErrors.UnsupportedStatementInLineBlock
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenErrors, UnsupportedStatementInLineBlock) {
     Program p;
     Line l; l.number = 10;
@@ -28,4 +22,3 @@ TEST(CodeGenErrors, UnsupportedStatementInLineBlock) {
     CodeGenerator gen;
     EXPECT_THROW({ (void)gen.generate(p); }, CodeGenError);
 }
-

@@ -8,6 +8,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: Parser.Open_InputAndOutput
+Purpose: Validate OPEN parses INPUT and OUTPUT modes with channel numbers.
+Components Under Test: Parser::parseOpen; OpenStmt fields.
+Expected Behavior: OpenStmt records mode and channel as parsed.
+*/
 TEST(Parser, Open_InputAndOutput) {
     {
         std::string src = "10 OPEN \"f.txt\" FOR INPUT AS #2\n";
@@ -32,4 +38,3 @@ TEST(Parser, Open_InputAndOutput) {
         EXPECT_EQ(s->channel, 5);
     }
 }
-

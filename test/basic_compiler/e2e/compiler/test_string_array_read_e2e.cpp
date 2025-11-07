@@ -15,6 +15,12 @@
 using namespace gwbasic;
 using namespace e2e_helpers;
 
+/***
+ * Test: E2E.StringArray_READ_Works
+ * Purpose: Validate READ into string array elements and printing them works end-to-end.
+ * Components Under Test: Parser/Codegen for READ into S$(), data table handling; End-to-End run.
+ * Expected Behavior: Output shows the exact three strings loaded.
+ */
 TEST(E2E, StringArray_READ_Works) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
@@ -47,4 +53,3 @@ TEST(E2E, StringArray_READ_Works) {
     EXPECT_EQ(lines[1], std::string("TWO"));
     EXPECT_EQ(lines[2], std::string("THREE"));
 }
-

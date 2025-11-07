@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Integration.PRINT_Degenerate_Separators_Compile
 Inputs: Program with "PRINT ;" and "PRINT ," forms
 Code under test: Parser and codegen for degenerate PRINT separators/terminators
@@ -21,4 +21,3 @@ TEST(Integration, PRINT_Degenerate_Separators_Compile) {
     // Should at least reference printf in the IR header or body
     ASSERT_NE(ir.find("@printf"), std::string::npos);
 }
-

@@ -9,7 +9,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Parser.DotPrefixedFloat_ParsesToNumberExpr
 Inputs: Program with LET A = .5
 Code under test: Lexer+Parser creating NumberExpr from .5 literal
@@ -30,4 +30,3 @@ TEST(Parser, DotPrefixedFloat_ParsesToNumberExpr) {
     ASSERT_NE(num, nullptr);
     EXPECT_DOUBLE_EQ(num->value, 0.5);
 }
-

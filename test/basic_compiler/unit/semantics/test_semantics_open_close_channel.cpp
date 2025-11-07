@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.OpenCloseChannelRange
 Inputs: OPEN/CLOSE with valid and invalid channel numbers
 Code under test: SemanticAnalyzer::analyzeStmt(OpenStmt/CloseStmt)
@@ -32,4 +32,3 @@ TEST(Semantics, OpenCloseChannelRange) {
         EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
     }
 }
-

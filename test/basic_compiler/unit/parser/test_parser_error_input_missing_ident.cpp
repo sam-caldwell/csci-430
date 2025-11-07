@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseStatement for INPUT.
  * Expected Behavior: Error reported when no identifier follows INPUT.
  */
-/*
+/***
 Test: Parser.ErrorInputMissingIdentifier
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

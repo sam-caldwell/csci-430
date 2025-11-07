@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenFor.Arrays_Mid_Terminators
  * Purpose: Exercise emitFor branches for array assigns (numeric/string), MID$ on array and scalar,
  *          PRINT USING and channel variants, nextStartsWithSpace formatting, and STOP/SYSTEM paths

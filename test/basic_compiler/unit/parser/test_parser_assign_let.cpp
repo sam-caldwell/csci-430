@@ -9,19 +9,13 @@
 #include "basic_compiler/ast/NumberExpr.h"
 
 using namespace gwbasic;
-/*
+/***
  * Test Suite: Parser Assign (LET)
  * Purpose: Ensure LET assignments parse with correct precedence (1 + 2*3).
  * Components Under Test: Lexer; Parser parseProgram/expressions/precedence.
  * Expected Behavior: Program has one AssignStmt with name A and value
  *          represented as BinaryExpr(Add, 1, BinaryExpr(Mul, 2, 3)).
  */
-/*
-Test: Parser.AssignWithLetAndPrecedence
-Inputs: BASIC source snippet
-Code under test: Parser (BASIC → AST)
-Expected behavior: AST structure or parse errors match expectations
-*/
 TEST(Parser, AssignWithLetAndPrecedence) {
     std::string src = "10 LET A = 1+2*3\n";
     std::istringstream iss(src);

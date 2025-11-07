@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenLineBlock.MemIO_POKE_BSAVE_BLOAD
-Purpose: Exercise POKE (mem write), BSAVE (write from mem), and BLOAD (read to
-         mem) codegen paths, which produce fopen/fread/fwrite/fclose and
-         pointer arithmetic.
-*/
+/***
+ * Test: CodeGenLineBlock.MemIO_POKE_BSAVE_BLOAD
+ * Purpose: Exercise POKE (mem write), BSAVE (write from mem), and BLOAD (read to
+ *          mem) codegen paths, which produce fopen/fread/fwrite/fclose and
+ *          pointer arithmetic.
+ */
 TEST(CodeGenLineBlock, MemIO_POKE_BSAVE_BLOAD) {
-    const char* src =
+    const auto src =
         "10 POKE 100, 65\n"
         "20 BSAVE \"OUT.BIN\", 0, 128\n"
         "30 BLOAD \"OUT.BIN\", 0\n"
@@ -28,4 +28,3 @@ TEST(CodeGenLineBlock, MemIO_POKE_BSAVE_BLOAD) {
     ASSERT_NE(ir.find("@fread"), std::string::npos);
     ASSERT_NE(ir.find("@fwrite"), std::string::npos);
 }
-

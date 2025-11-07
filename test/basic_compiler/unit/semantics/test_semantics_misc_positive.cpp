@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.MiscPositive
 Inputs: DEF USR, CHDIR, COLOR, SCREEN with valid argument types
 Code under test: SemanticAnalyzer::analyzeStmt for these statements
@@ -21,4 +21,3 @@ TEST(Semantics, MiscPositive) {
     const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }
-

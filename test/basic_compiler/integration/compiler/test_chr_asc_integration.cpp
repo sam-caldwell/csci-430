@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Integration.CHR_ASC_IRPatterns
  * Purpose: Ensure CHR$/ASC produce characteristic IR patterns.
  */
@@ -19,4 +19,3 @@ TEST(Integration, CHR_ASC_IRPatterns) {
     ASSERT_NE(ir.find("call ptr @malloc(i64 2)"), std::string::npos);
     ASSERT_NE(ir.find("load i8, ptr"), std::string::npos);
 }
-

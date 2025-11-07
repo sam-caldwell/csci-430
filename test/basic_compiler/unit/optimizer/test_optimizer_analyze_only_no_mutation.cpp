@@ -7,12 +7,12 @@
 
 using namespace gwbasic;
 
-/*
-Test: OptimizerAnalyzeOnly.NoMutation
-Inputs: Set gMetrics->analyze_only=true; compile optimized
-Code under test: AstOptimizer transform guards with isAnalyzeOnly()
-Expected behavior: No constant folding/mutation; IR still contains fmul/fadd for 1+2*3
-*/
+/***
+ * Test: OptimizerAnalyzeOnly.NoMutation
+ * Inputs: Set gMetrics->analyze_only=true; compile optimized
+ * Code under test: AstOptimizer transform guards with isAnalyzeOnly()
+ * Expected behavior: No constant folding/mutation; IR still contains fmul/fadd for 1+2*3
+ */
 TEST(OptimizerAnalyzeOnly, NoMutation) {
     Metrics m; m.setAnalyzeOnly(true);
     auto* prev = gMetrics; gMetrics = &m;
@@ -22,4 +22,3 @@ TEST(OptimizerAnalyzeOnly, NoMutation) {
     EXPECT_NE(ir.find(" = fadd double"), std::string::npos);
     gMetrics = prev;
 }
-

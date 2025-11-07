@@ -13,12 +13,6 @@ using namespace gwbasic;
  * Expected Behavior: IR defines global @gwb_last_rnd = global float 0.0;
  *                    IR defines helper @gwb_rnd(double) and calls it.
  */
-/*
-Test: CodeGenRND.EmitsHelperAndGlobal
-Inputs: AST (and semantic info) from BASIC snippet
-Code under test: LLVM IR code generator
-Expected behavior: Emits expected IR calls/ops; unsupported cases are reported
-*/
 TEST(CodeGenRND, EmitsHelperAndGlobal) {
     const auto src =
         "10 PRINT RND(1)\n"

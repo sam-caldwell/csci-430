@@ -18,6 +18,6 @@ using gwbasic::Line;
 TEST(PhaseLogHelpers, GenerateIRWithLogs) {
     // Minimal program to exercise semantics+codegen
     Program p{}; p.lines.push_back(Line{10,{}});
-    auto ir = generateIRWithLogs(p, "", "");
+    const auto ir = generateIRWithLogs(p, "", "");
     ASSERT_FALSE(ir.empty());
 }

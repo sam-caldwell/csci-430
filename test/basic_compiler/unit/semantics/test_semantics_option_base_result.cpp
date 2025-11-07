@@ -12,7 +12,7 @@ using namespace gwbasic;
  * Test Suite: Semantics OPTION BASE
  * Purpose: Verify OPTION BASE is recorded in semantic result.
  */
-/*
+/***
 Test: SemanticsOptionBase.RecordsBaseInResult
 Inputs: Parsed AST (from BASIC snippet) and default environment
 Code under test: Semantics analyzer (type/arity/domain checks)
@@ -33,4 +33,3 @@ TEST(SemanticsOptionBase, RecordsBaseInResult) {
     ASSERT_EQ(res.arrays["A"].size(), 1u);
     EXPECT_EQ(res.arrays["A"][0], 3);
 }
-

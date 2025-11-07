@@ -6,12 +6,12 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenIfBlock.StringUsing_WithAndWithoutChannel
-Purpose: Cover emitIfBlock string PRINT items with USING(fmt) in THEN (stdio)
-         and ELSE (channel) bodies, including next item spacing in THEN.
-Expected IR markers: @fprintf, @printf, and @snprintf appear.
-*/
+/***
+ * Test: CodeGenIfBlock.StringUsing_WithAndWithoutChannel
+ * Purpose: Cover emitIfBlock string PRINT items with USING(fmt) in THEN (stdio)
+ *          and ELSE (channel) bodies, including next item spacing in THEN.
+ * Expected IR markers: @fprintf, @printf, and @snprintf appear.
+ */
 TEST(CodeGenIfBlock, StringUsing_WithAndWithoutChannel) {
     const char* src =
         "10 IF 1<2 THEN\n"
@@ -28,4 +28,3 @@ TEST(CodeGenIfBlock, StringUsing_WithAndWithoutChannel) {
     ASSERT_NE(ir.find("@printf"), std::string::npos);
     ASSERT_NE(ir.find("@snprintf"), std::string::npos);
 }
-

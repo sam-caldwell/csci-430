@@ -6,7 +6,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: SemanticsColor.BackgroundMustBeNumeric
  * Inputs: COLOR 1,"B"
  * Code under test: Compiler::compileString() + semantics for COLOR.
@@ -18,4 +18,3 @@ TEST(SemanticsColor, BackgroundMustBeNumeric) {
         "20 END\n";
     EXPECT_THROW({ auto ir = Compiler::compileString(src); (void)ir; }, SemanticError);
 }
-

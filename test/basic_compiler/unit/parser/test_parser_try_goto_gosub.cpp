@@ -6,6 +6,12 @@
 
 using namespace gwbasic;
 
+/***
+Test: ParserHelpers.TryParseGotoGosub
+Purpose: Exercise helper to parse GOTO and GOSUB statements directly.
+Components Under Test: Parser::tryParseGotoGosub (friend-accessed).
+Expected Behavior: Returns non-null nodes for GOTO and GOSUB forms.
+*/
 TEST(ParserHelpers, TryParseGotoGosub) {
     {
         std::string src = "10 GOTO 100\n";
@@ -22,4 +28,3 @@ TEST(ParserHelpers, TryParseGotoGosub) {
         ASSERT_NE(node, nullptr);
     }
 }
-

@@ -16,7 +16,7 @@ using namespace gwbasic;
  * Components Under Test: Parser parseUnary.
  * Expected Behavior: UnaryExpr with op '-' wrapping inner NumberExpr/VarExpr.
  */
-/*
+/***
 Test: Parser.UnaryMinusBasic
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)

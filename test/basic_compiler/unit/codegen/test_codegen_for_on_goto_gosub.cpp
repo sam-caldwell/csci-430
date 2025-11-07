@@ -6,13 +6,13 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenFor.OnGotoGosub_InsideBody
-Purpose: Exercise emitFor handling of ON GOTO and ON GOSUB statements within
-         the loop body, including subroutine inlining. Keeps loop small to
-         avoid runtime noise.
-Expected IR markers: _on_cont_, _on_gs_entry_*, _on_gs_cont_, and gosub labels.
-*/
+/***
+ * Test: CodeGenFor.OnGotoGosub_InsideBody
+ * Purpose: Exercise emitFor handling of ON GOTO and ON GOSUB statements within
+ *          the loop body, including subroutine inlining. Keeps loop small to
+ *          avoid runtime noise.
+ * Expected IR markers: _on_cont_, _on_gs_entry_*, _on_gs_cont_, and gosub labels.
+ */
 TEST(CodeGenFor, OnGotoGosub_InsideBody) {
     const char* src =
         "10 FOR I=1 TO 1\n"

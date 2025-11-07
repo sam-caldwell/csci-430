@@ -6,11 +6,11 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenLineBlock.ERASE_Arrays_AllKinds
-Purpose: Exercise ERASE handling in emit_line_block: numeric arrays of all
-         kinds and a string array get reset appropriately.
-*/
+/***
+ * Test: CodeGenLineBlock.ERASE_Arrays_AllKinds
+ * Purpose: Exercise ERASE handling in emit_line_block: numeric arrays of all
+ *          kinds and a string array get reset appropriately.
+ */
 TEST(CodeGenLineBlock, ERASE_Arrays_AllKinds) {
     const char* src =
         "10 OPTION BASE 1\n"
@@ -31,4 +31,3 @@ TEST(CodeGenLineBlock, ERASE_Arrays_AllKinds) {
     // String array elements cleared to null
     ASSERT_NE(ir.find("store ptr null, ptr"), std::string::npos);
 }
-

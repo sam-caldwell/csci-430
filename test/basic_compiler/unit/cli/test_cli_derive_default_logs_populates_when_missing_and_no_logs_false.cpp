@@ -5,6 +5,12 @@
 #include <string>
 #include "basic_compiler/DeriveDefaultLogPaths.h"
 
+/***
+ * Test: CLI_DeriveDefaultLogs.PopulatesWhenMissingAndNoLogsFalse
+ * Purpose: Verify default log paths are populated when not provided and noLogs=false.
+ * Components Under Test: deriveDefaultLogPaths().
+ * Expected Behavior: All four log path outputs are set with expected suffixes.
+ */
 TEST(CLI_DeriveDefaultLogs, PopulatesWhenMissingAndNoLogsFalse) {
     std::optional<std::string> cg, lex, syn, sem;
     deriveDefaultLogPaths("/tmp/prog.bas", false, cg, lex, syn, sem);
@@ -17,4 +23,3 @@ TEST(CLI_DeriveDefaultLogs, PopulatesWhenMissingAndNoLogsFalse) {
     EXPECT_NE(syn->find(".syntax.log"), std::string::npos);
     EXPECT_NE(sem->find(".semantic.log"), std::string::npos);
 }
-

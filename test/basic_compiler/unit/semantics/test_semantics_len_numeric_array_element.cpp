@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics_LEN_Array.Numeric_Array_Element_Accepts_And_Errors
 Inputs: Programs using LEN(A(1)) with DIM A(...) declared; and error cases:
         LEN(A(1)) when A is not DIM'd, LEN(A(1)) when DIM dimensions mismatch,
@@ -29,4 +29,3 @@ TEST(Semantics_LEN_Array, Numeric_Array_Element_Accepts_And_Errors) {
     // Reject: string index
     EXPECT_THROW({ (void)Compiler::compileString("10 DIM A(2): PRINT LEN(A(\"X\"))\n"); }, SemanticError);
 }
-

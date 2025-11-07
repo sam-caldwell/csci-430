@@ -5,7 +5,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.MidAssignPositive
 Inputs: MID$ assignment on scalar and string array element with numeric indices
 Code under test: SemanticAnalyzer::analyzeStmt(MidAssignStmt)
@@ -27,4 +27,3 @@ TEST(Semantics, MidAssignPositive) {
         ASSERT_FALSE(ir.empty());
     }
 }
-

@@ -8,7 +8,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
 Test: Semantics.OptionBaseInvalid
 Inputs: OPTION BASE 2
 Code under test: SemanticAnalyzer::analyzeStmt(OptionBaseStmt)

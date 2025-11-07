@@ -7,7 +7,7 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: Parser.ColorStatementParsesVariants
  * Inputs: Three COLOR statements with 1, 2, and 3 arguments.
  * Code under test: Lexer/Parser building ColorStmt nodes.

@@ -16,7 +16,7 @@ using namespace gwbasic;
  * Purpose: Validate multi-line FOR body folding across lines until NEXT.
  * Expected Behavior: ForStmt spans multiple lines and captures inner statements.
  */
-/*
+/***
 Test: Parser.ForNextMultilineBody
 Inputs: BASIC source snippet
 Code under test: Parser (BASIC → AST)
@@ -45,4 +45,3 @@ TEST(Parser, ForNextMultilineBody) {
     ASSERT_NE(ve, nullptr);
     EXPECT_EQ(ve->name, "I");
 }
-

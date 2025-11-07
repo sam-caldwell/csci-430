@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
+/***
  * Test: CodeGenBuiltins.CHR_EmitsMallocAndStores
  * Inputs: PRINT CHR$(65)
  * Code under test: Compiler::compileString() codegen for CHR$.
  * Expected behavior: IR allocates 2 bytes (char + NUL) via malloc and stores.
  */
 TEST(CodeGenBuiltins, CHR_EmitsMallocAndStores) {
-    const char* src =
+    const auto src =
         "10 PRINT CHR$(65)\n"
         "20 END\n";
     std::string ir = Compiler::compileString(src);

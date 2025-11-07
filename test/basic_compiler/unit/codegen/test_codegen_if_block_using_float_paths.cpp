@@ -6,14 +6,14 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenIfBlock.UsingFloat_IntFloat_And_Channel
-Purpose: Drive emitIfBlock's numeric USING override paths for both integer and
-         float values, including channel printing and nextStartsWithSpace format
-         selection in BOTH THEN and ELSE bodies.
-Expected IR markers: _if_then/_if_else, _print_int_, _print_flt_, @fprintf,
-                     @printf, and @snprintf for screen buffer writes.
-*/
+/***
+ * Test: CodeGenIfBlock.UsingFloat_IntFloat_And_Channel
+ * Purpose: Drive emitIfBlock's numeric USING override paths for both integer and
+ *          float values, including channel printing and nextStartsWithSpace format
+ *          selection in BOTH THEN and ELSE bodies.
+ * Expected IR markers: _if_then/_if_else, _print_int_, _print_flt_, @fprintf,
+ *                      @printf, and @snprintf for screen buffer writes.
+ */
 TEST(CodeGenIfBlock, UsingFloat_IntFloat_And_Channel) {
     const char* src =
         "10 IF 1<2 THEN\n"
@@ -44,4 +44,3 @@ TEST(CodeGenIfBlock, UsingFloat_IntFloat_And_Channel) {
     ASSERT_NE(ir.find("@.fmt_num_ns"), std::string::npos);
     ASSERT_NE(ir.find("@.fmt_int_ns"), std::string::npos);
 }
-

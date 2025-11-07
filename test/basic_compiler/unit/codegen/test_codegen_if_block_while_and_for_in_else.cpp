@@ -6,11 +6,11 @@
 
 using namespace gwbasic;
 
-/*
-Test: CodeGenIfBlock.WhileAndForInThenElse
-Purpose: Ensure emitIfBlock delegates to emitWhile/emitFor for constructs
-         appearing in THEN and ELSE bodies, respectively.
-*/
+/***
+ * Test: CodeGenIfBlock.WhileAndForInThenElse
+ * Purpose: Ensure emitIfBlock delegates to emitWhile/emitFor for constructs
+ *          appearing in THEN and ELSE bodies, respectively.
+ */
 TEST(CodeGenIfBlock, WhileAndForInThenElse) {
     const char* src =
         "10 I=0: J=0\n"
@@ -33,4 +33,3 @@ TEST(CodeGenIfBlock, WhileAndForInThenElse) {
     ASSERT_NE(ir.find("_for_body"), std::string::npos);
     ASSERT_NE(ir.find("_while_cond"), std::string::npos);
 }
-
