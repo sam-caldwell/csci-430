@@ -17,6 +17,7 @@
 #include "basic_compiler/ast/OnErrorGotoStmt.h"
 #include "basic_compiler/ast/ResumeStmt.h"
 #include "basic_compiler/ast/StopStmt.h"
+#include "basic_compiler/ast/OptionPrintZonesStmt.h"
 #include "basic_compiler/ast/VarExpr.h"
 #include "basic_compiler/ast/CallExpr.h"
 #include "basic_compiler/ast/BinaryExpr.h"
@@ -60,6 +61,11 @@ void CodeGenerator::collectDecls(const Program& program) {
         for (const auto& st : line.statements) {
             scanStmtForRnd(st.get());
             scanStmtForStop(st.get());
+            // Also pick up OPTION PRINTZONES directives directly to drive
+            // comma-zone padding even if semantics were not provided.
+            if (const auto* opz = dyn_cast<const OptionPrintZonesStmt>(st.get())) {
+                printZones_ = opz->enabled;
+            }
         }
     }
     std::ranges::sort(lineNumbers_);

@@ -270,7 +270,6 @@ namespace gwbasic {
                 for (const auto &v: pr->more) items.push_back(v.get());
                 // Comma zone padding helper (OPTION PRINTZONES ON)
                 auto emit_pad_to_next_zone = [&]() {
-                    if (!printZones_) return;
                     // Compute padding to next 14-column zone
                     std::string col = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_cur_col", col); out << ir << Symbols::LF; }
                     std::string mod = nextTemp(); { std::string ir = std::format("  {} = srem i32 {}, 14", mod, col); out << ir << Symbols::LF; }
@@ -292,6 +291,12 @@ namespace gwbasic {
                         { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
                     }
                 };
+                // Debug: log parsed separators for this PRINT
+                {
+                    std::ostringstream m;
+                    m << "line " << currentLine_ << " PrintStmt items=" << items.size() << " seps=" << pr->seps.size();
+                    log() << m.str() << Symbols::LF;
+                }
                 for (size_t pi = 0; pi < items.size(); ++pi) {
                     const bool last = (pi + 1 == items.size());
                     const bool addNL = last && (pr->trail == PrintStmt::Terminator::Newline);
@@ -442,6 +447,7 @@ namespace gwbasic {
                         }
                         // Handle separator between items (zone for comma)
                         if (!last && pi < pr->seps.size() && pr->seps[pi] == PrintStmt::Sep::Comma) {
+                            { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt sep[" << pi << "]=Comma -> pad"; log() << m.str() << Symbols::LF; }
                             emit_pad_to_next_zone();
                         }
                     }

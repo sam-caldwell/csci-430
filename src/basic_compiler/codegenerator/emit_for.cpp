@@ -111,7 +111,7 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
             // Match emit_line_block dynamic integer/float PRINT semantics
             std::vector<const Expr*> items; if (pr->value) items.push_back(pr->value.get()); for (const auto& v : pr->more) items.push_back(v.get());
             auto emit_pad_to_next_zone = [&]() {
-                if (!printZones_) return;
+                // Zone padding always enabled (compatibility default)
                 std::string col = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_cur_col", col); out << ir << Symbols::LF; }
                 std::string mod = nextTemp(); { std::string ir = std::format("  {} = srem i32 {}, 14", mod, col); out << ir << Symbols::LF; }
                 std::string isZero = nextTemp(); { std::string ir = std::format("  {} = icmp eq i32 {}, 0", isZero, mod); out << ir << Symbols::LF; }
