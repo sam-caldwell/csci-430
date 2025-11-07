@@ -24,7 +24,7 @@
 
 ## Built-in Functions Coverage and Types
 
-- String: add STR$, STRING$, SPACE$, LTRIM$/RTRIM$/MID$ statement vs. function nuances, LEFT$/RIGHT$ complete; 
+-  
   verify types/arity in semantics.
 - Update `isKnownNumericFunction`/`isKnownStringFunction` to reflect the above; expand tests.
 

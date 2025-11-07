@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-#include "../../helper/clang_path.h"
+#include "clang_path.h"
 
 namespace e2e_helpers {
 

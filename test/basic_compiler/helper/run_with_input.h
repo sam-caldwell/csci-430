@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 
-#include "../../helper/run_command.h"
+#include "run_command.h"
 
 namespace e2e_helpers {
 

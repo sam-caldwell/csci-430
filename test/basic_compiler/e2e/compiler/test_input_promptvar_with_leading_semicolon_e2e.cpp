@@ -6,8 +6,8 @@
 #include <sstream>
 #include <string>
 #include "basic_compiler/Compiler.h"
-#include "clang_path.h"
-#include "run_with_input.h"
+#include "../../helper/clang_path.h"
+#include "../../helper/run_with_input.h"
 #include "../../helper/tool_exists.h"
 
 using namespace gwbasic;

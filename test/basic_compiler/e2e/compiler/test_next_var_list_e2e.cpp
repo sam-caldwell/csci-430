@@ -7,7 +7,7 @@
 #include "basic_compiler/Compiler.h"
 #include "../../helper/clang_path.h"
 #include "../../helper/tool_exists.h"
-#include "../../e2e/run_command.h"
+#include "../../helper/run_command.h"
 
 using namespace gwbasic;
 
