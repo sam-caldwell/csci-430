@@ -8,6 +8,7 @@
 #include "basic_compiler/ast/WriteStmt.h"
 #include "basic_compiler/ast/DimStmt.h"
 #include "basic_compiler/ast/OpenStmt.h"
+#include "basic_compiler/ast/LineInputStmt.h"
 #include "basic_compiler/ast/CloseStmt.h"
 #include "basic_compiler/ast/DefTypeStmt.h"
 #include "basic_compiler/ast/DefSegStmt.h"
@@ -590,16 +591,74 @@ namespace gwbasic {
                 terminated = true;
                 break;
             } else if (auto ins = dyn_cast<InputStmt>(st.get())) {
-                ensureVarAllocated(out, ins->name);
-                // Read into a temporary double, then convert to variable's storage type
-                std::string fmt = nextTemp();
-                { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " InputStmt fmt -> " << ir1; log() << m.str() << Symbols::LF; } }
-                std::string tmp = nextTemp();
-                { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
-                { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " InputStmt scanf -> " << ir2; log() << m.str() << Symbols::LF; } }
-                std::string dv = nextTemp();
-                { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
-                storeNumberToVar(out, ins->name, dv);
+                // Optional prompt: literal or variable
+                if (ins->promptLiteral || ins->promptVar) {
+                    std::string pstr;
+                    if (ins->promptLiteral) {
+                        if (strLiteralId_.contains(*ins->promptLiteral)) {
+                            int id = strLiteralId_[*ins->promptLiteral];
+                            pstr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", pstr, globalStringName(id)); out << ir << Symbols::LF; }
+                        }
+                    } else {
+                        // Prompt variable: load string pointer
+                        ensureVarAllocated(out, *ins->promptVar);
+                        pstr = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", pstr, varAllocaName_[*ins->promptVar]); out << ir << Symbols::LF; }
+                        std::string safe = nextTemp(); { std::string ir = std::format("  {} = call ptr @gwb_safe_str(ptr {})", safe, pstr); out << ir << Symbols::LF; } pstr = safe;
+                    }
+                    if (!pstr.empty()) {
+                        std::string fmtS = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_str_sp, i64 0", fmtS); out << ir << Symbols::LF; }
+                        { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmtS, pstr); out << ir << Symbols::LF; }
+                    }
+                }
+                // Read each numeric variable via scanf
+                for (const auto& vname : ins->variables) {
+                    ensureVarAllocated(out, vname);
+                    std::string fmt = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; }
+                    std::string tmp = nextTemp(); { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
+                    { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; }
+                    std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
+                    storeNumberToVar(out, vname, dv);
+                }
+            } else if (auto li = dyn_cast<LineInputStmt>(st.get())) {
+                // Read a full line (up to '\n') into sbuf, then copy to heap and assign to string var or channel
+                // Determine source stream
+                std::string buf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", buf); out << ir << Symbols::LF; }
+                std::string stream;
+                if (li->channel < 0) {
+                    std::string in = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr @stdin", in); out << ir << Symbols::LF; }
+                    stream = in;
+                } else {
+                    const int idx = li->channel - 1;
+                    std::string ep = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", ep, idx); out << ir << Symbols::LF; }
+                    std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, ep); out << ir << Symbols::LF; }
+                    stream = fh;
+                }
+                { std::string ir = std::format("  call ptr @fgets(ptr {}, i32 256, ptr {})", buf, stream); out << ir << Symbols::LF; }
+                // Strip trailing '\n' if present
+                std::string len = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", len, buf); out << ir << Symbols::LF; }
+                std::string gt0 = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, 0", gt0, len); out << ir << Symbols::LF; }
+                std::string contLbl = lineLabelName(line.number) + std::string("_li_cont_") + std::to_string(++localContCounter);
+                std::string doLbl  = lineLabelName(line.number) + std::string("_li_do_") + std::to_string(localContCounter);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", gt0, doLbl, contLbl); out << ir << Symbols::LF; }
+                out << doLbl << ":" << Symbols::LF;
+                std::string m1 = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, -1", m1, len); out << ir << Symbols::LF; }
+                std::string pch = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pch, buf, m1); out << ir << Symbols::LF; }
+                std::string ch = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", ch, pch); out << ir << Symbols::LF; }
+                std::string islf = nextTemp(); { std::string ir = std::format("  {} = icmp eq i8 {}, 10", islf, ch); out << ir << Symbols::LF; }
+                std::string endLbl = lineLabelName(line.number) + std::string("_li_end_") + std::to_string(localContCounter);
+                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", islf, endLbl, contLbl); out << ir << Symbols::LF; }
+                out << endLbl << ":" << Symbols::LF;
+                { std::string ir = std::format("  store i8 0, ptr {}", pch); out << ir << Symbols::LF; }
+                out << contLbl << ":" << Symbols::LF;
+                // Copy into heap buffer and assign
+                std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", n, buf); out << ir << Symbols::LF; }
+                std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }
+                std::string mem = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", mem, buf, n); out << ir << Symbols::LF; }
+                std::string pn = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pn, mem, n); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i8 0, ptr {}", pn); out << ir << Symbols::LF; }
+                ensureVarAllocated(out, li->name);
+                { std::string ir = std::format("  store ptr {}, ptr {}", mem, varAllocaName_[li->name]); out << ir << Symbols::LF; }
             } else if (auto fs = dyn_cast<ForStmt>(st.get())) {
                 emitFor(out, fs, lineLabelName(line.number), localContCounter);
             } else if (auto rz = dyn_cast<RandomizeStmt>(st.get())) {

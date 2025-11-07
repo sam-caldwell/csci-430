@@ -291,5 +291,19 @@
   - RESUME: explicit `RESUME 30` generates handler-flag clear and direct `br label %line30`; E2E validates output order.
 - All new tests run under `build/testrun`. No changes to `cmake/Coverage.cmake`.
 
+### INPUT Enhancements
+- Parser now supports console `INPUT` variants:
+  - `INPUT var[, var ...]`
+  - `INPUT ; prompt$, var[, ...]`
+  - `INPUT "prompt"; var[, ...]` (prompt literal parsed; runtime prints variable prompts; literal prompts parsed and carried in AST).
+- Runtime/codegen:
+  - Console `INPUT` accepts a variable list; emits one `scanf(%lf)` per numeric variable and stores with proper type conversion.
+  - Optional prompt printing via `printf` for prompt variables; literal-prompt printing wired via string table (subject to semantics seeding).
+  - `LINE INPUT [#n,] var$` implemented using `fgets` into a fixed buffer, newline strip, heap copy, and store to string variable; channel form reads from `@gwb_files`.
+- Tests:
+  - Unit (parser): var-list parsing; literal/variable prompt forms.
+  - Integration (IR): prompt+list emits `printf` and multiple `scanf` calls.
+  - E2E: var-list input sums two numbers; prompt-var input feeds and prints value; `LINE INPUT` reads and echoes a line.
+
 ### Notes
 - Focused on high-signal areas: DEF FN param semantics, RESUME line flow, boolean logic IR paths, and IF-flattening via comparison folds. These improve both statement- and expression-level coverage.

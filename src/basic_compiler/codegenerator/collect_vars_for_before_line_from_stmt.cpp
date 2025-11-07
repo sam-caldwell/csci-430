@@ -28,7 +28,7 @@ void CodeGenerator::collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std
     if (auto fs = dyn_cast<const ForStmt>(s)) { vars.insert(fs->var); collectVarsForBeforeLineFromExpr(fs->start.get(), vars, arrays); collectVarsForBeforeLineFromExpr(fs->end.get(), vars, arrays); if (fs->step) collectVarsForBeforeLineFromExpr(fs->step.get(), vars, arrays); for (const auto& st : fs->body) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays); return; }
     if (auto ws = dyn_cast<const WhileStmt>(s)) { collectVarsForBeforeLineFromExpr(ws->cond.get(), vars, arrays); for (const auto& st : ws->body) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays); return; }
     if (auto pr = dyn_cast<const PrintStmt>(s)) { if (pr->value) collectVarsForBeforeLineFromExpr(pr->value.get(), vars, arrays); for (const auto& v : pr->more) collectVarsForBeforeLineFromExpr(v.get(), vars, arrays); return; }
-    if (auto in = dyn_cast<const InputStmt>(s)) { vars.insert(in->name); return; }
+    if (auto in = dyn_cast<const InputStmt>(s)) { for (const auto& v : in->variables) vars.insert(v); return; }
     if (auto rd = dyn_cast<const ReadStmt>(s)) {
         for (const auto& t : rd->targets) {
             if (!t.indices.empty()) { arrays.insert(t.name); for (const auto& ix : t.indices) collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays); }

@@ -85,7 +85,10 @@ TEST(Metrics, ComputeAstSnapshot_CoversStatementKinds) {
         line.statements.emplace_back(std::move(ws));
     }
     // INPUT X
-    line.statements.emplace_back(std::make_unique<InputStmt>("X"));
+    {
+        auto in = std::make_unique<InputStmt>(std::vector<std::string>{"X"});
+        line.statements.emplace_back(std::move(in));
+    }
     // LINE INPUT #1, S$
     line.statements.emplace_back(std::make_unique<LineInputStmt>(1, "S$"));
     // WRITE #1, 7, "A", SQR(4)

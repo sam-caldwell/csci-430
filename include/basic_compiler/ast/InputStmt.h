@@ -2,6 +2,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <optional>
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/NodeTemplate.h"
 
@@ -10,17 +12,24 @@ namespace gwbasic {
 /**
  * Type: InputStmt
  * Purpose:
- *  - Read a numeric value from stdin and assign to a variable.
+ *  - Read values from stdin and assign to one or more variables.
  * Inputs:
- *  - name: Variable identifier to store into
+ *  - variables: One or more destination variable identifiers (numeric only in this compiler).
+ *  - promptLiteral: Optional literal string to print before reading.
+ *  - promptVar: Optional string variable name to print before reading.
  * Outputs:
  *  - Concrete Stmt node; codegen emits scanf-like logic (or stub)
  * Theory of operation:
- *  - Current implementation may be simplified; semantics logged for tracing.
+ *  - Current implementation supports numeric variable targets only; use LINE INPUT for strings.
  */
 struct InputStmt : ASTLeaf<NodeKind::InputStmt, Stmt> {
-    std::string name;
-    explicit InputStmt(std::string n) : ASTLeaf(), name(std::move(n)) {}
+    std::vector<std::string> variables;
+    std::optional<std::string> promptLiteral; // when INPUT "text"; var[,...]
+    std::optional<std::string> promptVar;     // when INPUT ; P$, var[,...]
+
+    InputStmt() = default;
+    explicit InputStmt(std::vector<std::string> names)
+        : ASTLeaf(), variables(std::move(names)) {}
 };
 
 } // namespace gwbasic

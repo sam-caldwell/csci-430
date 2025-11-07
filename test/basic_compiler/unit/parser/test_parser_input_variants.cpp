@@ -47,7 +47,8 @@ TEST(Parser, Input_BareVariable) {
     ASSERT_EQ(line.statements.size(), 1u);
     const auto* is = dynamic_cast<InputStmt*>(line.statements[0].get());
     ASSERT_NE(is, nullptr);
-    EXPECT_EQ(is->name, "X$");
+    ASSERT_EQ(is->variables.size(), 1u);
+    EXPECT_EQ(is->variables[0], std::string("X$"));
 }
 
 /*

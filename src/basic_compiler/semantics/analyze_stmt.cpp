@@ -26,6 +26,7 @@
 #include "basic_compiler/ast/WriteStmt.h"
 #include "basic_compiler/ast/DefFnStmt.h"
 #include "basic_compiler/ast/DefTypeStmt.h"
+#include "basic_compiler/ast/LineInputStmt.h"
 #include "basic_compiler/ast/DefSegStmt.h"
 #include "basic_compiler/ast/BloadStmt.h"
 #include "basic_compiler/ast/BsaveStmt.h"
@@ -230,7 +231,11 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         exitScope();
         return;
     }
-    if (auto in = dyn_cast<const InputStmt>(s)) { reference(in->name, in->pos); return; }
+    if (auto in = dyn_cast<const InputStmt>(s)) {
+        for (const auto& v : in->variables) reference(v, in->pos);
+        if (in->promptLiteral) strings_.insert(*in->promptLiteral);
+        return;
+    }
     if (auto dt = dyn_cast<const DefTypeStmt>(s)) {
         for (const auto& [a,b] : dt->ranges) {
             for (char ch = a; ch <= b; ++ch) {
@@ -414,6 +419,16 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         return;
     }
     if (dyn_cast<const ClearStmt>(s)) { log() << "Clear" << '\n'; return; }
+    if (auto li = dyn_cast<const LineInputStmt>(s)) {
+        // Ensure target is a string variable
+        if (!varNameIsString(li->name)) {
+            std::ostringstream m; m << "TypeError: LINE INPUT requires string variable @ " << li->pos.line << ':' << li->pos.col;
+            log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        reference(li->name, li->pos);
+        return;
+    }
     if (auto g = dyn_cast<const GotoStmt>(s)) {
         std::ostringstream m; m << "Goto target=" << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << m.str() << '\n';
         if (!lines_.contains(g->targetLine)) {

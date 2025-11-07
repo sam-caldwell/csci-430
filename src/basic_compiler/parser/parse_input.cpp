@@ -9,7 +9,7 @@ namespace gwbasic {
 /*
  * Function: Parser::parseInput
  * Purpose:
- *  - Parse INPUT [#n,] var[,var...] or bare console INPUT var
+ *  - Parse INPUT [#n,] var[,var...] or bare console INPUT [; P$ ,] ["text";] var[,var...]
  * Inputs:
  *  - none (assumes 'INPUT' matched by caller)
  * Outputs:
@@ -28,10 +28,32 @@ std::unique_ptr<Stmt> Parser::parseInput() {
         while (match(TokenType::Comma)) { if (!check(TokenType::Identifier)) throw ParseError("Expected variable"); vars.push_back(peek().lexeme); advance(); }
         return make_node<FileInputStmt>({l, c}, ch, std::move(vars));
     }
+    // Console INPUT: optional prompt, then var list
+    std::optional<std::string> promptLit;
+    std::optional<std::string> promptVar;
+    // Case 1: INPUT ; P$, var...
+    if (match(TokenType::Semicolon)) {
+        if (!check(TokenType::Identifier)) throw ParseError("Expected string variable after ';' in INPUT");
+        promptVar = peek().lexeme; advance();
+        // Expect a comma before variables
+        if (!match(TokenType::Comma)) throw ParseError("Expected ',' after prompt variable in INPUT");
+    } else if (check(TokenType::String)) {
+        // Case 2: INPUT "literal"; var...
+        promptLit = peek().lexeme; advance();
+        consume(TokenType::Semicolon, "';' after prompt string in INPUT");
+    }
+    // Parse variable list (at least one)
+    std::vector<std::string> vars;
     if (!check(TokenType::Identifier)) throw ParseError("Expected variable name after INPUT");
-    std::string name = peek().lexeme; advance();
-    return make_node<InputStmt>({l, c}, name);
+    vars.push_back(peek().lexeme); advance();
+    while (match(TokenType::Comma)) {
+        if (!check(TokenType::Identifier)) throw ParseError("Expected variable name after ',' in INPUT");
+        vars.push_back(peek().lexeme); advance();
+    }
+    auto node = make_node<InputStmt>({l, c}, std::move(vars));
+    node->promptLiteral = promptLit;
+    node->promptVar = promptVar;
+    return node;
 }
 
 } // namespace gwbasic
-

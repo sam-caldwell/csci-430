@@ -60,8 +60,9 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
         for (const auto& bs : f->body) collectStmtVars(bs.get());
         logSem() << "For var=" << f->var << " @ " << f->pos.line << ':' << f->pos.col << Symbols::LF;
     } else if (const auto in = dyn_cast<const InputStmt>(s)) {
-        variables_.insert(in->name);
-        logSem() << "Input " << in->name << " @ " << in->pos.line << ':' << in->pos.col << Symbols::LF;
+        for (const auto& v : in->variables) variables_.insert(v);
+        if (in->promptLiteral && !strLiteralId_.count(*in->promptLiteral)) strLiteralId_[*in->promptLiteral] = strCounter_++;
+        logSem() << "Input vars=" << in->variables.size() << " @ " << in->pos.line << ':' << in->pos.col << Symbols::LF;
     } else if (const auto rz = dyn_cast<const RandomizeStmt>(s)) {
         if (rz->seed) collectExprVars(rz->seed.get());
         logSem() << "Randomize @ " << rz->pos.line << ':' << rz->pos.col << Symbols::LF;

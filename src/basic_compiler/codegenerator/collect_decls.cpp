@@ -108,6 +108,17 @@ void CodeGenerator::collectDecls(const Program& program) {
         // LineNumbers are computed from AST to drive emission order; no change
     }
 
+    // Regardless of semantics, ensure prompt literals in INPUT are assigned ids
+    for (const auto& line : program.lines) {
+        for (const auto& st : line.statements) {
+            if (const auto* in = dyn_cast<const InputStmt>(st.get())) {
+                if (in->promptLiteral && !strLiteralId_.contains(*in->promptLiteral)) {
+                    strLiteralId_[*in->promptLiteral] = strCounter_++;
+                }
+            }
+        }
+    }
+
     // Populate DATA items into dataLiteralIds_ and ensure each item has an id
     dataLiteralIds_.clear();
     dataIsString_.clear();

@@ -307,13 +307,31 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
         } else if (isa<SystemStmt>(s.get())) {
             out << std::format("  br label %{}", endLbl) << Symbols::LF;
         } else if (auto ins = dyn_cast<InputStmt>(s.get())) {
-            ensureVarAllocated(out, ins->name);
-            std::string fmt = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir1 << Symbols::LF; }
-            // Read into temp double then convert to var storage
-            std::string tmp = nextTemp(); { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
-            { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir2 << Symbols::LF; }
-            std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
-            storeNumberToVar(out, ins->name, dv);
+            if (ins->promptLiteral || ins->promptVar) {
+                std::string pstr;
+                if (ins->promptLiteral) {
+                    if (strLiteralId_.contains(*ins->promptLiteral)) {
+                        int id = strLiteralId_[*ins->promptLiteral];
+                        pstr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", pstr, globalStringName(id)); out << ir << Symbols::LF; }
+                    }
+                } else {
+                    ensureVarAllocated(out, *ins->promptVar);
+                    pstr = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", pstr, varAllocaName_[*ins->promptVar]); out << ir << Symbols::LF; }
+                    std::string safe = nextTemp(); { std::string ir = std::format("  {} = call ptr @gwb_safe_str(ptr {})", safe, pstr); out << ir << Symbols::LF; } pstr = safe;
+                }
+                if (!pstr.empty()) {
+                    std::string fmtS = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_str_sp, i64 0", fmtS); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmtS, pstr); out << ir << Symbols::LF; }
+                }
+            }
+            for (const auto& vname : ins->variables) {
+                ensureVarAllocated(out, vname);
+                std::string fmt = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir1 << Symbols::LF; }
+                std::string tmp = nextTemp(); { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
+                { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir2 << Symbols::LF; }
+                std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
+                storeNumberToVar(out, vname, dv);
+            }
         } else if (auto col = dyn_cast<ColorStmt>(s.get())) {
             auto emitColor = [&](const std::unique_ptr<Expr>& e, bool isFg){
                 if (!e) return;

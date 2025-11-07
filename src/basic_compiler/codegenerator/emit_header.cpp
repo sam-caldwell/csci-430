@@ -26,6 +26,7 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare ptr @strcpy(ptr, ptr)" << Symbols::LF
         << "declare ptr @strcat(ptr, ptr)" << Symbols::LF << Symbols::LF
         << "declare ptr @strncpy(ptr, ptr, i64)" << Symbols::LF
+        << "declare ptr @fgets(ptr, i32, ptr)" << Symbols::LF
     // File I/O
         << "declare ptr @fopen(ptr, ptr)" << Symbols::LF
         << "declare i32 @fclose(ptr)" << Symbols::LF
@@ -186,6 +187,8 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "  %ret = select i1 %isnull, ptr %empty, ptr %p" << Symbols::LF
         << "  ret ptr %ret" << Symbols::LF
         << "}" << Symbols::LF << Symbols::LF;
+    // stdin handle (external) for LINE INPUT from console
+    out << "@stdin = external global ptr" << Symbols::LF << Symbols::LF;
     log() << "emitHeader: declared stdio + globals" << Symbols::LF;
 }
 
