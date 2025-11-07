@@ -14,4 +14,3 @@ extern "C" {
 TEST(HelloWorldTest, ReturnsExpectedString) {
     EXPECT_STREQ("Hello, World", get_hello_world());
 }
-
