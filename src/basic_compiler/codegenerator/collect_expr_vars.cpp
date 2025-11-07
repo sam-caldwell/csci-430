@@ -17,18 +17,28 @@ namespace gwbasic {
 void CodeGenerator::collectExprVars(const Expr* e) {
 
     if (!e) return;
+
     if (const auto v = dyn_cast<const VarExpr>(e)) {
         variables_.insert(v->name);
         logSem() << "VarRef " << v->name << " @ " << v->pos.line << ':' << v->pos.col << Symbols::LF;
         return;
     }
+
     if (const auto b = dyn_cast<const BinaryExpr>(e)) {
-        collectExprVars(b->lhs.get()); collectExprVars(b->rhs.get()); return;
+        collectExprVars(b->lhs.get()); collectExprVars(b->rhs.get());
+        return;
     }
+
     if (const auto u = dyn_cast<const UnaryExpr>(e)) {
-        collectExprVars(u->inner.get()); return;
+        collectExprVars(u->inner.get());
+        return;
     }
-    if (const auto c = dyn_cast<const CallExpr>(e)) { for (const auto& a : c->args) collectExprVars(a.get()); return; }
+
+    if (const auto c = dyn_cast<const CallExpr>(e)) {
+        for (const auto& a : c->args)
+            collectExprVars(a.get());
+        return;
+    }
 }
 
 } // namespace gwbasic
