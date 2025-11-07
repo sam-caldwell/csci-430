@@ -6,6 +6,11 @@ namespace gwbasic {
 bool SemanticAnalyzer::isKnownStringFunction(const std::string& upperName) {
     return (
         upperName == "CHR$" ||
+        upperName == "STR$" ||
+        upperName == "STRING$" ||
+        upperName == "SPACE$" ||
+        upperName == "LTRIM$" ||
+        upperName == "RTRIM$" ||
         upperName == "LEFT$" ||
         upperName == "RIGHT$" ||
         upperName == "MID$"
@@ -13,4 +18,3 @@ bool SemanticAnalyzer::isKnownStringFunction(const std::string& upperName) {
 }
 
 } // namespace gwbasic
-

@@ -25,7 +25,9 @@ COVERAGE_SCOPE ?= test/
 # Focus coverage on implementation sources under src/ (headers may be inlined
 # across translation units and skew source-based coverage). Projects often
 # measure coverage on compiled sources rather than public headers.
-COVERAGE_INCLUDE_RE ?= ^src/
+# Focus coverage strictly on the compiler implementation
+# (exclude ancillary samples under src/hello_world and logger tooling)
+COVERAGE_INCLUDE_RE ?= ^src/basic_compiler/
 COVERAGE_METRIC ?= lines
 # No test files included, so helper exclusion is unnecessary; keep empty unless overriding.
 COVERAGE_EXCLUDE_RE ?=

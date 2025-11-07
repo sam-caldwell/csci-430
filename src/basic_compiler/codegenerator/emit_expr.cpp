@@ -622,6 +622,116 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             { std::string ir = std::format("  store i8 0, ptr {}", pN); out << ir << Symbols::LF; }
             return buf;
         }
+        if (fn == "STR$") {
+            // Convert numeric to string via snprintf into sbuf, then copy to fresh buffer
+            std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [3 x i8], ptr @.fmt_num_ns, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
+            std::string sbuf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, double {})", sbuf, fmt, argv[0]); out << ir << Symbols::LF; }
+            std::string slen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", slen, sbuf); out << ir << Symbols::LF; }
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, slen); out << ir << Symbols::LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, size); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", buf, sbuf); out << ir << Symbols::LF; }
+            return buf;
+        }
+        if (fn == "SPACE$") {
+            // SPACE$(n): repeat space character n times
+            std::string n64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", n64, argv[0]); out << ir << Symbols::LF; }
+            // clamp negative to 0
+            std::string isNeg = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", isNeg, n64); out << ir << Symbols::LF; }
+            std::string nsel = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 0, i64 {}", nsel, isNeg, n64); out << ir << Symbols::LF; }
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, nsel); out << ir << Symbols::LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, size); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @memset(ptr {}, i32 32, i64 {})", buf, nsel); out << ir << Symbols::LF; }
+            std::string pN = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pN, buf, nsel); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i8 0, ptr {}", pN); out << ir << Symbols::LF; }
+            return buf;
+        }
+        if (fn == "STRING$") {
+            // STRING$(n, x): n copies of first byte of string x or numeric x
+            std::string n64 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", n64, argv[0]); out << ir << Symbols::LF; }
+            std::string isNeg = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", isNeg, n64); out << ir << Symbols::LF; }
+            std::string nsel = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i64 0, i64 {}", nsel, isNeg, n64); out << ir << Symbols::LF; }
+            // Determine fill byte
+            std::string fillb;
+            if (isStringExpr(call->args[1].get())) {
+                std::string b = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", b, argv[1]); out << ir << Symbols::LF; }
+                fillb = b;
+            } else {
+                std::string i32v = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", i32v, argv[1]); out << ir << Symbols::LF; }
+                std::string b = nextTemp(); { std::string ir = std::format("  {} = trunc i32 {} to i8", b, i32v); out << ir << Symbols::LF; }
+                fillb = b;
+            }
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, nsel); out << ir << Symbols::LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, size); out << ir << Symbols::LF; }
+            // memset requires i32 value; zext i8 to i32
+            std::string val32 = nextTemp(); { std::string ir = std::format("  {} = zext i8 {} to i32", val32, fillb); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @memset(ptr {}, i32 {}, i64 {})", buf, val32, nsel); out << ir << Symbols::LF; }
+            std::string pN = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pN, buf, nsel); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i8 0, ptr {}", pN); out << ir << Symbols::LF; }
+            return buf;
+        }
+        if (fn == "LTRIM$") {
+            // LTRIM$(s$): skip leading spaces
+            std::string src = argv[0];
+            std::string slen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", slen, src); out << ir << Symbols::LF; }
+            // Loop i from 0 while i < slen and src[i] == ' '
+            std::string loopLbl = lineLabelName(currentLine_) + std::string("_ltr_loop_") + std::to_string(++tempCounter_);
+            std::string bodyLbl = lineLabelName(currentLine_) + std::string("_ltr_body_") + std::to_string(tempCounter_);
+            std::string contLbl = lineLabelName(currentLine_) + std::string("_ltr_cont_") + std::to_string(tempCounter_);
+            std::string doneLbl = lineLabelName(currentLine_) + std::string("_ltr_done_") + std::to_string(tempCounter_);
+            out << loopLbl << ":" << Symbols::LF;
+            std::string i = nextTemp(); { std::string ir = std::format("  {} = phi i64 [ 0, %{} ], [ %{}, %{} ]", i, lineLabelName(currentLine_), contLbl, contLbl); out << ir << Symbols::LF; }
+            std::string cond = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, {}", cond, i, slen); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", cond, bodyLbl, doneLbl); out << ir << Symbols::LF; }
+            out << bodyLbl << ":" << Symbols::LF;
+            std::string p = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", p, src, i); out << ir << Symbols::LF; }
+            std::string ch = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", ch, p); out << ir << Symbols::LF; }
+            std::string isSp = nextTemp(); { std::string ir = std::format("  {} = icmp eq i8 {}, 32", isSp, ch); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isSp, contLbl, doneLbl); out << ir << Symbols::LF; }
+            out << contLbl << ":" << Symbols::LF;
+            std::string inc = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", inc, i); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  br label %{}", loopLbl); out << ir << Symbols::LF; }
+            out << doneLbl << ":" << Symbols::LF;
+            // i is index of first non-space; compute remainder length and copy
+            std::string start = i;
+            std::string rem = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", rem, slen, start); out << ir << Symbols::LF; }
+            std::string sptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", sptr, src, start); out << ir << Symbols::LF; }
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, rem); out << ir << Symbols::LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, size); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", buf, sptr, rem); out << ir << Symbols::LF; }
+            std::string pN2 = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pN2, buf, rem); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i8 0, ptr {}", pN2); out << ir << Symbols::LF; }
+            return buf;
+        }
+        if (fn == "RTRIM$") {
+            // RTRIM$(s$): trim trailing spaces
+            std::string src = argv[0];
+            std::string slen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", slen, src); out << ir << Symbols::LF; }
+            std::string loopLbl = lineLabelName(currentLine_) + std::string("_rtr_loop_") + std::to_string(++tempCounter_);
+            std::string bodyLbl = lineLabelName(currentLine_) + std::string("_rtr_body_") + std::to_string(tempCounter_);
+            std::string contLbl = lineLabelName(currentLine_) + std::string("_rtr_cont_") + std::to_string(tempCounter_);
+            std::string doneLbl = lineLabelName(currentLine_) + std::string("_rtr_done_") + std::to_string(tempCounter_);
+            out << loopLbl << ":" << Symbols::LF;
+            std::string j = nextTemp(); { std::string ir = std::format("  {} = phi i64 [ {}, %{} ], [ %{}, %{} ]", j, slen, lineLabelName(currentLine_), contLbl, contLbl); out << ir << Symbols::LF; }
+            std::string cnd = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i64 {}, 0", cnd, j); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", cnd, bodyLbl, doneLbl); out << ir << Symbols::LF; }
+            out << bodyLbl << ":" << Symbols::LF;
+            std::string jm1 = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, 1", jm1, j); out << ir << Symbols::LF; }
+            std::string p = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", p, src, jm1); out << ir << Symbols::LF; }
+            std::string ch = nextTemp(); { std::string ir = std::format("  {} = load i8, ptr {}", ch, p); out << ir << Symbols::LF; }
+            std::string isSp = nextTemp(); { std::string ir = std::format("  {} = icmp eq i8 {}, 32", isSp, ch); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isSp, contLbl, doneLbl); out << ir << Symbols::LF; }
+            out << contLbl << ":" << Symbols::LF;
+            { std::string ir = std::format("  br label %{}", loopLbl); out << ir << Symbols::LF; }
+            out << doneLbl << ":" << Symbols::LF;
+            std::string m = j; // number of bytes to keep
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, m); out << ir << Symbols::LF; }
+            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, size); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", buf, src, m); out << ir << Symbols::LF; }
+            std::string pN2 = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 {}", pN2, buf, m); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i8 0, ptr {}", pN2); out << ir << Symbols::LF; }
+            return buf;
+        }
         if (fn == "CHR$") {
             // Allocate 2 bytes and store low 8 bits of numeric arg as char
             // Strict: if arg outside 0..255 -> error 5

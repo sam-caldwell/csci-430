@@ -26,6 +26,7 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare ptr @strcpy(ptr, ptr)" << Symbols::LF
         << "declare ptr @strcat(ptr, ptr)" << Symbols::LF << Symbols::LF
         << "declare ptr @strncpy(ptr, ptr, i64)" << Symbols::LF
+        << "declare ptr @memset(ptr, i32, i64)" << Symbols::LF
         << "declare ptr @fgets(ptr, i32, ptr)" << Symbols::LF
     // File I/O
         << "declare ptr @fopen(ptr, ptr)" << Symbols::LF

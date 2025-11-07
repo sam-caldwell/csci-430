@@ -46,6 +46,11 @@ int SemanticAnalyzer::expectedArity(const std::string& upperName) {
         {"SCREEN", 2},
         // String intrinsics
         {"CHR$",   1},
+        {"STR$",   1},
+        {"SPACE$", 1},
+        {"STRING$",2},
+        {"LTRIM$", 1},
+        {"RTRIM$", 1},
         {"LEFT$",  2},
         {"RIGHT$", 2},
         // MID$(s, start [, len]) — minimum required arity is 2

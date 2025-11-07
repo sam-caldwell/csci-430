@@ -22,12 +22,6 @@
 - INPUT #n / LINE INPUT #n: see codegen gaps above; require numeric parsing with separators, string quoting rules, 
   EOF behavior.
 
-## Built-in Functions Coverage and Types
-
--  
-  verify types/arity in semantics.
-- Update `isKnownNumericFunction`/`isKnownStringFunction` to reflect the above; expand tests.
-
 ## Type System and Conversions
 
 - Variable kind defaults and suffixes are honored, but:
@@ -38,7 +32,8 @@
 
 - COMMON variables tracked and preserved across CHAIN, but CHAIN/RUN file handoff is not implemented; clarify 
   preservation across true overlays once implemented.
-- CLEAR is line-scoped to “vars/arrays seen before” to avoid crossing CHAIN boundaries; verify against GW-BASIC’s 
+
++ CLEAR is line-scoped to “vars/arrays seen before” to avoid crossing CHAIN boundaries; verify against GW-BASIC’s 
   memory model (string space, array descriptors, file buffers).
 
 ## Code Generation: Implementations Missing (parses exist)

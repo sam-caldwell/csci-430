@@ -52,11 +52,48 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
             throw SemanticError(m.str());
         }
         if (isBuiltinStr) {
+            // Arity validation first (MID$ has optional 3rd arg)
             if (fn == "MID$") {
                 if (!(call->args.size() == 2 || call->args.size() == 3)) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects 2 or 3 args @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             } else {
                 int exp = expectedArity(fn);
                 if (static_cast<int>(call->args.size()) != exp) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects " << exp << " arg(s) @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            }
+            // Type validation per intrinsic
+            if (fn == "CHR$") {
+                if (typeOf(call->args[0].get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function 'CHR$' requires numeric argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                analyzeExpr(call->args[0].get());
+            } else if (fn == "STR$") {
+                if (typeOf(call->args[0].get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function 'STR$' requires numeric argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                analyzeExpr(call->args[0].get());
+            } else if (fn == "SPACE$") {
+                if (typeOf(call->args[0].get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function 'SPACE$' requires numeric argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                analyzeExpr(call->args[0].get());
+            } else if (fn == "STRING$") {
+                if (typeOf(call->args[0].get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function 'STRING$' length must be numeric @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                // Second arg may be numeric (ASCII) or string (takes first char)
+                analyzeExpr(call->args[0].get());
+                analyzeExpr(call->args[1].get());
+            } else if (fn == "LTRIM$" || fn == "RTRIM$") {
+                if (typeOf(call->args[0].get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function '" << call->callee << "' requires string argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                analyzeExpr(call->args[0].get());
+            } else if (fn == "LEFT$" || fn == "RIGHT$") {
+                if (typeOf(call->args[0].get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function '" << call->callee << "' expects string first argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                if (typeOf(call->args[1].get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function '" << call->callee << "' length must be numeric @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                analyzeExpr(call->args[0].get());
+                analyzeExpr(call->args[1].get());
+            } else if (fn == "MID$") {
+                if (typeOf(call->args[0].get()) != ValueType::String) { std::ostringstream m; m << "TypeError: function 'MID$' expects string first argument @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                if (typeOf(call->args[1].get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function 'MID$' start must be numeric @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                analyzeExpr(call->args[0].get());
+                analyzeExpr(call->args[1].get());
+                if (call->args.size() == 3) {
+                    if (typeOf(call->args[2].get()) == ValueType::String) { std::ostringstream m; m << "TypeError: function 'MID$' length must be numeric @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+                    analyzeExpr(call->args[2].get());
+                }
+            } else {
+                // Default: analyze all args
+                for (const auto& arg : call->args) analyzeExpr(arg.get());
             }
         } else if (isBuiltinNum) {
             if (fn == "SCREEN") {
