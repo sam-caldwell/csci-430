@@ -218,6 +218,36 @@
 - `SWAP x, y` (variables and arrays).
   - Lexer: added `SWAP` keyword.
   - AST: new `SwapStmt` with left/right variable references (scalar or array element) using `ReadTarget`.
+
+---
+
+## 06 Nov 2025
+
+### Compiler Directives (MERGE/CHAIN/RUN)
+- MERGE is compile-time only; no runtime codegen. Integration defined and implemented in the CLI/compiler pipeline:
+  - Path resolution: `MERGE "file"` resolves relative paths against the including file via `resolvePath(baseFile, rel)` and canonicalizes with `weakly_canonical`.
+  - Conflicts: merged lines replace duplicates by line number (`appendMergeProgramReplacing` uses replace-or-append semantics).
+  - Renumbering: MERGE preserves line numbers (no renumber). CHAIN/RUN imports are parsed once per canonical path and renumbered by 1000-based regions (`assignBase`, `renumberProgram`). Targets are patched to `base + firstLine` when no explicit target is present.
+  - Flow: `compileFile*` performs a single pass: detect directives per line, process MERGE by appending parsed lines into the composite, and process CHAIN/RUN by ensuring import, renumbering, and patching target lines. MERGE causes no import stack push; CHAIN/RUN do.
+
+### Parser/Control Flow
+- NEXT var-list: Implemented `NEXT v1[,v2...]` parsing and folding semantics.
+  - Parser accepts comma-separated variable lists; AST `NextStmt` now holds `vars: vector<string>`.
+  - Folding enforces order: each listed name must match the current innermost open FOR and closes it (equivalent to `NEXT v1 : NEXT v2 : ...`). Bare `NEXT` still closes one level.
+
+### GOSUB/RETURN
+- Clarified behavior: GOSUB is lowered via inlining; nonlocal `RETURN <line>` is not supported.
+- Tests: added parser negative test that `RETURN n` is rejected.
+
+### WHILE/WEND
+- Added additional tests around nested interactions; EXIT interactions to be considered later as other control statements land.
+
+### Tests/Infra
+- New tests:
+  - Unit: NEXT var-list (happy and mismatch), RETURN-with-line rejected.
+  - E2E: NEXT var-list nested loops print expected pairs.
+- Test working directory remains under `build/testrun` for all suites, ensuring artifacts stay within `build/`.
+
   - Parser: `SWAP varref, varref` parsing wired in `tryParseOtherKeywords`.
   - Semantics: validates both refs exist (arrays DIM'd; indices numeric and correct arity) and types match (both
     numeric or both string). Clear error messages on mismatch.
@@ -239,15 +269,6 @@
 - Tests: unit (lexer exponent normalization and `&O`/`&`/`&B` decoding), integration (`DATA 1D2` → double 
   `1.000000e+02` in `@gwb_data_num`), and E2E (PRINT behavior) — all green.
 
-### Planned
-- Implement exponentiation `^` operator, associated unit/integration/E2E tests.
-- Implement logical operators (`AND`/`OR`/`NOT`) for numeric truthy semantics with tests.
-- Ensure relational operators are supported with strict semantics and tests.
-
----
-
-## 06 Nov 2025
-
 ### Numeric & Semantics
 - Add `VAL`, `LEN` (of string), `INSTR`, and clarify `FIX`/`INT` differences (behavior vs. negatives).
 - Domain handling for `SGN`/`SQR`/`SQRT`/`LOG` completed; arity and domains enforced uniformly via `expected_arity`
@@ -257,5 +278,18 @@
 - Implement the `INSTR` clamp and the optional `CHR$`/`ASC` strict checks now; add a strict-compat flag for `SQRT` 
   alias behavior.
 
+
 ---
 
+## 07 Nov 2025
+
+### Tests: Coverage Push
+- Added optimizer and IR tests to raise coverage without filtering:
+  - Optimizer: IF with foldable comparisons flattens to GOTO/removal (`IfCmp_Flattens_ToGotoOrRemoval`).
+  - Codegen: AND/OR boolean lowering uses `fcmp` → `and/or i1` → `uitofp`.
+  - DEF FN: parameter binding inlines argument SSA; IR contains no `%X` or `%S$` loads; no calls to user functions.
+  - RESUME: explicit `RESUME 30` generates handler-flag clear and direct `br label %line30`; E2E validates output order.
+- All new tests run under `build/testrun`. No changes to `cmake/Coverage.cmake`.
+
+### Notes
+- Focused on high-signal areas: DEF FN param semantics, RESUME line flow, boolean logic IR paths, and IF-flattening via comparison folds. These improve both statement- and expression-level coverage.
