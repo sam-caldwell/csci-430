@@ -125,6 +125,7 @@ int main(int argc, char **argv) {
     try {
         // Optional metrics context
         gwbasic::Metrics metrics;
+        // ReSharper disable once CppDFALocalValueEscapesFunction
         if (wantMetrics) gwbasic::gMetrics = &metrics;
         deriveDefaultLogPaths(input, noLogs, logPath, lexLogPath, syntaxLogPath, semanticLogPath);
         std::string ir;
