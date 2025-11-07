@@ -270,6 +270,7 @@ namespace gwbasic {
                 for (const auto &v: pr->more) items.push_back(v.get());
                 // Comma zone padding helper (OPTION PRINTZONES ON)
                 auto emit_pad_to_next_zone = [&]() {
+                    if (!printZones_) return;
                     // Compute padding to next 14-column zone
                     std::string col = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_cur_col", col); out << ir << Symbols::LF; }
                     std::string mod = nextTemp(); { std::string ir = std::format("  {} = srem i32 {}, 14", mod, col); out << ir << Symbols::LF; }
@@ -295,6 +296,14 @@ namespace gwbasic {
                 {
                     std::ostringstream m;
                     m << "line " << currentLine_ << " PrintStmt items=" << items.size() << " seps=" << pr->seps.size();
+                    if (!pr->seps.empty()) {
+                        m << " [";
+                        for (size_t si = 0; si < pr->seps.size(); ++si) {
+                            m << (pr->seps[si] == PrintStmt::Sep::Comma ? 'C' : 'S');
+                            if (si + 1 < pr->seps.size()) m << ',';
+                        }
+                        m << "]";
+                    }
                     log() << m.str() << Symbols::LF;
                 }
                 for (size_t pi = 0; pi < items.size(); ++pi) {
@@ -319,6 +328,11 @@ namespace gwbasic {
                             std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, useFmt, sptr); out << irn << Symbols::LF; }
                             std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
                             { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
+                        }
+                        // Explicit zone padding after string items when separated by comma
+                        if (printZones_ && !last && pi < pr->seps.size() && pr->seps[pi] == PrintStmt::Sep::Comma) {
+                            { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt (string) sep[" << pi << "]=Comma -> pad"; log() << m.str() << Symbols::LF; }
+                            emit_pad_to_next_zone();
                         }
                     } else {
                         // Fast path: compile-time constant number? Emit direct format without runtime fcmp
@@ -446,7 +460,7 @@ namespace gwbasic {
                             out << contLbl << ":" << Symbols::LF;
                         }
                         // Handle separator between items (zone for comma)
-                        if (!last && pi < pr->seps.size() && pr->seps[pi] == PrintStmt::Sep::Comma) {
+                        if (!last && pi < pr->seps.size() && pr->seps[pi] == PrintStmt::Sep::Comma && printZones_) {
                             { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt sep[" << pi << "]=Comma -> pad"; log() << m.str() << Symbols::LF; }
                             emit_pad_to_next_zone();
                         }

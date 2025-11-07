@@ -22,4 +22,7 @@ target_link_libraries(basic_compiler_integration_tests PRIVATE basic_compiler_li
 # Ensure hello_world builds first
 add_dependencies(basic_compiler_integration_tests hello_world)
 
-gtest_discover_tests(basic_compiler_integration_tests PROPERTIES LABELS integration)
+# Run integration tests under build/testrun to keep artifacts within build/
+set(GWB_IT_WORKDIR "${CMAKE_BINARY_DIR}/testrun")
+file(MAKE_DIRECTORY "${GWB_IT_WORKDIR}")
+gtest_discover_tests(basic_compiler_integration_tests PROPERTIES LABELS integration WORKING_DIRECTORY ${GWB_IT_WORKDIR})

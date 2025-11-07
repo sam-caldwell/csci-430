@@ -27,4 +27,7 @@ target_link_libraries(basic_compiler_unit_tests PRIVATE basic_compiler_lib GTest
 # Clang warns with -Wkeyword-macro; silence it for this target only.
 target_compile_options(basic_compiler_unit_tests PRIVATE $<$<CXX_COMPILER_ID:Clang>:-Wno-keyword-macro>)
 
-gtest_discover_tests(basic_compiler_unit_tests PROPERTIES LABELS unit)
+# Run unit tests under build/testrun to keep any incidental artifacts within build/
+set(GWB_TEST_WORKDIR "${CMAKE_BINARY_DIR}/testrun")
+file(MAKE_DIRECTORY "${GWB_TEST_WORKDIR}")
+gtest_discover_tests(basic_compiler_unit_tests PROPERTIES LABELS unit WORKING_DIRECTORY ${GWB_TEST_WORKDIR})
