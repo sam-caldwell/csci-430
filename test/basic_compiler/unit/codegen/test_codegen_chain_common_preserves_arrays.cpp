@@ -15,7 +15,11 @@ Purpose: Combine CHAIN (non-ALL) with COMMON declarations and multiple array
 TEST(CodeGenChain, CommonPreservesArrays) {
     const char* src =
         "10 COMMON A, S$\n"
-        "20 DIM A%(2), B&(2), C!(2), D#(2), S$(2)\n"
+        "20 DIM A%(2)\n"
+        "21 DIM B&(2)\n"
+        "22 DIM C!(2)\n"
+        "23 DIM D#(2)\n"
+        "24 DIM S$(2)\n"
         "30 CHAIN \"P\", 100\n"
         "40 END\n"
         "100 END\n";
@@ -32,4 +36,3 @@ TEST(CodeGenChain, CommonPreservesArrays) {
     // COMMON S$ should preserve the string array S$(2): no nulling stores in CHAIN block
     EXPECT_EQ(blk.find("store ptr null, ptr"), std::string::npos);
 }
-

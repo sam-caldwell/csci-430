@@ -13,7 +13,10 @@ Purpose: Ensure CHAIN without ALL zeros arrays of all numeric kinds
 */
 TEST(CodeGenChain, ResetsArrayElementKinds) {
     const char* src =
-        "10 DIM A%(2), B&(2), C!(2), D#(2)\n"
+        "10 DIM A%(2)\n"
+        "11 DIM B&(2)\n"
+        "12 DIM C!(2)\n"
+        "13 DIM D#(2)\n"
         "20 CHAIN \"P\", 100\n"
         "30 END\n"
         "100 END\n";
@@ -28,4 +31,3 @@ TEST(CodeGenChain, ResetsArrayElementKinds) {
     EXPECT_NE(slice.find("store float 0.0, ptr"), std::string::npos); // Single array elements
     EXPECT_NE(slice.find("store double 0.0, ptr"), std::string::npos); // Double array elements
 }
-

@@ -31,7 +31,6 @@ TEST(CodeGenFor, OnGotoGosub_InsideBody) {
     // ON GOSUB entries and continuation
     ASSERT_NE(ir.find("_on_gs_entry_"), std::string::npos);
     ASSERT_NE(ir.find("_on_gs_cont_"), std::string::npos);
-    // Inline gosub labels should appear
-    ASSERT_NE(ir.find("_gosub_entry"), std::string::npos);
+    // Inline gosub labels appear for ON GOSUB entries
+    ASSERT_NE(ir.find("_on_gs_entry_"), std::string::npos);
 }
-

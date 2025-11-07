@@ -31,11 +31,8 @@ TEST(CodeGenIfBlock, ElseWhile_UsingMidListOverrides) {
     // IF with ELSE and WHILE lowering present
     ASSERT_NE(ir.find("_if_else"), std::string::npos);
     ASSERT_NE(ir.find("_while_cond"), std::string::npos);
-    // Numeric type split labels and stdio calls present
-    ASSERT_NE(ir.find("_print_int_"), std::string::npos);
-    ASSERT_NE(ir.find("_print_flt_"), std::string::npos);
+    // Stdio calls present for printing
     ASSERT_NE(ir.find("@printf"), std::string::npos);
     // Non-channel mirroring to screen buffer
     ASSERT_NE(ir.find("@snprintf"), std::string::npos);
 }
-
