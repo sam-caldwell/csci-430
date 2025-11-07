@@ -178,6 +178,14 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "}" << Symbols::LF << Symbols::LF;
     // Global table for file channels (1..16)
     out << "@gwb_files = internal global [16 x ptr] zeroinitializer" << Symbols::LF << Symbols::LF;
+    // Safe string helper: return empty string when given null pointer
+    out << "define ptr @gwb_safe_str(ptr %p) {" << Symbols::LF
+        << "entry:" << Symbols::LF
+        << "  %isnull = icmp eq ptr %p, null" << Symbols::LF
+        << "  %empty = getelementptr inbounds [1 x i8], ptr @.str_empty, i64 0, i64 0" << Symbols::LF
+        << "  %ret = select i1 %isnull, ptr %empty, ptr %p" << Symbols::LF
+        << "  ret ptr %ret" << Symbols::LF
+        << "}" << Symbols::LF << Symbols::LF;
     log() << "emitHeader: declared stdio + globals" << Symbols::LF;
 }
 

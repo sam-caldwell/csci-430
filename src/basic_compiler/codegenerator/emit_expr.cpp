@@ -50,9 +50,13 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
         std::string r = nextTemp();
 
         if (isStringVarNameCG(v->name)) {
-            std::string ir = std::format("  {} = load ptr, ptr {}", r, a);
-            out << ir << Symbols::LF;
-            log() << "line " << currentLine_ << " VarExpr$ -> " << ir << Symbols::LF;
+            std::string ld = std::format("  {} = load ptr, ptr {}", r, a);
+            out << ld << Symbols::LF;
+            // Wrap null pointers to empty string for safety
+            std::string safe = nextTemp();
+            { std::string ir = std::format("  {} = call ptr @gwb_safe_str(ptr {})", safe, r); out << ir << Symbols::LF; }
+            r = safe;
+            log() << "line " << currentLine_ << " VarExpr$ -> load+safe" << Symbols::LF;
         } else {
             // Load typed storage and convert to double for expression math
             switch (numKindOf(v->name)) {
@@ -352,7 +356,8 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
                 std::string baseArr = arrayAllocaName_[call->callee];
                 std::string elem = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, baseArr, lin); out << ir << Symbols::LF; }
                 std::string val = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", val, elem); out << ir << Symbols::LF; }
-                return val;
+                std::string safe = nextTemp(); { std::string ir = std::format("  {} = call ptr @gwb_safe_str(ptr {})", safe, val); out << ir << Symbols::LF; }
+                return safe;
             } else {
                 ensureArrayAllocated(out, call->callee, static_cast<int>(total));
                 std::string baseArr = arrayAllocaName_[call->callee];
