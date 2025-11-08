@@ -1011,8 +1011,8 @@ namespace gwbasic {
                 if (!ch->all) {
                     // Preserve only variables declared COMMON before this line
                     const auto itCBL = commonBeforeLine_.find(line.number);
-                    const std::set<std::string> emptySet;
-                    const std::set<std::string>& preserve = (itCBL == commonBeforeLine_.end()) ? emptySet : itCBL->second;
+                    const std::set<std::string, std::less<>> emptySet;
+                    const std::set<std::string, std::less<>>& preserve = (itCBL == commonBeforeLine_.end()) ? emptySet : itCBL->second;
                     for (const auto &v: variables_) {
                         if (preserve.contains(v)) continue; // preserve caller's COMMON only
                         auto it = varAllocaName_.find(v);
@@ -1021,8 +1021,8 @@ namespace gwbasic {
                     }
                     // Also clear arrays not marked COMMON before this line
                     const auto itAB = arraysBeforeLine_.find(line.number);
-                    const std::set<std::string> emptyArr;
-                    const std::set<std::string>& aset = (itAB == arraysBeforeLine_.end()) ? emptyArr : itAB->second;
+                    const std::set<std::string, std::less<>> emptyArr;
+                    const std::set<std::string, std::less<>>& aset = (itAB == arraysBeforeLine_.end()) ? emptyArr : itAB->second;
                     for (const auto &an : aset) {
                         if (preserve.contains(an)) continue; // preserve COMMON arrays
                         auto itLen = arrayDims_.find(an);
@@ -1512,8 +1512,8 @@ namespace gwbasic {
                 // CLEAR: reset program state (scalars, strings, arrays in current segment), DATA index, file channels
                 // Scope: limit to variables/arrays seen before this line to avoid crossing CHAIN boundaries
                 const auto itVB = varsBeforeLine_.find(line.number);
-                const std::set<std::string> emptyVars;
-                const std::set<std::string>& vset = (itVB == varsBeforeLine_.end()) ? emptyVars : itVB->second;
+                const std::set<std::string, std::less<>> emptyVars;
+                const std::set<std::string, std::less<>>& vset = (itVB == varsBeforeLine_.end()) ? emptyVars : itVB->second;
                 for (const auto &v: vset) {
                     auto it = varAllocaName_.find(v);
                     if (it == varAllocaName_.end()) continue;
@@ -1521,8 +1521,8 @@ namespace gwbasic {
                 }
                 // Arrays: zero elements for arrays seen before this line
                 const auto itAB = arraysBeforeLine_.find(line.number);
-                const std::set<std::string> emptyArr;
-                const std::set<std::string>& aset = (itAB == arraysBeforeLine_.end()) ? emptyArr : itAB->second;
+                const std::set<std::string, std::less<>> emptyArr;
+                const std::set<std::string, std::less<>>& aset = (itAB == arraysBeforeLine_.end()) ? emptyArr : itAB->second;
                 for (const auto &an : aset) {
                     auto itLen = arrayDims_.find(an);
                     if (itLen == arrayDims_.end()) continue;

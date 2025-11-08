@@ -8,7 +8,7 @@
 
 namespace gwbasic {
 
-void CodeGenerator::collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string>& vars, std::set<std::string>& arrays) {
+void CodeGenerator::collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays) {
     if (!e) return;
     if (const auto v = dyn_cast<const VarExpr>(e)) {
         vars.insert(v->name);

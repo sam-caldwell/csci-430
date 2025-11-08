@@ -113,15 +113,21 @@ public:
      */
     void setSemantics(const SemanticAnalyzer::Result& r) {
         semProvided_ = true;
-        semVariables_ = r.variables;
-        semStrings_ = r.stringLiterals;
+        semVariables_.clear();
+        semVariables_.insert(r.variables.begin(), r.variables.end());
+        semStrings_.clear();
+        semStrings_.insert(r.stringLiterals.begin(), r.stringLiterals.end());
         semLineNumbers_ = r.lineNumbers;
-        semCommonVariables_ = r.commonVariables;
-        arrayDims_ = r.arrays;
+        semCommonVariables_.clear();
+        semCommonVariables_.insert(r.commonVariables.begin(), r.commonVariables.end());
+        arrayDims_.clear();
+        arrayDims_.insert(r.arrays.begin(), r.arrays.end());
         optionBase_ = r.optionBase;
         printZones_ = r.printZones;
-        userFunctions_ = r.userFunctions;
-        semStringVariables_ = r.stringVariables;
+        userFunctions_.clear();
+        userFunctions_.insert(r.userFunctions.begin(), r.userFunctions.end());
+        semStringVariables_.clear();
+        semStringVariables_.insert(r.stringVariables.begin(), r.stringVariables.end());
         // Map numeric kinds from semantics into codegen's representation
         semNumericKinds_.clear();
         for (const auto& [name, kind] : r.numericKinds) {
@@ -153,31 +159,31 @@ private:
      * Purpose:
      *  - Set of all variable identifiers referenced/declared in the program.
      */
-    std::set<std::string> variables_;
+    std::set<std::string, std::less<>> variables_;
     /*
      * Property: varAllocaName_
      * Purpose:
      *  - Map from variable name to its LLVM alloca symbol name.
      */
-    std::map<std::string, std::string> varAllocaName_;
+    std::map<std::string, std::string, std::less<>> varAllocaName_;
     /*
      * Property: strLiteralId_
      * Purpose:
      *  - Map string literal value to a unique id used for global names.
      */
-    std::map<std::string, int> strLiteralId_;
-    std::map<std::string, std::vector<int>> arrayDims_{};
-    std::map<std::string, std::string> arrayAllocaName_{};
+    std::map<std::string, int, std::less<>> strLiteralId_;
+    std::map<std::string, std::vector<int>, std::less<>> arrayDims_{};
+    std::map<std::string, std::string, std::less<>> arrayAllocaName_{};
     // OPTION BASE setting (0 default; 1 if OPTION BASE 1 seen)
     int optionBase_{0};
     bool printZones_{false};
     // User-defined functions by uppercase name
-    std::map<std::string, const DefFnStmt*> userFunctions_{};
+    std::map<std::string, const DefFnStmt*, std::less<>> userFunctions_{};
     // Variables determined as string-typed (by suffix or DEFSTR)
-    std::set<std::string> semStringVariables_{};
+    std::set<std::string, std::less<>> semStringVariables_{};
     // Variables numeric kind mapping (non-strings only)
     enum class NumKind { Int16, Long32, Single, Double };
-    std::map<std::string, NumKind> semNumericKinds_{};
+    std::map<std::string, NumKind, std::less<>> semNumericKinds_{};
     /*
      * Property: lineNumbers_
      * Purpose:
@@ -219,13 +225,13 @@ private:
      * Purpose:
      *  - Variables set provided by semantic analysis.
      */
-    std::set<std::string> semVariables_{};
+    std::set<std::string, std::less<>> semVariables_{};
     /*
      * Property: semStrings_
      * Purpose:
      *  - String literals set provided by semantics.
      */
-    std::set<std::string> semStrings_{};
+    std::set<std::string, std::less<>> semStrings_{};
     /*
      * Property: semLineNumbers_
      * Purpose:
@@ -237,24 +243,24 @@ private:
      * Purpose:
      *  - Variables marked as COMMON by semantics.
      */
-    std::set<std::string> semCommonVariables_{};
+    std::set<std::string, std::less<>> semCommonVariables_{};
     /*
      * Property: commonVariables_
      * Purpose:
      *  - Variables declared as COMMON in the current program.
      */
-    std::set<std::string> commonVariables_{};
+    std::set<std::string, std::less<>> commonVariables_{};
     /*
      * Property: commonBeforeLine_
      * Purpose:
      *  - Snapshot of COMMON variables in effect before each line number to
      *    drive CHAIN scoping behavior.
      */
-    std::map<int, std::set<std::string>> commonBeforeLine_{};
+    std::map<int, std::set<std::string, std::less<>>> commonBeforeLine_{};
     // Snapshot of variables seen before each line (in source order)
-    std::map<int, std::set<std::string>> varsBeforeLine_{};
+    std::map<int, std::set<std::string, std::less<>>> varsBeforeLine_{};
     // Snapshot of arrays seen (DIM'd or referenced) before each line
-    std::map<int, std::set<std::string>> arraysBeforeLine_{};
+    std::map<int, std::set<std::string, std::less<>>> arraysBeforeLine_{};
     // For error handlers: map trap start line -> first non-handler line after the
     // handler region (i.e., the line following the first line containing RESUME)
     std::map<int, int> handlerSkipAfter_{};
@@ -317,8 +323,25 @@ private:
     /** Collect declarations, variables, strings, and line ordering. */
     void collectDecls(const Program& program);
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
-    void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string>& vars, std::set<std::string>& arrays);
-    void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string>& vars, std::set<std::string>& arrays);
+    void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+
+    // Per-kind handlers to reduce complexity; implemented one-per-file
+    bool handleAssignBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleArrayAssignBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleIfBlockBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleIfBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleForBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleWhileBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handlePrintBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleInputBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleReadBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleDimBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& arrays);
+    bool handleSwapBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleEraseBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& arrays);
+    bool handleWriteBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleOnGotoBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleOnGosubBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     /** Collect variables/strings referenced by an expression. */
     void collectExprVars(const Expr* e);
     /** Collect variables/strings/COMMON from a statement (recursive). */

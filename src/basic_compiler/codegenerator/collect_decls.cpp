@@ -127,10 +127,10 @@ void CodeGenerator::collectDecls(const Program& program) {
     // Build mapping of COMMON variables that are in effect before each line
     {
         // Track COMMON variables seen before each line
-        std::set<std::string> accumCommon;
+        std::set<std::string, std::less<>> accumCommon;
         // Track variables/arrays seen before each line (by name)
-        std::set<std::string> accumVars;
-        std::set<std::string> accumArrays;
+        std::set<std::string, std::less<>> accumVars;
+        std::set<std::string, std::less<>> accumArrays;
         for (int ln : lineNumbers_) {
             // Record snapshots before processing this line
             commonBeforeLine_[ln] = accumCommon;
