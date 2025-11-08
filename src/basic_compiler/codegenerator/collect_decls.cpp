@@ -55,13 +55,14 @@ void CodeGenerator::collectDecls(const Program& program) {
         lineNumbers_.push_back(line.number);
         lineMap_[line.number] = &line;
         if (!semProvided_) {
-            for (const auto& st : line.statements) collectStmtVars(st.get());
+            for (const auto& st : line.statements)
+                collectStmtVars(st.get());
         }
         // Always scan for RND/STOP usage to decide helper/global emission
         for (const auto& st : line.statements) {
             scanStmtForRnd(st.get());
             scanStmtForStop(st.get());
-            // Also pick up OPTION PRINTZONES directives directly to drive
+            // Also, pick up OPTION PRINTZONES directives directly to drive
             // comma-zone padding even if semantics were not provided.
             if (const auto* opz = dyn_cast<const OptionPrintZonesStmt>(st.get())) {
                 printZones_ = opz->enabled;
@@ -88,7 +89,8 @@ void CodeGenerator::collectDecls(const Program& program) {
             // Update accumulators based on statements in this line
             for (const auto& st : lptr->statements) {
                 if (const auto cs = dyn_cast<const CommonStmt>(st.get())) {
-                    for (const auto& n : cs->names) accumCommon.insert(n);
+                    for (const auto& n : cs->names)
+                        accumCommon.insert(n);
                 }
                 collectVarsForBeforeLineFromStmt(st.get(), accumVars, accumArrays);
             }
@@ -109,8 +111,8 @@ void CodeGenerator::collectDecls(const Program& program) {
     }
 
     // Regardless of semantics, ensure prompt literals in INPUT are assigned ids
-    for (const auto& line : program.lines) {
-        for (const auto& st : line.statements) {
+    for (const auto&[number, statements] : program.lines) {
+        for (const auto& st : statements) {
             if (const auto* in = dyn_cast<const InputStmt>(st.get())) {
                 if (in->promptLiteral && !strLiteralId_.contains(*in->promptLiteral)) {
                     strLiteralId_[*in->promptLiteral] = strCounter_++;
@@ -178,35 +180,46 @@ void CodeGenerator::collectDecls(const Program& program) {
             if (!lptr) continue;
             for (const auto& st : lptr->statements) {
                 if (const auto oeg = dyn_cast<const OnErrorGotoStmt>(st.get())) {
-                    if (oeg->targetLine > 0) trapTargets.insert(oeg->targetLine);
+                    if (oeg->targetLine > 0)
+                        trapTargets.insert(oeg->targetLine);
                 }
             }
         }
-        // For each trap start, find first line with RESUME from that start
+        // For each trap start, find the first line with RESUME from that start
         for (int t : trapTargets) {
             // locate index of t
             int startIdx = -1;
-            for (size_t i = 0; i < lineNumbers_.size(); ++i) { if (lineNumbers_[i] == t) { startIdx = static_cast<int>(i); break; } }
+            for (size_t i = 0; i < lineNumbers_.size(); ++i) {
+                if (lineNumbers_[i] == t) {
+                    startIdx = static_cast<int>(i);
+                    break;
+                }
+            }
             if (startIdx < 0) continue;
             int endIdx = -1;
             for (int j = startIdx; j < static_cast<int>(lineNumbers_.size()); ++j) {
                 const auto* lp = lineMap_[lineNumbers_[j]];
                 if (!lp) continue;
                 bool hasResume = false;
-                for (const auto& st : lp->statements) { if (isa<const ResumeStmt>(st.get())) { hasResume = true; break; } }
+                for (const auto& st : lp->statements) {
+                    if (isa<const ResumeStmt>(st.get())) {
+                        hasResume = true;
+                        break;
+                    }
+                }
                 if (hasResume) { endIdx = j; break; }
             }
             int skipTo = -1;
             if (endIdx >= 0) {
-                if (endIdx + 1 < static_cast<int>(lineNumbers_.size())) skipTo = lineNumbers_[endIdx + 1];
+                if (endIdx + 1 < static_cast<int>(lineNumbers_.size()))
+                    skipTo = lineNumbers_[endIdx + 1];
             } else {
-                if (startIdx + 1 < static_cast<int>(lineNumbers_.size())) skipTo = lineNumbers_[startIdx + 1];
+                if (startIdx + 1 < static_cast<int>(lineNumbers_.size()))
+                    skipTo = lineNumbers_[startIdx + 1];
             }
             handlerSkipAfter_[t] = skipTo; // -1 means exit
         }
     }
 }
-
-// helpers moved to separate compilation units to satisfy one-function-per-file rule
 
 } // namespace gwbasic
