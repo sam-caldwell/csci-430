@@ -12,7 +12,7 @@
 - Implement code generation for the additional commands listed in docs/gw-basic.ebnf.
 - Ensure there are code generation optimizations for the additional commands listed in docs/gw-basic.ebnf.
 - Ensure all features implemented in this session emit the appropriate metrics.
-
+- Ensure that all features implemented in this session are covered by unit tests with >=97% test coverage.
 
 ## Type System and Conversions
 - COMMON variables tracked and preserved across CHAIN, make sure CHAIN/RUN file handoff is not implemented; clarify
@@ -23,7 +23,6 @@
 - Improve semantic optimizations (e.g., add more algebraic simplifications where possible)
 
 ## Code Generation: Implementations Missing (parses exist)
-
 - WRITE [#n,] expr[, ...]: parser exists; no codegen lowering yet.
 - INPUT #n, var[, ...]: file-input statement parsed; no codegen to `fscanf`/buffer + conversions.
 - LINE INPUT [#n,] var$: parser exists; no codegen to read an entire line (channel or stdin) and assign string.

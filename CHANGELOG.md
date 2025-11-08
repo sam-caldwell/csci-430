@@ -319,3 +319,38 @@
 ### Notes
 - Focused on high-signal areas: DEF FN param semantics, RESUME line flow, boolean logic IR paths, and IF-flattening via
   comparison folds. These improve both statement- and expression-level coverage.
+
+### Parser/Lexer: Additional GW-BASIC Keywords (EBNF coverage)
+- Added lexer tokens for additional commands from `docs/gw-basic.ebnf` that were previously unrecognized:
+  `FILES, NAME, KILL, MKDIR, RMDIR, WIDTH, LOCATE, CLS, PSET, PRESET, PAINT, DRAW, VIEW, WINDOW, BEEP, SOUND, PLAY,
+  KEY, PEN, STRIG, TIMER, TRON, TROFF, CONT, LOAD, SAVE, NEW, DELETE, LIST, LLIST, AUTO, RENUM, EDIT, PCOPY, RESET,
+  SHELL, ENVIRON, OUT, WAIT`.
+- Introduced a lightweight AST node `UnsupportedStmt` to accept these statements in the grammar while implementation
+  is pending. The parser consumes tokens up to end-of-statement and creates `UnsupportedStmt` with the keyword name.
+- Semantics and codegen treat `UnsupportedStmt` as a no-op and log the occurrence for visibility.
+- New unit test `Parser.AdditionalKeywords_ParseAsUnsupported` asserts that representative cases (`FILES`, `CLS`,
+  `LOCATE`, `WIDTH`, `BEEP`, `TIMER`) parse successfully as `UnsupportedStmt` and that trailing tokens are swallowed.
+  - Expanded to cover more keywords (`SOUND`, `PLAY`, `NAME`, `MKDIR`, `RMDIR`); `CLS` is now implemented (see below) and
+    is excluded from the unsupported list in the test.
+
+### CLS
+- Implemented `CLS` with a dedicated AST node and end-to-end behavior:
+  - Semantics: treated as a no-op for type/flow analysis.
+  - Codegen: emits `memset(@gwb_screen, 0, 2000)` and resets `@gwb_cur_row`/`@gwb_cur_col` to zero.
+  - Tests:
+    - Integration (IR): `CodeGen.CLS_EmitsMemsetAndCursorReset` validates expected IR patterns.
+    - E2E: `E2E.CLS_ClearsVirtualScreen` writes a character, calls `CLS`, and prints `SCREEN(1,1)` → `0`.
+
+### CHAIN/RUN and COMMON Clarification
+- CHAIN and RUN do not perform file handoff or overlay loading in this compiler. They are lowered to intra-module
+  control-flow transfers only:
+  - RUN resets all variables/arrays and branches to the first (or target) line.
+  - CHAIN resets all non-COMMON variables/arrays to zero/null (unless `ALL` specified) and branches to the target/first
+    line. COMMON variables declared before the CHAIN line are preserved across the transfer.
+- Preservation across true overlays (external file handoff) will mirror this behavior: only variables declared COMMON
+  will be preserved; all others will be reinitialized. Overlay file loading is not yet implemented and remains out of
+  scope for this release.
+
+### Metrics
+- The new paths integrate with existing metrics (token counting, AST snapshots, IR instruction counts). Unsupported
+  statements contribute to token and AST counts but produce no IR.
