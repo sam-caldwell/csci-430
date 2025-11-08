@@ -44,6 +44,7 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@.mode_rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"" << Symbols::LF
         << "@.mode_wb = private unnamed_addr constant [3 x i8] c\"wb\\00\"" << Symbols::LF
         << "@.call_msg = private unnamed_addr constant [8 x i8] c\"CALLED\\0A\\00\"" << Symbols::LF
+        << "@.str_eq = private unnamed_addr constant [2 x i8] c\"=\\00\"" << Symbols::LF
         << "@gwb_last_rnd = global float 0.0" << Symbols::LF; // RNG state (single precision) for RND(0)
     for (const auto&[fst, snd] : strLiteralId_) {
         const std::string& s = fst;
@@ -67,12 +68,20 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
     out << "@.env_display = private unnamed_addr constant [8 x i8] c\"DISPLAY\\00\"" << Symbols::LF
         << "@.env_wayland = private unnamed_addr constant [16 x i8] c\"WAYLAND_DISPLAY\\00\"" << Symbols::LF
         << "@gwb_gfx_ready = global i1 false" << Symbols::LF << Symbols::LF;
+    // Device names for WIDTH comparisons
+    out << "@.str_scrn = private unnamed_addr constant [6 x i8] c\"SCRN:\\00\"" << Symbols::LF
+        << "@.str_lpt1 = private unnamed_addr constant [6 x i8] c\"LPT1:\\00\"" << Symbols::LF;
+    // Bell character for BEEP
+    out << "@.bell = private unnamed_addr constant [2 x i8] c\"\\07\\00\"" << Symbols::LF;
     // Virtual screen state for SCREEN(row,col[,z])
     // - 80x25 character buffer, row-major, 0-based indices internally
     // - current cursor position used by PRINT mirroring logic
     out << "@gwb_screen = internal global [2000 x i8] zeroinitializer" << Symbols::LF
         << "@gwb_cur_row = global i32 0" << Symbols::LF
         << "@gwb_cur_col = global i32 0" << Symbols::LF
+        // Current screen width (columns) and printer width (columns)
+        << "@gwb_screen_cols = global i32 80" << Symbols::LF
+        << "@gwb_printer_cols = global i32 80" << Symbols::LF
         // Shared formatting scratch buffer for mirroring printf output to screen
         << "@gwb_sbuf = internal global [256 x i8] zeroinitializer" << Symbols::LF << Symbols::LF;
     // Error handling/trap globals

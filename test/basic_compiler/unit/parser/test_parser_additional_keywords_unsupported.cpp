@@ -39,8 +39,8 @@ TEST(Parser, AdditionalKeywords_ParseAsUnsupported) {
     for (const auto& line : prog.lines) {
         ASSERT_EQ(line.statements.size(), 1u);
         const Stmt* st = line.statements.front().get();
-        if (line.number == 20 || line.number == 30) {
-            // CLS and LOCATE should not be UnsupportedStmt
+        if (line.number == 20 || line.number == 30 || line.number == 40) {
+            // CLS, LOCATE, and WIDTH should not be UnsupportedStmt
             EXPECT_EQ(dyn_cast<const UnsupportedStmt>(st), nullptr);
             continue;
         }
@@ -48,15 +48,14 @@ TEST(Parser, AdditionalKeywords_ParseAsUnsupported) {
         ASSERT_NE(us, nullptr) << "Expected UnsupportedStmt for line " << line.number;
         seen.push_back(us->keyword);
     }
-    // Verify keywords captured (CLS excluded)
-    ASSERT_EQ(seen.size(), 9u);
+    // Verify keywords captured (CLS/LOCATE/WIDTH excluded)
+    ASSERT_EQ(seen.size(), 8u);
     EXPECT_EQ(seen[0], "FILES");
-    EXPECT_EQ(seen[1], "WIDTH");
-    EXPECT_EQ(seen[2], "BEEP");
-    EXPECT_EQ(seen[3], "TIMER");
-    EXPECT_EQ(seen[4], "SOUND");
-    EXPECT_EQ(seen[5], "PLAY");
-    EXPECT_EQ(seen[6], "NAME");
-    EXPECT_EQ(seen[7], "MKDIR");
-    EXPECT_EQ(seen[8], "RMDIR");
+    EXPECT_EQ(seen[1], "BEEP");
+    EXPECT_EQ(seen[2], "TIMER");
+    EXPECT_EQ(seen[3], "SOUND");
+    EXPECT_EQ(seen[4], "PLAY");
+    EXPECT_EQ(seen[5], "NAME");
+    EXPECT_EQ(seen[6], "MKDIR");
+    EXPECT_EQ(seen[7], "RMDIR");
 }

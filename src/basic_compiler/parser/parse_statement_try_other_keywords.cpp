@@ -14,6 +14,7 @@
 #include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/ast/UnsupportedStmt.h"
 #include "basic_compiler/ast/ClsStmt.h"
+#include "basic_compiler/ast/BeepStmt.h"
 
 namespace gwbasic {
 
@@ -126,10 +127,11 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     };
     if (match(TokenType::KwFiles)) { return parseUnsupported("FILES"); }
     if (match(TokenType::KwName))  { return parseUnsupported("NAME"); }
-    if (match(TokenType::KwKill))  { return parseUnsupported("KILL"); }
-    if (match(TokenType::KwMkdir)) { return parseUnsupported("MKDIR"); }
-    if (match(TokenType::KwRmdir)) { return parseUnsupported("RMDIR"); }
-    if (match(TokenType::KwWidth)) { return parseUnsupported("WIDTH"); }
+    if (match(TokenType::KwName))  { auto n = parseName(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwKill))  { auto n = parseKill(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwMkdir)) { auto n = parseMkdir(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwRmdir)) { auto n = parseRmdir(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwWidth)) { auto n = parseWidth(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwLocate)) { auto n = parseLocate(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwCls))   { return make_node<ClsStmt>({startTok.line, startTok.col}); }
     if (match(TokenType::KwPset))  { return parseUnsupported("PSET"); }
@@ -138,7 +140,7 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     if (match(TokenType::KwDraw))  { return parseUnsupported("DRAW"); }
     if (match(TokenType::KwView))  { return parseUnsupported("VIEW"); }
     if (match(TokenType::KwWindow)){ return parseUnsupported("WINDOW"); }
-    if (match(TokenType::KwBeep))  { return parseUnsupported("BEEP"); }
+    if (match(TokenType::KwBeep))  { return make_node<BeepStmt>({startTok.line, startTok.col}); }
     if (match(TokenType::KwSound)) { return parseUnsupported("SOUND"); }
     if (match(TokenType::KwPlay))  { return parseUnsupported("PLAY"); }
     if (match(TokenType::KwKey))   { return parseUnsupported("KEY"); }
@@ -159,8 +161,8 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     if (match(TokenType::KwEdit))  { return parseUnsupported("EDIT"); }
     if (match(TokenType::KwPcopy)) { return parseUnsupported("PCOPY"); }
     if (match(TokenType::KwReset)) { return parseUnsupported("RESET"); }
-    if (match(TokenType::KwShell)) { return parseUnsupported("SHELL"); }
-    if (match(TokenType::KwEnviron)){ return parseUnsupported("ENVIRON"); }
+    if (match(TokenType::KwShell)) { auto n = parseShell(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwEnviron)){ auto n = parseEnviron(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwOut))   { return parseUnsupported("OUT"); }
     if (match(TokenType::KwWait))  { return parseUnsupported("WAIT"); }
     return nullptr;

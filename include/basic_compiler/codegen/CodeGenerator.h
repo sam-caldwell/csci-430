@@ -502,6 +502,114 @@ public:
     void setAllowSqrtAlias(bool allow) { allowSqrtAlias_ = allow; }
 private:
     bool allowSqrtAlias_{true};
+
+    // -- Helpers to simplify emitFor() --
+    /** Load a scalar variable as double for math/comparisons. */
+    std::string loadVarAsDouble(std::ostringstream& out, const std::string& varName) {
+        switch (numKindOf(varName)) {
+            case NumKind::Int16: {
+                std::string l = nextTemp();
+                out << std::format("  {} = load i16, ptr {}", l, varAllocaName_[varName]) << Symbols::LF;
+                std::string d = nextTemp();
+                out << std::format("  {} = sitofp i16 {} to double", d, l) << Symbols::LF;
+                return d;
+            }
+            case NumKind::Long32: {
+                std::string l = nextTemp();
+                out << std::format("  {} = load i32, ptr {}", l, varAllocaName_[varName]) << Symbols::LF;
+                std::string d = nextTemp();
+                out << std::format("  {} = sitofp i32 {} to double", d, l) << Symbols::LF;
+                return d;
+            }
+            case NumKind::Single: {
+                std::string l = nextTemp();
+                out << std::format("  {} = load float, ptr {}", l, varAllocaName_[varName]) << Symbols::LF;
+                std::string d = nextTemp();
+                out << std::format("  {} = fpext float {} to double", d, l) << Symbols::LF;
+                return d;
+            }
+            case NumKind::Double: default: {
+                std::string d = nextTemp();
+                out << std::format("  {} = load double, ptr {}", d, varAllocaName_[varName]) << Symbols::LF;
+                return d;
+            }
+        }
+    }
+
+    /** Compute FOR loop condition as i1 given cur, end, step (inclusive). */
+    std::string computeForCond(std::ostringstream& out,
+                               const std::string& curVal,
+                               const std::string& endReg,
+                               const std::string& stepReg) {
+        std::string isNeg = nextTemp();
+        out << std::format("  {} = fcmp olt double {}, 0.0", isNeg, stepReg) << Symbols::LF;
+        std::string condLe = nextTemp();
+        out << std::format("  {} = fcmp ole double {}, {}", condLe, curVal, endReg) << Symbols::LF;
+        std::string condGe = nextTemp();
+        out << std::format("  {} = fcmp oge double {}, {}", condGe, curVal, endReg) << Symbols::LF;
+        std::string cond = nextTemp();
+        out << std::format("  {} = select i1 {}, i1 {}, i1 {}", cond, isNeg, condGe, condLe) << Symbols::LF;
+        return cond;
+    }
+
+    /** Emit step increment and branch back to cond label. */
+    void emitForIncrement(std::ostringstream& out,
+                          const std::string& varName,
+                          const std::string& stepReg,
+                          const std::string& condLbl) {
+        std::string vcur = loadVarAsDouble(out, varName);
+        std::string vnext = nextTemp();
+        out << std::format("  {} = fadd double {}, {}", vnext, vcur, stepReg) << Symbols::LF;
+        storeNumberToVar(out, varName, vnext);
+        out << std::format("  br label %{}", condLbl) << Symbols::LF;
+    }
+
+    /** Emit all statements inside a FOR body. Sets forTerminated when body ends with branch. */
+    void emitForBodyStatements(std::ostringstream& out,
+                               const ForStmt* fs,
+                               const std::string& currLineLabel,
+                               int& localCounter,
+                               bool& forTerminated);
+
+    /** Emit common error-path stores and handler dispatch switch. */
+    void emitErrorDispatch(std::ostringstream& out, int errCode, int lineNo, int stmtIndex) {
+        out << std::format("  store i32 {}, ptr @gwb_err_code", errCode) << Symbols::LF;
+        out << std::format("  store i32 {}, ptr @gwb_err_line", lineNo) << Symbols::LF;
+        out << std::format("  store i32 {}, ptr @gwb_resume_line", lineNo) << Symbols::LF;
+        out << std::format("  store i32 {}, ptr @gwb_resume_stmt", stmtIndex) << Symbols::LF;
+        out << std::format("  store i1 true, ptr @gwb_in_handler") << Symbols::LF;
+        std::string trap = nextTemp();
+        out << std::format("  {} = load i32, ptr @gwb_err_trap_line", trap) << Symbols::LF;
+        out << std::format("  switch i32 {}, label %exit [", trap) << Symbols::LF;
+        for (const auto & [lnum, lp] : lineMap_) {
+            (void)lp;
+            out << std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)) << Symbols::LF;
+        }
+        out << "  ]" << Symbols::LF;
+    }
+
+    /** Compute linearized index for multi-dim array indices (1-based optionBase_). */
+    std::string emitLinearIndex(std::ostringstream& out,
+                                const std::vector<std::string>& idxI64s,
+                                const std::vector<int>& dims) {
+        // Compute strides on host
+        std::vector<long long> extents; extents.reserve(dims.size());
+        for (size_t di = 0; di < dims.size(); ++di) {
+            long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e);
+        }
+        std::vector<long long> strides(dims.size(), 1);
+        for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) strides[di] = strides[di + 1] * extents[di + 1];
+        // Adjust each index by base
+        std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
+        for (const auto& ii : idxI64s) { std::string a = nextTemp(); out << std::format("  {} = sub i64 {}, {}", a, ii, optionBase_) << Symbols::LF; adjs.push_back(a); }
+        // Multiply-accumulate
+        std::string lin = nextTemp(); out << std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]) << Symbols::LF;
+        for (size_t di = 1; di < adjs.size(); ++di) {
+            std::string t = nextTemp(); out << std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]) << Symbols::LF;
+            std::string s2 = nextTemp(); out << std::format("  {} = add i64 {}, {}", s2, lin, t) << Symbols::LF; lin = s2;
+        }
+        return lin;
+    }
 };
 
 } // namespace gwbasic

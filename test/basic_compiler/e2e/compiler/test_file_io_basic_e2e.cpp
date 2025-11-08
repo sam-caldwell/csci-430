@@ -18,7 +18,7 @@ Test: E2E.FileOutput_PRINT_ToFile
 Inputs: Program opens tmp file for OUTPUT, PRINT #1, "HELLO" and closes
 Expected behavior: The file contains a single line "HELLO\n".
 */
-TEST(E2E, DISABLED_FileOutput_PRINT_ToFile) {
+TEST(E2E, FileOutput_PRINT_ToFile) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();
     // Use a simple relative path so the binary writes in the test WORKING_DIRECTORY
     const std::string outfile = "e2e_print_out.txt";
@@ -34,7 +34,7 @@ TEST(E2E, DISABLED_FileOutput_PRINT_ToFile) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     // Run the program (no stdout expected); then check file contents
-    (void)runCommand(std::string("\"") + bin.string() + "\"");
+    (void)runCommand(std::string("./") + bin.string());
     std::ifstream in(outfile);
     ASSERT_TRUE(in.good());
     std::string line; std::getline(in, line);
@@ -46,10 +46,10 @@ Test: E2E.FileInput_LINE_INPUT_FromFile
 Inputs: Pre-create input file; program opens FOR INPUT, LINE INPUT #1 into S$, prints it
 Expected behavior: Program stdout contains the line without trailing newline from file.
 */
-TEST(E2E, DISABLED_FileInput_LINE_INPUT_FromFile) {
+TEST(E2E, FileInput_LINE_INPUT_FromFile) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();
     // Pre-create an input file in the test working directory
-    const std::string infile = "e2e_input.txt"; { std::ofstream f(infile); f << "Line from file\\n"; }
+    const std::string infile = "e2e_input.txt"; { std::ofstream f(infile); f << "Line from file\n"; }
     std::ostringstream src;
     src << "10 OPEN \"" << infile << "\" FOR INPUT AS #1\n"
         << "20 LINE INPUT #1, S$\n"
@@ -61,6 +61,6 @@ TEST(E2E, DISABLED_FileInput_LINE_INPUT_FromFile) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    std::string out = runCommand(std::string("./") + bin.string());
     ASSERT_NE(out.find("Line from file\n"), std::string::npos);
 }

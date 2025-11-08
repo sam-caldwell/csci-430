@@ -48,6 +48,14 @@
 #include "basic_compiler/ast/UnsupportedStmt.h"
 #include "basic_compiler/ast/ClsStmt.h"
 #include "basic_compiler/ast/LocateStmt.h"
+#include "basic_compiler/ast/WidthStmt.h"
+#include "basic_compiler/ast/MkdirStmt.h"
+#include "basic_compiler/ast/RmdirStmt.h"
+#include "basic_compiler/ast/KillStmt.h"
+#include "basic_compiler/ast/NameStmt.h"
+#include "basic_compiler/ast/ShellStmt.h"
+#include "basic_compiler/ast/EnvironStmt.h"
+#include "basic_compiler/ast/BeepStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -80,6 +88,79 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         log() << "Locate" << '\n';
         return;
     }
+    if (auto wd = dyn_cast<const WidthStmt>(s)) {
+        // WIDTH n  OR  WIDTH dev$, n
+        if (wd->device) {
+            if (typeOf(wd->device.get()) != ValueType::String) {
+                std::ostringstream m; m << "TypeError: WIDTH device must be string @ " << wd->pos.line << ':' << wd->pos.col; log() << m.str() << '\n';
+                throw SemanticError(m.str());
+            }
+            analyzeExpr(wd->device.get());
+        }
+        if (typeOf(wd->columns.get()) == ValueType::String) {
+            std::ostringstream m; m << "TypeError: WIDTH columns must be numeric @ " << wd->pos.line << ':' << wd->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(wd->columns.get());
+        log() << "Width" << '\n';
+        return;
+    }
+    if (auto mk = dyn_cast<const MkdirStmt>(s)) {
+        if (typeOf(mk->path.get()) != ValueType::String) {
+            std::ostringstream m; m << "TypeError: MKDIR requires string path @ " << mk->pos.line << ':' << mk->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(mk->path.get());
+        log() << "Mkdir" << '\n';
+        return;
+    }
+    if (auto rd = dyn_cast<const RmdirStmt>(s)) {
+        if (typeOf(rd->path.get()) != ValueType::String) {
+            std::ostringstream m; m << "TypeError: RMDIR requires string path @ " << rd->pos.line << ':' << rd->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(rd->path.get());
+        log() << "Rmdir" << '\n';
+        return;
+    }
+    if (auto kl = dyn_cast<const KillStmt>(s)) {
+        if (typeOf(kl->filespec.get()) != ValueType::String) {
+            std::ostringstream m; m << "TypeError: KILL requires string filespec @ " << kl->pos.line << ':' << kl->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(kl->filespec.get());
+        log() << "Kill" << '\n';
+        return;
+    }
+    if (auto nm = dyn_cast<const NameStmt>(s)) {
+        if (typeOf(nm->oldName.get()) != ValueType::String || typeOf(nm->newName.get()) != ValueType::String) {
+            std::ostringstream m; m << "TypeError: NAME requires string operands @ " << nm->pos.line << ':' << nm->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(nm->oldName.get());
+        analyzeExpr(nm->newName.get());
+        log() << "Name" << '\n';
+        return;
+    }
+    if (auto sh = dyn_cast<const ShellStmt>(s)) {
+        if (sh->command && typeOf(sh->command.get()) != ValueType::String) {
+            std::ostringstream m; m << "TypeError: SHELL command must be string @ " << sh->pos.line << ':' << sh->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        if (sh->command) analyzeExpr(sh->command.get());
+        log() << "Shell" << '\n';
+        return;
+    }
+    if (auto ev = dyn_cast<const EnvironStmt>(s)) {
+        if (typeOf(ev->spec.get()) != ValueType::String) {
+            std::ostringstream m; m << "TypeError: ENVIRON requires string spec @ " << ev->pos.line << ':' << ev->pos.col; log() << m.str() << '\n';
+            throw SemanticError(m.str());
+        }
+        analyzeExpr(ev->spec.get());
+        log() << "Environ" << '\n';
+        return;
+    }
+    if (dyn_cast<const BeepStmt>(s)) { log() << "Beep" << '\n'; return; }
     if (auto ob = dyn_cast<const OptionBaseStmt>(s)) {
         if (!(ob->base == 0 || ob->base == 1)) { std::ostringstream m; m << "TypeError: OPTION BASE must be 0 or 1 @ " << ob->pos.line << ':' << ob->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         optionBase_ = ob->base;

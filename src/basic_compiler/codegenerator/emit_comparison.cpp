@@ -30,11 +30,8 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
         const auto ls = emitExpr(out, c->lhs.get(), "cmp");
         const auto rs = emitExpr(out, c->rhs.get(), "cmp");
         std::string call = nextTemp();
-        {
-            std::string ir = std::format("  {} = call i32 @strcmp(ptr {}, ptr {})", call, ls, rs);
-            out << ir << Symbols::LF;
-            log() << "line " << currentLine_ << " StrCmp -> " << ir << Symbols::LF;
-        }
+        out << std::format("  {} = call i32 @strcmp(ptr {}, ptr {})", call, ls, rs) << Symbols::LF;
+        log() << "line " << currentLine_ << " StrCmp -> call strcmp" << Symbols::LF;
         std::string res = nextTemp();
         const char* pred = nullptr;
         switch (c->op) {
@@ -46,12 +43,8 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
             case BinaryOp::Ge: pred = "sge"; break;
             default: throw CodeGenError("Invalid comparison operator");
         }
-        {
-            std::string rhs = "0"; //Simplified this from something I can't remember why I did it.
-            std::string ir = std::format("  {} = icmp {} i32 {}, 0", res, pred, call);
-            out << ir << Symbols::LF;
-            log() << "line " << currentLine_ << " StrCmp icmp -> " << ir << Symbols::LF;
-        }
+        out << std::format("  {} = icmp {} i32 {}, 0", res, pred, call) << Symbols::LF;
+        log() << "line " << currentLine_ << " StrCmp icmp" << Symbols::LF;
         return res;
     } else {
         const auto lhsReg = emitExpr(out, c->lhs.get(), "cmp");
@@ -67,11 +60,8 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
             case BinaryOp::Ge: pred = "oge"; break;
             default: throw CodeGenError("Invalid comparison operator");
         }
-        {
-            std::string ir = std::format("  {} = fcmp {} double {}, {}", res, pred, lhsReg, rhsReg);
-            out << ir << Symbols::LF;
-            log() << "line " << currentLine_ << " Compare -> " << ir << Symbols::LF;
-        }
+        out << std::format("  {} = fcmp {} double {}, {}", res, pred, lhsReg, rhsReg) << Symbols::LF;
+        log() << "line " << currentLine_ << " Compare fcmp" << Symbols::LF;
         return res;
     }
 }

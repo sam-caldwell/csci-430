@@ -77,6 +77,15 @@ enum class NodeKind {
     OptionPrintZonesStmt,
     UnsupportedStmt,
     LocateStmt,
+    WidthStmt,
+    // New filesystem / OS / env / console statements
+    MkdirStmt,
+    RmdirStmt,
+    KillStmt,
+    NameStmt,
+    ShellStmt,
+    EnvironStmt,
+    BeepStmt,
 };
 
 } // namespace gwbasic

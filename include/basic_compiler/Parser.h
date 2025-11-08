@@ -307,6 +307,20 @@ private:
     std::unique_ptr<Stmt> parseScreen();
     /** Parse LOCATE row[,col] */
     std::unique_ptr<Stmt> parseLocate();
+    /** Parse WIDTH [device$,] columns */
+    std::unique_ptr<Stmt> parseWidth();
+    /** Parse MKDIR path$ */
+    std::unique_ptr<Stmt> parseMkdir();
+    /** Parse RMDIR path$ */
+    std::unique_ptr<Stmt> parseRmdir();
+    /** Parse KILL filespec$ */
+    std::unique_ptr<Stmt> parseKill();
+    /** Parse NAME old$ AS new$ */
+    std::unique_ptr<Stmt> parseName();
+    /** Parse SHELL [cmd$] */
+    std::unique_ptr<Stmt> parseShell();
+    /** Parse ENVIRON spec$ */
+    std::unique_ptr<Stmt> parseEnviron();
     /** Parse CIRCLE x, y, r */
     std::unique_ptr<Stmt> parseCircle();
     /** Parse CLEAR */
