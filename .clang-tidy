@@ -20,5 +20,7 @@ CheckOptions:
       value: 30
     - key: readability-function-size.ParameterThreshold
       value: 6
-#WarningsAsErrors: 'readability-function-cognitive-complexity,readability-function-size'
+    - key: readability-function-size.NestingThreshold
+      value: 3
+WarningsAsErrors: '*'
 HeaderFilterRegex: '^(src|include)/'
