@@ -14,7 +14,7 @@ Purpose: Ensure logToken writes expected format for various token types and
          escapes lexemes securely (quotes, backslashes, control bytes).
 Security: Validates NUL/control bytes render as \xHH and quotes/backslashes are escaped.
 */
-TEST(Lexer, DISABLED_LogToken_FormatsTokensAndEscapes) {
+TEST(Lexer, LogToken_FormatsTokensAndEscapes) {
     namespace fs = std::filesystem;
     fs::path tmpdir = fs::path("..") / "tmp" / "lexer_log_token_content";
     fs::create_directories(tmpdir);

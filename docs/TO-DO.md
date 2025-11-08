@@ -2,27 +2,25 @@
 
 - REDBULL BEFORE CODING.  Tired Sam is dumb Sam!
 
-## Parser and Grammar Coverage
-
-- Additional commands listed in docs/gw-basic.ebnf but not recognized in the lexer/token set: FILES, NAME, KILL, MKDIR,
-  RMDIR, WIDTH, LOCATE, CLS, PSET, PRESET, LINE (graphics), PAINT, DRAW, VIEW/VIEW PRINT, WINDOW, BEEP/SOUND/PLAY, 
-  KEY/KEYn/ON KEY, ON event variants, PEN/STRIG, TIMER ON/OFF, TRON/TROFF, CONT, LOAD/SAVE/NEW/DELETE/LIST/LLIST/AUTO/
-  RENUM/EDIT/PCOPY, RESET, SHELL, ENVIRON, OUT, WAIT.
+## Additional Parser and Grammar Coverage
+- Implement the additional commands listed in docs/gw-basic.ebnf but not recognized in the lexer/token set: FILES, 
+  NAME, KILL, MKDIR, RMDIR, WIDTH, LOCATE, CLS, PSET, PRESET, LINE (graphics), PAINT, DRAW, VIEW/VIEW PRINT, WINDOW, 
+  BEEP/SOUND/PLAY, KEY/KEYn/ON KEY, ON event variants, PEN/STRIG, TIMER ON/OFF, TRON/TROFF, CONT, LOAD/SAVE/NEW/
+  DELETE/LIST/LLIST/AUTO/RENUM/EDIT/PCOPY, RESET, SHELL, ENVIRON, OUT, WAIT.
+- Implement semantic analysis for the additional commands listed in docs/gw-basic.ebnf.
+- Ensure there are semantic optimizations for the additional commands listed in docs/gw-basic.ebnf.
+- Implement code generation for the additional commands listed in docs/gw-basic.ebnf.
+- Ensure there are code generation optimizations for the additional commands listed in docs/gw-basic.ebnf.
+- Ensure all features implemented in this session emit the appropriate metrics.
 
 
 ## Type System and Conversions
-
+- COMMON variables tracked and preserved across CHAIN, make sure CHAIN/RUN file handoff is not implemented; clarify
+  preservation across true overlays once implemented.
 - Variable kind defaults and suffixes are honored, but:
   - Default kinds by DEFxxx only affect first-letter currently; document and test crossing interactions with
     explicit suffixes.
-
-## Scope and COMMON Behavior
-
-- COMMON variables tracked and preserved across CHAIN, but CHAIN/RUN file handoff is not implemented; clarify 
-  preservation across true overlays once implemented.
-
-+ CLEAR is line-scoped to “vars/arrays seen before” to avoid crossing CHAIN boundaries; verify against GW-BASIC’s 
-  memory model (string space, array descriptors, file buffers).
+- Improve semantic optimizations (e.g., add more algebraic simplifications where possible)
 
 ## Code Generation: Implementations Missing (parses exist)
 
