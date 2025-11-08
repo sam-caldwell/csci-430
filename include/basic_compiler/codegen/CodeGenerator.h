@@ -32,6 +32,14 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/PrintStmt.h"
 // ReSharper disable once CppUnusedIncludeDirective
+#include "basic_compiler/ast/ArrayAssignStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "basic_compiler/ast/MidAssignStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "basic_compiler/ast/OnGotoStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "basic_compiler/ast/OnGosubStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/OpenStmt.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/InputStmt.h"
@@ -334,7 +342,7 @@ private:
     bool handleForBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     bool handleWhileBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     bool handlePrintBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleInputBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    auto handleInputBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>* arrays) -> bool;
     bool handleReadBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     bool handleDimBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& arrays);
     bool handleSwapBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
@@ -378,6 +386,13 @@ private:
     // Expression lowering
     /** Lower an expression to SSA value; returns its name. */
     std::string emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix);
+    // Refactored helpers (one-function-per-file) used by emitExpr dispatcher
+    std::string emitNumberExpr(std::ostringstream& out, const class NumberExpr* num);
+    std::string emitVarExpr(std::ostringstream& out, const class VarExpr* v);
+    std::string emitUnaryExpr(std::ostringstream& out, const class UnaryExpr* u);
+    std::string emitBinaryExpr(std::ostringstream& out, const class BinaryExpr* b);
+    std::string emitCallExpr(std::ostringstream& out, const class CallExpr* call);
+    std::string emitStringExpr(std::ostringstream& out, const class StringExpr* s);
     // Helper: determine whether an expression is string-typed (for codegen routing)
     bool isStringExpr(const Expr* e) const;
     /** Lower a comparison expression to an i1 predicate value. */
@@ -587,12 +602,33 @@ private:
         out << std::format("  br label %{}", condLbl) << Symbols::LF;
     }
 
-    /** Emit all statements inside a FOR body. Sets forTerminated when body ends with branch. */
-    void emitForBodyStatements(std::ostringstream& out,
+    /** Emit all statements inside a FOR body; returns true if body terminated (e.g., via GOTO). */
+    bool emitForBodyStatements(std::ostringstream& out,
                                const ForStmt* fs,
                                const std::string& currLineLabel,
-                               int& localCounter,
-                               bool& forTerminated);
+                               int& localCounter);
+
+    // FOR body per-kind helpers (one function per file)
+    void emitForHandleAssign(std::ostringstream& out, const AssignStmt* asg, const std::string& currLineLabel);
+    void emitForHandlePrint(std::ostringstream& out, const PrintStmt* pr, const std::string& currLineLabel, int& localCounter);
+    void emitForHandleMidAssign(std::ostringstream& out, const MidAssignStmt* mid, const std::string& currLineLabel, int& localCounter);
+    void emitForHandleOnGoto(std::ostringstream& out, const OnGotoStmt* og, const std::string& currLineLabel, int& localCounter);
+    void emitForHandleOnGosub(std::ostringstream& out, const OnGosubStmt* ogs, const std::string& currLineLabel, int& localCounter);
+    bool emitForHandleGoto(std::ostringstream& out, const GotoStmt* gt);
+    void emitForHandleGosub(std::ostringstream& out, const GosubStmt* gs, const std::string& currLineLabel, int& localCounter);
+    void emitForHandleArrayAssign(std::ostringstream& out, const ArrayAssignStmt* aaset, const std::string& currLineLabel, int& localCounter);
+    void emitForHandleStop(std::ostringstream& out);
+    void emitForHandleSystem(std::ostringstream& out);
+
+    // PRINT sub-helpers (FOR body)
+    void emitForPrintPadZone(std::ostringstream& out, const PrintStmt* pr);
+    void emitForPrintStringItem(std::ostringstream& out, const PrintStmt* pr, const StringExpr* se, bool addNL);
+    void emitForPrintConstNumberItem(std::ostringstream& out, const PrintStmt* pr, double cv, bool addNL, bool nextStartsWithSpace);
+    void emitForPrintDynamicOverride(std::ostringstream& out, const PrintStmt* pr, const std::string& val,
+                                     const std::string& currLineLabel, int& localCounter);
+    void emitForPrintDynamicAuto(std::ostringstream& out, const PrintStmt* pr, const std::string& val,
+                                 bool addNL, bool nextStartsWithSpace,
+                                 const std::string& currLineLabel, int& localCounter);
 
     /** Emit common error-path stores and handler dispatch switch. */
     void emitErrorDispatch(std::ostringstream& out, int errCode, int lineNo, int stmtIndex) {

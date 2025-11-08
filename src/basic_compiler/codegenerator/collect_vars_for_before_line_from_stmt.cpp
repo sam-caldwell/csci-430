@@ -28,7 +28,7 @@ namespace gwbasic {
         if (handleForBeforeLine(s, vars, arrays)) return;
         if (handleWhileBeforeLine(s, vars, arrays)) return;
         if (handlePrintBeforeLine(s, vars, arrays)) return;
-        if (handleInputBeforeLine(s, vars, arrays)) return;
+        if (handleInputBeforeLine(s, vars, &arrays)) return;
         if (handleReadBeforeLine(s, vars, arrays)) return;
         if (handleDimBeforeLine(s, arrays)) return;
         if (handleSwapBeforeLine(s, vars, arrays)) return;

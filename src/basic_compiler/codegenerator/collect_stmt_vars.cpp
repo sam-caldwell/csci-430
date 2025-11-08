@@ -25,7 +25,7 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
             const Expr* v = p->value.get();
             collectExprVars(v);
             if (const auto se = dyn_cast<StringExpr>(v)) {
-                if (!strLiteralId_.count(se->value)) strLiteralId_[se->value] = strCounter_++;
+                if (!strLiteralId_.contains(se->value)) strLiteralId_[se->value] = strCounter_++;
                 logSem() << "StringLiteral @ " << se->pos.line << ':' << se->pos.col << Symbols::LF;
             }
         }
@@ -33,7 +33,7 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
             const Expr* v = vx.get();
             collectExprVars(v);
             if (const auto se = dyn_cast<StringExpr>(v)) {
-                if (!strLiteralId_.count(se->value)) strLiteralId_[se->value] = strCounter_++;
+                if (!strLiteralId_.contains(se->value)) strLiteralId_[se->value] = strCounter_++;
                 logSem() << "StringLiteral @ " << se->pos.line << ':' << se->pos.col << Symbols::LF;
             }
         }
@@ -61,7 +61,7 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
         logSem() << "For var=" << f->var << " @ " << f->pos.line << ':' << f->pos.col << Symbols::LF;
     } else if (const auto in = dyn_cast<const InputStmt>(s)) {
         for (const auto& v : in->variables) variables_.insert(v);
-        if (in->promptLiteral && !strLiteralId_.count(*in->promptLiteral)) strLiteralId_[*in->promptLiteral] = strCounter_++;
+        if (in->promptLiteral && !strLiteralId_.contains(*in->promptLiteral)) strLiteralId_[*in->promptLiteral] = strCounter_++;
         logSem() << "Input vars=" << in->variables.size() << " @ " << in->pos.line << ':' << in->pos.col << Symbols::LF;
     } else if (const auto rz = dyn_cast<const RandomizeStmt>(s)) {
         if (rz->seed) collectExprVars(rz->seed.get());
@@ -76,9 +76,9 @@ void CodeGenerator::collectStmtVars(const Stmt* s) {
         // MERGE is a compile-time directive; codegen no-op
     } else if (const auto ds = dyn_cast<const DataStmt>(s)) {
         // Normalize DATA items into string literals and record ids
-        for (const auto& it : ds->items) {
-            const std::string& txt = it.text;
-            if (!strLiteralId_.count(txt)) strLiteralId_[txt] = strCounter_++;
+        for (const auto&[isString, text] : ds->items) {
+            const std::string& txt = text;
+            if (!strLiteralId_.contains(txt)) strLiteralId_[txt] = strCounter_++;
             dataLiteralIds_.push_back(strLiteralId_[txt]);
         }
         logSem() << "Data items=" << ds->items.size() << Symbols::LF;

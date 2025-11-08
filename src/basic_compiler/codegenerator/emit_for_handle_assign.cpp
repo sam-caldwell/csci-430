@@ -1,0 +1,23 @@
+// (c) 2025 Sam Caldwell. All Rights Reserved.
+#include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/ast/AssignStmt.h"
+#include <sstream>
+
+namespace gwbasic {
+
+/*
+ * Function: CodeGenerator::emitForHandleAssign
+ * Purpose: Emit IR for an assignment inside a FOR body.
+ */
+void CodeGenerator::emitForHandleAssign(std::ostringstream& out, const AssignStmt* asg, const std::string& currLineLabel) {
+    (void)currLineLabel; // label not needed here
+    std::string val = emitExpr(out, asg->value.get(), currLineLabel);
+    if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
+        out << std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]) << Symbols::LF;
+    } else {
+        storeNumberToVar(out, asg->name, val);
+    }
+}
+
+} // namespace gwbasic
+
