@@ -10,6 +10,8 @@
 
 namespace gwbasic {
 
+// Helpers are declared as private static methods on SemanticAnalyzer
+
 /*
  * Function: SemanticAnalyzer::constEval
  * Inputs:
@@ -23,37 +25,15 @@ namespace gwbasic {
  */
 bool SemanticAnalyzer::constEval(const Expr* e, double& out) {
     if (!e) return false;
-    if (const auto n = dyn_cast<const NumberExpr>(e)) { out = n->value; return true; }
+    if (const auto n = dyn_cast<const NumberExpr>(e)) {
+        out = n->value;
+        return true;
+    }
     if (const auto u = dyn_cast<const UnaryExpr>(e)) {
-        if (double v; constEval(u->inner.get(), v)) {
-            if (u->op == Symbols::PLUS.first()) {
-                if (gMetrics) gMetrics->incUnaryElimPlus();
-                out = v; return true;
-            }
-            if (u->op == Symbols::MINUS.first()) {
-                if (gMetrics) gMetrics->incUnaryConstMinus();
-                out = -v; return true;
-            }
-        }
-        return false;
+        return SemanticAnalyzer::constEvalUnary(*u, out);
     }
     if (const auto b = dyn_cast<const BinaryExpr>(e)) {
-        if (double L, R; constEval(b->lhs.get(), L) && constEval(b->rhs.get(), R)) {
-            switch (b->op) {
-                case BinaryOp::Add: out = L + R; if (gMetrics) gMetrics->incConstFoldAdd(); return true;
-                case BinaryOp::Sub: out = L - R; if (gMetrics) gMetrics->incConstFoldSub(); return true;
-                case BinaryOp::Mul: out = L * R; if (gMetrics) gMetrics->incConstFoldMul(); return true;
-                case BinaryOp::Div: out = L / R; if (gMetrics) gMetrics->incConstFoldDiv(); return true;
-                case BinaryOp::Eq:  out = (L == R) ? 1.0 : 0.0; if (gMetrics) gMetrics->incConstFoldCmp(); return true;
-                case BinaryOp::Ne:  out = (L != R) ? 1.0 : 0.0; if (gMetrics) gMetrics->incConstFoldCmp(); return true;
-                case BinaryOp::Lt:  out = (L <  R) ? 1.0 : 0.0; if (gMetrics) gMetrics->incConstFoldCmp(); return true;
-                case BinaryOp::Le:  out = (L <= R) ? 1.0 : 0.0; if (gMetrics) gMetrics->incConstFoldCmp(); return true;
-                case BinaryOp::Gt:  out = (L >  R) ? 1.0 : 0.0; if (gMetrics) gMetrics->incConstFoldCmp(); return true;
-                case BinaryOp::Ge:  out = (L >= R) ? 1.0 : 0.0; if (gMetrics) gMetrics->incConstFoldCmp(); return true;
-                default: return false;
-            }
-        }
-        return false;
+        return SemanticAnalyzer::constEvalBinary(*b, out);
     }
     return false;
 }
