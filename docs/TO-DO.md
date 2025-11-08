@@ -2,6 +2,7 @@
 
 - REDBULL BEFORE CODING.  Tired Sam is dumb Sam!
 
+
 ## Additional Parser and Grammar Coverage
 - Implement the additional commands listed in docs/gw-basic.ebnf but not recognized in the lexer/token set: FILES, 
   NAME, KILL, MKDIR, RMDIR, WIDTH, LOCATE, CLS, PSET, PRESET, LINE (graphics), PAINT, DRAW, VIEW/VIEW PRINT, WINDOW, 
@@ -13,6 +14,7 @@
 - Ensure there are code generation optimizations for the additional commands listed in docs/gw-basic.ebnf.
 - Ensure all features implemented in this session emit the appropriate metrics.
 - Ensure that all features implemented in this session are covered by unit tests with >=97% test coverage.
+- Ensure that all tests are green
 
 ## Type System and Conversions
 - COMMON variables tracked and preserved across CHAIN, make sure CHAIN/RUN file handoff is not implemented; clarify
