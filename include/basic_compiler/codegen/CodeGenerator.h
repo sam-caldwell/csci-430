@@ -62,6 +62,10 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/CommonStmt.h"
 // ReSharper disable once CppUnusedIncludeDirective
+#include "basic_compiler/ast/DataStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "basic_compiler/ast/ReadStmt.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/ChainStmt.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/MergeStmt.h"
@@ -330,6 +334,24 @@ private:
     // Declaration collection
     /** Collect declarations, variables, strings, and line ordering. */
     void collectDecls(const Program& program);
+    // collectDecls() helpers (one per file) to reduce nesting
+    void cdGatherLinesAndDeletes(const Program& program,
+                                 std::vector<int>& linesOut,
+                                 std::map<int, const Line*>& lineMapOut,
+                                 bool& printZones,
+                                 std::vector<std::pair<int,int>>& deleteRanges,
+                                 int& globalMin,
+                                 int& globalMax);
+    void cdFilterDeletedLines(std::vector<int>& lines,
+                              const std::vector<std::pair<int,int>>& deleteRanges);
+    void cdCollectVarsIfNoSemantics(const std::vector<int>& lines);
+    void cdScanRndAndStop(const std::vector<int>& lines);
+    void cdBuildBeforeLineSnapshots(const std::vector<int>& lines);
+    void cdSeedFromSemantics();
+    void cdAssignInputPromptLiteralIds(const std::vector<int>& lines);
+    void cdCollectDataItems(const std::vector<int>& lines);
+    void cdBuildRegionDataStartIdx(const std::vector<int>& lines);
+    void cdComputeHandlerSkipAfter(const std::vector<int>& lines);
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
     void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
@@ -354,6 +376,19 @@ private:
     void collectExprVars(const Expr* e);
     /** Collect variables/strings/COMMON from a statement (recursive). */
     void collectStmtVars(const Stmt* s);
+    // collectStmtVars() helpers
+    void csvHandlePrint(const PrintStmt* p);
+    void csvHandleAssign(const AssignStmt* a);
+    void csvHandleMidAssign(const MidAssignStmt* m);
+    void csvHandleIf(const IfStmt* i);
+    void csvHandleFor(const ForStmt* f);
+    void csvHandleInput(const InputStmt* in);
+    void csvHandleRandomize(const RandomizeStmt* rz);
+    void csvHandleCommon(const CommonStmt* cs);
+    void csvHandleData(const DataStmt* ds);
+    void csvHandleRead(const ReadStmt* rd);
+    void csvHandleOnGoto(const OnGotoStmt* og);
+    void csvHandleOnGosub(const OnGosubStmt* ogs);
     // Lightweight scan for RND usage independent of semantics
     /** Scan expression for RND() usage to enable helper emission. */
     void scanExprForRnd(const Expr* e);
