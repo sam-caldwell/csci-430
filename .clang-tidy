@@ -1,0 +1,22 @@
+# file: .clang-tidy
+Checks: >
+    readability-function-cognitive-complexity,
+    readability-function-size,
+    readability-identifier-naming,
+    cppcoreguidelines-*,
+    modernize-*,
+    bugprone-*,
+    performance-*
+
+# Tune complexity/size thresholds to your policy
+CheckOptions:
+    - key: readability-function-cognitive-complexity.Threshold
+      value: 15
+    - key: readability-function-size.LineThreshold
+      value: 80
+    - key: readability-function-size.BranchThreshold
+      value: 30
+    - key: readability-function-size.ParameterThreshold
+      value: 6
+WarningsAsErrors: 'readability-function-cognitive-complexity,readability-function-size'
+HeaderFilterRegex: '^(src|include)/'
