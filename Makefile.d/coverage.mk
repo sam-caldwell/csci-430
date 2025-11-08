@@ -27,7 +27,7 @@ COVERAGE_SCOPE ?= test/
 # measure coverage on compiled sources rather than public headers.
 # Focus coverage strictly on the compiler implementation
 # (exclude ancillary samples under src/hello_world and logger tooling)
-COVERAGE_INCLUDE_RE ?= ^(src/|include)
+COVERAGE_INCLUDE_RE ?= ^(src/|include/)
 COVERAGE_METRIC ?= lines
 # No test files included, so helper exclusion is unnecessary; keep empty unless overriding.
 # Exclude test helpers and any other paths matching this regex from coverage.
