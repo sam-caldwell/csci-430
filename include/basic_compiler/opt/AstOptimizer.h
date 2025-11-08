@@ -7,6 +7,7 @@
 
 namespace gwbasic {
 
+    struct ForStmt;
 /**
  * Type: AstOptimizer
  * Purpose:
@@ -38,6 +39,40 @@ public:
     static auto optimize(Program &program) -> void;
 
 private:
+    /**
+     * Function: AstOptimizer::optimizeLineStatements
+     * Purpose:
+     *  - Optimize a vector of statements in-place for a single program line.
+     * Details:
+     *  - Delegates to expression simplifier and targeted stmt re-writers.
+     */
+    static auto optimizeLineStatements(std::vector<std::unique_ptr<Stmt>>& statements) -> void;
+
+    /**
+     * Function: AstOptimizer::rewriteIf
+     * Purpose:
+     *  - Apply constant condition folding to an IF statement. May replace
+     *    with a GOTO, remove it, or leave it unchanged. Appends zero or one
+     *    statements to 'out'.
+     */
+    static auto rewriteIf(std::unique_ptr<Stmt>& st,
+                          std::vector<std::unique_ptr<Stmt>>& out) -> void;
+
+    /**
+     * Function: AstOptimizer::optimizeForBody
+     * Purpose:
+     *  - Simplify expressions within a FOR body and perform STEP elision
+     *    handling (the STEP value is processed by the caller).
+     */
+    static auto optimizeForBody(ForStmt& fs) -> void;
+
+    // Per-kind statement handlers (one-function-per-file definitions)
+    static auto optimizeAssignStmt(std::unique_ptr<Stmt>& st,
+                                   std::vector<std::unique_ptr<Stmt>>& out) -> bool;
+    static auto optimizePrintStmt(std::unique_ptr<Stmt>& st,
+                                  std::vector<std::unique_ptr<Stmt>>& out) -> bool;
+    static auto optimizeForStmt(std::unique_ptr<Stmt>& st,
+                                std::vector<std::unique_ptr<Stmt>>& out) -> bool;
     /**
      * Function: AstOptimizer::optExpr
      * Purpose:

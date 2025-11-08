@@ -198,6 +198,15 @@ private:
      */
     std::unique_ptr<Stmt> parsePrint();
     /**
+     * Function: Parser::parseLprint
+     * Purpose:
+     *  - Parse LPRINT (printer device) mirroring PRINT syntax, but uses
+     *    the default printer channel. No '#n' prefix is allowed.
+     * Outputs:
+     *  - Stmt: PrintStmt node with channel implicitly set to printer.
+     */
+    std::unique_ptr<Stmt> parseLprint();
+    /**
      * Function: Parser::parseAssignOrLet
      * Purpose:
      *  - Parse assignment with or without the optional LET keyword.
@@ -309,6 +318,14 @@ private:
     std::unique_ptr<Stmt> parseLocate();
     /** Parse WIDTH [device$,] columns */
     std::unique_ptr<Stmt> parseWidth();
+    /** Parse FILES [device$,] [path_or_pattern$] */
+    std::unique_ptr<Stmt> parseFiles();
+    /** Parse DELETE [start][- [end]] */
+    std::unique_ptr<Stmt> parseDelete();
+    /** Parse LIST [start][- [end]] */
+    std::unique_ptr<Stmt> parseList();
+    /** Parse LLIST [start][- [end]] (printer) */
+    std::unique_ptr<Stmt> parseLlist();
     /** Parse MKDIR path$ */
     std::unique_ptr<Stmt> parseMkdir();
     /** Parse RMDIR path$ */

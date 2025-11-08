@@ -97,6 +97,7 @@ inline std::string to_string(const TokenType t) {
         case TokenType::KwViewPrint: return "VIEW PRINT";
         case TokenType::KwWindow: return "WINDOW";
         case TokenType::KwBeep: return "BEEP";
+        case TokenType::KwLprint: return "LPRINT";
         case TokenType::KwSound: return "SOUND";
         case TokenType::KwPlay: return "PLAY";
         case TokenType::KwKey: return "KEY";

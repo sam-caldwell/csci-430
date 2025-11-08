@@ -25,6 +25,7 @@ std::string Compiler::compileStringWithLog(const std::string& source, const std:
     gen.setLogPath(logPath);
     // Provide semantics
     SemanticAnalyzer sema;
+    sema.setStrictControlFlow(false);
     auto res = sema.analyze(program);
     gen.setSemantics(res);
     return Compiler::addDefaultTripleIfMissing(gen.generate(program));

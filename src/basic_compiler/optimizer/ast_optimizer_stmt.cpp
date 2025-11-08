@@ -9,13 +9,7 @@
  *    expression simplification to `optExpr`.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
-#include "basic_compiler/ast/RTTI.h"
-#include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/ast/PrintStmt.h"
-#include "basic_compiler/ast/IfStmt.h"
-#include "basic_compiler/ast/GotoStmt.h"
-#include "basic_compiler/ast/ForStmt.h"
-#include "basic_compiler/compiler/Metrics.h"
 
 namespace gwbasic {
 
@@ -35,77 +29,9 @@ namespace gwbasic {
  *  - FOR: simplify start/end/step; elide step if it becomes 1.0.
  */
 void AstOptimizer::optimize(Program& program) {
-    for (auto&[number, statements] : program.lines) {
-        std::vector<std::unique_ptr<Stmt>> newStmts;
-        newStmts.reserve(statements.size());
-        for (auto& st : statements) {
-            if (const auto asg = dyn_cast<AssignStmt>(st.get())) {
-                asg->value = optExpr(std::move(asg->value));
-                newStmts.emplace_back(std::move(st));
-            } else if (const auto pr = dyn_cast<PrintStmt>(st.get())) {
-                if (pr->value) pr->value = optExpr(std::move(pr->value));
-                for (auto& v : pr->more) v = optExpr(std::move(v));
-                newStmts.emplace_back(std::move(st));
-            } else if (const auto is = dyn_cast<IfStmt>(st.get())) {
-                is->cond = optExpr(std::move(is->cond));
-                if (double v; asNumber(is->cond.get(), v)) {
-                    if (v != 0.0) {
-                        if (gMetrics) gMetrics->incIfConstTrueToGoto();
-                        if (gMetrics && gMetrics->isAnalyzeOnly()) {
-                            newStmts.emplace_back(std::move(st));
-                        } else {
-                            // Replace with GOTO target
-                            auto g = std::make_unique<GotoStmt>(is->targetLine);
-                            g->pos = is->pos;
-                            newStmts.emplace_back(std::move(g));
-                        }
-                    } else {
-                        if (gMetrics) gMetrics->incIfConstFalseRemoved();
-                        if (gMetrics && gMetrics->isAnalyzeOnly()) {
-                            newStmts.emplace_back(std::move(st));
-                        } else {
-                            // Remove statement (no-op)
-                        }
-                    }
-                } else {
-                    newStmts.emplace_back(std::move(st));
-                }
-            } else if (const auto fs = dyn_cast<ForStmt>(st.get())) {
-                fs->start = optExpr(std::move(fs->start));
-                fs->end   = optExpr(std::move(fs->end));
-                if (fs->step) fs->step = optExpr(std::move(fs->step));
-                // If step simplifies to 1.0, drop it to trigger default path in codegen
-                if (fs->step && isOne(fs->step.get())) {
-                    if (gMetrics) gMetrics->incForStepElided();
-                    if (!(gMetrics && gMetrics->isAnalyzeOnly())) fs->step.reset();
-                }
-                // Optimize body
-                std::vector<std::unique_ptr<Stmt>> body;
-                body.reserve(fs->body.size());
-                for (auto& bs : fs->body) {
-                    if (const auto basg = dyn_cast<AssignStmt>(bs.get())) {
-                        basg->value = optExpr(std::move(basg->value));
-                        body.emplace_back(std::move(bs));
-                    } else if (const auto bpr = dyn_cast<PrintStmt>(bs.get())) {
-                        if (bpr->value) bpr->value = optExpr(std::move(bpr->value));
-                        for (auto& v : bpr->more) v = optExpr(std::move(v));
-                        // Move the owning unique_ptr, not the raw pointer
-                        body.emplace_back(std::move(bs));
-                    } else {
-                        // leave as-is; other constructs in FOR body unchanged
-                        body.emplace_back(std::move(bs));
-                    }
-                }
-                fs->body = std::move(body);
-                newStmts.emplace_back(std::move(st));
-            } else {
-                // Other statements: GOTO/GOSUB/RETURN/END/INPUT left unchanged
-                newStmts.emplace_back(std::move(st));
-            }
-        }
-        statements = std::move(newStmts);
+    for (auto& [number, statements] : program.lines) {
+        optimizeLineStatements(statements);
     }
-
 }
 
 } // namespace gwbasic

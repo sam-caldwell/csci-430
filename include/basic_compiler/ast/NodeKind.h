@@ -79,6 +79,7 @@ enum class NodeKind {
     LocateStmt,
     WidthStmt,
     // New filesystem / OS / env / console statements
+    FilesStmt,
     MkdirStmt,
     RmdirStmt,
     KillStmt,
@@ -86,6 +87,9 @@ enum class NodeKind {
     ShellStmt,
     EnvironStmt,
     BeepStmt,
+    // Program management / listing
+    ListStmt,
+    DeleteStmt,
 };
 
 } // namespace gwbasic

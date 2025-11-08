@@ -22,10 +22,11 @@ std::unique_ptr<Stmt> Parser::parseLineInput() {
         channel = std::stoi(peek().lexeme); advance();
         if (match(TokenType::Comma)) {}
     }
+    // Optional leading ';' allowed (suppresses prompt spacing)
+    if (match(TokenType::Semicolon)) { /* optional */ }
     if (!check(TokenType::Identifier)) throw ParseError("Expected string variable after LINE INPUT");
     std::string name = peek().lexeme; advance();
     return make_node<LineInputStmt>({l, c}, channel, name);
 }
 
 } // namespace gwbasic
-

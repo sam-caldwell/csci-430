@@ -9,6 +9,8 @@ bool SemanticAnalyzer::isKnownStringFunction(const std::string& upperName) {
         upperName == "STR$" ||
         upperName == "STRING$" ||
         upperName == "SPACE$" ||
+        upperName == "DATE$" ||
+        upperName == "TIME$" ||
         upperName == "LTRIM$" ||
         upperName == "RTRIM$" ||
         upperName == "LEFT$" ||

@@ -32,6 +32,7 @@ namespace gwbasic {
 std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     // Primary I/O and control
     if (match(TokenType::KwPrint)) { auto n = parsePrint(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwLprint)) { auto n = parseLprint(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwIf)) { auto n = parseIf(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwWhile)) { auto n = parseWhile(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwFor)) { auto n = parseFor(); n->pos = {startTok.line, startTok.col}; return n; }
@@ -68,6 +69,7 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     if (match(TokenType::KwPoke)) { auto n = parsePoke(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwCall)) { auto n = parseCallAbs(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwChdir)) { auto n = parseChdir(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwFiles)) { auto n = parseFiles(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwColor)) { auto n = parseColor(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwLine)) { consume(TokenType::KwInput, "INPUT"); auto n = parseLineInput(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwClear)) { auto n = parseClear(); n->pos = {startTok.line, startTok.col}; return n; }
@@ -125,8 +127,7 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
         n->keyword = kw;
         return n;
     };
-    if (match(TokenType::KwFiles)) { return parseUnsupported("FILES"); }
-    if (match(TokenType::KwName))  { return parseUnsupported("NAME"); }
+    // fallthrough: no longer treat FILES/NAME as unsupported; proper parsers exist
     if (match(TokenType::KwName))  { auto n = parseName(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwKill))  { auto n = parseKill(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwMkdir)) { auto n = parseMkdir(); n->pos = {startTok.line, startTok.col}; return n; }
@@ -153,9 +154,9 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     if (match(TokenType::KwLoad))  { return parseUnsupported("LOAD"); }
     if (match(TokenType::KwSave))  { return parseUnsupported("SAVE"); }
     if (match(TokenType::KwNew))   { return parseUnsupported("NEW"); }
-    if (match(TokenType::KwDelete)){ return parseUnsupported("DELETE"); }
-    if (match(TokenType::KwList))  { return parseUnsupported("LIST"); }
-    if (match(TokenType::KwLlist)) { return parseUnsupported("LLIST"); }
+    if (match(TokenType::KwDelete)){ auto n = parseDelete(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwList))  { auto n = parseList(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwLlist)) { auto n = parseLlist(); n->pos = {startTok.line, startTok.col}; return n; }
     if (match(TokenType::KwAuto))  { return parseUnsupported("AUTO"); }
     if (match(TokenType::KwRenum)) { return parseUnsupported("RENUM"); }
     if (match(TokenType::KwEdit))  { return parseUnsupported("EDIT"); }

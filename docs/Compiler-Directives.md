@@ -14,14 +14,16 @@ defines a clear integration with the CLI/compiler phases.
   canonicalized using `std::filesystem::weakly_canonical`.
 - The root file path is canonicalized once when compiling from a file and propagated through directive detection.
 
-## MERGE Behavior
+## MERGE Behavior (Completed)
 - When a `MERGE "file"` is encountered, the referenced program is parsed and its lines are appended into the composite
   program using replace-or-append semantics:
   - If a merged line number matches an existing number, it replaces the existing line (conflict resolution by replace).
   - Otherwise, the line is appended.
-- `MERGE` does not push a new frame onto the import stack; the merged lines are not scanned recursively for further 
-  import processing during this pass.
-- `MERGE` never renumbers imported lines; line numbers are preserved as written.
+- `MERGE` does not push a new frame onto the import stack; the merged lines are not scanned recursively for further
+  import processing during this pass (strictly a front-end directive).
+- `MERGE` never renumbers imported lines; line numbers are preserved as written. Duplicate numbers replace existing
+  composite lines at the time of merge; subsequent lines with the same number from the including file are appended
+  as written.
 
 ## CHAIN/RUN Behavior
 - Each referenced program is parsed at compile time and assigned a region base in 1000-line increments (1000, 2000, …)
@@ -36,11 +38,11 @@ defines a clear integration with the CLI/compiler phases.
 ## Compiler/CLI Pipeline Integration
 - Both `compileFile()` and `compileFileWithPhaseLogs()` perform a single pass over the root program lines, handling 
   directives per line:
-  1) Detect `MERGE`/`CHAIN`/`RUN` on a line and resolve the include path against the current file.
-  2) `MERGE`: parse the referenced file and append its lines (replacing duplicates) into the composite program.
-  3) `CHAIN`/`RUN`: ensure the imported program is present in the import table (parse + renumber on first encounter) 
-     and patch the directive’s target line accordingly.
-  4) Non-directive lines (or the directive line after patching) are replaced/appended into the composite output.
+     1) Detect `MERGE`/`CHAIN`/`RUN` on a line and resolve the include path against the current file.
+     2) `MERGE`: parse the referenced file and append its lines (replacing duplicates) into the composite program.
+     3) `CHAIN`/`RUN`: ensure the imported program is present in the import table (parse + renumber on first encounter) 
+        and patch the directive’s target line accordingly.
+     4) Non-directive lines (or the directive line after patching) are replaced/appended into the composite output.
 - After the pass, the composite program is analyzed and lowered to LLVM IR identically for string and file inputs.
 
 ## Key Helper Functions

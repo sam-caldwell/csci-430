@@ -45,6 +45,8 @@ int SemanticAnalyzer::expectedArity(const std::string& upperName) {
         // SCREEN(row, col [, z]) — minimum required arity is 2
         {"SCREEN", 2},
         // String intrinsics
+        {"DATE$",  0},
+        {"TIME$",  0},
         {"CHR$",   1},
         {"STR$",   1},
         {"SPACE$", 1},

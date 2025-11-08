@@ -33,9 +33,8 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
     }
     if (auto v = dyn_cast<const VarExpr>(e)) {
         // Inline binding for DEF FN parameter?
-        std::string bound;
-        if (lookupBinding(v->name, bound)) return bound;
-        // Special-case INKEY$ (treated as built-in string function without parentheses)
+        if (std::string bound; lookupBinding(v->name, bound)) return bound;
+        // Special-case INKEY$/DATE$/TIME$ (built-in string functions without parentheses)
         {
             std::string up = v->name; for (auto &ch : up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
             if (up == "INKEY$") {
@@ -43,6 +42,34 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
                 { std::string ir = std::format("  {} = getelementptr inbounds [1 x i8], ptr @.str_empty, i64 0, i64 0", p); out << ir << Symbols::LF; }
                 log() << "line " << currentLine_ << " VarExpr(INKEY$) -> empty string" << Symbols::LF;
                 return p;
+            }
+            if (up == "DATE$") {
+                std::string t = nextTemp(); { std::string ir = std::format("  {} = call i64 @time(ptr null)", t); out << ir << Symbols::LF; }
+                std::string tp = nextTemp(); { std::string ir = std::format("  {} = alloca i64", tp); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i64 {}, ptr {}", t, tp); out << ir << Symbols::LF; }
+                std::string tm = nextTemp(); { std::string ir = std::format("  {} = call ptr @localtime(ptr {})", tm, tp); out << ir << Symbols::LF; }
+                std::string sbuf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << ir << Symbols::LF; }
+                std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_date, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
+                std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, tm); out << ir << Symbols::LF; }
+                std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }
+                std::string mem = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << ir << Symbols::LF; }
+                log() << "line " << currentLine_ << " VarExpr(DATE$) -> strftime" << Symbols::LF;
+                return mem;
+            }
+            if (up == "TIME$") {
+                std::string t = nextTemp(); { std::string ir = std::format("  {} = call i64 @time(ptr null)", t); out << ir << Symbols::LF; }
+                std::string tp = nextTemp(); { std::string ir = std::format("  {} = alloca i64", tp); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i64 {}, ptr {}", t, tp); out << ir << Symbols::LF; }
+                std::string tm = nextTemp(); { std::string ir = std::format("  {} = call ptr @localtime(ptr {})", tm, tp); out << ir << Symbols::LF; }
+                std::string sbuf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << ir << Symbols::LF; }
+                std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_time, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
+                std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, tm); out << ir << Symbols::LF; }
+                std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }
+                std::string mem = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << ir << Symbols::LF; }
+                log() << "line " << currentLine_ << " VarExpr(TIME$) -> strftime" << Symbols::LF;
+                return mem;
             }
         }
         ensureVarAllocated(out, v->name);
@@ -209,7 +236,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
                 {
                     std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                     { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                     out << "  ]" << Symbols::LF;
                 }
                 // Ok path computes the division
@@ -238,7 +265,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
                 {
                     std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                     { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                     out << "  ]" << Symbols::LF;
                 }
                 // Ok path computes integer division
@@ -338,7 +365,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             {
                 std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                 { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                 out << "  ]" << Symbols::LF;
             }
             // Ok path
@@ -478,6 +505,12 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             return res;
         }
         if (fn == "RND") { std::string ir = std::format("  {} = call double @gwb_rnd(double {})", res, argv[0]); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr rnd(full) -> " << ir; log() << m.str() << Symbols::LF; } return res; }
+        if (fn == "USR") {
+            // USR(x): per current design, return argument identity as double
+            // (DEF USR address is a no-op; no ABI callout implemented yet)
+            // Assume arity validated by semantics.
+            return argv[0];
+        }
         if (fn == "ASC") {
             // argv[0] is ptr to string; strict check: empty -> error 5
             std::string slen = nextTemp(); { std::string ir = std::format("  {} = call i64 @strlen(ptr {})", slen, argv[0]); out << ir << Symbols::LF; }
@@ -498,7 +531,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             {
                 std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                 { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                 out << "  ]" << Symbols::LF;
             }
             // Ok path: load first byte and return as double
@@ -507,6 +540,34 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             std::string i32v = nextTemp(); { std::string ir = std::format("  {} = zext i8 {} to i32", i32v, b); out << ir << Symbols::LF; }
             { std::string ir = std::format("  {} = uitofp i32 {} to double", res, i32v); out << ir << Symbols::LF; }
             return res;
+        }
+        if (fn == "DATE$") {
+            // Format current local date as %m-%d-%y using strftime
+            std::string t = nextTemp(); { std::string ir = std::format("  {} = call i64 @time(ptr null)", t); out << ir << Symbols::LF; }
+            std::string tp = nextTemp(); { std::string ir = std::format("  {} = alloca i64", tp); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i64 {}, ptr {}", t, tp); out << ir << Symbols::LF; }
+            std::string tm = nextTemp(); { std::string ir = std::format("  {} = call ptr @localtime(ptr {})", tm, tp); out << ir << Symbols::LF; }
+            std::string sbuf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << ir << Symbols::LF; }
+            std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_date, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
+            std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, tm); out << ir << Symbols::LF; }
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }
+            std::string mem = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << ir << Symbols::LF; }
+            return mem;
+        }
+        if (fn == "TIME$") {
+            // Format current local time as %H:%M:%S using strftime
+            std::string t = nextTemp(); { std::string ir = std::format("  {} = call i64 @time(ptr null)", t); out << ir << Symbols::LF; }
+            std::string tp = nextTemp(); { std::string ir = std::format("  {} = alloca i64", tp); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  store i64 {}, ptr {}", t, tp); out << ir << Symbols::LF; }
+            std::string tm = nextTemp(); { std::string ir = std::format("  {} = call ptr @localtime(ptr {})", tm, tp); out << ir << Symbols::LF; }
+            std::string sbuf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << ir << Symbols::LF; }
+            std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_time, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
+            std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, tm); out << ir << Symbols::LF; }
+            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }
+            std::string mem = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << ir << Symbols::LF; }
+            { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << ir << Symbols::LF; }
+            return mem;
         }
         if (fn == "SCREEN") {
             // SCREEN(row, col [, z]) -> ASCII code at 1-based (row,col)
@@ -753,7 +814,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             {
                 std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                 { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                 out << "  ]" << Symbols::LF;
             }
             // Ok path

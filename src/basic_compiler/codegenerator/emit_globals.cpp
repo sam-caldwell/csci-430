@@ -39,6 +39,9 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
     out << "@.fmt_in = private unnamed_addr constant [4 x i8] c\"%lf\\00\"" << Symbols::LF
         // scanf format to read an entire line into a buffer, discarding the trailing newline
         << "@.fmt_line_in = private unnamed_addr constant [12 x i8] c\"%255[^\\0A]%*c\\00\"" << Symbols::LF
+        // strftime formats for DATE$/TIME$
+        << "@.fmt_date = private unnamed_addr constant [9 x i8] c\"%m-%d-%y\\00\"" << Symbols::LF
+        << "@.fmt_time = private unnamed_addr constant [9 x i8] c\"%H:%M:%S\\00\"" << Symbols::LF
         << "@.mode_r = private unnamed_addr constant [2 x i8] c\"r\\00\"" << Symbols::LF
         << "@.mode_w = private unnamed_addr constant [2 x i8] c\"w\\00\"" << Symbols::LF
         << "@.mode_rb = private unnamed_addr constant [3 x i8] c\"rb\\00\"" << Symbols::LF
@@ -73,6 +76,9 @@ void CodeGenerator::emitGlobals(std::ostringstream& out) {
         << "@.str_lpt1 = private unnamed_addr constant [6 x i8] c\"LPT1:\\00\"" << Symbols::LF;
     // Bell character for BEEP
     out << "@.bell = private unnamed_addr constant [2 x i8] c\"\\07\\00\"" << Symbols::LF;
+    // Helper strings for FILES implementation
+    out << "@.str_ls1sp = private unnamed_addr constant [7 x i8] c\"ls -1 \\00\"" << Symbols::LF
+        << "@.str_dot = private unnamed_addr constant [2 x i8] c\".\\00\"" << Symbols::LF;
     // Virtual screen state for SCREEN(row,col[,z])
     // - 80x25 character buffer, row-major, 0-based indices internally
     // - current cursor position used by PRINT mirroring logic

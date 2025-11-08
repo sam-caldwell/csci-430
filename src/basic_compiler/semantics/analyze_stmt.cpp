@@ -49,6 +49,7 @@
 #include "basic_compiler/ast/ClsStmt.h"
 #include "basic_compiler/ast/LocateStmt.h"
 #include "basic_compiler/ast/WidthStmt.h"
+#include "basic_compiler/ast/FilesStmt.h"
 #include "basic_compiler/ast/MkdirStmt.h"
 #include "basic_compiler/ast/RmdirStmt.h"
 #include "basic_compiler/ast/KillStmt.h"
@@ -103,6 +104,24 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         }
         analyzeExpr(wd->columns.get());
         log() << "Width" << '\n';
+        return;
+    }
+    if (auto fl = dyn_cast<const FilesStmt>(s)) {
+        if (fl->device) {
+            if (typeOf(fl->device.get()) != ValueType::String) {
+                std::ostringstream m; m << "TypeError: FILES device must be string @ " << fl->pos.line << ':' << fl->pos.col; log() << m.str() << '\n';
+                throw SemanticError(m.str());
+            }
+            analyzeExpr(fl->device.get());
+        }
+        if (fl->pattern) {
+            if (typeOf(fl->pattern.get()) != ValueType::String) {
+                std::ostringstream m; m << "TypeError: FILES path/pattern must be string @ " << fl->pos.line << ':' << fl->pos.col; log() << m.str() << '\n';
+                throw SemanticError(m.str());
+            }
+            analyzeExpr(fl->pattern.get());
+        }
+        log() << "Files" << '\n';
         return;
     }
     if (auto mk = dyn_cast<const MkdirStmt>(s)) {

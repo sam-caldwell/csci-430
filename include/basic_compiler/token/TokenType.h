@@ -103,6 +103,7 @@ enum class TokenType {
     KwViewPrint,
     KwWindow,
     KwBeep,
+    KwLprint,
     KwSound,
     KwPlay,
     KwKey,

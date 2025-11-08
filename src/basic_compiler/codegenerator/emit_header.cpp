@@ -26,6 +26,8 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare ptr @malloc(i64)" << Symbols::LF
         << "declare ptr @strcpy(ptr, ptr)" << Symbols::LF
         << "declare ptr @strcat(ptr, ptr)" << Symbols::LF << Symbols::LF
+        << "declare ptr @popen(ptr, ptr)" << Symbols::LF
+        << "declare i32 @pclose(ptr)" << Symbols::LF
         << "declare ptr @strncpy(ptr, ptr, i64)" << Symbols::LF
         << "declare ptr @memset(ptr, i32, i64)" << Symbols::LF
         << "declare ptr @fgets(ptr, i32, ptr)" << Symbols::LF
@@ -33,6 +35,7 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare ptr @fopen(ptr, ptr)" << Symbols::LF
         << "declare i32 @fclose(ptr)" << Symbols::LF
         << "declare i32 @fprintf(ptr, ptr, ...)" << Symbols::LF
+        << "declare i32 @fscanf(ptr, ptr, ...)" << Symbols::LF
         << "declare i64 @fread(ptr, i64, i64, ptr)" << Symbols::LF
         << "declare i64 @fwrite(ptr, i64, i64, ptr)" << Symbols::LF << Symbols::LF
         << "declare i32 @chdir(ptr)" << Symbols::LF
@@ -61,7 +64,9 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "declare double @strtod(ptr, ptr)" << Symbols::LF << Symbols::LF
     // RNG seed + time
         << "declare void @srand48(i64)" << Symbols::LF
-        << "declare i64 @time(ptr)" << Symbols::LF << Symbols::LF
+        << "declare i64 @time(ptr)" << Symbols::LF
+        << "declare ptr @localtime(ptr)" << Symbols::LF
+        << "declare i64 @strftime(ptr, i64, ptr, ptr)" << Symbols::LF << Symbols::LF
         << "declare ptr @getenv(ptr)" << Symbols::LF << Symbols::LF;
 
     // Provide helper implementing full RND(x) semantics if needed
@@ -102,6 +107,50 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "  call i32 (ptr, ...) @printf(ptr %fmt)" << Symbols::LF
         << "  br label %ret" << Symbols::LF
         << "ret:" << Symbols::LF
+        << "  ret void" << Symbols::LF
+        << "}" << Symbols::LF << Symbols::LF;
+    // Helper: list directory entries using popen("ls -1 ...") and print to stdout or device
+    out << "define void @gwb_list_files(ptr %dev, ptr %pat) {" << Symbols::LF
+        << "entry:" << Symbols::LF
+        << "  %prefix = getelementptr inbounds [7 x i8], ptr @.str_ls1sp, i64 0, i64 0" << Symbols::LF
+        << "  %dot = getelementptr inbounds [2 x i8], ptr @.str_dot, i64 0, i64 0" << Symbols::LF
+        << "  %pat_is_null = icmp eq ptr %pat, null" << Symbols::LF
+        << "  %pat_eff = select i1 %pat_is_null, ptr %dot, ptr %pat" << Symbols::LF
+        << "  %cmd = call ptr @malloc(i64 512)" << Symbols::LF
+        << "  call ptr @strcpy(ptr %cmd, ptr %prefix)" << Symbols::LF
+        << "  call ptr @strcat(ptr %cmd, ptr %pat_eff)" << Symbols::LF
+        << "  %pipe = call ptr @popen(ptr %cmd, ptr @.mode_r)" << Symbols::LF
+        << "  br label %loop" << Symbols::LF
+        << "loop:" << Symbols::LF
+        << "  %buf = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0" << Symbols::LF
+        << "  %got = call ptr @fgets(ptr %buf, i32 256, ptr %pipe)" << Symbols::LF
+        << "  %eof = icmp eq ptr %got, null" << Symbols::LF
+        << "  br i1 %eof, label %done, label %body" << Symbols::LF
+        << "body:" << Symbols::LF
+        << "  %dev_null = icmp eq ptr %dev, null" << Symbols::LF
+        << "  br i1 %dev_null, label %to_stdout, label %chk_dev" << Symbols::LF
+        << "chk_dev:" << Symbols::LF
+        << "  %lpt = getelementptr inbounds [6 x i8], ptr @.str_lpt1, i64 0, i64 0" << Symbols::LF
+        << "  %cmp = call i32 @strcmp(ptr %dev, ptr %lpt)" << Symbols::LF
+        << "  %is_lpt = icmp eq i32 %cmp, 0" << Symbols::LF
+        << "  br i1 %is_lpt, label %try_prn, label %to_stdout" << Symbols::LF
+        << "try_prn:" << Symbols::LF
+        << "  %p0p = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 0" << Symbols::LF
+        << "  %fp = load ptr, ptr %p0p" << Symbols::LF
+        << "  %fp_null = icmp eq ptr %fp, null" << Symbols::LF
+        << "  br i1 %fp_null, label %to_stdout, label %do_prn" << Symbols::LF
+        << "do_prn:" << Symbols::LF
+        << "  %fmtp = getelementptr inbounds [3 x i8], ptr @.fmt_str_sp, i64 0, i64 0" << Symbols::LF
+        << "  call i32 @fprintf(ptr %fp, ptr %fmtp, ptr %buf)" << Symbols::LF
+        << "  br label %cont" << Symbols::LF
+        << "to_stdout:" << Symbols::LF
+        << "  %fmts = getelementptr inbounds [3 x i8], ptr @.fmt_str_sp, i64 0, i64 0" << Symbols::LF
+        << "  call i32 (ptr, ...) @printf(ptr %fmts, ptr %buf)" << Symbols::LF
+        << "  br label %cont" << Symbols::LF
+        << "cont:" << Symbols::LF
+        << "  br label %loop" << Symbols::LF
+        << "done:" << Symbols::LF
+        << "  call i32 @pclose(ptr %pipe)" << Symbols::LF
         << "  ret void" << Symbols::LF
         << "}" << Symbols::LF << Symbols::LF;
     // Graphics initializer used by SCREEN statement

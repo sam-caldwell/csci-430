@@ -2,20 +2,6 @@
 
 - REDBULL BEFORE CODING.  Tired Sam is dumb Sam!
 
-
-## Additional Parser and Grammar Coverage
-- Implement the additional commands listed in docs/gw-basic.ebnf but not recognized in the lexer/token set: FILES, 
-  NAME, KILL, MKDIR, RMDIR, WIDTH, LOCATE, CLS, PSET, PRESET, LINE (graphics), PAINT, DRAW, VIEW/VIEW PRINT, WINDOW, 
-  BEEP/SOUND/PLAY, KEY/KEYn/ON KEY, ON event variants, PEN/STRIG, TIMER ON/OFF, TRON/TROFF, CONT, LOAD/SAVE/NEW/
-  DELETE/LIST/LLIST/AUTO/RENUM/EDIT/PCOPY, RESET, SHELL, ENVIRON, OUT, WAIT.
-- Implement semantic analysis for the additional commands listed in docs/gw-basic.ebnf.
-- Ensure there are semantic optimizations for the additional commands listed in docs/gw-basic.ebnf.
-- Implement code generation for the additional commands listed in docs/gw-basic.ebnf.
-- Ensure there are code generation optimizations for the additional commands listed in docs/gw-basic.ebnf.
-- Ensure all features implemented in this session emit the appropriate metrics.
-- Ensure that all features implemented in this session are covered by unit tests with >=97% test coverage.
-- Ensure that all tests are green
-
 ## Type System and Conversions
 - COMMON variables tracked and preserved across CHAIN, make sure CHAIN/RUN file handoff is not implemented; clarify
   preservation across true overlays once implemented.
@@ -24,16 +10,14 @@
     explicit suffixes.
 - Improve semantic optimizations (e.g., add more algebraic simplifications where possible)
 
-## Code Generation: Implementations Missing (parses exist)
-- WRITE [#n,] expr[, ...]: parser exists; no codegen lowering yet.
-- INPUT #n, var[, ...]: file-input statement parsed; no codegen to `fscanf`/buffer + conversions.
-- LINE INPUT [#n,] var$: parser exists; no codegen to read an entire line (channel or stdin) and assign string.
-- RUN "file"[, line]: codegen ignores filename and only resets variables and branches; no handoff/loading semantics.
-- MERGE "file": compile-time directive only; codegen is a no-op; finalize expected behavior or tooling integration.
-- DEF SEG [= expr]: treated as semantic/logging only; codegen is a no-op yet memory ops (POKE/PEEK/CALL/BLOAD/BSAVE)
-  reference @gwb_seg. Need runtime to set @gwb_seg (store casted value) when provided.
-- DEF USRn = expr and USR(): DEF USR is a no-op; USR(arg) returns arg identity in expressions. Define callout ABI or
-  trap and optional index dispatch.
+## Code Generation: Status (previously missing)
+- WRITE [#n,] expr[, ...]: Implemented. stdout uses `printf` and printer/file channels use `fprintf`/`snprintf`.
+- INPUT #n, var[, ...]: Implemented. Lowers to `fscanf(FILE*, "%lf", &tmp)` per variable with numeric storage.
+- LINE INPUT [#n,] var$: Implemented. Console path uses `scanf("%255[^\n]%*c", buf)`; channel path uses `fgets` and newline trim; copies to heap and assigns.
+- RUN "file"[, line]: Compile-time path resolves and patches target; runtime resets variables and branches within the composite program (no loader overlay).
+- MERGE "file": Compile-time directive implemented; appends imported lines replacing duplicates; no runtime codegen.
+- DEF SEG [= expr]: Implemented. Stores casted integer into `@gwb_seg` (or 0 when omitted) used by POKE/PEEK/CALL/BLOAD/BSAVE.
+- DEF USRn = expr and USR(): DEF USR remains a no-op; `USR(x)` returns the numeric argument (identity) in expressions.
 
 ## Diagnostics and Robustness
 
@@ -54,3 +38,48 @@
 
 ## Bug Reports
 
+
+## Implement the Open Language Features (from gw-basic.ebnf)
+The table below tracks features defined in docs/gw-basic.ebnf that are not yet implemented or only partially implemented in the current repository. Percent complete is a rough pipeline estimate (Lexer, Parser, Semantics, Codegen ~25% each):
+
+| Feature                     | Description of the feature / future work                                                                                                                                  | % Complete |
+|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------:|
+| OPEN "COMn:"                | Serial port open (COM) with device options; validate and map to host serial APIs.                                                                                         |         0% |
+| COM(n) ON/OFF/STOP          | Enable/disable/stop COM event trapping; wire into ON COM dispatcher.                                                                                                      |         0% |
+| FIELD #n, len AS var$       | Random-access record layout binding to string buffers.                                                                                                                    |         0% |
+| GET #n, [rec]               | Random-access file GET (structured reads per FIELD layout).                                                                                                               |         0% |
+| PUT #n, [rec]               | Random-access file PUT (structured writes per FIELD layout).                                                                                                              |         0% |
+| LOCK/UNLOCK #n              | Advisory locks for file records or ranges.                                                                                                                                |         0% |
+| IOCTL / IOCTL$              | Device control; pass-through of control codes/strings to devices/channels.                                                                                                |         0% |
+| PSET/PRESET/LINE (graphics) | Pixel draw, erase, and line drawing. Honor current screen mode, colors, and clipping.                                                                                     |        25% |
+| PAINT                       | Flood fill region from a point with color; optional border color.                                                                                                         |        25% |
+| DRAW                        | Turtle-like drawing language parsing/execution onto current page.                                                                                                         |        25% |
+| VIEW / VIEW PRINT / WINDOW  | Graphics viewport/window setup; map text viewport (VIEW PRINT) and coordinate transforms (WINDOW).                                                                        |        25% |
+| PALETTE                     | Palette index/value programming and palette USING.                                                                                                                        |         0% |
+| SOUND                       | Simple tone generation with frequency/duration.                                                                                                                           |        25% |
+| PLAY                        | Music macro language parsing/tempo/channel; schedule tones.                                                                                                               |        25% |
+| KEY / KEY(n) / ON KEY       | Keyboard management, binding handlers (ON KEY) and KEY toggles.                                                                                                           |        25% |
+| PEN                         | Light pen status and event trap setup.                                                                                                                                    |        25% |
+| STRIG                       | Joystick trigger and event trapping.                                                                                                                                      |        25% |
+| TIMER ON/OFF/STOP           | Timer event trap enable/disable and polling.                                                                                                                              |        25% |
+| TRON/TROFF                  | Trace execution on/off; integrate with logger and diagnostics hooks.                                                                                                      |        25% |
+| CONT                        | Continue execution after a break/STOP (debug flow).                                                                                                                       |        25% |
+| LOAD/SAVE                   | Load/Save BASIC program files; integrate with compiler front-end IO.                                                                                                      |        25% |
+| NEW                         | Clear program from memory.                                                                                                                                                |        25% |
+| DELETE                      | Delete program line ranges.                                                                                                                                               |        25% |
+| RENUM                       | Renumber program lines with dependency updates.                                                                                                                           |        25% |
+| EDIT                        | Line editor invocation.                                                                                                                                                   |        25% |
+| PCOPY                       | Page copy (graphics pages).                                                                                                                                               |        25% |
+| RESET                       | Reset communications/files/devices.                                                                                                                                       |        25% |
+| OUT                         | Port OUT (write to hardware I/O address).                                                                                                                                 |        25% |
+| WAIT                        | Port WAIT (poll for bit pattern at I/O address).                                                                                                                          |        25% |
+| LSET/RSET                   | Left/right-justified assignment into fixed-length strings/fields.                                                                                                         |         0% |
+| DEF USR / USR()             | Indirect call-out. USR(x) returns x (identity). DEF USR remains a no-op; ABI/callback remains TODO.                                                                       |        75% |
+| RUN "file"[,line]           | Program overlay/transfer. Current codegen resets variables and branches; add file handoff/loading.                                                                        |        60% |
+| CHAIN [MERGE]               | Partial: resets state and branches + DATA index regioning. Add file load, COMMON preservation rules.                                                                      |        60% |
+| INP(addr)                   | Hardware port input function. Add intrinsic lowering and safety stub on non-PC targets.                                                                                   |         0% |
+| POINT/PMAP/POS              | Graphics/text coordinate queries and mapping.                                                                                                                             |         0% |
+| IOCTL$                      | Device status/data query as string.                                                                                                                                       |         0% |
+
+Notes
+- INKEY$ is currently stubbed as empty string; treat as partial until keyboard polling is supported.

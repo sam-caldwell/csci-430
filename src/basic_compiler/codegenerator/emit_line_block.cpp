@@ -9,6 +9,8 @@
 #include "basic_compiler/ast/DimStmt.h"
 #include "basic_compiler/ast/OpenStmt.h"
 #include "basic_compiler/ast/LineInputStmt.h"
+#include "basic_compiler/ast/DeleteStmt.h"
+#include "basic_compiler/ast/FileInputStmt.h"
 #include "basic_compiler/ast/WidthStmt.h"
 #include "basic_compiler/ast/CloseStmt.h"
 #include "basic_compiler/ast/DefTypeStmt.h"
@@ -47,6 +49,8 @@
 #include "basic_compiler/ast/ShellStmt.h"
 #include "basic_compiler/ast/EnvironStmt.h"
 #include "basic_compiler/ast/BeepStmt.h"
+#include "basic_compiler/ast/FilesStmt.h"
+#include "basic_compiler/ast/ListStmt.h"
 #include <sstream>
 #include <format>
 #include <cmath>
@@ -152,7 +156,7 @@ namespace gwbasic {
                     out << std::format("  store i1 true, ptr @gwb_in_handler") << Symbols::LF;
                     std::string trap = nextTemp(); out << std::format("  {} = load i32, ptr @gwb_err_trap_line", trap) << Symbols::LF;
                     out << std::format("  switch i32 {}, label %exit [", trap) << Symbols::LF;
-                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; out << std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)) << Symbols::LF; }
+                    for (int lnum : lineNumbers_) { out << std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)) << Symbols::LF; }
                     out << "  ]" << Symbols::LF;
                     // Ok path: compute linear index
                     out << doLbl << ":" << Symbols::LF;
@@ -239,7 +243,7 @@ namespace gwbasic {
                 {
                     std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                     { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                     out << "  ]" << Symbols::LF;
                 }
                 // Ok path
@@ -644,6 +648,19 @@ namespace gwbasic {
                     std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
                     storeNumberToVar(out, vname, dv);
                 }
+            } else if (auto fi = dyn_cast<FileInputStmt>(st.get())) {
+                // INPUT #n, var[, var...]: read numeric values from a file channel using fscanf
+                const int idx = fi->channel - 1;
+                std::string ep = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", ep, idx); out << ir << Symbols::LF; }
+                std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, ep); out << ir << Symbols::LF; }
+                for (const auto& vname : fi->variables) {
+                    ensureVarAllocated(out, vname);
+                    std::string tmp = nextTemp(); { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
+                    std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  call i32 (ptr, ptr, ...) @fscanf(ptr {}, ptr {}, ptr {})", fh, fmt, tmp); out << ir << Symbols::LF; }
+                    std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
+                    storeNumberToVar(out, vname, dv);
+                }
             } else if (auto li = dyn_cast<LineInputStmt>(st.get())) {
                 // Read a full line into sbuf, then copy to heap and assign to string var.
                 // Console (stdin) path uses scanf to avoid explicit @stdin linkage; channel path uses fgets(FILE*).
@@ -685,6 +702,9 @@ namespace gwbasic {
                 { std::string ir = std::format("  store i8 0, ptr {}", pn); out << ir << Symbols::LF; }
                 ensureVarAllocated(out, li->name);
                 { std::string ir = std::format("  store ptr {}, ptr {}", mem, varAllocaName_[li->name]); out << ir << Symbols::LF; }
+            } else if (dyn_cast<DeleteStmt>(st.get())) {
+                // DELETE is a compile-time directive only; no runtime emission
+                { std::ostringstream m; m << "line " << currentLine_ << " DeleteStmt (no-op at runtime)"; log() << m.str() << Symbols::LF; }
             } else if (auto fs = dyn_cast<ForStmt>(st.get())) {
                 emitFor(out, fs, lineLabelName(line.number), localContCounter);
             } else if (auto rz = dyn_cast<RandomizeStmt>(st.get())) {
@@ -816,6 +836,66 @@ namespace gwbasic {
                 out << std::format("  br label %{}", afterLbl) << Symbols::LF;
                 out << afterLbl << ":" << Symbols::LF;
                 { std::ostringstream m; m << "line " << currentLine_ << " WidthStmt -> set width"; log() << m.str() << Symbols::LF; }
+            } else if (auto ls = dyn_cast<ListStmt>(st.get())) {
+                // LIST/LLIST: print program line numbers within optional range
+                int minLine = lineNumbers_.empty() ? 0 : lineNumbers_.front();
+                int maxLine = lineNumbers_.empty() ? 0 : lineNumbers_.back();
+                int startBound = minLine;
+                int endBound = maxLine;
+                if (ls->startLine.has_value()) {
+                    startBound = (ls->startIsDot ? currentLine_ : *ls->startLine);
+                }
+                if (ls->endLine.has_value()) {
+                    endBound = (ls->endIsDot ? currentLine_ : *ls->endLine);
+                }
+                // Unroll checks for each known line number
+                for (int ln : lineNumbers_) {
+                    std::string c1 = nextTemp(); out << std::format("  {} = icmp sge i32 {}, {}", c1, ln, startBound) << Symbols::LF;
+                    std::string c2 = nextTemp(); out << std::format("  {} = icmp sle i32 {}, {}", c2, ln, endBound) << Symbols::LF;
+                    std::string inr = nextTemp(); out << std::format("  {} = and i1 {}, {}", inr, c1, c2) << Symbols::LF;
+                    std::string doLbl = lineLabelName(line.number) + std::string("_lst_do_") + std::to_string(++localContCounter);
+                    std::string contLbl = lineLabelName(line.number) + std::string("_lst_cont_") + std::to_string(localContCounter);
+                    out << std::format("  br i1 {}, label %{}, label %{}", inr, doLbl, contLbl) << Symbols::LF;
+                    out << doLbl << ":" << Symbols::LF;
+                    // Emit printing of the line number
+                    std::string fmt = nextTemp(); out << std::format("  {} = getelementptr inbounds [5 x i8], ptr @.fmt_int, i64 0, i64 0", fmt) << Symbols::LF;
+                    std::string ln64 = nextTemp(); out << std::format("  {} = sext i32 {} to i64", ln64, ln) << Symbols::LF;
+                    if (ls->toPrinter) {
+                        // Prefer printer channel #1 (gwb_files[0]); if null, fallback to stdout + screen mirror
+                        std::string p0 = nextTemp(); out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 0", p0) << Symbols::LF;
+                        std::string fh = nextTemp(); out << std::format("  {} = load ptr, ptr {}", fh, p0) << Symbols::LF;
+                        std::string sbuf = nextTemp(); out << std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf) << Symbols::LF;
+                        std::string n = nextTemp(); out << std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, i64 {})", n, sbuf, fmt, ln64) << Symbols::LF;
+                        std::string n64 = nextTemp(); out << std::format("  {} = sext i32 {} to i64", n64, n) << Symbols::LF;
+                        std::string useStd = lineLabelName(line.number) + std::string("_lst_lpt_std_") + std::to_string(++localContCounter);
+                        std::string useLpt = lineLabelName(line.number) + std::string("_lst_lpt_dev_") + std::to_string(localContCounter);
+                        std::string isNull = nextTemp(); out << std::format("  {} = icmp eq ptr {}, null", isNull, fh) << Symbols::LF;
+                        out << std::format("  br i1 {}, label %{}, label %{}", isNull, useStd, useLpt) << Symbols::LF;
+                        // Fallback: print to stdout and mirror to screen
+                        out << useStd << ":" << Symbols::LF;
+                        out << std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmt, ln64) << Symbols::LF;
+                        out << std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64) << Symbols::LF;
+                        out << std::format("  br label %{}", contLbl) << Symbols::LF;
+                        // Printer: write to channel
+                        out << useLpt << ":" << Symbols::LF;
+                        out << std::format("  call i64 @fwrite(ptr {}, i64 {}, i64 1, ptr {})", sbuf, n64, fh) << Symbols::LF;
+                    } else {
+                        out << std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmt, ln64) << Symbols::LF;
+                        std::string sbuf = nextTemp(); out << std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf) << Symbols::LF;
+                        std::string n = nextTemp(); out << std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, i64 {})", n, sbuf, fmt, ln64) << Symbols::LF;
+                        std::string n64 = nextTemp(); out << std::format("  {} = sext i32 {} to i64", n64, n) << Symbols::LF;
+                        out << std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64) << Symbols::LF;
+                    }
+                    out << std::format("  br label %{}", contLbl) << Symbols::LF;
+                    out << contLbl << ":" << Symbols::LF;
+                }
+                { std::ostringstream m; m << "line " << currentLine_ << " ListStmt -> emit listing"; log() << m.str() << Symbols::LF; }
+            } else if (auto fl = dyn_cast<FilesStmt>(st.get())) {
+                // FILES [device$,] [pattern$] -> call helper @gwb_list_files
+                std::string dev = (fl->device ? emitExpr(out, fl->device.get(), "") : std::string("null"));
+                std::string pat = (fl->pattern ? emitExpr(out, fl->pattern.get(), "") : std::string("null"));
+                out << std::format("  call void @gwb_list_files(ptr {}, ptr {})", dev, pat) << Symbols::LF;
+                { std::ostringstream m; m << "line " << currentLine_ << " FilesStmt -> gwb_list_files()"; log() << m.str() << Symbols::LF; }
             } else if (auto mk = dyn_cast<MkdirStmt>(st.get())) {
                 // MKDIR path$
                 auto p = emitExpr(out, mk->path.get(), "");
@@ -1036,8 +1116,7 @@ namespace gwbasic {
                     // We will materialize case blocks after the switch
                     struct ResumeCase { int line; std::string label; };
                     std::vector<ResumeCase> cases; cases.reserve(lineNumbers_.size());
-                    for (const auto & [lnum, lp] : lineMap_) {
-                        (void)lp;
+                    for (int lnum : lineNumbers_) {
                         std::string caseLbl = lineLabelName(line.number) + std::string("_resume_case_") + std::to_string(++localContCounter);
                         std::string ir = std::format("    i32 {}, label %{}", lnum, caseLbl);
                         out << ir << Symbols::LF;
@@ -1127,7 +1206,7 @@ namespace gwbasic {
                     {
                         std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                         { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                        for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                         out << "  ]" << Symbols::LF;
                     }
                     // Ok path
@@ -1178,7 +1257,7 @@ namespace gwbasic {
                         {
                             std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                             { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                            for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                             out << "  ]" << Symbols::LF;
                         }
                         out << doLbl2 << ":" << Symbols::LF;
@@ -1215,7 +1294,7 @@ namespace gwbasic {
                             {
                                 std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                                 { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                                 out << "  ]" << Symbols::LF;
                             }
                             // ok: load numeric constant and store into array element
@@ -1244,7 +1323,7 @@ namespace gwbasic {
                             {
                                 std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                                 { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                                 out << "  ]" << Symbols::LF;
                             }
                             out << okNumLbl << ":" << Symbols::LF;
@@ -1312,9 +1391,16 @@ namespace gwbasic {
             } else if (isa<DefTypeStmt>(st.get())) {
                 // DEFINT/DEFSNG/DEFDBL/DEFSTR are compile-time declarations; no direct codegen
                 { std::ostringstream m; m << "line " << currentLine_ << " DefTypeStmt (no-op)"; log() << m.str() << Symbols::LF; }
-            } else if (isa<DefSegStmt>(st.get())) {
-                // DEF SEG is a no-op in this compiler
-                { std::ostringstream m; m << "line " << currentLine_ << " DefSegStmt (no-op)"; log() << m.str() << Symbols::LF; }
+            } else if (auto ds = dyn_cast<DefSegStmt>(st.get())) {
+                // DEF SEG [= expr]: set @gwb_seg (i32) or restore default (0) when value is absent
+                if (ds->value) {
+                    std::string val = emitExpr(out, ds->value.get(), "");
+                    std::string i32v = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", i32v, val); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i32 {}, ptr @gwb_seg", i32v); out << ir << Symbols::LF; }
+                } else {
+                    { std::string ir = std::format("  store i32 0, ptr @gwb_seg"); out << ir << Symbols::LF; }
+                }
+                { std::ostringstream m; m << "line " << currentLine_ << " DefSegStmt -> set gwb_seg"; log() << m.str() << Symbols::LF; }
             } else if (auto pk = dyn_cast<PokeStmt>(st.get())) {
                 // Compute physical address = seg*16 + addr
                 std::string seg = nextTemp(); { std::string ir = "  "; ir += seg; ir += " = load i32, ptr @gwb_seg"; out << ir << Symbols::LF; }
@@ -1562,7 +1648,7 @@ namespace gwbasic {
                         {
                             std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                             { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                            for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                            for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                             out << "  ]" << Symbols::LF;
                         }
                         // Ok path: compute element pointer

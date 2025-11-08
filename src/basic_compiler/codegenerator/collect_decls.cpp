@@ -18,6 +18,7 @@
 #include "basic_compiler/ast/ResumeStmt.h"
 #include "basic_compiler/ast/StopStmt.h"
 #include "basic_compiler/ast/OptionPrintZonesStmt.h"
+#include "basic_compiler/ast/DeleteStmt.h"
 #include "basic_compiler/ast/VarExpr.h"
 #include "basic_compiler/ast/CallExpr.h"
 #include "basic_compiler/ast/BinaryExpr.h"
@@ -51,26 +52,77 @@ void CodeGenerator::collectDecls(const Program& program) {
     varsBeforeLine_.clear();
     arraysBeforeLine_.clear();
 
+    // Pass 1: record all lines and DELETE directives only
+    struct DelRange { int start; int end; };
+    std::vector<DelRange> deleteRanges;
+    int globalMin = std::numeric_limits<int>::max();
+    int globalMax = std::numeric_limits<int>::min();
     for (const auto& line : program.lines) {
         lineNumbers_.push_back(line.number);
         lineMap_[line.number] = &line;
-        if (!semProvided_) {
-            for (const auto& st : line.statements)
-                collectStmtVars(st.get());
-        }
-        // Always scan for RND/STOP usage to decide helper/global emission
+        if (line.number < globalMin) globalMin = line.number;
+        if (line.number > globalMax) globalMax = line.number;
         for (const auto& st : line.statements) {
-            scanStmtForRnd(st.get());
-            scanStmtForStop(st.get());
-            // Also, pick up OPTION PRINTZONES directives directly to drive
-            // comma-zone padding even if semantics were not provided.
             if (const auto* opz = dyn_cast<const OptionPrintZonesStmt>(st.get())) {
                 printZones_ = opz->enabled;
             }
+            if (const auto* del = dyn_cast<const DeleteStmt>(st.get())) {
+                // Resolve bounds ('.' -> current line; open-end -> global max later)
+                int start = del->startLine.has_value() ? *del->startLine : globalMin;
+                int end   = del->endLine.has_value()   ? *del->endLine   : globalMax;
+                if (del->startIsDot) start = line.number;
+                if (del->endIsDot)   end   = line.number;
+                deleteRanges.push_back({start, end});
+            }
         }
+    }
+    if (lineNumbers_.empty()) {
+        // No lines; nothing further to collect
+        return;
     }
     std::ranges::sort(lineNumbers_);
     lineNumbers_.erase(std::ranges::unique(lineNumbers_).begin(), lineNumbers_.end());
+    if (globalMin == std::numeric_limits<int>::max()) globalMin = 0;
+    if (globalMax == std::numeric_limits<int>::min()) globalMax = 0;
+
+    // Normalize open-ended ranges based on discovered global bounds
+    for (auto& r : deleteRanges) {
+        if (r.start < globalMin) r.start = globalMin;
+        if (r.end   < r.start)   r.end   = r.start; // clamp empty/invalid to single
+        if (r.end   > globalMax) r.end   = globalMax;
+    }
+    // Build set of deleted lines
+    std::set<int> deleted;
+    for (int ln : lineNumbers_) {
+        for (const auto& r : deleteRanges) {
+            if (ln >= r.start && ln <= r.end) { deleted.insert(ln); break; }
+        }
+    }
+    // Filter lineNumbers_ to exclude deleted lines
+    if (!deleted.empty()) {
+        std::vector<int> kept; kept.reserve(lineNumbers_.size());
+        for (int ln : lineNumbers_) if (!deleted.contains(ln)) kept.push_back(ln);
+        lineNumbers_.swap(kept);
+    }
+
+    // Pass 2: collect variables and scan helpers only for kept lines
+    if (!semProvided_) {
+        for (int ln : lineNumbers_) {
+            const auto* lptr = lineMap_[ln];
+            if (!lptr) continue;
+            for (const auto& st : lptr->statements) {
+                collectStmtVars(st.get());
+            }
+        }
+    }
+    for (int ln : lineNumbers_) {
+        const auto* lptr = lineMap_[ln];
+        if (!lptr) continue;
+        for (const auto& st : lptr->statements) {
+            scanStmtForRnd(st.get());
+            scanStmtForStop(st.get());
+        }
+    }
 
     // Build mapping of COMMON variables that are in effect before each line
     {
@@ -111,8 +163,10 @@ void CodeGenerator::collectDecls(const Program& program) {
     }
 
     // Regardless of semantics, ensure prompt literals in INPUT are assigned ids
-    for (const auto&[number, statements] : program.lines) {
-        for (const auto& st : statements) {
+    for (int ln : lineNumbers_) {
+        const auto* lptr = lineMap_[ln];
+        if (!lptr) continue;
+        for (const auto& st : lptr->statements) {
             if (const auto* in = dyn_cast<const InputStmt>(st.get())) {
                 if (in->promptLiteral && !strLiteralId_.contains(*in->promptLiteral)) {
                     strLiteralId_[*in->promptLiteral] = strCounter_++;
@@ -175,8 +229,8 @@ void CodeGenerator::collectDecls(const Program& program) {
     handlerSkipAfter_.clear();
     {
         std::set<int> trapTargets;
-        for (const auto& [ln, lptr] : lineMap_) {
-            (void)ln;
+        for (int ln : lineNumbers_) {
+            const auto* lptr = lineMap_[ln];
             if (!lptr) continue;
             for (const auto& st : lptr->statements) {
                 if (const auto oeg = dyn_cast<const OnErrorGotoStmt>(st.get())) {
@@ -187,7 +241,7 @@ void CodeGenerator::collectDecls(const Program& program) {
         }
         // For each trap start, find the first line with RESUME from that start
         for (int t : trapTargets) {
-            // locate index of t
+            // locate index of t among kept lines
             int startIdx = -1;
             for (size_t i = 0; i < lineNumbers_.size(); ++i) {
                 if (lineNumbers_[i] == t) {
@@ -202,10 +256,7 @@ void CodeGenerator::collectDecls(const Program& program) {
                 if (!lp) continue;
                 bool hasResume = false;
                 for (const auto& st : lp->statements) {
-                    if (isa<const ResumeStmt>(st.get())) {
-                        hasResume = true;
-                        break;
-                    }
+                    if (isa<const ResumeStmt>(st.get())) { hasResume = true; break; }
                 }
                 if (hasResume) { endIdx = j; break; }
             }

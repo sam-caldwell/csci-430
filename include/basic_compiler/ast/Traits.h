@@ -78,6 +78,7 @@ template <> struct NodeKindTraits<NodeKind::OnErrorGotoStmt> { static constexpr 
 template <> struct NodeKindTraits<NodeKind::ResumeStmt>      { static constexpr auto pretty = "ResumeStmt"; };
 template <> struct NodeKindTraits<NodeKind::ErrorStmt>       { static constexpr auto pretty = "ErrorStmt"; };
 template <> struct NodeKindTraits<NodeKind::WidthStmt>       { static constexpr auto pretty = "WidthStmt"; };
+template <> struct NodeKindTraits<NodeKind::FilesStmt>       { static constexpr auto pretty = "FilesStmt"; };
 template <> struct NodeKindTraits<NodeKind::MkdirStmt>       { static constexpr auto pretty = "MkdirStmt"; };
 template <> struct NodeKindTraits<NodeKind::RmdirStmt>       { static constexpr auto pretty = "RmdirStmt"; };
 template <> struct NodeKindTraits<NodeKind::KillStmt>        { static constexpr auto pretty = "KillStmt"; };
@@ -85,6 +86,8 @@ template <> struct NodeKindTraits<NodeKind::NameStmt>        { static constexpr 
 template <> struct NodeKindTraits<NodeKind::ShellStmt>       { static constexpr auto pretty = "ShellStmt"; };
 template <> struct NodeKindTraits<NodeKind::EnvironStmt>     { static constexpr auto pretty = "EnvironStmt"; };
 template <> struct NodeKindTraits<NodeKind::BeepStmt>        { static constexpr auto pretty = "BeepStmt"; };
+template <> struct NodeKindTraits<NodeKind::ListStmt>        { static constexpr auto pretty = "ListStmt"; };
+template <> struct NodeKindTraits<NodeKind::DeleteStmt>      { static constexpr auto pretty = "DeleteStmt"; };
 
 // Map a runtime NodeKind to a human-readable pretty name
 inline auto prettyName(const NodeKind k) {
@@ -156,6 +159,7 @@ inline auto prettyName(const NodeKind k) {
         case NodeKind::OptionPrintZonesStmt: return NodeKindTraits<NodeKind::OptionPrintZonesStmt>::pretty;
         case NodeKind::UnsupportedStmt: return NodeKindTraits<NodeKind::UnsupportedStmt>::pretty;
         case NodeKind::WidthStmt: return NodeKindTraits<NodeKind::WidthStmt>::pretty;
+        case NodeKind::FilesStmt: return NodeKindTraits<NodeKind::FilesStmt>::pretty;
         case NodeKind::MkdirStmt: return NodeKindTraits<NodeKind::MkdirStmt>::pretty;
         case NodeKind::RmdirStmt: return NodeKindTraits<NodeKind::RmdirStmt>::pretty;
         case NodeKind::KillStmt: return NodeKindTraits<NodeKind::KillStmt>::pretty;
@@ -163,6 +167,8 @@ inline auto prettyName(const NodeKind k) {
         case NodeKind::ShellStmt: return NodeKindTraits<NodeKind::ShellStmt>::pretty;
         case NodeKind::EnvironStmt: return NodeKindTraits<NodeKind::EnvironStmt>::pretty;
         case NodeKind::BeepStmt: return NodeKindTraits<NodeKind::BeepStmt>::pretty;
+        case NodeKind::ListStmt: return NodeKindTraits<NodeKind::ListStmt>::pretty;
+        case NodeKind::DeleteStmt: return NodeKindTraits<NodeKind::DeleteStmt>::pretty;
     }
     return "Node";
 }

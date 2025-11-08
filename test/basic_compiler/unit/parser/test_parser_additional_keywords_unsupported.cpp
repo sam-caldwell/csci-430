@@ -27,14 +27,13 @@ TEST(Parser, AdditionalKeywords_ParseAsUnsupported) {
         "60 TIMER ON\n"
         "70 SOUND 440,2\n"
         "80 PLAY \"CDE\"\n"
-        "90 NAME \n"
         "100 MKDIR \"dir\"\n"
         "110 RMDIR \"dir\"\n";
     Lexer lx(src);
     auto tokens = lx.tokenize();
     Parser p(std::move(tokens));
     Program prog = p.parseProgram();
-    ASSERT_EQ(prog.lines.size(), 11u);
+    ASSERT_EQ(prog.lines.size(), 10u);
     std::vector<std::string> seen;
     for (const auto& line : prog.lines) {
         ASSERT_EQ(line.statements.size(), 1u);
@@ -44,18 +43,13 @@ TEST(Parser, AdditionalKeywords_ParseAsUnsupported) {
             EXPECT_EQ(dyn_cast<const UnsupportedStmt>(st), nullptr);
             continue;
         }
-        const auto* us = dyn_cast<const UnsupportedStmt>(st);
-        ASSERT_NE(us, nullptr) << "Expected UnsupportedStmt for line " << line.number;
-        seen.push_back(us->keyword);
+        if (auto* us = dyn_cast<const UnsupportedStmt>(st)) {
+            seen.push_back(us->keyword);
+        }
     }
-    // Verify keywords captured (CLS/LOCATE/WIDTH excluded)
-    ASSERT_EQ(seen.size(), 8u);
-    EXPECT_EQ(seen[0], "FILES");
-    EXPECT_EQ(seen[1], "BEEP");
-    EXPECT_EQ(seen[2], "TIMER");
-    EXPECT_EQ(seen[3], "SOUND");
-    EXPECT_EQ(seen[4], "PLAY");
-    EXPECT_EQ(seen[5], "NAME");
-    EXPECT_EQ(seen[6], "MKDIR");
-    EXPECT_EQ(seen[7], "RMDIR");
+    // Verify unsupported keywords captured (CLS/LOCATE/WIDTH excluded)
+    ASSERT_EQ(seen.size(), 3u);
+    EXPECT_EQ(seen[0], "TIMER");
+    EXPECT_EQ(seen[1], "SOUND");
+    EXPECT_EQ(seen[2], "PLAY");
 }

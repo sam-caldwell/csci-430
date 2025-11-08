@@ -10,19 +10,29 @@ namespace gwbasic {
 
 void CodeGenerator::collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string>& vars, std::set<std::string>& arrays) {
     if (!e) return;
-    if (auto v = dyn_cast<const VarExpr>(e)) { vars.insert(v->name); return; }
-    if (auto c = dyn_cast<const CallExpr>(e)) {
+    if (const auto v = dyn_cast<const VarExpr>(e)) {
+        vars.insert(v->name);
+        return;
+    }
+    if (const auto c = dyn_cast<const CallExpr>(e)) {
         // Array element reference syntax uses call-form: A(index[,index...])
         if (arrayDims_.contains(c->callee)) {
             arrays.insert(c->callee);
-            for (const auto& a : c->args) collectVarsForBeforeLineFromExpr(a.get(), vars, arrays);
+            for (const auto& a : c->args)
+                collectVarsForBeforeLineFromExpr(a.get(), vars, arrays);
             return;
         }
-        for (const auto& a : c->args) collectVarsForBeforeLineFromExpr(a.get(), vars, arrays);
+        for (const auto& a : c->args)
+            collectVarsForBeforeLineFromExpr(a.get(), vars, arrays);
         return;
     }
-    if (auto b = dyn_cast<const BinaryExpr>(e)) { collectVarsForBeforeLineFromExpr(b->lhs.get(), vars, arrays); collectVarsForBeforeLineFromExpr(b->rhs.get(), vars, arrays); return; }
-    if (auto u = dyn_cast<const UnaryExpr>(e)) { collectVarsForBeforeLineFromExpr(u->inner.get(), vars, arrays); return; }
+    if (const auto b = dyn_cast<const BinaryExpr>(e)) {
+        collectVarsForBeforeLineFromExpr(b->lhs.get(), vars, arrays);
+        collectVarsForBeforeLineFromExpr(b->rhs.get(), vars, arrays); return;
+    }
+    if (const auto u = dyn_cast<const UnaryExpr>(e)) {
+        collectVarsForBeforeLineFromExpr(u->inner.get(), vars, arrays); return;
+    }
 }
 
 } // namespace gwbasic

@@ -124,6 +124,7 @@ private:
         {"VIEW",      TokenType::KwView},
         {"WINDOW",    TokenType::KwWindow},
         {"BEEP",      TokenType::KwBeep},
+        {"LPRINT",    TokenType::KwLprint},
         {"SOUND",     TokenType::KwSound},
         {"PLAY",      TokenType::KwPlay},
         {"KEY",       TokenType::KwKey},

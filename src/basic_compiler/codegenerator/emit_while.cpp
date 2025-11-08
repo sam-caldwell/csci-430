@@ -100,7 +100,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
                 {
                     std::string trap = nextTemp(); out << std::format("  {} = load i32, ptr @gwb_err_trap_line", trap) << Symbols::LF;
                     out << std::format("  switch i32 {}, label %exit [", trap) << Symbols::LF;
-                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; out << std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)) << Symbols::LF; }
+                    for (int lnum : lineNumbers_) { out << std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)) << Symbols::LF; }
                     out << "  ]" << Symbols::LF;
                 }
                 out << doLbl << ":" << Symbols::LF;

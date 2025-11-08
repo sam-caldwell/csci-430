@@ -381,8 +381,9 @@
   statements contribute to token and AST counts but produce no IR.
 - Additional IR tests:
   - Filesystem/Env/OS: fs/env/os basic IR emission
-  - Comparison ops: numeric+string paths for =,<>,<,<=,>,>=
+  - Comparison ops: numeric+string paths for =, <>, <, <=, >, >=
   - FOR negative-step condition + zone padding
   - Inline subroutine MID$ OOB error dispatch
   - IF-block: MID$ OOB and channel USING; WRITE #n with strings
-  - Coverage currently ~94% on emit_* scope; subsequent pass will target deep paths in emit_if_block/emit_for/emit_subroutine_inline to reach ≥97%.
+  - Coverage currently ~94% on emit_* scope; subsequent pass will target deep paths in emit_if_block/emit_for/
+    emit_subroutine_inline to reach ≥97%.

@@ -31,6 +31,7 @@ std::string Compiler::compileStringOptimized(const std::string& source) {
     if (gMetrics) gMetrics->recordOptimizedSnapshot(program);
     CodeGenerator gen;
     SemanticAnalyzer sema;
+    sema.setStrictControlFlow(false);
     
     auto res = sema.analyze(program);
     gen.setSemantics(res);

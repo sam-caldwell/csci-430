@@ -66,7 +66,7 @@ std::string Compiler::compileFile(const std::string& path) {
         gMetrics->recordAfterSemanticsSnapshot(program);
     }
     // Keep semantics integration consistent with compileString
-    SemanticAnalyzer sema; auto res = sema.analyze(program);
+    SemanticAnalyzer sema; sema.setStrictControlFlow(false); auto res = sema.analyze(program);
     CodeGenerator gen; gen.setSemantics(res);
     auto ir = gen.generate(program);
     if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(ir));

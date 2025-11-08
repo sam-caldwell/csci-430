@@ -13,7 +13,8 @@
 #  - COVERAGE_METRIC: lines|regions|both (both requires both to meet threshold)
 ## Default policy: cover the entire codebase for csci-430 projects
 ## (basic_compiler, hello_world, and logger under src/)
-COVERAGE_MIN ?= 95
+# NOTE: Do not change COVERAGE_MIN. It is fixed at 95 and not overridable.
+override COVERAGE_MIN := 95
 COVERAGE_SCOPE ?= test/
 # Enforce comprehensive coverage on the compiler only; exclude tests from coverage requirements.
 # Includes all compiler areas (lexer, parser, semantics, codegenerator, etc.).

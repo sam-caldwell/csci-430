@@ -439,7 +439,7 @@ void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const st
             {
                 std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
                 { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
                 out << "  ]" << Symbols::LF;
             }
             out << doLbl << ":" << Symbols::LF;
