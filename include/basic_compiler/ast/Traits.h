@@ -67,8 +67,11 @@ template <> struct NodeKindTraits<NodeKind::ClearStmt>      { static constexpr a
 template <> struct NodeKindTraits<NodeKind::EraseStmt>      { static constexpr auto pretty = "EraseStmt"; };
 template <> struct NodeKindTraits<NodeKind::SwapStmt>       { static constexpr auto pretty = "SwapStmt"; };
 template <> struct NodeKindTraits<NodeKind::MidAssignStmt>  { static constexpr auto pretty = "MidAssignStmt"; };
+template <> struct NodeKindTraits<NodeKind::ClsStmt>        { static constexpr auto pretty = "ClsStmt"; };
+template <> struct NodeKindTraits<NodeKind::LocateStmt>     { static constexpr auto pretty = "LocateStmt"; };
 template <> struct NodeKindTraits<NodeKind::OptionBaseStmt> { static constexpr auto pretty = "OptionBaseStmt"; };
 template <> struct NodeKindTraits<NodeKind::OptionPrintZonesStmt> { static constexpr auto pretty = "OptionPrintZonesStmt"; };
+template <> struct NodeKindTraits<NodeKind::UnsupportedStmt> { static constexpr auto pretty = "UnsupportedStmt"; };
 template <> struct NodeKindTraits<NodeKind::OnGotoStmt>     { static constexpr auto pretty = "OnGotoStmt"; };
 template <> struct NodeKindTraits<NodeKind::OnGosubStmt>    { static constexpr auto pretty = "OnGosubStmt"; };
 template <> struct NodeKindTraits<NodeKind::OnErrorGotoStmt> { static constexpr auto pretty = "OnErrorGotoStmt"; };
@@ -134,6 +137,8 @@ inline auto prettyName(const NodeKind k) {
         case NodeKind::EraseStmt: return NodeKindTraits<NodeKind::EraseStmt>::pretty;
         case NodeKind::SwapStmt: return NodeKindTraits<NodeKind::SwapStmt>::pretty;
         case NodeKind::MidAssignStmt: return NodeKindTraits<NodeKind::MidAssignStmt>::pretty;
+        case NodeKind::ClsStmt: return NodeKindTraits<NodeKind::ClsStmt>::pretty;
+        case NodeKind::LocateStmt: return NodeKindTraits<NodeKind::LocateStmt>::pretty;
         case NodeKind::OnGotoStmt: return NodeKindTraits<NodeKind::OnGotoStmt>::pretty;
         case NodeKind::OnGosubStmt: return NodeKindTraits<NodeKind::OnGosubStmt>::pretty;
         case NodeKind::OnErrorGotoStmt: return NodeKindTraits<NodeKind::OnErrorGotoStmt>::pretty;
@@ -141,6 +146,7 @@ inline auto prettyName(const NodeKind k) {
         case NodeKind::ErrorStmt: return NodeKindTraits<NodeKind::ErrorStmt>::pretty;
         case NodeKind::OptionBaseStmt: return NodeKindTraits<NodeKind::OptionBaseStmt>::pretty;
         case NodeKind::OptionPrintZonesStmt: return NodeKindTraits<NodeKind::OptionPrintZonesStmt>::pretty;
+        case NodeKind::UnsupportedStmt: return NodeKindTraits<NodeKind::UnsupportedStmt>::pretty;
     }
     return "Node";
 }

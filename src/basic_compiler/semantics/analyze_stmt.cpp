@@ -45,6 +45,9 @@
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
 #include "basic_compiler/ast/MidAssignStmt.h"
+#include "basic_compiler/ast/UnsupportedStmt.h"
+#include "basic_compiler/ast/ClsStmt.h"
+#include "basic_compiler/ast/LocateStmt.h"
 #include <sstream>
 
 namespace gwbasic {
@@ -60,6 +63,23 @@ namespace gwbasic {
  *    validation, scope handling, and logs relevant events.
  */
 void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
+    if (auto us = dyn_cast<const UnsupportedStmt>(s)) {
+        // For now, unsupported statements are accepted but logged as no-ops.
+        std::ostringstream m; m << "Unsupported: " << us->keyword << " @ " << us->pos.line << ':' << us->pos.col;
+        log() << m.str() << '\n';
+        return;
+    }
+    if (dyn_cast<const ClsStmt>(s)) { log() << "CLS" << '\n'; return; }
+    if (auto lc = dyn_cast<const LocateStmt>(s)) {
+        if (typeOf(lc->row.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: LOCATE row must be numeric @ " << lc->pos.line << ':' << lc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        analyzeExpr(lc->row.get());
+        if (lc->col) {
+            if (typeOf(lc->col.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: LOCATE col must be numeric @ " << lc->pos.line << ':' << lc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+            analyzeExpr(lc->col.get());
+        }
+        log() << "Locate" << '\n';
+        return;
+    }
     if (auto ob = dyn_cast<const OptionBaseStmt>(s)) {
         if (!(ob->base == 0 || ob->base == 1)) { std::ostringstream m; m << "TypeError: OPTION BASE must be 0 or 1 @ " << ob->pos.line << ':' << ob->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         optionBase_ = ob->base;

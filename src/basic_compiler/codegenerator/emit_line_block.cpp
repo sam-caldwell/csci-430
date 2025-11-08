@@ -36,6 +36,9 @@
 #include "basic_compiler/ast/StopStmt.h"
 #include "basic_compiler/ast/SystemStmt.h"
 #include "basic_compiler/ast/MidAssignStmt.h"
+#include "basic_compiler/ast/UnsupportedStmt.h"
+#include "basic_compiler/ast/ClsStmt.h"
+#include "basic_compiler/ast/LocateStmt.h"
 #include <sstream>
 #include <format>
 #include <cmath>
@@ -694,9 +697,43 @@ namespace gwbasic {
                 out << ir << Symbols::LF;
                 { std::ostringstream m; m << "line " << currentLine_ << " ReturnStmt -> " << ir; log() << m.str() << Symbols::LF; }
                 stmtTerminates = true;
+            } else if (auto us = dyn_cast<UnsupportedStmt>(st.get())) {
+                // Not implemented yet: emit no code, just a log entry for visibility
+                { std::ostringstream m; m << "line " << currentLine_ << " UnsupportedStmt(" << us->keyword << ") (no-op)"; log() << m.str() << Symbols::LF; }
             } else if (auto cs = dyn_cast<CommonStmt>(st.get())) {
                 // COMMON has no direct codegen effect in this compiler; treat as no-op.
                 { std::ostringstream m; m << "line " << currentLine_ << " CommonStmt (no-op)"; log() << m.str() << Symbols::LF; }
+            } else if (isa<ClsStmt>(st.get())) {
+                // CLS: memset screen to 0 and reset cursor
+                { std::string ir = std::format("  call ptr @memset(ptr @gwb_screen, i32 0, i64 2000)"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 0, ptr @gwb_cur_row"); out << ir << Symbols::LF; }
+                { std::string ir = std::format("  store i32 0, ptr @gwb_cur_col"); out << ir << Symbols::LF; }
+                { std::ostringstream m; m << "line " << currentLine_ << " ClsStmt -> clear screen and reset cursor"; log() << m.str() << Symbols::LF; }
+            } else if (auto lc = dyn_cast<LocateStmt>(st.get())) {
+                // LOCATE row[,col]: 1-based, clamp to 1..25 rows and 1..80 cols, convert to 0-based for storage
+                // Row
+                {
+                    std::string dr = emitExpr(out, lc->row.get(), "");
+                    std::string ri = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", ri, dr); out << ir << Symbols::LF; }
+                    std::string lt1 = nextTemp(); { std::string ir = std::format("  {} = icmp slt i32 {}, 1", lt1, ri); out << ir << Symbols::LF; }
+                    std::string r1 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i32 1, i32 {}", r1, lt1, ri); out << ir << Symbols::LF; }
+                    std::string gt25 = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i32 {}, 25", gt25, r1); out << ir << Symbols::LF; }
+                    std::string rc = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i32 25, i32 {}", rc, gt25, r1); out << ir << Symbols::LF; }
+                    std::string rz = nextTemp(); { std::string ir = std::format("  {} = sub i32 {}, 1", rz, rc); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i32 {}, ptr @gwb_cur_row", rz); out << ir << Symbols::LF; }
+                }
+                // Col (optional)
+                if (lc->col) {
+                    std::string dc = emitExpr(out, lc->col.get(), "");
+                    std::string ci = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", ci, dc); out << ir << Symbols::LF; }
+                    std::string lt1c = nextTemp(); { std::string ir = std::format("  {} = icmp slt i32 {}, 1", lt1c, ci); out << ir << Symbols::LF; }
+                    std::string c1 = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i32 1, i32 {}", c1, lt1c, ci); out << ir << Symbols::LF; }
+                    std::string gt80 = nextTemp(); { std::string ir = std::format("  {} = icmp sgt i32 {}, 80", gt80, c1); out << ir << Symbols::LF; }
+                    std::string cc = nextTemp(); { std::string ir = std::format("  {} = select i1 {}, i32 80, i32 {}", cc, gt80, c1); out << ir << Symbols::LF; }
+                    std::string cz = nextTemp(); { std::string ir = std::format("  {} = sub i32 {}, 1", cz, cc); out << ir << Symbols::LF; }
+                    { std::string ir = std::format("  store i32 {}, ptr @gwb_cur_col", cz); out << ir << Symbols::LF; }
+                }
+                { std::ostringstream m; m << "line " << currentLine_ << " LocateStmt -> set row/col"; log() << m.str() << Symbols::LF; }
             } else if (auto rn = dyn_cast<RunStmt>(st.get())) {
                 // Reset all variables to zero/null and branch to first or specified line
                 for (const auto &v: variables_) { if (varAllocaName_.contains(v)) resetVar(out, v); }

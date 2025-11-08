@@ -305,6 +305,8 @@ private:
     std::unique_ptr<Stmt> parseChdir();
     /** Parse SCREEN [mode][,[colorswitch][,[apage][,vpage]]] */
     std::unique_ptr<Stmt> parseScreen();
+    /** Parse LOCATE row[,col] */
+    std::unique_ptr<Stmt> parseLocate();
     /** Parse CIRCLE x, y, r */
     std::unique_ptr<Stmt> parseCircle();
     /** Parse CLEAR */

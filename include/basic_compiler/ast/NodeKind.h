@@ -72,8 +72,11 @@ enum class NodeKind {
     EraseStmt,
     SwapStmt,
     MidAssignStmt,
+    ClsStmt,
     OptionBaseStmt,
     OptionPrintZonesStmt,
+    UnsupportedStmt,
+    LocateStmt,
 };
 
 } // namespace gwbasic

@@ -12,6 +12,8 @@
 #include "basic_compiler/ast/StopStmt.h"
 #include "basic_compiler/ast/SystemStmt.h"
 #include "basic_compiler/ast/RandomizeStmt.h"
+#include "basic_compiler/ast/UnsupportedStmt.h"
+#include "basic_compiler/ast/ClsStmt.h"
 
 namespace gwbasic {
 
@@ -114,6 +116,53 @@ std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
         if (match(TokenType::KwIf)) return make_node<EndIfStmt>({startTok.line, startTok.col});
         return make_node<EndStmt>({startTok.line, startTok.col});
     }
+    // Newly recognized keywords that are not yet implemented: parse as UnsupportedStmt
+    auto parseUnsupported = [&](const std::string& kw)->std::unique_ptr<Stmt> {
+        // Consume tokens to end-of-statement (before ':' or NEWLINE or EOF)
+        while (!(check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile))) advance();
+        auto n = make_node<UnsupportedStmt>({startTok.line, startTok.col});
+        n->keyword = kw;
+        return n;
+    };
+    if (match(TokenType::KwFiles)) { return parseUnsupported("FILES"); }
+    if (match(TokenType::KwName))  { return parseUnsupported("NAME"); }
+    if (match(TokenType::KwKill))  { return parseUnsupported("KILL"); }
+    if (match(TokenType::KwMkdir)) { return parseUnsupported("MKDIR"); }
+    if (match(TokenType::KwRmdir)) { return parseUnsupported("RMDIR"); }
+    if (match(TokenType::KwWidth)) { return parseUnsupported("WIDTH"); }
+    if (match(TokenType::KwLocate)) { auto n = parseLocate(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwCls))   { return make_node<ClsStmt>({startTok.line, startTok.col}); }
+    if (match(TokenType::KwPset))  { return parseUnsupported("PSET"); }
+    if (match(TokenType::KwPreset)){ return parseUnsupported("PRESET"); }
+    if (match(TokenType::KwPaint)) { return parseUnsupported("PAINT"); }
+    if (match(TokenType::KwDraw))  { return parseUnsupported("DRAW"); }
+    if (match(TokenType::KwView))  { return parseUnsupported("VIEW"); }
+    if (match(TokenType::KwWindow)){ return parseUnsupported("WINDOW"); }
+    if (match(TokenType::KwBeep))  { return parseUnsupported("BEEP"); }
+    if (match(TokenType::KwSound)) { return parseUnsupported("SOUND"); }
+    if (match(TokenType::KwPlay))  { return parseUnsupported("PLAY"); }
+    if (match(TokenType::KwKey))   { return parseUnsupported("KEY"); }
+    if (match(TokenType::KwPen))   { return parseUnsupported("PEN"); }
+    if (match(TokenType::KwStrig)) { return parseUnsupported("STRIG"); }
+    if (match(TokenType::KwTimer)) { return parseUnsupported("TIMER"); }
+    if (match(TokenType::KwTron))  { return parseUnsupported("TRON"); }
+    if (match(TokenType::KwTroff)) { return parseUnsupported("TROFF"); }
+    if (match(TokenType::KwCont))  { return parseUnsupported("CONT"); }
+    if (match(TokenType::KwLoad))  { return parseUnsupported("LOAD"); }
+    if (match(TokenType::KwSave))  { return parseUnsupported("SAVE"); }
+    if (match(TokenType::KwNew))   { return parseUnsupported("NEW"); }
+    if (match(TokenType::KwDelete)){ return parseUnsupported("DELETE"); }
+    if (match(TokenType::KwList))  { return parseUnsupported("LIST"); }
+    if (match(TokenType::KwLlist)) { return parseUnsupported("LLIST"); }
+    if (match(TokenType::KwAuto))  { return parseUnsupported("AUTO"); }
+    if (match(TokenType::KwRenum)) { return parseUnsupported("RENUM"); }
+    if (match(TokenType::KwEdit))  { return parseUnsupported("EDIT"); }
+    if (match(TokenType::KwPcopy)) { return parseUnsupported("PCOPY"); }
+    if (match(TokenType::KwReset)) { return parseUnsupported("RESET"); }
+    if (match(TokenType::KwShell)) { return parseUnsupported("SHELL"); }
+    if (match(TokenType::KwEnviron)){ return parseUnsupported("ENVIRON"); }
+    if (match(TokenType::KwOut))   { return parseUnsupported("OUT"); }
+    if (match(TokenType::KwWait))  { return parseUnsupported("WAIT"); }
     return nullptr;
 }
 
