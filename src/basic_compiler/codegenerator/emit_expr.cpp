@@ -4,6 +4,7 @@
 #include <format>
 #include "basic_compiler/Symbols.h"
 #include <sstream>
+#include <iomanip>
 #include <cctype>
 
 namespace gwbasic {
@@ -21,11 +22,17 @@ namespace gwbasic {
  *    string) and emits the corresponding LLVM IR instructions, returning
  *    a name/literal which the caller can use.
  */
+// NOLINTNEXTLINE(readability-function-cognitive-complexity,readability-function-size)
 std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix) {
+    constexpr int kInt16Bytes = 2;
+    constexpr int kInt32Bytes = 4;
+    constexpr int kDoubleBytes = 8;
+    constexpr int kSigDigits   = 17;
     if (auto num = dyn_cast<const NumberExpr>(e)) {
-        char buf[64];
-        std::snprintf(buf, sizeof(buf), "%.17g", num->value);
-        std::string s(buf);
+        std::ostringstream oss;
+        oss.setf(std::ios::fmtflags(0), std::ios::floatfield);
+        oss << std::setprecision(kSigDigits) << std::defaultfloat << num->value;
+        std::string s = oss.str();
         if (s.find('.') == std::string::npos && s.find('e') == std::string::npos && s.find('E') == std::string::npos)
             s += ".0";
 
@@ -420,29 +427,27 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             // If argument is variable
             if (auto v = dyn_cast<const VarExpr>(arg0)) {
                 if (!isStringVarNameCG(v->name)) {
-                    int bytes = 4;
+                    int bytes = kInt32Bytes;
                     switch (numKindOf(v->name)) {
-                        case NumKind::Int16: bytes = 2; break;
-                        case NumKind::Long32: bytes = 4; break;
-                        case NumKind::Single: bytes = 4; break;
-                        case NumKind::Double: bytes = 8; break;
+                        case NumKind::Int16: bytes = kInt16Bytes; break;
+                        case NumKind::Long32: [[fallthrough]];
+                        case NumKind::Single: bytes = kInt32Bytes; break;
+                        case NumKind::Double: bytes = kDoubleBytes; break;
                     }
-                    char buf[16]; std::snprintf(buf, sizeof(buf), "%d.0", bytes);
-                    return std::string(buf);
+                    return std::to_string(bytes) + ".0";
                 }
             }
             // If argument is array element reference
             if (auto ac = dyn_cast<const CallExpr>(arg0)) {
                 if (arrayDims_.contains(ac->callee) && !isStringVarNameCG(ac->callee)) {
-                    int bytes = 4;
+                    int bytes = kInt32Bytes;
                     switch (numKindOf(ac->callee)) {
-                        case NumKind::Int16: bytes = 2; break;
-                        case NumKind::Long32: bytes = 4; break;
-                        case NumKind::Single: bytes = 4; break;
-                        case NumKind::Double: bytes = 8; break;
+                        case NumKind::Int16: bytes = kInt16Bytes; break;
+                        case NumKind::Long32: [[fallthrough]];
+                        case NumKind::Single: bytes = kInt32Bytes; break;
+                        case NumKind::Double: bytes = kDoubleBytes; break;
                     }
-                    char buf[16]; std::snprintf(buf, sizeof(buf), "%d.0", bytes);
-                    return std::string(buf);
+                    return std::to_string(bytes) + ".0";
                 }
             }
             // Otherwise, treat as string and call strlen

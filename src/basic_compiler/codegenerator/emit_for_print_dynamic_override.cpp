@@ -9,14 +9,14 @@ namespace gwbasic {
  * Purpose: PRINT numeric with user-provided format string.
  */
 void CodeGenerator::emitForPrintDynamicOverride(std::ostringstream& out, const PrintStmt* pr, const std::string& val,
-                                                const std::string& currLineLabel, int& localCounter) { // NOLINT(bugprone-easily-swappable-parameters)
-    auto useFmt = emitExpr(out, pr->format.get(), currLineLabel);
+                                                std::string_view currLineLabel, int& localCounter) {
+    auto useFmt = emitExpr(out, pr->format.get(), std::string(currLineLabel));
     auto iv = nextTemp(); out << std::format("  {} = fptosi double {} to i64", iv, val) << Symbols::LF;
     auto dv = nextTemp(); out << std::format("  {} = sitofp i64 {} to double", dv, iv) << Symbols::LF;
     auto isInt = nextTemp(); out << std::format("  {} = fcmp oeq double {}, {}", isInt, dv, val) << Symbols::LF;
-    auto intLbl = currLineLabel + std::string("_print_int_") + std::to_string(++localCounter);
-    auto fltLbl = currLineLabel + std::string("_print_flt_") + std::to_string(localCounter);
-    auto contLbl = currLineLabel + std::string("_print_cont_") + std::to_string(localCounter);
+    auto intLbl = std::string(currLineLabel) + std::string("_print_int_") + std::to_string(++localCounter);
+    auto fltLbl = std::string(currLineLabel) + std::string("_print_flt_") + std::to_string(localCounter);
+    auto contLbl = std::string(currLineLabel) + std::string("_print_cont_") + std::to_string(localCounter);
     out << std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl, fltLbl) << Symbols::LF;
     out << intLbl << ":" << Symbols::LF;
     if (pr->channel >= 1) {

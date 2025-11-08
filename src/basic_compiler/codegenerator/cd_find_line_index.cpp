@@ -1,0 +1,16 @@
+// (c) 2025 Sam Caldwell. All Rights Reserved.
+#include "basic_compiler/codegen/CodeGenerator.h"
+
+namespace gwbasic {
+
+/*
+ * Function: CodeGenerator::cdFindLineIndex
+ * Purpose: Find index of a line number within 'lines' or -1 if missing.
+ */
+int CodeGenerator::cdFindLineIndex(const std::vector<int>& lines, int line) const {
+    for (size_t i = 0; i < lines.size(); ++i) if (lines[i] == line) return static_cast<int>(i);
+    return -1;
+}
+
+} // namespace gwbasic
+

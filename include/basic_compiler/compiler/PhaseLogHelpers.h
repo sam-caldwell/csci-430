@@ -93,6 +93,7 @@ gwbasic::Program parseFileNoLogs(const std::string& fpath);
  *  - outCanon: Canonical path to the root file
  *  - outMinLine: Minimum line number in the root program (or 0 if none)
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 gwbasic::Program tokenizeRootWithLogs(const std::string& path,
                                       const std::string& lexLogPath,
                                       const std::string& syntaxLogPath,

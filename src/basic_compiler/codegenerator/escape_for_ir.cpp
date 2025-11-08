@@ -18,21 +18,9 @@ std::string CodeGenerator::escapeForIR(const std::string& s) {
      */
     std::string out;
     for (const unsigned char c : s) {
-        switch (c) {
-            case '\\': out += "\\5C"; break;
-            case Symbols::DOUBLE_QUOTE.first(): out += "\\22"; break;
-            case Symbols::LF.first(): out += "\\0A"; break;
-            case '\t': out += "\\09"; break;
-            case '\r': out += "\\0D"; break;
-            default:
-                if (c >= 32 && c < 127) out.push_back(static_cast<char>(c));
-                else { char buf[5]; std::snprintf(buf, sizeof(buf), "\\%02X", c); out += buf; }
-                break;
-        }
+        CodeGenerator::appendEscapedByte(out, c);
     }
     return out;
 }
-
-// other helper methods are defined in separate compilation units
 
 } // namespace gwbasic

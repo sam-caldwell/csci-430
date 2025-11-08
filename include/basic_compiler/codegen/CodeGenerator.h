@@ -331,6 +331,9 @@ private:
         std::string s = "resume_next_l"; s += std::to_string(ln); s += "_"; s += std::to_string(stmtIndex); return s;
     }
 
+    // Byte escaping helper for IR string literals (one-function-per-file)
+    static void appendEscapedByte(std::string& out, unsigned char c);
+
     // Declaration collection
     /** Collect declarations, variables, strings, and line ordering. */
     void collectDecls(const Program& program);
@@ -350,8 +353,14 @@ private:
     void cdSeedFromSemantics();
     void cdAssignInputPromptLiteralIds(const std::vector<int>& lines);
     void cdCollectDataItems(const std::vector<int>& lines);
+    void cdCollectDataItemsFromLine(int ln);
+    void cdCollectDataItemsFromStmt(const class DataStmt& ds);
     void cdBuildRegionDataStartIdx(const std::vector<int>& lines);
     void cdComputeHandlerSkipAfter(const std::vector<int>& lines);
+    void cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets);
+    int cdFindLineIndex(const std::vector<int>& lines, int line) const;
+    int cdFindResumeEndIdx(const std::vector<int>& lines, int startIdx) const;
+    int cdComputeSkipFromIndices(const std::vector<int>& lines, std::pair<int,int> idx) const;
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
     void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
@@ -642,6 +651,10 @@ private:
                                const ForStmt* fs,
                                const std::string& currLineLabel,
                                int& localCounter);
+    bool emitForBodyStatement(std::ostringstream& out,
+                              const Stmt* s,
+                              const std::string& currLineLabel,
+                              int& localCounter);
 
     // FOR body per-kind helpers (one function per file)
     void emitForHandleAssign(std::ostringstream& out, const AssignStmt* asg, const std::string& currLineLabel);
@@ -660,10 +673,10 @@ private:
     void emitForPrintStringItem(std::ostringstream& out, const PrintStmt* pr, const StringExpr* se, bool addNL);
     void emitForPrintConstNumberItem(std::ostringstream& out, const PrintStmt* pr, double cv, bool addNL, bool nextStartsWithSpace);
     void emitForPrintDynamicOverride(std::ostringstream& out, const PrintStmt* pr, const std::string& val,
-                                     const std::string& currLineLabel, int& localCounter);
+                                     std::string_view currLineLabel, int& localCounter);
     void emitForPrintDynamicAuto(std::ostringstream& out, const PrintStmt* pr, const std::string& val,
                                  bool addNL, bool nextStartsWithSpace,
-                                 const std::string& currLineLabel, int& localCounter);
+                                 std::string_view currLineLabel, int& localCounter);
 
     /** Emit common error-path stores and handler dispatch switch. */
     void emitErrorDispatch(std::ostringstream& out, int errCode, int lineNo, int stmtIndex) {

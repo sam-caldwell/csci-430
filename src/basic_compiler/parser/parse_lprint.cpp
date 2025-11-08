@@ -12,6 +12,7 @@ namespace gwbasic {
  *    Same as PRINT but without optional '#n' channel prefix; implicitly
  *    targets the default printer channel.
  */
+// NOLINTNEXTLINE(readability-function-cognitive-complexity,bugprone-branch-clone)
 std::unique_ptr<Stmt> Parser::parseLprint() {
     const int l = peek().line;
     const int c = peek().col;
@@ -20,9 +21,7 @@ std::unique_ptr<Stmt> Parser::parseLprint() {
     std::unique_ptr<Expr> fmt;
     if (match(TokenType::KwUsing)) {
         fmt = parseExpression();
-        if (match(TokenType::Semicolon)) {
-        } else if (match(TokenType::Comma)) {
-        }
+        (void)(match(TokenType::Semicolon) || match(TokenType::Comma));
     }
     // Degenerate: LPRINT ; or LPRINT , (no items)
     if (match(TokenType::Semicolon)) {
@@ -46,8 +45,7 @@ std::unique_ptr<Stmt> Parser::parseLprint() {
         if (check(TokenType::KwUsing)) {
             advance();
             fmt = parseExpression();
-            if (match(TokenType::Semicolon)) {}
-            else if (match(TokenType::Comma)) {}
+            (void)(match(TokenType::Semicolon) || match(TokenType::Comma));
             continue;
         }
         if (check(TokenType::String) || check(TokenType::Integer) || check(TokenType::Float) || check(TokenType::Identifier) || check(TokenType::LParen) || check(TokenType::Plus) || check(TokenType::Minus) || check(TokenType::KwNot)) {
@@ -76,4 +74,3 @@ std::unique_ptr<Stmt> Parser::parseLprint() {
 }
 
 } // namespace gwbasic
-

@@ -25,7 +25,9 @@ bool takeOptValue(const std::string& arg,
                   std::optional<std::string>& out) {
     if (arg == name) {
         if (i + 1 < argc) {
-            out = argv[++i];
+            ++i;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            out = argv[i];
             return true;
         }
         // Missing value; do not consume. Let the caller handle error/reporting.

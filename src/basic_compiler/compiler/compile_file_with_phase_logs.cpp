@@ -23,6 +23,8 @@ namespace gwbasic {
  *  - Reads file contents and forwards to compileStringWithPhaseLogs, so
  *    string- and file-based flows share identical behavior and logging.
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+// NOLINTBEGIN(bugprone-easily-swappable-parameters)
 std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
                                                const std::string& lexLogPath,
                                                const std::string& syntaxLogPath,
@@ -85,5 +87,6 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
     if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(irBody));
     return Compiler::addDefaultTripleIfMissing(irBody);
 }
+// NOLINTEND(bugprone-easily-swappable-parameters)
 
 } // namespace gwbasic

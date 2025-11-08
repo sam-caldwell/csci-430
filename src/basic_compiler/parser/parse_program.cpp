@@ -20,6 +20,7 @@ namespace gwbasic {
  *  - Skips leading blank lines; repeatedly parses a numbered line until
  *    EndOfFile, producing the program AST.
  */
+// NOLINTNEXTLINE(readability-function-size,readability-function-cognitive-complexity)
 Program Parser::parseProgram() {
     Program prog;
     while (!atEnd()) {
@@ -36,7 +37,7 @@ Program Parser::parseProgram() {
     // eliminating structural marker statements (NEXT/ELSE/END IF).
     Program folded;
     struct BlockEntry {
-        enum class Kind { ForK, IfK, WhileK } kind;
+        enum class Kind { ForK, IfK, WhileK } kind{Kind::ForK};
         ForStmt* f{nullptr};
         IfBlockStmt* ib{nullptr};
         WhileStmt* w{nullptr};

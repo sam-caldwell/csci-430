@@ -52,6 +52,8 @@ public:
     Program parseProgram();
 
 private:
+    // Helper to fold multi-line blocks (FOR/IF/WHILE) after parsing.
+    Program foldProgramBlocks(Program&& prog);
     /*
      * Property: tokens_
      * Purpose:

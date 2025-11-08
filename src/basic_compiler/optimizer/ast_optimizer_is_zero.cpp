@@ -18,8 +18,7 @@ namespace gwbasic {
  *  - true if `e` is a `NumberExpr` equal to 0.0; false otherwise.
  */
 bool AstOptimizer::isZero(const Expr* e) {
-    double v; return asNumber(e, v) && v == 0.0;
+    double v = 0.0; return asNumber(e, v) && v == 0.0;
 }
 
 } // namespace gwbasic
-
