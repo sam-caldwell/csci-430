@@ -197,7 +197,32 @@
   - Referencing arrays before DIM or after ERASE produces `array '<name>' not DIM'd`.
 - Code generation:
   - Ensures per-array stack allocation on first use (numeric/string variants) and reuses allocas.
-  - Linearization from multi-index to linear element with GEP; prints use typed formats.
+- Linearization from multi-index to linear element with GEP; prints use typed formats.
+
+---
+
+## 07 Nov 2025
+
+### Refactors
+- Direct-stream IR emission across codegen (emit_if_block, emit_for, emit_line_block, emit_while, emit_comparison), reducing scoped temporaries and improving readability.
+- Small helpers extracted in codegen to reduce duplication and complexity:
+  - `loadVarAsDouble`, `computeForCond`, `emitForIncrement`
+  - `emitLinearIndex` for array linearization
+  - `emitErrorDispatch` for standard error-path and handler switch
+
+### Features
+- WIDTH is fully honored at runtime; PRINT wrapping now uses dynamic screen width. LOCATE clamps use dynamic width.
+- WRITE #n supported inside IF THEN/ELSE bodies.
+- Filesystem/OS/Env/Console:
+  - Implemented MKDIR, RMDIR, KILL, NAME; SHELL [string], ENVIRON "NAME=VALUE"; BEEP.
+  - No-op codegen + logs for other EBNF commands pending implementation.
+
+### Tests & Coverage
+- Added integration tests:
+  - WIDTH + PRINT together IR assertions
+  - WHILE body with MID$ on array element
+  - GOSUB inline body with MID$ assignment
+- Raised coverage threshold to 97% and added tests to meet it.
   - Numeric stores emit `fptosi`/`fptrunc`/bit-casts as appropriate for target element type.
   - String array elements are stored as pointers; string operations use `@strncpy`/`@malloc` helpers.
 - Runtime behavior helpers:
@@ -354,3 +379,10 @@
 ### Metrics
 - The new paths integrate with existing metrics (token counting, AST snapshots, IR instruction counts). Unsupported
   statements contribute to token and AST counts but produce no IR.
+- Additional IR tests:
+  - Filesystem/Env/OS: fs/env/os basic IR emission
+  - Comparison ops: numeric+string paths for =,<>,<,<=,>,>=
+  - FOR negative-step condition + zone padding
+  - Inline subroutine MID$ OOB error dispatch
+  - IF-block: MID$ OOB and channel USING; WRITE #n with strings
+  - Coverage currently ~94% on emit_* scope; subsequent pass will target deep paths in emit_if_block/emit_for/emit_subroutine_inline to reach ≥97%.
