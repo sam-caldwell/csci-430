@@ -281,6 +281,10 @@ private:
      */
     static bool constEval(const Expr* e, double& out);
 
+    // Helpers for constEval (defined in separate TUs to maintain one-function-per-file)
+    static bool constEvalUnary(const class UnaryExpr& u, double& out);
+    static bool constEvalBinary(const class BinaryExpr& b, double& out);
+
     // Function utilities
     /**
      * Function: SemanticAnalyzer::isKnownNumericFunction
