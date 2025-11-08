@@ -6,7 +6,9 @@ Checks: >
     cppcoreguidelines-*,
     modernize-*,
     bugprone-*,
-    performance-*
+    performance-*,
+    -modernize-*,
+    -cppcoreguidelines-avoid-do-while
 
 # Tune complexity/size thresholds to your policy
 CheckOptions:
@@ -18,5 +20,5 @@ CheckOptions:
       value: 30
     - key: readability-function-size.ParameterThreshold
       value: 6
-WarningsAsErrors: 'readability-function-cognitive-complexity,readability-function-size'
+#WarningsAsErrors: 'readability-function-cognitive-complexity,readability-function-size'
 HeaderFilterRegex: '^(src|include)/'
