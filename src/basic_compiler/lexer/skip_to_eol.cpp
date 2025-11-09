@@ -5,12 +5,12 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::skipToEOL
- * Inputs:
+ * Summary:
+ *  Consume characters until a newline or end-of-input is reached.
+ * Parameters:
  *  - none
- * Outputs:
+ * Returns:
  *  - void
- * Theory of operation:
- *  - Consumes characters until a newline or end-of-input is reached.
  */
 void Lexer::skipToEOL() {
     skipWhile([](const char c){ return c != Symbols::LF.first(); });

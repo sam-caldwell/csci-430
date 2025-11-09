@@ -6,14 +6,12 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::number
- * Inputs:
- *  - none (reads from current source position)
- * Outputs:
- *  - Token: Integer or Float token with lexeme and source location
- * Theory of operation:
- *  - Scans digits with optional decimal point and optional scientific
- *    exponent (E or D with optional sign). Classifies as Float when a
- *    dot or exponent is present; otherwise Integer.
+ * Summary:
+ *  Scan a numeric literal and return Integer or Float token.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - Token: Integer or Float token with lexeme and location
  */
 Token Lexer::number() {
     const int startLine = line_;

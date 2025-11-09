@@ -5,13 +5,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::nodeName
- * Inputs:
+ * Summary:
+ *  Return a human-readable statement type name for diagnostics.
+ * Parameters:
  *  - s: Statement pointer (may be null)
- * Outputs:
- *  - const char*: Human-readable type name for diagnostics
- * Theory of operation:
- *  - Delegates to prettyName() using the statement's NodeKind, falling back
- *    to AbstractStmt for null pointers.
+ * Returns:
+ *  - const char*: Pretty name for the node kind
  */
 const char* Parser::nodeName(const Stmt* s) {
     return prettyName(s ? s->getKind() : NodeKind::AbstractStmt);

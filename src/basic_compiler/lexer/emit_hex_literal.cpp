@@ -7,17 +7,16 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::emitAmpLiteral
- * Purpose:
- *  - Consume an '&' numeric literal in one of the following forms:
- *      &H[0-9A-F]+  (hex)
- *      &O[0-7]+     (octal)
- *      &[0-7]+      (octal shorthand)
- *      &B[0-1]+     (binary)
- *    Emits an Integer token with the parsed decimal value.
- * Inputs:
- *  - line/col: token position metadata captured by the caller
+ * Summary:
+ *  Parse an '&' numeric literal (&H, &O, &B, or octal shorthand) and emit it.
+ * Parameters:
+ *  - out: Token vector to append the emitted Integer token to
+ *  - line: Source line for the token's starting position
+ *  - col: Source column for the token's starting position
+ * Returns:
+ *  - void
  * Throws:
- *  - LexError when the format is invalid
+ *  - LexError when the literal format is invalid
  */
 void Lexer::emitAmpLiteral(std::vector<Token>& out, const int line, const int col) {
     // Caller should have peek() == '&'

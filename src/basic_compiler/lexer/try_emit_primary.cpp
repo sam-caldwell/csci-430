@@ -6,11 +6,12 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::tryEmitPrimary
- * Purpose:
- *  - Try to emit a primary token category starting at the current
- *    position: number, identifier/keyword, or string literal.
- * Outputs:
- *  - bool: true if a token was emitted; false if none matched
+ * Summary:
+ *  Try to emit a number, identifier/keyword, or string literal token.
+ * Parameters:
+ *  - out: Token vector to append the emitted token to
+ * Returns:
+ *  - bool: true if a token was emitted; false otherwise
  */
 bool Lexer::tryEmitPrimary(std::vector<Token>& out) {
     const unsigned char cu = static_cast<unsigned char>(peek());

@@ -4,13 +4,12 @@
 namespace gwbasic {
 /*
  * Function: Lexer::identifierOrKeyword
- * Inputs:
- *  - none (reads from current position)
- * Outputs:
- *  - Token: Identifier or specific keyword token with text and location
- * Theory of operation:
- *  - Accumulates alphanumeric/underscore characters, uppercases a copy
- *    to compare against known GW-BASIC keywords; otherwise returns IDENT.
+ * Summary:
+ *  Scan an identifier or keyword and return the corresponding token.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - Token: Identifier or keyword token with text and location
  */
 Token Lexer::identifierOrKeyword() {
 

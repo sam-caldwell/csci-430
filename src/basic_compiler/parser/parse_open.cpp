@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseOpen
- * Purpose:
- *  - Parse the OPEN statement: OPEN <string-expr> FOR (INPUT|OUTPUT) AS #<channel>
- * Inputs:
- *  - none (assumes 'OPEN' matched by caller)
- * Outputs:
- *  - OpenStmt: captures filename expression, file mode, and channel number
+ * Summary:
+ *  Parse OPEN <string-expr> FOR (INPUT|OUTPUT) AS #<channel>.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: OpenStmt with filename, mode, and channel
  */
 std::unique_ptr<Stmt> Parser::parseOpen() {
     const int l = peek().line;

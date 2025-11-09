@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseLogical
- * Purpose:
- *  - Parse left-associative logical AND/OR over comparison expressions.
- * Inputs:
+ * Summary:
+ *  Parse left-associative logical AND/OR over comparison expressions.
+ * Parameters:
  *  - none
- * Outputs:
- *  - Expr: expression node
+ * Returns:
+ *  - std::unique_ptr<Expr>: Expression node
  */
 std::unique_ptr<Expr> Parser::parseLogical() {
     auto left = parseComparison();
@@ -31,4 +31,3 @@ std::unique_ptr<Expr> Parser::parseLogical() {
 }
 
 } // namespace gwbasic
-

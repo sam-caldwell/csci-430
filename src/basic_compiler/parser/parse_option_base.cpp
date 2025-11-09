@@ -7,8 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseOptionBase
- * Purpose:
- *  - Parse OPTION BASE <Integer> (0 or 1)
+ * Summary:
+ *  Parse OPTION BASE <Integer> (0 or 1) into an OptionBaseStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: OptionBaseStmt with base value
  */
 std::unique_ptr<Stmt> Parser::parseOptionBase() {
     // assumes 'OPTION' already matched; current should be 'BASE'
@@ -21,4 +25,3 @@ std::unique_ptr<Stmt> Parser::parseOptionBase() {
 }
 
 } // namespace gwbasic
-

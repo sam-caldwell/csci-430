@@ -14,12 +14,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::tryParseGotoGosub
- * Inputs:
+ * Summary:
+ *  Parse GOTO/GOSUB followed by a required integer line number.
+ * Parameters:
  *  - startTok: Starting token for position metadata
- * Outputs:
- *  - GotoStmt or GosubStmt on success; nullptr when neither keyword matches.
- * Theory of operation:
- *  - Consumes GOTO/GOSUB followed by a required integer line number.
+ * Returns:
+ *  - std::unique_ptr<Stmt>: GotoStmt, GosubStmt, or nullptr if not matched
  */
 std::unique_ptr<Stmt> Parser::tryParseGotoGosub(const Token& startTok) {
     if (match(TokenType::KwGoto)) {

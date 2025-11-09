@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseScreen
- * Purpose:
- *  - Parse SCREEN [mode][,[colorswitch][,[apage][,vpage]]]
- * Inputs:
- *  - none (assumes identifier 'SCREEN' was consumed by caller)
- * Outputs:
- *  - ScreenStmt with up to 4 optional numeric expressions
+ * Summary:
+ *  Parse SCREEN [mode][,[colorswitch][,[apage][,vpage]]] into a ScreenStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ScreenStmt with up to four optional expressions
  */
 std::unique_ptr<Stmt> Parser::parseScreen() {
     std::unique_ptr<Expr> mode, cs, ap, vp;
@@ -39,4 +39,3 @@ std::unique_ptr<Stmt> Parser::parseScreen() {
 }
 
 } // namespace gwbasic
-

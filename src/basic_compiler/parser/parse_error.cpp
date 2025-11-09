@@ -5,11 +5,18 @@
 
 namespace gwbasic {
 
-/* Parse ERROR numeric-expression */
+/*
+ * Function: Parser::parseError
+ * Summary:
+ *  Parse ERROR statement followed by a numeric expression.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ErrorStmt with error code expression
+ */
 std::unique_ptr<Stmt> Parser::parseError() {
     auto e = parseExpression();
     return make_node<ErrorStmt>({0,0}, std::move(e));
 }
 
 } // namespace gwbasic
-

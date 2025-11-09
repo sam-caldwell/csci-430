@@ -5,10 +5,18 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseEnviron
+ * Summary:
+ *  Parse ENVIRON statement assigning an environment variable string.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: EnvironStmt with string expression
+ */
 std::unique_ptr<Stmt> Parser::parseEnviron() {
     auto s = parseExpression();
     return make_node<EnvironStmt>({0,0}, std::move(s));
 }
 
 } // namespace gwbasic
-

@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseWidth
- * Purpose:
- *  - Parse WIDTH [device$,] columns according to EBNF.
- * Inputs:
- *  - none (assumes 'WIDTH' already matched by caller)
- * Outputs:
- *  - WidthStmt with optional device expression and required columns expression.
+ * Summary:
+ *  Parse WIDTH [device$,] columns according to EBNF.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: WidthStmt with device and columns expressions
  */
 std::unique_ptr<Stmt> Parser::parseWidth() {
     const int l = peek().line, c = peek().col;
@@ -30,4 +30,3 @@ std::unique_ptr<Stmt> Parser::parseWidth() {
 }
 
 } // namespace gwbasic
-

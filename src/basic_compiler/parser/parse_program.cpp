@@ -12,13 +12,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseProgram
- * Inputs:
- *  - none (consumes internal token stream)
- * Outputs:
- *  - Program: AST containing ordered lines with statements
- * Theory of operation:
- *  - Skips leading blank lines; repeatedly parses a numbered line until
- *    EndOfFile, producing the program AST.
+ * Summary:
+ *  Parse the entire token stream into a Program AST and fold blocks.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - Program: Ordered lines with statements; block markers folded
  */
 // NOLINTNEXTLINE(readability-function-size,readability-function-cognitive-complexity)
 Program Parser::parseProgram() {
@@ -42,8 +41,20 @@ Program Parser::parseProgram() {
         IfBlockStmt* ib{nullptr};
         WhileStmt* w{nullptr};
         bool ifInElse{false};
+        /// Function: BlockEntry::For
+        /// Summary: Create a FOR block entry for folding.
+        /// Parameters: p (ForStmt*): Open FOR statement pointer.
+        /// Returns: BlockEntry: Initialized as Kind::ForK with pointer set.
         static BlockEntry For(ForStmt* p) { BlockEntry b; b.kind = Kind::ForK; b.f = p; return b; }
+        /// Function: BlockEntry::If
+        /// Summary: Create an IF block entry for folding.
+        /// Parameters: p (IfBlockStmt*): Open IF block statement pointer.
+        /// Returns: BlockEntry: Initialized as Kind::IfK with pointer set.
         static BlockEntry If(IfBlockStmt* p) { BlockEntry b; b.kind = Kind::IfK; b.ib = p; return b; }
+        /// Function: BlockEntry::While
+        /// Summary: Create a WHILE block entry for folding.
+        /// Parameters: p (WhileStmt*): Open WHILE statement pointer.
+        /// Returns: BlockEntry: Initialized as Kind::WhileK with pointer set.
         static BlockEntry While(WhileStmt* p) { BlockEntry b; b.kind = Kind::WhileK; b.w = p; return b; }
     };
     std::vector<BlockEntry> stack;

@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseBsave
- * Purpose:
- *  - Parse BSAVE "filename", offset, length
- * Inputs:
- *  - none (assumes 'BSAVE' was matched by caller)
- * Outputs:
- *  - BsaveStmt: filename, offset, and length expressions
+ * Summary:
+ *  Parse BSAVE "filename", offset, length into a BsaveStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: BsaveStmt with filename, offset, length
  */
 std::unique_ptr<Stmt> Parser::parseBsave() {
     if (!check(TokenType::String)) throw ParseError("Expected filename string after BSAVE");
@@ -25,4 +25,3 @@ std::unique_ptr<Stmt> Parser::parseBsave() {
 }
 
 } // namespace gwbasic
-

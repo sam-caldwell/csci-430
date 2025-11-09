@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseFiles
- * Purpose:
- *  - Parse FILES [device$,] [path_or_pattern$]
- * Inputs:
- *  - none (assumes 'FILES' already matched by caller)
- * Outputs:
- *  - FilesStmt with optional device and pattern expressions.
+ * Summary:
+ *  Parse FILES [device$,] [path_or_pattern$] into a FilesStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: FilesStmt with optional device and pattern
  */
 std::unique_ptr<Stmt> Parser::parseFiles() {
     const int l = peek().line, c = peek().col;
@@ -36,4 +36,3 @@ std::unique_ptr<Stmt> Parser::parseFiles() {
 }
 
 } // namespace gwbasic
-

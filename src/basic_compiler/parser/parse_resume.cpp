@@ -5,7 +5,15 @@
 
 namespace gwbasic {
 
-/* Parse RESUME [0|NEXT|line] */
+/*
+ * Function: Parser::parseResume
+ * Summary:
+ *  Parse RESUME with optional 0, NEXT, or specific line.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ResumeStmt indicating resume behavior
+ */
 std::unique_ptr<Stmt> Parser::parseResume() {
     // Current token is KwResume already consumed by caller
     if (check(TokenType::KwNext)) { advance(); return make_node<ResumeStmt>({0,0}, ResumeStmt::Kind::Next); }

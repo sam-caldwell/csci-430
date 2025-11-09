@@ -7,13 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseUnary
- * Inputs:
+ * Summary:
+ *  Parse unary +, -, and NOT applied to the next expression.
+ * Parameters:
  *  - none
- * Outputs:
- *  - Expr: unary +/- applied to a primary expression
- * Theory of operation:
- *  - Recognizes leading '+' or '-' and constructs a UnaryExpr; otherwise
- *    defers to parsePrimary().
+ * Returns:
+ *  - std::unique_ptr<Expr>: Unary expression or next precedence level
  */
 std::unique_ptr<Expr> Parser::parseUnary() {
     if (match(TokenType::Plus)) return std::make_unique<UnaryExpr>(Symbols::PLUS.first(), parseUnary());

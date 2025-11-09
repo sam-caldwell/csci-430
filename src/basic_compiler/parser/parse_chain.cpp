@@ -14,9 +14,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseChain
- * Inputs: none (assumes CHAIN already consumed)
- * Outputs: ChainStmt with optional filename, target line, and ALL flag.
- * Grammar accepted: CHAIN ["file"][, <line>][, ALL]
+ * Summary:
+ *  Parse CHAIN ["file"][, line][, ALL] into a ChainStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ChainStmt with optional file, line, and ALL flag
  */
 std::unique_ptr<Stmt> Parser::parseChain() { // NOLINT(readability-function-size)
     std::optional<int> target;

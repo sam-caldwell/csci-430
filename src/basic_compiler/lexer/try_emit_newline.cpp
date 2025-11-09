@@ -9,10 +9,11 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::tryEmitNewline
- * Purpose:
- *  - If the current character is a newline, consume it and emit a
- *    NewLine token, updating beginning-of-line state.
- * Outputs:
+ * Summary:
+ *  Consume a newline and emit a NewLine token, updating BOL state.
+ * Parameters:
+ *  - out: Token vector to append the emitted token to
+ * Returns:
  *  - bool: true if a newline was consumed and emitted; false otherwise
  */
 bool Lexer::tryEmitNewline(std::vector<Token>& out) {

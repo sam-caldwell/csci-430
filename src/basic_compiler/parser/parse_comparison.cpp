@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseComparison
- * Purpose:
- *  - Parse comparison expressions (=, <>, <, <=, >, >=).
- * Inputs:
+ * Summary:
+ *  Parse comparison expressions: =, <>, <, <=, >, >=.
+ * Parameters:
  *  - none
- * Outputs:
- *  - Expr: expression node with comparison precedence
+ * Returns:
+ *  - std::unique_ptr<Expr>: Expression node with comparison precedence
  */
 std::unique_ptr<Expr> Parser::parseComparison() {
     auto left = parseTerm();

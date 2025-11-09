@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseBload
- * Purpose:
- *  - Parse BLOAD "filename"[,offset]
- * Inputs:
- *  - none (assumes 'BLOAD' was matched by caller)
- * Outputs:
- *  - BloadStmt: filename expression and optional numeric offset
+ * Summary:
+ *  Parse BLOAD "filename"[,offset] into a BloadStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: BloadStmt with filename and optional offset
  */
 std::unique_ptr<Stmt> Parser::parseBload() {
     if (!check(TokenType::String)) throw ParseError("Expected filename string after BLOAD");
@@ -23,4 +23,3 @@ std::unique_ptr<Stmt> Parser::parseBload() {
 }
 
 } // namespace gwbasic
-

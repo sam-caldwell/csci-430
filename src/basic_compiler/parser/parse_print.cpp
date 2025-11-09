@@ -8,14 +8,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parsePrint
- * Inputs:
- *  - none (assumes PRINT already consumed)
- * Outputs:
- *  - PrintStmt: printing either a string literal or an expression
- * Theory of operation:
- *  - If the next token is STRING, returns a PrintStmt with StringExpr;
- *    otherwise parses an expression and returns a PrintStmt for numeric
- *    output.
+ * Summary:
+ *  Parse PRINT (and variants) into a PrintStmt with items and separators.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: PrintStmt capturing items, seps, format, channel
  */
 std::unique_ptr<Stmt> Parser::parsePrint() {
     const int l = peek().line;

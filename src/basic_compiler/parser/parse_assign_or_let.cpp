@@ -9,12 +9,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseAssignOrLet
- * Purpose:
- *  - Parse assignment statements with optional leading LET keyword.
- * Inputs:
- *  - none (assumes current token is LET or Identifier)
- * Outputs:
- *  - AssignStmt or ArrayAssignStmt depending on presence of '(index)'
+ * Summary:
+ *  Parse LET/assignment for scalars, arrays, and MID$ slice assignments.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: AssignStmt, ArrayAssignStmt, or MidAssignStmt
  */
 std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
     if (match(TokenType::KwLet)) {

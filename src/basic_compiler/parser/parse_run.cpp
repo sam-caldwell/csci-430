@@ -13,9 +13,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseRun
- * Inputs: none (assumes RUN already consumed)
- * Outputs: RunStmt with optional target line number
- * Theory: Accepts optional integer; otherwise restarts at first line.
+ * Summary:
+ *  Parse RUN "file"[, line] into a RunStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: RunStmt with filename and optional line
  */
 std::unique_ptr<Stmt> Parser::parseRun() {
     // Strict: require filename string; optional , <line>

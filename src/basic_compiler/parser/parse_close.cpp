@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseClose
- * Purpose:
- *  - Parse the CLOSE statement: CLOSE #<channel>
- * Inputs:
- *  - none (assumes 'CLOSE' was matched by caller)
- * Outputs:
- *  - CloseStmt: channel number to close
+ * Summary:
+ *  Parse CLOSE #<channel> into a CloseStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: CloseStmt with channel number
  */
 std::unique_ptr<Stmt> Parser::parseClose() {
     int l = peek().line, c = peek().col;
@@ -23,4 +23,3 @@ std::unique_ptr<Stmt> Parser::parseClose() {
 }
 
 } // namespace gwbasic
-

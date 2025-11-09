@@ -7,15 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parsePower
- * Inputs:
+ * Summary:
+ *  Parse a right-associative exponentiation expression.
+ * Parameters:
  *  - none
- * Outputs:
- *  - Expr: expression tree for exponentiation (right-associative)
- * Theory of operation:
- *  - Parses a primary expression, then if '^' follows, parses the RHS via
- *    parseUnary() to allow unary signs in exponents, and constructs a
- *    BinaryExpr(Pow) combining them. Right associativity is achieved by
- *    delegating RHS back through parseUnary() which recurses into parsePower().
+ * Returns:
+ *  - std::unique_ptr<Expr>: Expression tree for exponentiation
  */
 std::unique_ptr<Expr> Parser::parsePower() {
     auto left = parsePrimary();
@@ -27,4 +24,3 @@ std::unique_ptr<Expr> Parser::parsePower() {
 }
 
 } // namespace gwbasic
-

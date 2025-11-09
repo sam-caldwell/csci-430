@@ -6,13 +6,12 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::setLexLogPath
- * Inputs:
+ * Summary:
+ *  Enable lexer token logging to the specified file path.
+ * Parameters:
  *  - path: Filesystem path for the lexical analysis log output
- * Outputs:
+ * Returns:
  *  - void
- * Theory of operation:
- *  - Opens/truncates the specified file and enables token logging; each
- *    token produced during tokenize() is appended to this file.
  */
 void Lexer::setLexLogPath(const std::string& path) {
     lexLogger_.open(path, /*append=*/false);

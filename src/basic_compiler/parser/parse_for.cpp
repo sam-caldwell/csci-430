@@ -7,16 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseFor
- * Inputs:
- *  - none (assumes FOR already consumed)
- * Outputs:
- *  - ForStmt: loop construct with optional STEP and body
- * Theory of operation:
- *  - Parses induction variable, start expression, TO end expression,
- *    optional STEP, then collects statements until NEXT on the same line.
- *    If end-of-line is reached before NEXT, treat as a multi-line FOR;
- *    the parser will fold subsequent lines into the body during
- *    parseProgram restructuring.
+ * Summary:
+ *  Parse FOR var = start TO end [STEP step] with inline or multiline body.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ForStmt with optional STEP and body
  */
 std::unique_ptr<Stmt> Parser::parseFor() {
     if (!check(TokenType::Identifier)) throw ParseError("Expected variable name after FOR");

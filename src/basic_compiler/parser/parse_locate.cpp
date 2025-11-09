@@ -5,7 +5,15 @@
 
 namespace gwbasic {
 
-// LOCATE row[, col]
+/*
+ * Function: Parser::parseLocate
+ * Summary:
+ *  Parse LOCATE row[,col] into a LocateStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: LocateStmt with row and optional column
+ */
 std::unique_ptr<Stmt> Parser::parseLocate() {
     auto start = peek();
     auto row = parseExpression();
@@ -17,4 +25,3 @@ std::unique_ptr<Stmt> Parser::parseLocate() {
 }
 
 } // namespace gwbasic
-

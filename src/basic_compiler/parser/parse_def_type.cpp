@@ -10,12 +10,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseDefType
- * Purpose:
- *  - Parse DEFSTR/DEFINT/DEFSNG/DEFDBL letter ranges.
- * Inputs:
+ * Summary:
+ *  Parse DEFSTR/DEFINT/DEFSNG/DEFDBL letter ranges.
+ * Parameters:
  *  - k: Kind of DEF TYPE statement
- * Outputs:
- *  - DefTypeStmt: list of inclusive letter ranges (A..Z)
+ * Returns:
+ *  - std::unique_ptr<Stmt>: DefTypeStmt with inclusive letter ranges
  */
 std::unique_ptr<Stmt> Parser::parseDefType(DefTypeStmt::Kind k) {
     std::vector<std::pair<char,char>> ranges;

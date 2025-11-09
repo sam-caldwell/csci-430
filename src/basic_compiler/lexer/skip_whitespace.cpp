@@ -5,13 +5,12 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::skipWhitespace
- * Inputs:
- *  - none (operates on internal stream state)
- * Outputs:
+ * Summary:
+ *  Skip spaces, tabs, carriage returns, and apostrophe comments to EOL.
+ * Parameters:
+ *  - none
+ * Returns:
  *  - void
- * Theory of operation:
- *  - Advances past spaces, tabs and carriage returns. If an apostrophe is
- *    encountered, treats the rest of the line as a comment and skips to EOL.
  */
 void Lexer::skipWhitespace() {
     while (!atEnd()) {

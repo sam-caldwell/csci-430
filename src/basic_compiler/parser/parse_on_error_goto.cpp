@@ -8,7 +8,7 @@ namespace gwbasic {
 /*
  * Function: Parser::parseOnErrorGoto
  * Inputs:
- *  - none (assumes KwOn already matched and current token is KwError)
+ *  - none (assumes KwOn already matched and the current token is KwError)
  * Outputs:
  *  - OnErrorGotoStmt with target line or 0 to disable
  * Grammar:

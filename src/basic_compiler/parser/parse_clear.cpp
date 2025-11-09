@@ -7,14 +7,15 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseClear
- * Purpose:
- *  - Parse the CLEAR statement (no arguments).
- * Outputs:
- *  - ClearStmt
+ * Summary:
+ *  Parse CLEAR (no arguments) into a ClearStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ClearStmt
  */
 std::unique_ptr<Stmt> Parser::parseClear() const {
     return make_node<ClearStmt>({peek().line, peek().col});
 }
 
 } // namespace gwbasic
-

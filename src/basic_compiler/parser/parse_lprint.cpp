@@ -5,18 +5,14 @@
 
 namespace gwbasic {
 
-/**
- * @brief Parse an LPRINT statement.
- *
- * Grammar (subset):
- *   LPRINT [USING fmt] [;|,] items [{;|,} items]* [{;|,}]
- *
- * Notes:
- *  - Equivalent to PRINT without optional '#n' channel; implicitly uses printer channel 1.
- *  - Supports leading USING, degenerate LPRINT ; / LPRINT , (no items), and trailing terminators.
- *  - This implementation minimizes loop breaks and reduces branching without changing semantics.
- *
- * @return std::unique_ptr<Stmt> Constructed PrintStmt AST node.
+/*
+ * Function: Parser::parseLprint
+ * Summary:
+ *  Parse LPRINT with optional USING, item list, and terminators.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: PrintStmt targeting printer channel 1
  */
 std::unique_ptr<Stmt> Parser::parseLprint() {
     const int l = peek().line;

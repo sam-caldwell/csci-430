@@ -11,12 +11,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parsePoke
- * Purpose:
- *  - Parse POKE address, value
- * Inputs:
- *  - none (assumes 'POKE' matched by caller)
- * Outputs:
- *  - PokeStmt: address and value expressions
+ * Summary:
+ *  Parse POKE address, value into a PokeStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: PokeStmt with address and value expressions
  */
 std::unique_ptr<Stmt> Parser::parsePoke() {
     auto addr = parseExpression();

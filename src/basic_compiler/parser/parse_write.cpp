@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseWrite
- * Purpose:
- *  - Parse WRITE [#n,] expr[,expr...]
- * Inputs:
- *  - none (assumes 'WRITE' matched by caller)
- * Outputs:
- *  - WriteStmt: optional channel number and list of expressions to output
+ * Summary:
+ *  Parse WRITE [#n,] expr[,expr...] into a WriteStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: WriteStmt with channel and expressions
  */
 std::unique_ptr<Stmt> Parser::parseWrite() {
     const int l = peek().line;

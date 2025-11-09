@@ -12,12 +12,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseLineInput
- * Purpose:
- *  - Parse LINE INPUT [#n,] var$
- * Inputs:
- *  - none (assumes 'LINE INPUT' tokens were matched by caller)
- * Outputs:
- *  - LineInputStmt: optional channel and destination string variable name
+ * Summary:
+ *  Parse LINE INPUT [#n,] var$ into a LineInputStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: LineInputStmt with channel and dest variable
  */
 std::unique_ptr<Stmt> Parser::parseLineInput() {
     const int line = peek().line;

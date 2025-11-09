@@ -13,12 +13,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseSwap
- * Purpose:
- *  - Parse SWAP varref, varref where varref may be a scalar or array element.
- * Inputs:
- *  - none (assumes 'SWAP' matched by caller)
- * Outputs:
- *  - SwapStmt with left and right ReadTarget references
+ * Summary:
+ *  Parse SWAP varref, varref where varref may be scalar or array element.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: SwapStmt with left and right ReadTargets
  */
 std::unique_ptr<Stmt> Parser::parseSwap() { // NOLINT(readability-function-size)
     const int line = peek().line;

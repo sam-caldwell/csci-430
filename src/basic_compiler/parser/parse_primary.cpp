@@ -12,13 +12,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parsePrimary
- * Inputs:
+ * Summary:
+ *  Parse a literal, identifier (var or call), or parenthesized expression.
+ * Parameters:
  *  - none
- * Outputs:
- *  - Expr: a number, string, variable, or parenthesized expression
- * Theory of operation:
- *  - Recognizes literal tokens, identifiers, or '(' expression ')';
- *    throws ParseError for any unexpected token.
+ * Returns:
+ *  - std::unique_ptr<Expr>: Number, String, Var, Call, or grouped expression
  */
 std::unique_ptr<Expr> Parser::parsePrimary() {
     if (check(TokenType::Integer) || check(TokenType::Float)) {

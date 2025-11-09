@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseCommon
- * Purpose:
- *  - Parse COMMON var[,var...]
- * Inputs:
- *  - none (assumes 'COMMON' matched by caller)
- * Outputs:
- *  - CommonStmt: list of variable names
+ * Summary:
+ *  Parse COMMON var[,var...] and return a CommonStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: CommonStmt containing variable names
  */
 std::unique_ptr<Stmt> Parser::parseCommon() {
     std::vector<std::string> names;

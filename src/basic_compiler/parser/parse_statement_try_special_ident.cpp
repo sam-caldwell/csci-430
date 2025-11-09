@@ -8,15 +8,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::tryParseSpecialIdentifierStatement
- * Inputs:
- *  - startTok: Token at which the statement begins (for pos assignment)
- * Outputs:
- *  - std::unique_ptr<Stmt> when a special identifier-led statement is parsed;
- *    otherwise nullptr and no tokens are consumed.
- * Theory of operation:
- *  - Some statements are introduced by identifiers rather than keywords
- *    (e.g., SCREEN, CIRCLE). When these appear and are not function calls,
- *    parse them before falling back to generic identifier assignment parsing.
+ * Summary:
+ *  Handle identifier-led statements (e.g., SCREEN, CIRCLE, MID$ assignment).
+ * Parameters:
+ *  - startTok: Token at which the statement begins for position assignment
+ * Returns:
+ *  - std::unique_ptr<Stmt>: Parsed node or nullptr if not matched
  */
 std::unique_ptr<Stmt> Parser::tryParseSpecialIdentifierStatement(const Token& startTok) {
     if (!check(TokenType::Identifier)) return nullptr;

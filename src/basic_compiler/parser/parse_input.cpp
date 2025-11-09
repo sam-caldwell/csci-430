@@ -8,12 +8,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseInput
- * Purpose:
- *  - Parse INPUT [#n,] var[,var...] or bare console INPUT [; P$ ,] ["text";] var[,var...]
- * Inputs:
- *  - none (assumes 'INPUT' matched by caller)
- * Outputs:
- *  - FileInputStmt when a channel is specified; otherwise InputStmt
+ * Summary:
+ *  Parse INPUT [#n,] var-list or console INPUT with prompt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: FileInputStmt (with channel) or InputStmt
  */
 std::unique_ptr<Stmt> Parser::parseInput() {
     const int l = peek().line;

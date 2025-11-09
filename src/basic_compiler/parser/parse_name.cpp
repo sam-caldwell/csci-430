@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseName
+ * Summary:
+ *  Parse NAME old AS new statement for renaming a file.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: NameStmt with old/new expressions
+ */
 std::unique_ptr<Stmt> Parser::parseName() {
     auto old = parseExpression();
     consume(TokenType::KwAs, "AS");
@@ -13,4 +22,3 @@ std::unique_ptr<Stmt> Parser::parseName() {
 }
 
 } // namespace gwbasic
-

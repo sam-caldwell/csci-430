@@ -7,13 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseFactor
- * Inputs:
+ * Summary:
+ *  Parse multiplicative-precedence expressions: *, /, integer division, MOD.
+ * Parameters:
  *  - none
- * Outputs:
- *  - Expr: expression tree for multiplicative precedence
- * Theory of operation:
- *  - Parses a unary expression, then folds '*' and '/' operators
- *    left-associatively.
+ * Returns:
+ *  - std::unique_ptr<Expr>: Expression tree for multiplicative precedence
  */
 std::unique_ptr<Expr> Parser::parseFactor() {
     auto left = parseUnary();

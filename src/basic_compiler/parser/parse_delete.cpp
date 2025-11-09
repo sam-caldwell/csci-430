@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseDelete
+ * Summary:
+ *  Parse DELETE statement with LIST-like line range forms.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: DeleteStmt with optional start/end markers
+ */
 std::unique_ptr<Stmt> Parser::parseDelete() {
     auto node = make_node<DeleteStmt>({peek().line, peek().col});
     // DELETE grammar mirrors LIST ranges: start | start - end | start -
@@ -50,4 +59,3 @@ std::unique_ptr<Stmt> Parser::parseDelete() {
 }
 
 } // namespace gwbasic
-

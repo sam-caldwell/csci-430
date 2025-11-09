@@ -5,10 +5,18 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseKill
+ * Summary:
+ *  Parse KILL statement: delete a file specified by an expression.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: KillStmt node with target expression
+ */
 std::unique_ptr<Stmt> Parser::parseKill() {
     auto f = parseExpression();
     return make_node<KillStmt>({0,0}, std::move(f));
 }
 
 } // namespace gwbasic
-

@@ -9,12 +9,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseDefUsr
- * Purpose:
- *  - Parse DEF USR[digits] = expr
- * Inputs:
- *  - none (assumes 'DEF' and 'USR...' tokens were matched by caller)
- * Outputs:
- *  - DefUsrStmt: optional function index and address expression
+ * Summary:
+ *  Parse DEF USR[digits] = expr into a DefUsrStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: DefUsrStmt with optional index and address expr
  */
 std::unique_ptr<Stmt> Parser::parseDefUsr() {
     // We have consumed DEF and the next token is Identifier starting with USR

@@ -5,10 +5,18 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseMkdir
+ * Summary:
+ *  Parse MKDIR statement with a single path expression.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: MkdirStmt with target path expression
+ */
 std::unique_ptr<Stmt> Parser::parseMkdir() {
     auto p = parseExpression();
     return make_node<MkdirStmt>({0,0}, std::move(p));
 }
 
 } // namespace gwbasic
-

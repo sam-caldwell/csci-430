@@ -15,12 +15,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseData
- * Purpose:
- *  - Parse DATA item[,item...] where items are literal numbers or strings.
- * Inputs:
- *  - none (assumes 'DATA' was matched by caller)
- * Outputs:
- *  - DataStmt: list of literal strings as stored text
+ * Summary:
+ *  Parse DATA item[,item...] where items are literal numbers or strings.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: DataStmt containing the literal items
  */
 std::unique_ptr<Stmt> Parser::parseData() {
     // DATA item[,item...]; items must be string or numeric literals

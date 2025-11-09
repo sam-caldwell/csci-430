@@ -5,13 +5,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::setSyntaxLogPath
- * Inputs:
+ * Summary:
+ *  Enable parser syntax logging to the specified file path.
+ * Parameters:
  *  - path: Filesystem path to write syntax log entries
- * Outputs:
- *  - void (opens/rotates the log file and enables logging)
- * Theory of operation:
- *  - Closes any existing file, opens 'path' for truncation, and sets the
- *    internal flag when the file is open.
+ * Returns:
+ *  - void
  */
 void Parser::setSyntaxLogPath(const std::string& path) {
     syntaxLogger_.open(path, /*append=*/false);

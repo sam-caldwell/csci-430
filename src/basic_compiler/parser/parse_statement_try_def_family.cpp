@@ -6,13 +6,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::tryParseDefFamily
- * Inputs:
- *  - startTok: Token at which the statement begins (for pos assignment)
- * Outputs:
- *  - std::unique_ptr<Stmt> for DEF SEG/DEF USR/DEF FN variants; nullptr otherwise.
- * Theory of operation:
- *  - Handles the DEF keyword and its sub-forms, delegating to the specific
- *    parse methods and assigning the node position uniformly.
+ * Summary:
+ *  Handle DEF family statements (SEG/USR/FN and range directives).
+ * Parameters:
+ *  - startTok: Token at which the statement begins for position assignment
+ * Returns:
+ *  - std::unique_ptr<Stmt>: Parsed DEF* node or nullptr if not matched
  */
 std::unique_ptr<Stmt> Parser::tryParseDefFamily(const Token& startTok) {
     // Handle compound DEF* forms first (DEFINT/DEFSNG/DEFDBL/DEFSTR)

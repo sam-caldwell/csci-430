@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseList
+ * Summary:
+ *  Parse LIST statement with optional start/end line specifiers.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ListStmt with range and toPrinter=false
+ */
 std::unique_ptr<Stmt> Parser::parseList() {
     auto node = make_node<ListStmt>({peek().line, peek().col});
     // Optional: start
@@ -44,6 +53,15 @@ std::unique_ptr<Stmt> Parser::parseList() {
     return node;
 }
 
+/*
+ * Function: Parser::parseLlist
+ * Summary:
+ *  Parse LLIST statement (PRINT listing to printer) with optional ranges.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ListStmt with range and toPrinter=true
+ */
 std::unique_ptr<Stmt> Parser::parseLlist() {
     auto node = make_node<ListStmt>({peek().line, peek().col});
     auto parseLineRefHere = [this](int& outVal, bool& isDot)->bool{

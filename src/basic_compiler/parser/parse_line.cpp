@@ -6,13 +6,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseLine
- * Inputs:
- *  - none (expects current token to be a line number)
- * Outputs:
+ * Summary:
+ *  Parse a program line: line-number followed by ':'-separated statements.
+ * Parameters:
+ *  - none
+ * Returns:
  *  - Line: AST node with line number and parsed statements
- * Theory of operation:
- *  - Reads a leading Integer token as the line number, then parses one or
- *    more statements separated by ':' until a newline or EOF is reached.
  */
 Line Parser::parseLine() {
     Line line;

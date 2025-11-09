@@ -25,10 +25,13 @@ using namespace gwbasic;
 bool CodeGenerator::handleOnGosubBeforeLine(const Stmt* stmt,
                                             std::set<std::string, std::less<>>& vars,
                                             std::set<std::string, std::less<>>& arrays) {
+
     const auto* const onGosub = dyn_cast<const OnGosubStmt>(stmt);
     if (onGosub == nullptr) {
         return false;
     }
+
     collectVarsForBeforeLineFromExpr(onGosub->index.get(), vars, arrays);
+
     return true;
 }

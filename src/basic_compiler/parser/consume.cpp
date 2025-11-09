@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::consume
- * Purpose:
- *  - Require the next token to be of a given type and advance.
- * Inputs:
- *  - t: expected TokenType
- *  - what: human-friendly name for diagnostics
- * Outputs:
+ * Summary:
+ *  Require the next token to be a given type and advance.
+ * Parameters:
+ *  - t: Expected TokenType
+ *  - what: Human-friendly name for diagnostics
+ * Returns:
  *  - void (throws ParseError on mismatch)
  */
 void Parser::consume(TokenType t, const std::string& what) {

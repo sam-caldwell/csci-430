@@ -22,7 +22,7 @@ using namespace gwbasic;
  */
 auto CodeGenerator::handleInputBeforeLine(const Stmt *s,
                                           std::set<std::string, std::less<>> &vars,
-                                          std::set<std::string, std::less<>> *arrays) -> bool {
+                                          const std::set<std::string, std::less<>> *arrays) -> bool {
     const auto in = dyn_cast<const InputStmt>(s);
     if (!in) return false;
     (void)arrays; // unused here

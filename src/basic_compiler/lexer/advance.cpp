@@ -5,13 +5,12 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::advance
- * Inputs:
- *  - none (uses internal source position state)
- * Outputs:
+ * Summary:
+ *  Consume one character and update source position state.
+ * Parameters:
+ *  - none
+ * Returns:
  *  - char: the character consumed, or '\0' at end-of-input
- * Theory of operation:
- *  - Moves the cursor forward one character, updating line/column counters
- *    and beginning-of-line flag when encountering a newline.
  */
 char Lexer::advance() {
     if (atEnd()) return Symbols::NUL.first();

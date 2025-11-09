@@ -13,32 +13,32 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-void CodeGenerator::collectStmtVars(const Stmt* s) {
-    if (const auto p = dyn_cast<const PrintStmt>(s))
+void CodeGenerator::collectStmtVars(const Stmt* stmt) {
+    if (const auto p = dyn_cast<const PrintStmt>(stmt))
         return csvHandlePrint(p);
-    if (const auto a = dyn_cast<const AssignStmt>(s))
+    if (const auto a = dyn_cast<const AssignStmt>(stmt))
         return csvHandleAssign(a);
-    if (const auto m = dyn_cast<const MidAssignStmt>(s))
+    if (const auto m = dyn_cast<const MidAssignStmt>(stmt))
         return csvHandleMidAssign(m);
-    if (const auto i = dyn_cast<const IfStmt>(s))
+    if (const auto i = dyn_cast<const IfStmt>(stmt))
         return csvHandleIf(i);
-    if (const auto f = dyn_cast<const ForStmt>(s))
+    if (const auto f = dyn_cast<const ForStmt>(stmt))
         return csvHandleFor(f);
-    if (const auto in = dyn_cast<const InputStmt>(s))
+    if (const auto in = dyn_cast<const InputStmt>(stmt))
         return csvHandleInput(in);
-    if (const auto rz = dyn_cast<const RandomizeStmt>(s))
+    if (const auto rz = dyn_cast<const RandomizeStmt>(stmt))
         return csvHandleRandomize(rz);
-    if (const auto cs = dyn_cast<const CommonStmt>(s))
+    if (const auto cs = dyn_cast<const CommonStmt>(stmt))
         return csvHandleCommon(cs);
-    if (dyn_cast<const MergeStmt>(s))
+    if (dyn_cast<const MergeStmt>(stmt))
         return; // no-op
-    if (const auto ds = dyn_cast<const DataStmt>(s))
+    if (const auto ds = dyn_cast<const DataStmt>(stmt))
         return csvHandleData(ds);
-    if (const auto rd = dyn_cast<const ReadStmt>(s))
+    if (const auto rd = dyn_cast<const ReadStmt>(stmt))
         return csvHandleRead(rd);
-    if (const auto og = dyn_cast<const OnGotoStmt>(s))
+    if (const auto og = dyn_cast<const OnGotoStmt>(stmt))
         return csvHandleOnGoto(og);
-    if (const auto ogs = dyn_cast<const OnGosubStmt>(s))
+    if (const auto ogs = dyn_cast<const OnGosubStmt>(stmt))
         return csvHandleOnGosub(ogs);
 }
 

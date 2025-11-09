@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseErase
- * Purpose:
- *  - Parse ERASE name[,name...]
- * Inputs:
- *  - none (assumes 'ERASE' matched by caller)
- * Outputs:
- *  - EraseStmt: list of array names to erase
+ * Summary:
+ *  Parse ERASE name[,name...] into an EraseStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: EraseStmt with array names to erase
  */
 std::unique_ptr<Stmt> Parser::parseErase() {
     std::vector<std::string> names;
@@ -28,4 +28,3 @@ std::unique_ptr<Stmt> Parser::parseErase() {
 }
 
 } // namespace gwbasic
-

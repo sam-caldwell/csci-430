@@ -6,15 +6,12 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::stringLiteral
- * Inputs:
- *  - none (expects current char to be '"')
- * Outputs:
- *  - Token: STRING token with unescaped contents and source location
- * Theory of operation:
- *  - Consumes the opening quote, then scans until the closing quote.
- *    GW-BASIC does not use C-style escapes; to embed a double quote
- *    inside the string, the quote is doubled (""). A backslash is
- *    just a literal character. Throws on unterminated strings.
+ * Summary:
+ *  Parse a quoted string and return a String token.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - Token: String token with unescaped contents and location
  */
 Token Lexer::stringLiteral() {
     const int startLine = line_;

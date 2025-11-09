@@ -19,26 +19,37 @@
 #include "basic_compiler/ast/SwapStmt.h"
 
 namespace gwbasic {
-    void CodeGenerator::collectVarsForBeforeLineFromStmt(const Stmt *s, std::set<std::string, std::less<>> &vars,
+    /*
+     * Function: CodeGenerator::collectVarsForBeforeLineFromStmt
+     * Summary:
+     *  Scan a statement to collect variable names referenced prior to execution of a line.
+     * Parameters:
+     *  - stmt: Input statement to analyze.
+     *  - vars: Output set of scalar variable names.
+     *  - arrays: Output set of array variable names.
+     * Returns:
+     *  - void
+     */
+    void CodeGenerator::collectVarsForBeforeLineFromStmt(const Stmt *stmt, std::set<std::string, std::less<>> &vars,
                                                          std::set<std::string, std::less<>> &arrays) {
-        if (!s ||
-            handleAssignBeforeLine(s, vars, arrays) ||
-            handleArrayAssignBeforeLine(s, vars, arrays) ||
-            handleIfBlockBeforeLine(s, vars, arrays) ||
-            handleIfBeforeLine(s, vars, arrays) ||
-            handleForBeforeLine(s, vars, arrays) ||
-            handleWhileBeforeLine(s, vars, arrays) ||
-            handlePrintBeforeLine(s, vars, arrays) ||
-            handleInputBeforeLine(s, vars, &arrays) ||  // keep existing signature
-            handleReadBeforeLine(s, vars, arrays) ||
-            handleDimBeforeLine(s, arrays) ||
-            handleSwapBeforeLine(s, vars, arrays) ||
-            handleEraseBeforeLine(s, arrays) ||
-            handleWriteBeforeLine(s, vars, arrays) ||
-            handleOnGotoBeforeLine(s, vars, arrays)
+        if (!stmt ||
+            handleAssignBeforeLine(stmt, vars, arrays) ||
+            handleArrayAssignBeforeLine(stmt, vars, arrays) ||
+            handleIfBlockBeforeLine(stmt, vars, arrays) ||
+            handleIfBeforeLine(stmt, vars, arrays) ||
+            handleForBeforeLine(stmt, vars, arrays) ||
+            handleWhileBeforeLine(stmt, vars, arrays) ||
+            handlePrintBeforeLine(stmt, vars, arrays) ||
+            handleInputBeforeLine(stmt, vars, &arrays) ||  // keep existing signature
+            handleReadBeforeLine(stmt, vars, arrays) ||
+            handleDimBeforeLine(stmt, arrays) ||
+            handleSwapBeforeLine(stmt, vars, arrays) ||
+            handleEraseBeforeLine(stmt, arrays) ||
+            handleWriteBeforeLine(stmt, vars, arrays) ||
+            handleOnGotoBeforeLine(stmt, vars, arrays)
         )
             return;
 
-        (void)handleOnGosubBeforeLine(s, vars, arrays);
+        (void)handleOnGosubBeforeLine(stmt, vars, arrays);
     }
 } // namespace gwbasic

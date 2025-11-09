@@ -10,12 +10,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseDefFn
- * Purpose:
- *  - Parse DEF FNname(param) = expression
- * Notes:
- *  - We accept function identifiers that begin with "FN" (case-insensitive),
- *    optionally ending with a type suffix ('$','!','%','#'). The suffix, if
- *    present, is stored as part of the function name.
+ * Summary:
+ *  Parse DEF FNname(param) = expression into a DefFnStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: DefFnStmt with name, parameter, and body
  */
 std::unique_ptr<Stmt> Parser::parseDefFn() {
     if (!check(TokenType::Identifier)) throw ParseError("Expected FNname after DEF");

@@ -5,11 +5,15 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::tryEmitOperatorOrPunct
- * Purpose:
- *  - Consume and emit a recognized single- or two-character operator or
- *    punctuation token. Leaves unexpected characters to the caller.
- * Outputs:
- *  - bool: true if a token was emitted; false if character unrecognized
+ * Summary:
+ *  Emit a recognized operator/punctuation token at the current position.
+ * Parameters:
+ *  - out: Token vector to append the emitted token to
+ *  - line: Source line for the token's starting position
+ *  - col: Source column for the token's starting position
+ *  - c: Current character to classify
+ * Returns:
+ *  - bool: true if a token was emitted; false if unrecognized
  */
 bool Lexer::tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, const char c) {
     switch (c) {

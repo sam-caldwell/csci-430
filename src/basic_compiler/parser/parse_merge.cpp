@@ -10,7 +10,7 @@ namespace gwbasic {
  * Purpose:
  *  - Parse MERGE "file"
  * Inputs:
- *  - none (assumes 'MERGE' was matched by caller)
+ *  - none (assumes caller matched 'MERGE')
  * Outputs:
  *  - MergeStmt: filename string (as written)
  */

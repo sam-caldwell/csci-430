@@ -24,14 +24,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseStatement
- * Inputs:
- *  - none (examines current token)
- * Outputs:
+ * Summary:
+ *  Dispatch on the current token to parse a single statement.
+ * Parameters:
+ *  - none
+ * Returns:
  *  - std::unique_ptr<Stmt>: Parsed statement node
- * Theory of operation:
- *  - Dispatches based on the next token to the appropriate parse method
- *    (PRINT, assignment/LET, IF, FOR, GOTO, GOSUB/RETURN, INPUT, END),
- *    building the corresponding AST node or throwing on unexpected input.
  */
 std::unique_ptr<Stmt> Parser::parseStatement() {
     const Token startTok = peek();

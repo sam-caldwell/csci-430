@@ -9,14 +9,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseIf
- * Inputs:
- *  - none (assumes IF already consumed)
- * Outputs:
- *  - IfStmt (single-line THEN <line>) or IfBlockStmt (multi-line)
- * Theory of operation:
- *  - Parses comparison expression and THEN.
- *    If the next token is a line number, produce IfStmt.
- *    Otherwise, treat it as a multi-line IF block to be folded later.
+ * Summary:
+ *  Parse IF ... THEN into either an IfStmt or an IfBlockStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: IfStmt (line target) or IfBlockStmt
  */
 std::unique_ptr<Stmt> Parser::parseIf() {
 

@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseRead
- * Purpose:
- *  - Parse READ var[,var...], where targets may be scalar or array element A(expr)
- * Inputs:
- *  - none (assumes 'READ' was matched by caller)
- * Outputs:
- *  - ReadStmt: vector of ReadTarget entries capturing names and optional indices
+ * Summary:
+ *  Parse READ var[,var...] where each target may be scalar or array element.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ReadStmt with target names and optional indices
  */
 std::unique_ptr<Stmt> Parser::parseRead() {
     const int l = peek().line;

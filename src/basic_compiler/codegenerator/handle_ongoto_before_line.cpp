@@ -23,8 +23,10 @@ using namespace gwbasic;
 bool CodeGenerator::handleOnGotoBeforeLine(const Stmt *s,
                                            std::set<std::string, std::less<>> &vars,
                                            std::set<std::string, std::less<>> &arrays) {
+
     const auto og = dyn_cast<const OnGotoStmt>(s);
-    if (!og) return false;
+    if (!og)
+        return false;
     collectVarsForBeforeLineFromExpr(og->index.get(), vars, arrays);
     return true;
 }

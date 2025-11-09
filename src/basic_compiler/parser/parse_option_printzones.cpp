@@ -6,12 +6,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseOptionPrintZones
- * Inputs:
- *  - none (assumes OPTION already consumed and next is PRINTZONES)
- * Outputs:
- *  - OptionPrintZonesStmt with enabled set by ON/OFF
- * Theory of operation:
- *  - Accepts: OPTION PRINTZONES ON | OPTION PRINTZONES OFF
+ * Summary:
+ *  Parse OPTION PRINTZONES ON|OFF into an OptionPrintZonesStmt.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: OptionPrintZonesStmt with ON/OFF state
  */
 std::unique_ptr<Stmt> Parser::parseOptionPrintZones() {
     // Expect identifier PRINTZONES
@@ -32,4 +32,3 @@ std::unique_ptr<Stmt> Parser::parseOptionPrintZones() {
 }
 
 } // namespace gwbasic
-

@@ -5,15 +5,12 @@
 namespace gwbasic {
 /*
  * Function: Lexer::tokenize
- * Inputs:
- *  - none (operates over the entire provided source string)
- * Outputs:
- *  - std::vector<Token>: Complete token stream including NewLine tokens
- *    and a final EndOfFile marker
- * Theory of operation:
- *  - Iteratively skips whitespace/comments, classifies the next lexeme
- *    as number, identifier/keyword, string, or operator/punctuation, and
- *    appends corresponding tokens, tracking source positions.
+ * Summary:
+ *  Convert the source text into a sequence of tokens including EOF.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::vector<Token>: Token stream with NewLine tokens and EndOfFile
  */
 std::vector<Token> Lexer::tokenize() {
     std::vector<Token> tokens;

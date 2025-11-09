@@ -17,7 +17,9 @@ namespace gwbasic {
 std::unique_ptr<Stmt> Parser::parseDim() {
     // DIM <Identifier> '(' <Integer> [',' <Integer>]* ')'
     if (!check(TokenType::Identifier)) throw ParseError("Expected array name after DIM");
-    std::string name = peek().lexeme; int l = peek().line, c = peek().col; advance();
+    std::string name = peek().lexeme;
+    const int l = peek().line;
+    const int c = peek().col; advance();
     consume(TokenType::LParen, "(");
     std::vector<int> bounds;
     if (!check(TokenType::Integer)) throw ParseError("Expected array bound in DIM");

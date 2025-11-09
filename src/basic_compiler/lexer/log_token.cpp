@@ -7,13 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Lexer::logToken
- * Inputs:
- *  - t: Token to report
- * Outputs:
- *  - void (writes a single line to the lex log if enabled)
- * Theory of operation:
- *  - Renders the token type and location; includes a readable lexeme for
- *    most tokens except EOF/NEWLINE where lexeme text is not useful.
+ * Summary:
+ *  Log a single token to the lex log if logging is enabled.
+ * Parameters:
+ *  - t: Token to render into the log
+ * Returns:
+ *  - void
  */
 void Lexer::logToken(const Token& t) {
     // Use a chained logging pattern: single stream chain for the whole line

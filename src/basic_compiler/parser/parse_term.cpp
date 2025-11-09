@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseTerm
- * Inputs:
+ * Summary:
+ *  Parse additive-precedence expressions: + and -.
+ * Parameters:
  *  - none
- * Outputs:
- *  - Expr: expression tree for additive precedence
- * Theory of operation:
- *  - Parses a factor, then folds '+' and '-' operators left-associatively.
+ * Returns:
+ *  - std::unique_ptr<Expr>: Expression tree for additive precedence
  */
 std::unique_ptr<Expr> Parser::parseTerm() {
     auto left = parseFactor();

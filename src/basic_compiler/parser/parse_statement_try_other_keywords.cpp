@@ -20,14 +20,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::tryParseOtherKeywords
- * Inputs:
- *  - startTok: Starting token for pos metadata
- * Outputs:
- *  - Parsed statement node for a wide range of keyword-led statements;
- *    nullptr if the current token is not a recognized keyword or case here.
- * Theory of operation:
- *  - Groups the common single-keyword dispatch cases used by parseStatement
- *    to keep the top-level function concise.
+ * Summary:
+ *  Dispatch handlers for many keyword-led statements used by parseStatement.
+ * Parameters:
+ *  - startTok: Starting token for source position metadata
+ * Returns:
+ *  - std::unique_ptr<Stmt>: Parsed node or nullptr if no keyword matched
  */
 std::unique_ptr<Stmt> Parser::tryParseOtherKeywords(const Token& startTok) {
     // Primary I/O and control

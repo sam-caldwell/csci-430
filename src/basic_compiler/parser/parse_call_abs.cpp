@@ -7,12 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseCallAbs
- * Purpose:
- *  - Parse CALL address (absolute address)
- * Inputs:
- *  - none (assumes 'CALL' was matched by caller)
- * Outputs:
- *  - CallAbsStmt: numeric address expression
+ * Summary:
+ *  Parse CALL with an absolute address expression.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: CallAbsStmt with target address expression
  */
 std::unique_ptr<Stmt> Parser::parseCallAbs() {
     auto addr = parseExpression();
@@ -20,4 +20,3 @@ std::unique_ptr<Stmt> Parser::parseCallAbs() {
 }
 
 } // namespace gwbasic
-

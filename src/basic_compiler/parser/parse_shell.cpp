@@ -5,6 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: Parser::parseShell
+ * Summary:
+ *  Parse SHELL statement optionally followed by a string expression.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: ShellStmt with optional command expression
+ */
 std::unique_ptr<Stmt> Parser::parseShell() {
     // SHELL [string-expr]
     if (check(TokenType::NewLine) || check(TokenType::Colon)) {
@@ -15,4 +24,3 @@ std::unique_ptr<Stmt> Parser::parseShell() {
 }
 
 } // namespace gwbasic
-

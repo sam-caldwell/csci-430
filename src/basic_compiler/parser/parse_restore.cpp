@@ -7,16 +7,15 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseRestore
- * Purpose:
- *  - Parse the RESTORE statement (reset DATA pointer)
- * Inputs:
- *  - none (assumes 'RESTORE' matched by caller)
- * Outputs:
- *  - RestoreStmt: marker node, no operands
+ * Summary:
+ *  Parse RESTORE, which resets the DATA pointer.
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: RestoreStmt marker node
  */
 std::unique_ptr<Stmt> Parser::parseRestore() const {
     return make_node<RestoreStmt>({peek().line, peek().col});
 }
 
 } // namespace gwbasic
-

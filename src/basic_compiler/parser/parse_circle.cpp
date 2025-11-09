@@ -7,10 +7,12 @@ namespace gwbasic {
 
 /*
  * Function: Parser::parseCircle
- * Purpose:
- *  - Parse CIRCLE x, y, r (minimal stub grammar)
- * Outputs:
- *  - CircleStmt with numeric expressions for x, y and r
+ * Summary:
+ *  Parse CIRCLE with required x,y,r and optional parameters (stub grammar).
+ * Parameters:
+ *  - none
+ * Returns:
+ *  - std::unique_ptr<Stmt>: CircleStmt with x, y, r and optional parts
  */
 std::unique_ptr<Stmt> Parser::parseCircle() {
     // Syntax (GW-BASIC compatible):
