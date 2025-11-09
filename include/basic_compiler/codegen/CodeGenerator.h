@@ -370,6 +370,7 @@ private:
     int cdFindLineIndex(const std::vector<int>& lines, int line) const;
     int cdFindResumeEndIdx(const std::vector<int>& lines, int startIdx) const;
     int cdComputeSkipFromIndices(const std::vector<int>& lines, std::pair<int,int> idx) const;
+    void cdMaybeAddTrapTarget(const Stmt* st, std::set<int>& trapTargets);
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
     void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
