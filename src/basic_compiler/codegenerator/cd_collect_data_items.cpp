@@ -12,7 +12,9 @@ void CodeGenerator::cdCollectDataItems(const std::vector<int>& lines) {
     dataLiteralIds_.clear();
     dataIsString_.clear();
     dataNumValues_.clear();
-    for (int ln : lines) { cdCollectDataItemsFromLine(ln); }
+    for (const int ln : lines) {
+        cdCollectDataItemsFromLine(ln);
+    }
 }
 
 } // namespace gwbasic
