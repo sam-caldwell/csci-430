@@ -4,8 +4,9 @@
  * Purpose: Implement CodeGenerator::handleAssignBeforeLine for before-line var collection.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 
 using namespace gwbasic;
 
@@ -18,4 +19,3 @@ bool CodeGenerator::handleAssignBeforeLine(const Stmt *s,
     collectVarsForBeforeLineFromExpr(a->value.get(), vars, arrays);
     return true;
 }
-

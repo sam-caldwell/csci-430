@@ -6,6 +6,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: resetVar
+ * Summary: Reset a variable to its default zero/null value.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - name: Variable identifier.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::resetVar(std::ostringstream& out, const std::string& name) {
     const std::string& dst = varAllocaName_[name];
     if (isStringVarNameCG(name)) {
@@ -22,4 +31,3 @@ void CodeGenerator::resetVar(std::ostringstream& out, const std::string& name) {
 }
 
 } // namespace gwbasic
-

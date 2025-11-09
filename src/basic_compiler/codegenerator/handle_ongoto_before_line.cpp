@@ -4,8 +4,9 @@
  * Purpose: Implement CodeGenerator::handleOnGotoBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 
 using namespace gwbasic;
 
@@ -17,4 +18,3 @@ bool CodeGenerator::handleOnGotoBeforeLine(const Stmt *s,
     collectVarsForBeforeLineFromExpr(og->index.get(), vars, arrays);
     return true;
 }
-

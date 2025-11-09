@@ -5,6 +5,7 @@
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/WriteStmt.h"
 
 using namespace gwbasic;
@@ -17,4 +18,3 @@ bool CodeGenerator::handleWriteBeforeLine(const Stmt *s,
     for (const auto &e: wr->items) collectVarsForBeforeLineFromExpr(e.get(), vars, arrays);
     return true;
 }
-

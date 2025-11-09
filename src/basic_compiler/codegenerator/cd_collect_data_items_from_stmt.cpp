@@ -8,15 +8,17 @@ namespace gwbasic {
  * Function: CodeGenerator::cdCollectDataItemsFromStmt
  * Purpose: Flatten a single DATA statement's items into tables.
  */
-void CodeGenerator::cdCollectDataItemsFromStmt(const DataStmt& ds) {
-    for (const auto&[isString, text] : ds.items) {
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+void CodeGenerator::cdCollectDataItemsFromStmt(const DataStmt& dataStmt) {
+    for (const auto& [isString, text] : dataStmt.items) {
         const std::string& txt = text;
-        if (!strLiteralId_.contains(txt)) strLiteralId_[txt] = strCounter_++;
+        if (!strLiteralId_.contains(txt)) {
+            strLiteralId_[txt] = strCounter_++;
+        }
         dataLiteralIds_.push_back(strLiteralId_[txt]);
-        dataIsString_.push_back(isString ? 1u : 0u);
+        dataIsString_.push_back(isString ? 1U : 0U);
         dataNumValues_.push_back(isString ? 0.0 : (std::stod(txt)));
     }
 }
 
 } // namespace gwbasic
-

@@ -4,18 +4,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: escapeForIR
+ * Summary: Escape a raw string for LLVM IR constant syntax.
+ * Parameters:
+ *  - s: Raw string literal contents.
+ * Returns:
+ *  - std::string: IR-escaped string with byte escapes for special chars.
+ */
 std::string CodeGenerator::escapeForIR(const std::string& s) {
-    /*
-     * Function: CodeGenerator::escapeForIR
-     * Inputs:
-     *  - s: raw string literal contents
-     * Outputs:
-     *  - std::string: string with LLVM IR escape sequences for special bytes
-     * Theory of operation:
-     *  - Walks each byte, emitting printable ASCII as-is and percent-style
-     *    hex escapes for control/non-ASCII; uses predefined escapes for
-     *    common characters like backslash and quotes.
-     */
     std::string out;
     for (const unsigned char c : s) {
         CodeGenerator::appendEscapedByte(out, c);

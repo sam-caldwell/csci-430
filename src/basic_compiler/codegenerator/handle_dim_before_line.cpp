@@ -4,8 +4,9 @@
  * Purpose: Implement CodeGenerator::handleDimBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/DimStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 
 using namespace gwbasic;
 
@@ -16,4 +17,3 @@ bool CodeGenerator::handleDimBeforeLine(const Stmt *s,
     arrays.insert(ds->name);
     return true;
 }
-

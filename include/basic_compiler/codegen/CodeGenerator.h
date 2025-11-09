@@ -9,6 +9,9 @@
 #include <fstream>
 #include <sstream>
 #include <format>
+#include <utility>
+#include <cwchar>
+#include <wchar.h>
 #include "logger/Logger.h"
 #include "basic_compiler/Symbols.h"
 #include "basic_compiler/ast/Program.h"
@@ -123,34 +126,7 @@ public:
      * Outputs:
      *  - void (sets internal semantic caches)
      */
-    void setSemantics(const SemanticAnalyzer::Result& r) {
-        semProvided_ = true;
-        semVariables_.clear();
-        semVariables_.insert(r.variables.begin(), r.variables.end());
-        semStrings_.clear();
-        semStrings_.insert(r.stringLiterals.begin(), r.stringLiterals.end());
-        semLineNumbers_ = r.lineNumbers;
-        semCommonVariables_.clear();
-        semCommonVariables_.insert(r.commonVariables.begin(), r.commonVariables.end());
-        arrayDims_.clear();
-        arrayDims_.insert(r.arrays.begin(), r.arrays.end());
-        optionBase_ = r.optionBase;
-        printZones_ = r.printZones;
-        userFunctions_.clear();
-        userFunctions_.insert(r.userFunctions.begin(), r.userFunctions.end());
-        semStringVariables_.clear();
-        semStringVariables_.insert(r.stringVariables.begin(), r.stringVariables.end());
-        // Map numeric kinds from semantics into codegen's representation
-        semNumericKinds_.clear();
-        for (const auto& [name, kind] : r.numericKinds) {
-            switch (kind) {
-                case SemanticAnalyzer::Result::NumericKind::Int16: semNumericKinds_[name] = NumKind::Int16; break;
-                case SemanticAnalyzer::Result::NumericKind::Long32: semNumericKinds_[name] = NumKind::Long32; break;
-                case SemanticAnalyzer::Result::NumericKind::Single: semNumericKinds_[name] = NumKind::Single; break;
-                case SemanticAnalyzer::Result::NumericKind::Double: semNumericKinds_[name] = NumKind::Double; break;
-            }
-        }
-    }
+    void setSemantics(const SemanticAnalyzer::Result& r);
 
 private:
     // Counters and symbol maps
@@ -196,25 +172,25 @@ private:
     // Variables numeric kind mapping (non-strings only)
     enum class NumKind { Int16, Long32, Single, Double };
     std::map<std::string, NumKind, std::less<>> semNumericKinds_{};
-    /*
+    /***
      * Property: lineNumbers_
      * Purpose:
      *  - Sorted list of all program line numbers (emission order driver).
      */
     std::vector<int> lineNumbers_;
-    /*
+    /***
      * Property: lineMap_
      * Purpose:
      *  - Map from line number to Line* for quick lookup during emission.
      */
     std::map<int, const Line*> lineMap_;
-    /*
+    /***
      * Property: currentLine_
      * Purpose:
      *  - Currently emitting line number for logging context.
      */
     int currentLine_{0};
-    /*
+    /***
      * Property: needsRndHelper_
      * Purpose:
      *  - Flag indicating whether RND(x) helper function must be emitted.
@@ -226,43 +202,43 @@ private:
     // Inline call-time substitution bindings (stack of name->SSA value)
     std::vector<std::map<std::string, std::string>> bindingStack_{};
     // Optional semantic input
-    /*
+    /***
      * Property: semProvided_
      * Purpose:
      *  - Whether setSemantics() was called to seed generator state.
      */
     bool semProvided_{false};
-    /*
+    /***
      * Property: semVariables_
      * Purpose:
      *  - Variables set provided by semantic analysis.
      */
     std::set<std::string, std::less<>> semVariables_{};
-    /*
+    /***
      * Property: semStrings_
      * Purpose:
      *  - String literals set provided by semantics.
      */
     std::set<std::string, std::less<>> semStrings_{};
-    /*
+    /***
      * Property: semLineNumbers_
      * Purpose:
      *  - Line numbers set provided by semantics.
      */
     std::set<int> semLineNumbers_{};
-    /*
+    /***
      * Property: semCommonVariables_
      * Purpose:
      *  - Variables marked as COMMON by semantics.
      */
     std::set<std::string, std::less<>> semCommonVariables_{};
-    /*
+    /***
      * Property: commonVariables_
      * Purpose:
      *  - Variables declared as COMMON in the current program.
      */
     std::set<std::string, std::less<>> commonVariables_{};
-    /*
+    /***
      * Property: commonBeforeLine_
      * Purpose:
      *  - Snapshot of COMMON variables in effect before each line number to
@@ -301,7 +277,7 @@ private:
      * Outputs:
      *  - std::string: New temporary name (e.g., "%t3")
      */
-    std::string nextTemp() { std::string s = "%t"; s += std::to_string(++tempCounter_); return s; }
+    std::string nextTemp();
     /**
      * Function: CodeGenerator::globalStringName
      * Purpose:
@@ -311,7 +287,7 @@ private:
      * Outputs:
      *  - std::string: Global symbol (e.g., "@.str.5")
      */
-    static std::string globalStringName(const int id) { std::string s = "@.str."; s += std::to_string(id); return s; }
+    static std::string globalStringName(int id);
     /**
      * Function: CodeGenerator::lineLabelName
      * Purpose:
@@ -321,15 +297,11 @@ private:
      * Outputs:
      *  - std::string: Label (e.g., "line100")
      */
-    static std::string lineLabelName(const int ln) { std::string s = "line"; s += std::to_string(ln); return s; }
+    static std::string lineLabelName(int ln);
     /** Label for re-executing a specific statement index within a line. 1-based index. */
-    static std::string resumeLabelName(const int ln, const int stmtIndex) {
-        std::string s = "resume_l"; s += std::to_string(ln); s += "_"; s += std::to_string(stmtIndex); return s;
-    }
+    static std::string resumeLabelName(int ln, int stmtIndex);
     /** Label for resuming at the statement after a given index within a line. 1-based index. */
-    static std::string resumeNextLabelName(const int ln, const int stmtIndex) {
-        std::string s = "resume_next_l"; s += std::to_string(ln); s += "_"; s += std::to_string(stmtIndex); return s;
-    }
+    static std::string resumeNextLabelName(int ln, int stmtIndex);
 
     // Byte escaping helper for IR string literals (one-function-per-file)
     static void appendEscapedByte(std::string& out, unsigned char c);
@@ -339,8 +311,8 @@ private:
     // collectDecls() helpers (one per file) to reduce nesting
     void collectDecls(const Program& program);
 
-    void cdAccumulateFromStatement(
-        const Stmt* st,
+    void cdAccumulateFromStatement( // NOLINT(bugprone-easily-swappable-parameters)
+        const Stmt* stmt,
         std::set<std::string, std::less<>>& accumCommon,
         std::set<std::string, std::less<>>& accumVars,
         std::set<std::string, std::less<>>& accumArrays);
@@ -362,15 +334,16 @@ private:
     void cdSeedFromSemantics();
     void cdAssignInputPromptLiteralIds(const std::vector<int>& lines);
     void cdCollectDataItems(const std::vector<int>& lines);
-    void cdCollectDataItemsFromLine(int ln);
-    void cdCollectDataItemsFromStmt(const class DataStmt& ds);
+    void cdCollectDataItemsFromLine(int lineNum);
+    // ReSharper disable once CppRedundantElaboratedTypeSpecifier
+    void cdCollectDataItemsFromStmt(const struct DataStmt& dataStmt);
     void cdBuildRegionDataStartIdx(const std::vector<int>& lines);
     void cdComputeHandlerSkipAfter(const std::vector<int>& lines);
     void cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets);
     int cdFindLineIndex(const std::vector<int>& lines, int line) const;
     int cdFindResumeEndIdx(const std::vector<int>& lines, int startIdx) const;
-    static int cdComputeSkipFromIndices(const std::vector<int>& lines, std::pair<int,int> idx);
-    static void cdMaybeAddTrapTarget(const Stmt* st, std::set<int>& trapTargets);
+    static int cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &idx);
+    static void cdMaybeAddTrapTarget(const Stmt* stmt, std::set<int>& trapTargets);
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
     void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
@@ -402,12 +375,12 @@ private:
     void csvHandleIf(const IfStmt* i);
     void csvHandleFor(const ForStmt* f);
     void csvHandleInput(const InputStmt* in);
-    void csvHandleRandomize(const RandomizeStmt* rz);
+    void csvHandleRandomize(const RandomizeStmt* randomizeStmt);
     void csvHandleCommon(const CommonStmt* cs);
     void csvHandleData(const DataStmt* ds);
-    void csvHandleRead(const ReadStmt* rd);
+    void csvHandleRead(const ReadStmt* readStmt);
     void csvHandleOnGoto(const OnGotoStmt* onGotoStmt);
-    void csvHandleOnGosub(const OnGosubStmt* ogs);
+    void csvHandleOnGosub(const OnGosubStmt* onGosubStmt);
     // Lightweight scan for RND usage independent of semantics
     /** Scan expression for RND() usage to enable helper emission. */
     void scanExprForRnd(const Expr* e);
@@ -441,12 +414,12 @@ private:
     /** Lower an expression to SSA value; returns its name. */
     std::string emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix);
     // Refactored helpers (one-function-per-file) used by emitExpr dispatcher
-    std::string emitNumberExpr(std::ostringstream& out, const class NumberExpr* num);
-    std::string emitVarExpr(std::ostringstream& out, const class VarExpr* v);
-    std::string emitUnaryExpr(std::ostringstream& out, const class UnaryExpr* u);
-    std::string emitBinaryExpr(std::ostringstream& out, const class BinaryExpr* b);
-    std::string emitCallExpr(std::ostringstream& out, const class CallExpr* call);
-    std::string emitStringExpr(std::ostringstream& out, const class StringExpr* s);
+    std::string emitNumberExpr(std::ostringstream& out, const struct NumberExpr* num);
+    std::string emitVarExpr(std::ostringstream& out, const struct VarExpr* v);
+    std::string emitUnaryExpr(std::ostringstream& out, const struct UnaryExpr* u);
+    std::string emitBinaryExpr(std::ostringstream& out, const struct BinaryExpr* b);
+    std::string emitCallExpr(std::ostringstream& out, const struct CallExpr* call);
+    std::string emitStringExpr(std::ostringstream& out, const struct StringExpr* s);
     // Helper: determine whether an expression is string-typed (for codegen routing)
     bool isStringExpr(const Expr* e) const;
     /** Lower a comparison expression to an i1 predicate value. */
@@ -468,193 +441,75 @@ private:
     /** Reset a variable to zero/null according to its type */
     void resetVar(std::ostringstream& out, const std::string& name);
     /** Lookup numeric kind for variable (assumes non-string); defaults to Single */
-    NumKind numKindOf(const std::string& name) const {
-        auto it = semNumericKinds_.find(name);
-        if (it != semNumericKinds_.end()) return it->second;
-        return NumKind::Single;
-    }
+    NumKind numKindOf(const std::string& name) const;
     // Lookup current inline binding for a variable name (if any)
-    bool lookupBinding(const std::string& name, std::string& out) const {
-        for (const auto & it : std::ranges::reverse_view(bindingStack_)) {
-            auto f = it.find(name);
-            if (f != it.end()) { out = f->second; return true; }
-        }
-        return false;
-    }
+    bool lookupBinding(const std::string& name, std::string& out) const;
     // Helper: determine if a variable name is string-typed
-    bool isStringVarNameCG(const std::string& name) const {
-        if (!name.empty() && name.back() == Symbols::DOLLARSIGN.first()) return true;
-        return semStringVariables_.contains(name);
-    }
-    bool isStringArrayNameCG(const std::string& name) const { return isStringVarNameCG(name); }
+    bool isStringVarNameCG(const std::string& name) const;
+    bool isStringArrayNameCG(const std::string& name) const;
 
     // Array helpers
     // Determine LLVM element type string for a numeric array name
-    std::string arrayElemType(const std::string& name) const {
-        switch (numKindOf(name)) {
-            case NumKind::Int16: return "i32";   // Integer arrays map to i32
-            case NumKind::Long32: return "i64";  // Long arrays map to i64
-            case NumKind::Single: return "float"; // Single arrays are true float
-            case NumKind::Double: default: return "double";
-        }
-    }
+    std::string arrayElemType(const std::string& name) const;
     // Emit a typed store into a numeric array element given the RHS as double
     void storeNumberToArrayElem(std::ostringstream& out,
                                 const std::string& arrayName,
                                 const std::string& elemPtrSSA,
-                                const std::string& doubleValSSA) {
-        switch (numKindOf(arrayName)) {
-            case NumKind::Int16: {
-                std::string cvt = nextTemp();
-                { std::string ir = std::format("  {} = fptosi double {} to i32", cvt, doubleValSSA); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 {}, ptr {}", cvt, elemPtrSSA); out << ir << Symbols::LF; }
-                break;
-            }
-            case NumKind::Long32: {
-                std::string cvt = nextTemp();
-                { std::string ir = std::format("  {} = fptosi double {} to i64", cvt, doubleValSSA); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i64 {}, ptr {}", cvt, elemPtrSSA); out << ir << Symbols::LF; }
-                break;
-            }
-            case NumKind::Single: {
-                std::string cvt = nextTemp();
-                { std::string ir = std::format("  {} = fptrunc double {} to float", cvt, doubleValSSA); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store float {}, ptr {}", cvt, elemPtrSSA); out << ir << Symbols::LF; }
-                break;
-            }
-            case NumKind::Double: {
-                { std::string ir = std::format("  store double {}, ptr {}", doubleValSSA, elemPtrSSA); out << ir << Symbols::LF; }
-                break;
-            }
-        }
-    }
+                                const std::string& doubleValSSA);
     // Load a numeric array element as a double SSA value
     std::string loadArrayElemAsDouble(std::ostringstream& out,
                                       const std::string& arrayName,
-                                      const std::string& elemPtrSSA) {
-        switch (numKindOf(arrayName)) {
-            case NumKind::Int16: {
-                std::string v = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr {}", v, elemPtrSSA); out << ir << Symbols::LF; }
-                std::string d = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", d, v); out << ir << Symbols::LF; }
-                return d;
-            }
-            case NumKind::Long32: {
-                std::string v = nextTemp(); { std::string ir = std::format("  {} = load i64, ptr {}", v, elemPtrSSA); out << ir << Symbols::LF; }
-                std::string d = nextTemp(); { std::string ir = std::format("  {} = sitofp i64 {} to double", d, v); out << ir << Symbols::LF; }
-                return d;
-            }
-            case NumKind::Single: {
-                std::string v = nextTemp(); { std::string ir = std::format("  {} = load float, ptr {}", v, elemPtrSSA); out << ir << Symbols::LF; }
-                std::string d = nextTemp(); { std::string ir = std::format("  {} = fpext float {} to double", d, v); out << ir << Symbols::LF; }
-                return d;
-            }
-            case NumKind::Double: default: {
-                std::string d = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", d, elemPtrSSA); out << ir << Symbols::LF; }
-                return d;
-            }
-        }
-    }
+                                      const std::string& elemPtrSSA);
 
     // Logging utilities
     /** Stream accessor: codegen-phase logger (ostream sink when disabled). */
-    std::ostream& log() { return codegenLogger_.stream(); }
+    std::ostream& log();
     /** Stream accessor: semantics-phase logger (ostream sink when disabled). */
-    std::ostream& logSem() { return semLogger_.stream(); }
+    std::ostream& logSem();
     /** Stream accessor: syntax-phase logger (unused here; provided for interface parity). */
-    std::ostream& syntax() { return syntaxLogger_.stream(); }
+    std::ostream& syntax();
     /** Human-readable name for a Stmt node kind (for logging). */
-    static const char* nodeName(const Stmt* s) { return prettyName(s ? s->getKind() : NodeKind::AbstractStmt); }
+    static const char* nodeName(const Stmt* s);
     /** Human-readable name for an Expr node kind (for logging). */
-    static const char* nodeName(const Expr* e) { return prettyName(e ? e->getKind() : NodeKind::AbstractExpr); }
+    static const char* nodeName(const Expr* e);
 
 public:
-    /**
+    /***
      * Function: CodeGenerator::setLogPath
      * Purpose:
      *  - Enable code generation logging to the specified file path.
      * Inputs:
      *  - path: Destination file path for codegen logs
      */
-    void setLogPath(const std::string& path) {
-        codegenLogger_.open(path, /*append=*/false);
-        codegenLogger_.setEnabled(true);
-    }
-    /**
+    void setLogPath(const std::string& path);
+    /***
      * Function: CodeGenerator::setSemanticLogPath
      * Purpose:
      *  - Enable semantic analysis logging to the specified file path.
      * Inputs:
      *  - path: Destination file path for semantic logs
      */
-    void setSemanticLogPath(const std::string& path) {
-        semLogger_.open(path, /*append=*/false);
-        semLogger_.setEnabled(true);
-    }
+    void setSemanticLogPath(const std::string& path);
     // Control SQRT alias (non-standard). When false, only SQR is recognized.
-    void setAllowSqrtAlias(bool allow) { allowSqrtAlias_ = allow; }
+    void setAllowSqrtAlias(bool allow);
 private:
     bool allowSqrtAlias_{true};
 
     // -- Helpers to simplify emitFor() --
     /** Load a scalar variable as double for math/comparisons. */
-    std::string loadVarAsDouble(std::ostringstream& out, const std::string& varName) {
-        switch (numKindOf(varName)) {
-            case NumKind::Int16: {
-                std::string l = nextTemp();
-                out << std::format("  {} = load i16, ptr {}", l, varAllocaName_[varName]) << Symbols::LF;
-                std::string d = nextTemp();
-                out << std::format("  {} = sitofp i16 {} to double", d, l) << Symbols::LF;
-                return d;
-            }
-            case NumKind::Long32: {
-                std::string l = nextTemp();
-                out << std::format("  {} = load i32, ptr {}", l, varAllocaName_[varName]) << Symbols::LF;
-                std::string d = nextTemp();
-                out << std::format("  {} = sitofp i32 {} to double", d, l) << Symbols::LF;
-                return d;
-            }
-            case NumKind::Single: {
-                std::string l = nextTemp();
-                out << std::format("  {} = load float, ptr {}", l, varAllocaName_[varName]) << Symbols::LF;
-                std::string d = nextTemp();
-                out << std::format("  {} = fpext float {} to double", d, l) << Symbols::LF;
-                return d;
-            }
-            case NumKind::Double: default: {
-                std::string d = nextTemp();
-                out << std::format("  {} = load double, ptr {}", d, varAllocaName_[varName]) << Symbols::LF;
-                return d;
-            }
-        }
-    }
+    std::string loadVarAsDouble(std::ostringstream& out, const std::string& varName);
 
     /** Compute FOR loop condition as i1 given cur, end, step (inclusive). */
     std::string computeForCond(std::ostringstream& out,
                                const std::string& curVal,
                                const std::string& endReg,
-                               const std::string& stepReg) {
-        std::string isNeg = nextTemp();
-        out << std::format("  {} = fcmp olt double {}, 0.0", isNeg, stepReg) << Symbols::LF;
-        std::string condLe = nextTemp();
-        out << std::format("  {} = fcmp ole double {}, {}", condLe, curVal, endReg) << Symbols::LF;
-        std::string condGe = nextTemp();
-        out << std::format("  {} = fcmp oge double {}, {}", condGe, curVal, endReg) << Symbols::LF;
-        std::string cond = nextTemp();
-        out << std::format("  {} = select i1 {}, i1 {}, i1 {}", cond, isNeg, condGe, condLe) << Symbols::LF;
-        return cond;
-    }
+                               const std::string& stepReg);
 
     /** Emit step increment and branch back to cond label. */
     void emitForIncrement(std::ostringstream& out,
                           const std::string& varName,
                           const std::string& stepReg,
-                          const std::string& condLbl) {
-        std::string vcur = loadVarAsDouble(out, varName);
-        std::string vnext = nextTemp();
-        out << std::format("  {} = fadd double {}, {}", vnext, vcur, stepReg) << Symbols::LF;
-        storeNumberToVar(out, varName, vnext);
-        out << std::format("  br label %{}", condLbl) << Symbols::LF;
-    }
+                          const std::string& condLbl);
 
     /** Emit all statements inside a FOR body; returns true if body terminated (e.g., via GOTO). */
     bool emitForBodyStatements(std::ostringstream& out,
@@ -689,44 +544,12 @@ private:
                                  std::string_view currLineLabel, int& localCounter);
 
     /** Emit common error-path stores and handler dispatch switch. */
-    void emitErrorDispatch(std::ostringstream& out, int errCode, int lineNo, int stmtIndex) {
-        out << std::format("  store i32 {}, ptr @gwb_err_code", errCode) << Symbols::LF;
-        out << std::format("  store i32 {}, ptr @gwb_err_line", lineNo) << Symbols::LF;
-        out << std::format("  store i32 {}, ptr @gwb_resume_line", lineNo) << Symbols::LF;
-        out << std::format("  store i32 {}, ptr @gwb_resume_stmt", stmtIndex) << Symbols::LF;
-        out << std::format("  store i1 true, ptr @gwb_in_handler") << Symbols::LF;
-        std::string trap = nextTemp();
-        out << std::format("  {} = load i32, ptr @gwb_err_trap_line", trap) << Symbols::LF;
-        out << std::format("  switch i32 {}, label %exit [", trap) << Symbols::LF;
-        for (const auto & [lnum, lp] : lineMap_) {
-            (void)lp;
-            out << std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)) << Symbols::LF;
-        }
-        out << "  ]" << Symbols::LF;
-    }
+    void emitErrorDispatch(std::ostringstream& out, int errCode, int lineNo, int stmtIndex);
 
     /** Compute linearized index for multi-dim array indices (1-based optionBase_). */
     std::string emitLinearIndex(std::ostringstream& out,
                                 const std::vector<std::string>& idxI64s,
-                                const std::vector<int>& dims) {
-        // Compute strides on host
-        std::vector<long long> extents; extents.reserve(dims.size());
-        for (size_t di = 0; di < dims.size(); ++di) {
-            long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e);
-        }
-        std::vector<long long> strides(dims.size(), 1);
-        for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) strides[di] = strides[di + 1] * extents[di + 1];
-        // Adjust each index by base
-        std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
-        for (const auto& ii : idxI64s) { std::string a = nextTemp(); out << std::format("  {} = sub i64 {}, {}", a, ii, optionBase_) << Symbols::LF; adjs.push_back(a); }
-        // Multiply-accumulate
-        std::string lin = nextTemp(); out << std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]) << Symbols::LF;
-        for (size_t di = 1; di < adjs.size(); ++di) {
-            std::string t = nextTemp(); out << std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]) << Symbols::LF;
-            std::string s2 = nextTemp(); out << std::format("  {} = add i64 {}, {}", s2, lin, t) << Symbols::LF; lin = s2;
-        }
-        return lin;
-    }
+                                const std::vector<int>& dims);
 };
 
 } // namespace gwbasic

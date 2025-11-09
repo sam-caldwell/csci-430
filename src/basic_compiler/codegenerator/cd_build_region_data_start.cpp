@@ -1,6 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/DataStmt.h"
 
 namespace gwbasic {
 
@@ -8,16 +7,22 @@ namespace gwbasic {
  * Function: CodeGenerator::cdBuildRegionDataStartIdx
  * Purpose: Map each 1000-based region to DATA item index at its first line.
  */
+// NOLINTNEXTLINE(readability-function-size,readability-convert-member-functions-to-static)
 void CodeGenerator::cdBuildRegionDataStartIdx(const std::vector<int>& lines) {
     regionDataStartIdx_.clear();
-    int dataCount = 0;
-    for (int ln : lines) {
-        if (const int region = (ln / 1000) * 1000; !regionDataStartIdx_.contains(region))
+    int dataCount = 0; // NOLINT(misc-const-correctness)
+    for (const int lineNum : lines) {
+        if (const int region = (lineNum / 1000) * 1000; !regionDataStartIdx_.contains(region)) {
             regionDataStartIdx_[region] = dataCount;
-        const auto* lptr = lineMap_[ln]; if (!lptr) continue;
-        for (const auto& st : lptr->statements) {
-            if (const auto ds = dyn_cast<const DataStmt>(st.get()))
-                dataCount += static_cast<int>(ds->items.size());
+        }
+        const auto* const linePtr = lineMap_[lineNum];
+        if (linePtr == nullptr) {
+            continue;
+        }
+        for (const auto& stmtNode : linePtr->statements) {
+            if (const auto* const dataStmt = dyn_cast<const DataStmt>(stmtNode.get())) {
+                dataCount += static_cast<int>(dataStmt->items.size());
+            }
         }
     }
 }

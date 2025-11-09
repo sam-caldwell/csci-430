@@ -4,8 +4,9 @@
  * Purpose: Implement CodeGenerator::handleReadBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/ReadStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 
 using namespace gwbasic;
 
@@ -24,4 +25,3 @@ bool CodeGenerator::handleReadBeforeLine(const Stmt *s,
     }
     return true;
 }
-

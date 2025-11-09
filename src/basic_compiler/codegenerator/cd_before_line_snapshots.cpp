@@ -1,6 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/CommonStmt.h"
+// STL dependencies are provided via CodeGenerator.h
 
 namespace gwbasic {
 
@@ -15,24 +15,25 @@ namespace gwbasic {
  * @param lines Ordered collection of line numbers to snapshot before.
  */
 void CodeGenerator::cdBuildBeforeLineSnapshots(const std::vector<int>& lines) {
-    for (int ln : lines) {
+    for (const int lineNum : lines) {
         std::set<std::string, std::less<>> accumCommon;
         std::set<std::string, std::less<>> accumVars;
         std::set<std::string, std::less<>> accumArrays;
         // level 1
         // Record snapshots as of "before this line".
-        commonBeforeLine_[ln] = accumCommon;
-        varsBeforeLine_[ln]   = accumVars;
-        arraysBeforeLine_[ln] = accumArrays;
+        commonBeforeLine_[lineNum] = accumCommon;
+        varsBeforeLine_[lineNum]   = accumVars;
+        arraysBeforeLine_[lineNum] = accumArrays;
 
-        const auto* lptr = lineMap_[ln];
-        if (!lptr) continue;
+        const auto* linePtr = lineMap_[lineNum];
+        if (linePtr == nullptr) {
+            continue;
+        }
 
-        for (const auto& st : lptr->statements) { // level 2
-            CodeGenerator::cdAccumulateFromStatement(st.get(), accumCommon, accumVars, accumArrays);
+        for (const auto& stmtNode : linePtr->statements) { // level 2
+            CodeGenerator::cdAccumulateFromStatement(stmtNode.get(), accumCommon, accumVars, accumArrays);
         }
     }
 }
 
 } // namespace gwbasic
-

@@ -4,8 +4,9 @@
  * Purpose: Implement CodeGenerator::handleIfBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 
 using namespace gwbasic;
 
@@ -17,4 +18,3 @@ bool CodeGenerator::handleIfBeforeLine(const Stmt *s,
     collectVarsForBeforeLineFromExpr(is->cond.get(), vars, arrays);
     return true;
 }
-

@@ -15,17 +15,18 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitWhile
- * Inputs:
- *  - out: IR output stream to append to
- *  - ws: Parsed WhileStmt node
- *  - currLineLabel: Base label for naming emitted blocks
- *  - localCounter: Per-line counter to uniquify labels
- * Outputs:
+ * Function: emitWhile
+ * Summary: Emit IR for a WHILE loop statement.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - ws: Parsed WhileStmt node.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
  *  - void (appends IR for WHILE loop structure)
  * Theory of operation:
- *  - Emits a loop with condition, body, and back-edge, merging at an end
- *    label. The condition must be a comparison expression.
+ *  - Emit a loop with condition, body, and back-edge, merging at an end
+ *    label. The condition may be comparison or general expression.
  */
 void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, const std::string& currLineLabel, int& localCounter) {
     std::string id = std::to_string(++localCounter);

@@ -4,8 +4,9 @@
  * Purpose: Implement CodeGenerator::handleEraseBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/EraseStmt.h"
+#include "basic_compiler/ast/RTTI.h"
 
 using namespace gwbasic;
 
@@ -16,4 +17,3 @@ bool CodeGenerator::handleEraseBeforeLine(const Stmt *s,
     for (const auto &n: er->names) arrays.erase(n);
     return true;
 }
-

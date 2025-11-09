@@ -4,8 +4,9 @@
  * Purpose: Implement CodeGenerator::handlePrintBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 
 using namespace gwbasic;
 
@@ -18,4 +19,3 @@ bool CodeGenerator::handlePrintBeforeLine(const Stmt *s,
     for (const auto &v: pr->more) collectVarsForBeforeLineFromExpr(v.get(), vars, arrays);
     return true;
 }
-

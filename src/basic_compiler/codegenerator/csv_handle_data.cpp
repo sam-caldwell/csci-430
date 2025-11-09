@@ -3,7 +3,14 @@
 
 namespace gwbasic {
 
-/* Collect literal ids from DATA items for coverage of symbol table. */
+/*
+ * Function: csvHandleData
+ * Summary: Collect literal ids from DATA items to seed the string table.
+ * Parameters:
+ *  - ds: Parsed DataStmt node.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::csvHandleData(const DataStmt* ds) {
     for (const auto& [isString, text] : ds->items) {
         (void)isString;
@@ -14,4 +21,3 @@ void CodeGenerator::csvHandleData(const DataStmt* ds) {
 }
 
 } // namespace gwbasic
-

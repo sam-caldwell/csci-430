@@ -5,12 +5,13 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::appendEscapedByte
- * Purpose:
- *  - Append a single byte to an IR string literal, escaping as needed.
- * Inputs:
- *  - out: target string to append to
- *  - c: byte to encode
+ * Function: appendEscapedByte
+ * Summary: Append a byte to an IR string literal, escaping as needed.
+ * Parameters:
+ *  - out: Target string to append to.
+ *  - c: Byte to encode.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::appendEscapedByte(std::string& out, unsigned char c) {
     // Named constants to avoid magic numbers and clarify ranges
@@ -45,4 +46,3 @@ void CodeGenerator::appendEscapedByte(std::string& out, unsigned char c) {
 }
 
 } // namespace gwbasic
-

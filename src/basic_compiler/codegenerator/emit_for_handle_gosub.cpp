@@ -6,8 +6,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandleGosub
- * Purpose: Emit inline GOSUB inside a FOR body.
+ * Function: emitForHandleGosub
+ * Summary: Emit inline GOSUB handling within a FOR body.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - gs: Parsed GosubStmt node.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForHandleGosub(std::ostringstream& out, const GosubStmt* gs, const std::string& currLineLabel, int& localCounter) {
     std::string contLbl = currLineLabel + std::string("_gosub_cont") + std::to_string(++localCounter);
@@ -18,4 +25,3 @@ void CodeGenerator::emitForHandleGosub(std::ostringstream& out, const GosubStmt*
 }
 
 } // namespace gwbasic
-

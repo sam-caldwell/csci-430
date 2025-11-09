@@ -4,8 +4,9 @@
  * Purpose: Implement CodeGenerator::handleIfBlockBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/IfBlockStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 
 using namespace gwbasic;
 
@@ -19,4 +20,3 @@ bool CodeGenerator::handleIfBlockBeforeLine(const Stmt *s,
     for (const auto &st: ib->elseBody) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays);
     return true;
 }
-

@@ -4,8 +4,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandleStop
- * Purpose: Emit STOP handling inside a FOR body (prints break message and exits).
+ * Function: emitForHandleStop
+ * Summary: Emit STOP handling inside a FOR body.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForHandleStop(std::ostringstream& out) {
     std::string fmt = nextTemp(); out << std::format("  {} = getelementptr inbounds i8, ptr @.msg_break, i64 0", fmt) << Symbols::LF;
@@ -14,4 +18,3 @@ void CodeGenerator::emitForHandleStop(std::ostringstream& out) {
 }
 
 } // namespace gwbasic
-

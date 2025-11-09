@@ -6,6 +6,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: storeNumberToVar
+ * Summary: Store a computed double value into a typed variable slot.
+ * Parameters:
+ *  - out: IR output stream to append store instructions.
+ *  - name: Target variable name.
+ *  - doubleValSSA: SSA register holding the double value to store.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::storeNumberToVar(std::ostringstream& out, const std::string& name, const std::string& doubleValSSA) {
     const std::string& dst = varAllocaName_[name];
     switch (numKindOf(name)) {
@@ -32,4 +42,3 @@ void CodeGenerator::storeNumberToVar(std::ostringstream& out, const std::string&
 }
 
 } // namespace gwbasic
-

@@ -6,8 +6,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForPrintStringItem
- * Purpose: Emit IR for printing a string item within PRINT.
+ * Function: emitForPrintStringItem
+ * Summary: Emit IR for printing a string item within PRINT.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - pr: Parsed PrintStmt node for context (channel, separators, trail).
+ *  - se: String expression to print.
+ *  - addNL: Whether to print a trailing newline for this item.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForPrintStringItem(std::ostringstream& out, const PrintStmt* pr, const StringExpr* se, bool addNL) {
     std::string sptr = nextTemp();
@@ -34,4 +41,3 @@ void CodeGenerator::emitForPrintStringItem(std::ostringstream& out, const PrintS
 }
 
 } // namespace gwbasic
-

@@ -7,6 +7,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: ensureArrayAllocated
+ * Summary: Ensure a string/array allocation exists for a named variable.
+ * Parameters:
+ *  - out: IR output stream to append allocation instructions.
+ *  - name: Array variable name.
+ *  - length: Number of elements to allocate.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::ensureArrayAllocated(std::ostringstream& out, const std::string& name, int length) {
     if (auto foundIt = arrayAllocaName_.find(name); foundIt != arrayAllocaName_.end() && !foundIt->second.empty()) {
         return;

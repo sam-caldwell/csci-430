@@ -10,17 +10,14 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitExpr
- * Inputs:
- *  - out: IR output stream
- *  - e: expression node
- *  - (unused) block suffix for naming (reserved)
- * Outputs:
- *  - std::string: register name or immediate literal used as the result
- * Theory of operation:
- *  - Pattern matches the expression type (number, var, unary, binary,
- *    string) and emits the corresponding LLVM IR instructions, returning
- *    a name/literal which the caller can use.
+ * Function: emitExpr
+ * Summary: Emit IR for an expression and return its SSA value.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - e: Expression node to lower.
+ *  - currBlockSuffix: Optional block suffix used for naming.
+ * Returns:
+ *  - std::string: Register name or literal with the resulting value.
  */
 // NOLINTNEXTLINE(readability-function-cognitive-complexity,readability-function-size)
 std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix) {

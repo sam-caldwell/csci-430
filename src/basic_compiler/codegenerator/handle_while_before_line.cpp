@@ -5,6 +5,7 @@
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
 
 using namespace gwbasic;
@@ -18,4 +19,3 @@ bool CodeGenerator::handleWhileBeforeLine(const Stmt *s,
     for (const auto &st: ws->body) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays);
     return true;
 }
-

@@ -1,23 +1,17 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/RTTI.h"
-#include "basic_compiler/ast/DataStmt.h"
-#include "basic_compiler/ast/ReadStmt.h"
-#include "basic_compiler/ast/OnGotoStmt.h"
-#include "basic_compiler/ast/OnGosubStmt.h"
-#include "basic_compiler/ast/MidAssignStmt.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::collectStmtVars
- * Inputs:
- *  - s: statement node to analyze
- * Outputs:
- *  - void (updates internal sets/maps of variables and string literals)
- * Theory of operation:
- *  - Inspects the statement kind to discover referenced variables and
- *    string constants, recursing into contained expressions/blocks.
+ * Function: collectStmtVars
+ * Summary: Collect variables and string literals used by a statement.
+ * Parameters:
+ *  - s: Statement node to analyze.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::collectStmtVars(const Stmt* s) {
     if (const auto p = dyn_cast<const PrintStmt>(s))

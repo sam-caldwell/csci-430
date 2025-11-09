@@ -5,6 +5,7 @@
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/SwapStmt.h"
 
 using namespace gwbasic;
@@ -26,4 +27,3 @@ bool CodeGenerator::handleSwapBeforeLine(const Stmt *s,
     handle(sw->right);
     return true;
 }
-

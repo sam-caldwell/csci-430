@@ -1,13 +1,21 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/Symbols.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
 
 namespace gwbasic {
 
-/* Collect variables for ON ... GOSUB */
-void CodeGenerator::csvHandleOnGosub(const OnGosubStmt* ogs) {
-    collectExprVars(ogs->index.get());
-    logSem() << "OnGosub targets=" << ogs->targets.size() << Symbols::LF;
+/*
+ * Function: csvHandleOnGosub
+ * Summary: Collect variables referenced by an ON ... GOSUB statement.
+ * Parameters:
+ *  - onGosubStmt: Parsed OnGosubStmt node.
+ * Returns:
+ *  - void
+ */
+void CodeGenerator::csvHandleOnGosub(const OnGosubStmt* onGosubStmt) {
+    collectExprVars(onGosubStmt->index.get());
+    logSem() << "OnGosub targets=" << onGosubStmt->targets.size() << Symbols::LF;
 }
 
 } // namespace gwbasic
-

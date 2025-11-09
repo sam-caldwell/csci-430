@@ -4,14 +4,16 @@
 
 namespace gwbasic {
     /*
-     * Function: CodeGenerator::emitGlobals
-     * Inputs:
-     *  - out: IR output stream
-     * Outputs:
+     * Function: emitGlobals
+     * Summary: Emit global constants and state used by the runtime.
+     * Parameters:
+     *  - out: IR output stream to append to.
+     * Returns:
      *  - void
      * Theory of operation:
-     *  - Emits format strings and all discovered string literals as constant
-     *    global arrays with unnamed_addr for efficient addressing.
+     *  - Emit format strings and discovered string literals as constant
+     *    global arrays with unnamed_addr for efficient addressing, along with
+     *    various runtime globals used by BASIC features.
      */
     void CodeGenerator::emitGlobals(std::ostringstream &out) {
         // Printf format strings:

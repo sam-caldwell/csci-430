@@ -4,8 +4,9 @@
  * Purpose: Implement CodeGenerator::handleArrayAssignBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/ArrayAssignStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 
 using namespace gwbasic;
 
@@ -20,4 +21,3 @@ bool CodeGenerator::handleArrayAssignBeforeLine(const Stmt *s,
     collectVarsForBeforeLineFromExpr(aa->value.get(), vars, arrays);
     return true;
 }
-

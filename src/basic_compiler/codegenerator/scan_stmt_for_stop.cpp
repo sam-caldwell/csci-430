@@ -10,13 +10,14 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::scanStmtForStop
- * Inputs:
- *  - s: Statement node to scan
- * Outputs:
+ * Function: scanStmtForStop
+ * Summary: Scan a statement (and nested bodies) for a STOP.
+ * Parameters:
+ *  - stmt: Statement node to scan.
+ * Returns:
  *  - void (sets needsBreakMsg_ when STOP encountered)
  * Theory of operation:
- *  - Recursively walks nested blocks to detect STOP, enabling conditional
+ *  - Recursively walk nested blocks to detect STOP, enabling conditional
  *    emission of the break message global.
  */
 void CodeGenerator::scanStmtForStop(const Stmt* stmt) {
