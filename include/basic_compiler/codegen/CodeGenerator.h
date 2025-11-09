@@ -311,7 +311,7 @@ private:
      * Outputs:
      *  - std::string: Global symbol (e.g., "@.str.5")
      */
-    static std::string globalStringName(int id) { std::string s = "@.str."; s += std::to_string(id); return s; }
+    static std::string globalStringName(const int id) { std::string s = "@.str."; s += std::to_string(id); return s; }
     /**
      * Function: CodeGenerator::lineLabelName
      * Purpose:
@@ -321,13 +321,13 @@ private:
      * Outputs:
      *  - std::string: Label (e.g., "line100")
      */
-    static std::string lineLabelName(int ln) { std::string s = "line"; s += std::to_string(ln); return s; }
+    static std::string lineLabelName(const int ln) { std::string s = "line"; s += std::to_string(ln); return s; }
     /** Label for re-executing a specific statement index within a line. 1-based index. */
-    static std::string resumeLabelName(int ln, int stmtIndex) {
+    static std::string resumeLabelName(const int ln, const int stmtIndex) {
         std::string s = "resume_l"; s += std::to_string(ln); s += "_"; s += std::to_string(stmtIndex); return s;
     }
     /** Label for resuming at the statement after a given index within a line. 1-based index. */
-    static std::string resumeNextLabelName(int ln, int stmtIndex) {
+    static std::string resumeNextLabelName(const int ln, const int stmtIndex) {
         std::string s = "resume_next_l"; s += std::to_string(ln); s += "_"; s += std::to_string(stmtIndex); return s;
     }
 
@@ -336,8 +336,15 @@ private:
 
     // Declaration collection
     /** Collect declarations, variables, strings, and line ordering. */
-    void collectDecls(const Program& program);
     // collectDecls() helpers (one per file) to reduce nesting
+    void collectDecls(const Program& program);
+
+    void cdAccumulateFromStatement(
+        const Stmt* st,
+        std::set<std::string, std::less<>>& accumCommon,
+        std::set<std::string, std::less<>>& accumVars,
+        std::set<std::string, std::less<>>& accumArrays);
+
     void cdGatherLinesAndDeletes(const Program& program,
                                  std::vector<int>& linesOut,
                                  std::map<int, const Line*>& lineMapOut,
@@ -345,8 +352,10 @@ private:
                                  std::vector<std::pair<int,int>>& deleteRanges,
                                  int& globalMin,
                                  int& globalMax);
+
     void cdFilterDeletedLines(std::vector<int>& lines,
                               const std::vector<std::pair<int,int>>& deleteRanges);
+
     void cdCollectVarsIfNoSemantics(const std::vector<int>& lines);
     void cdScanRndAndStop(const std::vector<int>& lines);
     void cdBuildBeforeLineSnapshots(const std::vector<int>& lines);
