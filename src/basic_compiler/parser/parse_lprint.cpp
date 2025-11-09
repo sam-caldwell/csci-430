@@ -16,7 +16,7 @@ namespace gwbasic {
 std::unique_ptr<Stmt> Parser::parseLprint() {
     const int l = peek().line;
     const int c = peek().col;
-    int channel = 1; // Implicit printer channel maps to @gwb_files[0]
+    constexpr int channel = 1; // Implicit printer channel maps to @gwb_files[0]
     // Optional: USING formatExpr ; or , (leading)
     std::unique_ptr<Expr> fmt;
     if (match(TokenType::KwUsing)) {
@@ -40,7 +40,7 @@ std::unique_ptr<Stmt> Parser::parseLprint() {
     }
     std::vector<std::unique_ptr<Expr>> items;
     std::vector<PrintStmt::Sep> seps;
-    PrintStmt::Terminator trail = PrintStmt::Terminator::Newline;
+    auto trail = PrintStmt::Terminator::Newline;
     while (true) {
         if (check(TokenType::KwUsing)) {
             advance();
