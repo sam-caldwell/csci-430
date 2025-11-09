@@ -6,35 +6,47 @@
 
 namespace gwbasic {
 
+/*
+ * Function: storeNumberToArrayElem
+ * Summary: Store a double value into an array element of typed kind.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - arrayName: Array variable name (determines numeric kind).
+ *  - elemPtrSSA: SSA name of the element pointer (ptr).
+ *  - doubleValSSA: SSA name of the source double value.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::storeNumberToArrayElem(std::ostringstream& out,
                                            const std::string& arrayName,
                                            const std::string& elemPtrSSA,
                                            const std::string& doubleValSSA) {
+
     switch (numKindOf(arrayName)) {
-        case NumKind::Int16: {
+        using enum gwbasic::CodeGenerator::NumKind;
+        case Int16: {
             std::string cvt = nextTemp();
-            { std::string ir = std::format("  {} = fptosi double {} to i32", cvt, doubleValSSA); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store i32 {}, ptr {}", cvt, elemPtrSSA); out << ir << Symbols::LF; }
+            out << std::format("  {} = fptosi double {} to i32", cvt, doubleValSSA) << Symbols::LF
+                << std::format("  store i32 {}, ptr {}", cvt, elemPtrSSA) << Symbols::LF;
             break;
         }
-        case NumKind::Long32: {
+        case Long32: {
             std::string cvt = nextTemp();
-            { std::string ir = std::format("  {} = fptosi double {} to i64", cvt, doubleValSSA); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store i64 {}, ptr {}", cvt, elemPtrSSA); out << ir << Symbols::LF; }
+            out << std::format("  {} = fptosi double {} to i64", cvt, doubleValSSA) << Symbols::LF
+                << std::format("  store i64 {}, ptr {}", cvt, elemPtrSSA) << Symbols::LF;
             break;
         }
-        case NumKind::Single: {
+        case Single: {
             std::string cvt = nextTemp();
-            { std::string ir = std::format("  {} = fptrunc double {} to float", cvt, doubleValSSA); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store float {}, ptr {}", cvt, elemPtrSSA); out << ir << Symbols::LF; }
+            out << std::format("  {} = fptrunc double {} to float", cvt, doubleValSSA) << Symbols::LF
+                << std::format("  store float {}, ptr {}", cvt, elemPtrSSA) << Symbols::LF;
             break;
         }
-        case NumKind::Double: {
-            { std::string ir = std::format("  store double {}, ptr {}", doubleValSSA, elemPtrSSA); out << ir << Symbols::LF; }
+        case Double: {
+            out << std::format("  store double {}, ptr {}", doubleValSSA, elemPtrSSA) << Symbols::LF;
             break;
         }
     }
 }
 
 } // namespace gwbasic
-

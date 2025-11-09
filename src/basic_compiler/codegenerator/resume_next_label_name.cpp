@@ -13,12 +13,8 @@ namespace gwbasic {
  * Returns:
  *  - std::string: Label like "resume_next_l<ln>_<stmtIndex>".
  */
-std::string CodeGenerator::resumeNextLabelName(int ln, int stmtIndex) {
-    std::string s = "resume_next_l";
-    s += std::to_string(ln);
-    s += "_";
-    s += std::to_string(stmtIndex);
-    return s;
+std::string CodeGenerator::resumeNextLabelName(const int ln, const int stmtIndex) {
+    return std::format("resume_next_{}_{}", ln, stmtIndex);
 }
 
 } // namespace gwbasic

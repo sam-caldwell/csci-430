@@ -4,8 +4,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdBuildRegionDataStartIdx
- * Purpose: Map each 1000-based region to DATA item index at its first line.
+ * Function: cdBuildRegionDataStartIdx
+ * Summary: Map each 1000-based region to the DATA item start index.
+ * Parameters:
+ *  - lines: Ordered kept line numbers to scan.
+ * Returns:
+ *  - void
  */
 // NOLINTNEXTLINE(readability-function-size,readability-convert-member-functions-to-static)
 void CodeGenerator::cdBuildRegionDataStartIdx(const std::vector<int>& lines) {

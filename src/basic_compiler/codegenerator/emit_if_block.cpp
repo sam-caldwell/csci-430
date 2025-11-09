@@ -14,17 +14,15 @@
 
 namespace gwbasic {
     /*
-     * Function: CodeGenerator::emitIfBlock
-     * Inputs:
-     *  - out: IR output stream to append to
-     *  - ib: Parsed IfBlockStmt node (with optional ELSE body)
-     *  - currLineLabel: Base label for naming emitted blocks
-     *  - localCounter: Per-line counter to uniquify labels
-     * Outputs:
-     *  - void (appends IR for IF/THEN[/ELSE] block)
-     * Theory of operation:
-     *  - Lowers the condition as a comparison, emits branches to THEN/ELSE,
-     *    lowers contained statements, and merges control at an end label.
+     * Function: emitIfBlock
+     * Summary: Emit IR for an IF/THEN[/ELSE] block.
+     * Parameters:
+     *  - out: IR output stream to append to.
+     *  - ib: Parsed IfBlockStmt node (with optional ELSE body).
+     *  - currLineLabel: Base label for naming emitted blocks.
+     *  - localCounter: Per-line counter to uniquify labels.
+     * Returns:
+     *  - void
      */
     void CodeGenerator::emitIfBlock(std::ostringstream &out, const IfBlockStmt *ib, const std::string &currLineLabel,
                                     int &localCounter) {

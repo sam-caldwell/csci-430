@@ -10,6 +10,16 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: handleInputBeforeLine
+ * Summary: Collect input variable names before a line.
+ * Parameters:
+ *  - s: Statement pointer to inspect.
+ *  - vars: Output set of scalar variable names.
+ *  - arrays: Optional output set of array names (unused).
+ * Returns:
+ *  - bool: True if the statement was handled.
+ */
 auto CodeGenerator::handleInputBeforeLine(const Stmt *s,
                                           std::set<std::string, std::less<>> &vars,
                                           std::set<std::string, std::less<>> *arrays) -> bool {

@@ -7,15 +7,13 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitComparison
- * Inputs:
- *  - out: IR stream
- *  - c: BinaryExpr comparison node
- * Outputs:
- *  - std::string: name of the i1 result register
- * Theory of operation:
- *  - Emits code to evaluate both operands as double, then performs an
- *    IEEE-754 ordered comparison using the appropriate fcmp predicate.
+ * Function: emitComparison
+ * Summary: Lower a comparison BinaryExpr to i1 using fcmp/icmp.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - c: BinaryExpr comparison node.
+ * Returns:
+ *  - std::string: Name of the i1 result register.
  */
 std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryExpr* c) {
     // Support string vs string comparison via strcmp; otherwise numeric fcmp

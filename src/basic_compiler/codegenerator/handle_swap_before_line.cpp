@@ -10,20 +10,40 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: handleSwapBeforeLine
+ * Summary: Collect names referenced by SWAP before a line.
+ * Parameters:
+ *  - s: Statement pointer to inspect.
+ *  - vars: Output set of scalar variable names.
+ *  - arrays: Output set of array names referenced.
+ * Returns:
+ *  - bool: True if the statement was handled.
+ */
 bool CodeGenerator::handleSwapBeforeLine(const Stmt *s,
                                          std::set<std::string, std::less<>> &vars,
                                          std::set<std::string, std::less<>> &arrays) {
+
     const auto sw = dyn_cast<const SwapStmt>(s);
-    if (!sw) return false;
+
+    if (!sw)
+        return false;
+
     auto handle = [&](const ReadTarget &t) {
+
         if (!t.indices.empty()) {
             arrays.insert(t.name);
-            for (const auto &ix: t.indices) collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays);
+            for (const auto &ix: t.indices)
+                collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays);
         } else {
             vars.insert(t.name);
         }
+
     };
+
     handle(sw->left);
+
     handle(sw->right);
+
     return true;
 }

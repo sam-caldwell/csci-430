@@ -5,7 +5,14 @@
 
 namespace gwbasic {
 
-/* Collect variables for INPUT statement. */
+/*
+ * Function: csvHandleInput
+ * Summary: Collect variables and prompt literal for INPUT.
+ * Parameters:
+ *  - inputStmt: Parsed InputStmt node.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::csvHandleInput(const InputStmt* inputStmt) {
 
     for (const auto& varName : inputStmt->variables) {

@@ -11,6 +11,8 @@ namespace gwbasic {
  * Returns:
  *  - std::ostream&: Stream for syntax logging.
  */
-std::ostream& CodeGenerator::syntax() { return syntaxLogger_.stream(); }
+std::ostream& CodeGenerator::syntax() {
+    return syntaxLogger_.stream();
+}
 
 } // namespace gwbasic

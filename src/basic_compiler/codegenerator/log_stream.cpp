@@ -11,6 +11,8 @@ namespace gwbasic {
  * Returns:
  *  - std::ostream&: Stream for codegen logging.
  */
-std::ostream& CodeGenerator::log() { return codegenLogger_.stream(); }
+std::ostream& CodeGenerator::log() {
+    return codegenLogger_.stream();
+}
 
 } // namespace gwbasic

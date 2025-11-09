@@ -9,6 +9,15 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: emitCallExpr
+ * Summary: Emit IR for a call expression (built-in functions).
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - call: Parsed CallExpr node.
+ * Returns:
+ *  - std::string: SSA register name holding the result.
+ */
 std::string CodeGenerator::emitCallExpr(std::ostringstream& out, const CallExpr* call) {
     // This function contains the original logic from emitExpr for handling built-in
     // functions such as SPACE$, LTRIM$, RTRIM$, CHR$, etc. It normalizes the callee

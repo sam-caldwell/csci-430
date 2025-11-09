@@ -13,9 +13,7 @@ namespace gwbasic {
  *  - std::string: Label name prefixing the line number (e.g., "line100").
  */
 std::string CodeGenerator::lineLabelName(int ln) {
-    std::string s = "line";
-    s += std::to_string(ln);
-    return s;
+    return std::format("line{}", ln);;
 }
 
 } // namespace gwbasic

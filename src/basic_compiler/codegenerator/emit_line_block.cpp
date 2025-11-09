@@ -56,21 +56,18 @@
 #include <cmath>
 
 namespace gwbasic {
+    /*
+     * Function: emitLineBlock
+     * Summary: Emit a basic block for a source line and its statements.
+     * Parameters:
+     *  - out: IR output stream to append to.
+     *  - line: AST line to emit.
+     *  - lineIndex: Index of this line within the kept list.
+     *  - lastIndex: Index of the last kept line.
+     * Returns:
+     *  - void
+     */
     void CodeGenerator::emitLineBlock(std::ostringstream &out, const Line &line, int lineIndex, int lastIndex) {
-        /*
-         * Function: CodeGenerator::emitLineBlock
-         * Inputs:
-         *  - out: IR stream
-         *  - line: AST line to emit
-         *  - lineIndex/lastIndex: indices to compute fall-through label
-         * Outputs:
-         *  - void
-         * Theory of operation:
-         *  - Emits a basic block label for the line, then iterates statements,
-         *    generating IR for assignments, PRINT, GOTO, GOSUB/RETURN, IF, INPUT,
-         *    and inline FOR loops. Terminates with a branch to the next line or
-         *    %exit on END/RETURN/GOTO.
-         */
         currentLine_ = line.number;
         out << lineLabelName(line.number) << ":" << Symbols::LF;
         { std::ostringstream m; m << "begin line " << currentLine_; log() << m.str() << Symbols::LF; }

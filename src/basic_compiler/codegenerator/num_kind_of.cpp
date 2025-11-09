@@ -12,8 +12,7 @@ namespace gwbasic {
  *  - NumKind: Inferred numeric kind (Int16, Long32, Single, Double).
  */
 CodeGenerator::NumKind CodeGenerator::numKindOf(const std::string& name) const {
-    auto it = semNumericKinds_.find(name);
-    if (it != semNumericKinds_.end()) {
+    if (const auto it = semNumericKinds_.find(name); it != semNumericKinds_.end()) {
         return it->second;
     }
     return NumKind::Single;

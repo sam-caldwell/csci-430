@@ -10,6 +10,15 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: emitVarExpr
+ * Summary: Emit IR for a variable expression, loading its value.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - v: Parsed VarExpr node.
+ * Returns:
+ *  - std::string: SSA register name or bound name holding the value.
+ */
 std::string CodeGenerator::emitVarExpr(std::ostringstream& out, const VarExpr* v) {
     if (std::string bound; lookupBinding(v->name, bound)) return bound;
     {
@@ -90,4 +99,3 @@ std::string CodeGenerator::emitVarExpr(std::ostringstream& out, const VarExpr* v
     }
     return r;
 }
-

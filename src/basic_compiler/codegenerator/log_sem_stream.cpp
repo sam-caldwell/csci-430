@@ -11,6 +11,8 @@ namespace gwbasic {
  * Returns:
  *  - std::ostream&: Stream for semantic logging.
  */
-std::ostream& CodeGenerator::logSem() { return semLogger_.stream(); }
+std::ostream& CodeGenerator::logSem() {
+    return semLogger_.stream();
+}
 
 } // namespace gwbasic

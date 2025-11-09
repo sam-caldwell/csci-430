@@ -6,6 +6,17 @@
 
 namespace gwbasic {
 
+/*
+ * Function: emitForIncrement
+ * Summary: Increment a FOR loop variable and branch to condition.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - varName: Variable name to increment.
+ *  - stepReg: SSA name of the step value (double).
+ *  - condLbl: Label of the condition block to branch to.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::emitForIncrement(std::ostringstream& out,
                                      const std::string& varName,
                                      const std::string& stepReg,
@@ -18,4 +29,3 @@ void CodeGenerator::emitForIncrement(std::ostringstream& out,
 }
 
 } // namespace gwbasic
-

@@ -7,6 +7,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: emitLinearIndex
+ * Summary: Compute linearized array index from multi-dimensional indices.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - idxI64s: SSA names of each index (i64), in order.
+ *  - dims: Declared upper bounds for each dimension.
+ * Returns:
+ *  - std::string: SSA register name holding the linear index (i64).
+ */
 std::string CodeGenerator::emitLinearIndex(std::ostringstream& out,
                                            const std::vector<std::string>& idxI64s,
                                            const std::vector<int>& dims) {
@@ -46,4 +56,3 @@ std::string CodeGenerator::emitLinearIndex(std::ostringstream& out,
 }
 
 } // namespace gwbasic
-

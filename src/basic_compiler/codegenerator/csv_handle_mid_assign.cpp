@@ -5,7 +5,14 @@
 
 namespace gwbasic {
 
-/* Collect variables for MID$ assignment (scalar or array element). */
+/*
+ * Function: csvHandleMidAssign
+ * Summary: Collect variables referenced by MID$ assignment (scalar/array).
+ * Parameters:
+ *  - midAssign: Parsed MidAssignStmt node.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::csvHandleMidAssign(const MidAssignStmt* midAssign) {
     variables_.insert(midAssign->name);
     for (const auto& indexExpr : midAssign->indices) {

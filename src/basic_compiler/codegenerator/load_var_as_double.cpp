@@ -19,23 +19,23 @@ std::string CodeGenerator::loadVarAsDouble(std::ostringstream& out, const std::s
     switch (numKindOf(varName)) {
         case NumKind::Int16: {
             std::string l = nextTemp();
-            out << std::format("  {} = load i16, ptr {}", l, varAllocaName_[varName]) << Symbols::LF;
             std::string d = nextTemp();
-            out << std::format("  {} = sitofp i16 {} to double", d, l) << Symbols::LF;
+            out << std::format("  {} = load i16, ptr {}", l, varAllocaName_[varName]) << Symbols::LF
+                << std::format("  {} = sitofp i16 {} to double", d, l) << Symbols::LF;
             return d;
         }
         case NumKind::Long32: {
             std::string l = nextTemp();
-            out << std::format("  {} = load i32, ptr {}", l, varAllocaName_[varName]) << Symbols::LF;
             std::string d = nextTemp();
-            out << std::format("  {} = sitofp i32 {} to double", d, l) << Symbols::LF;
+            out << std::format("  {} = load i32, ptr {}", l, varAllocaName_[varName]) << Symbols::LF
+                << std::format("  {} = sitofp i32 {} to double", d, l) << Symbols::LF;
             return d;
         }
         case NumKind::Single: {
             std::string l = nextTemp();
-            out << std::format("  {} = load float, ptr {}", l, varAllocaName_[varName]) << Symbols::LF;
             std::string d = nextTemp();
-            out << std::format("  {} = fpext float {} to double", d, l) << Symbols::LF;
+            out << std::format("  {} = load float, ptr {}", l, varAllocaName_[varName]) << Symbols::LF
+                << std::format("  {} = fpext float {} to double", d, l) << Symbols::LF;
             return d;
         }
         case NumKind::Double: default: {

@@ -3,6 +3,14 @@
 
 namespace gwbasic {
 
+/*
+ * Function: setSemantics
+ * Summary: Provide semantic analysis results to the code generator.
+ * Parameters:
+ *  - r: SemanticAnalyzer::Result structure with program facts.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::setSemantics(const SemanticAnalyzer::Result& r) {
     semProvided_ = true;
     semVariables_.clear();
@@ -33,4 +41,3 @@ void CodeGenerator::setSemantics(const SemanticAnalyzer::Result& r) {
 }
 
 } // namespace gwbasic
-

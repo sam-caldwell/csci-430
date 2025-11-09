@@ -18,15 +18,26 @@ namespace gwbasic {
 void CodeGenerator::resetVar(std::ostringstream& out, const std::string& name) {
     const std::string& dst = varAllocaName_[name];
     if (isStringVarNameCG(name)) {
-        std::string ir = std::format("  store ptr null, ptr {}", dst);
-        out << ir << Symbols::LF;
+        out << std::format("  store ptr null, ptr {}", dst) << Symbols::LF;
         return;
     }
     switch (numKindOf(name)) {
-        case NumKind::Int16: { std::string ir = std::format("  store i16 0, ptr {}", dst); out << ir << Symbols::LF; break; }
-        case NumKind::Long32:{ std::string ir = std::format("  store i32 0, ptr {}", dst); out << ir << Symbols::LF; break; }
-        case NumKind::Single:{ std::string ir = std::format("  store float 0.0, ptr {}", dst); out << ir << Symbols::LF; break; }
-        case NumKind::Double:{ std::string ir = std::format("  store double 0.0, ptr {}", dst); out << ir << Symbols::LF; break; }
+        case NumKind::Int16: {
+            out << std::format("  store i16 0, ptr {}", dst) << Symbols::LF;
+            break;
+        }
+        case NumKind::Long32:{
+            out << std::format("  store i32 0, ptr {}", dst) << Symbols::LF;
+            break;
+        }
+        case NumKind::Single:{
+            out << std::format("  store float 0.0, ptr {}", dst) << Symbols::LF;
+            break;
+        }
+        case NumKind::Double:{
+            out << std::format("  store double 0.0, ptr {}", dst) << Symbols::LF;
+            break;
+        }
     }
 }
 

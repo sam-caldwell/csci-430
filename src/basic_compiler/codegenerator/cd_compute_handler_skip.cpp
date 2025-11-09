@@ -5,8 +5,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdComputeHandlerSkipAfter
- * Purpose: Determine the line to skip to after an ON ERROR handler when not in handler context.
+ * Function: cdComputeHandlerSkipAfter
+ * Summary: Compute the post-handler skip line for ON ERROR handlers.
+ * Parameters:
+ *  - lines: Kept line numbers to scan.
+ * Returns:
+ *  - void
  */
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void CodeGenerator::cdComputeHandlerSkipAfter(const std::vector<int>& lines) {

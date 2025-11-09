@@ -10,6 +10,15 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: handleEraseBeforeLine
+ * Summary: Remove array names erased by ERASE before a line.
+ * Parameters:
+ *  - s: Statement pointer to inspect.
+ *  - arrays: In/out set of array names.
+ * Returns:
+ *  - bool: True if the statement was handled.
+ */
 bool CodeGenerator::handleEraseBeforeLine(const Stmt *s,
                                           std::set<std::string, std::less<>> &arrays) {
     const auto er = dyn_cast<const EraseStmt>(s);

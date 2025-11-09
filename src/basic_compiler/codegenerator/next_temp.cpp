@@ -4,11 +4,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: nextTemp
+ * Summary: Generate a fresh SSA temporary name.
+ * Parameters:
+ *  - (none)
+ * Returns:
+ *  - std::string: Name like "%t<counter>".
+ */
 std::string CodeGenerator::nextTemp() {
-    std::string s = "%t";
-    s += std::to_string(++tempCounter_);
-    return s;
+    return std::format("%t{}", ++tempCounter_);
 }
 
 } // namespace gwbasic
-

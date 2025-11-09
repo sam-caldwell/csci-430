@@ -10,6 +10,15 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: handleDimBeforeLine
+ * Summary: Collect array name from DIM before-line snapshot.
+ * Parameters:
+ *  - s: Statement pointer to inspect.
+ *  - arrays: Output set of array names referenced.
+ * Returns:
+ *  - bool: True if the statement was handled.
+ */
 bool CodeGenerator::handleDimBeforeLine(const Stmt *s,
                                         std::set<std::string, std::less<>> &arrays) {
     const auto ds = dyn_cast<const DimStmt>(s);

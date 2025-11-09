@@ -4,13 +4,14 @@
 
 namespace gwbasic {
 
-    /**
-     * @brief Collect positive OnErrorGoto targets from the given lines.
-     *
-     * Keeps nesting under three levels and avoids mutating lineMap_ on misses.
-     *
-     * @param lines       Ordered line numbers to scan.
-     * @param trapTargets Output set populated with unique positive target lines.
+    /*
+     * Function: cdCollectTrapTargets
+     * Summary: Collect positive ON ERROR GOTO targets from kept lines.
+     * Parameters:
+     *  - lines: Ordered line numbers to scan.
+     *  - trapTargets: Output set populated with unique positive target lines.
+     * Returns:
+     *  - void
      */
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     void CodeGenerator::cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets) {

@@ -12,6 +12,16 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: handleForBeforeLine
+ * Summary: Collect names referenced by a FOR header and body.
+ * Parameters:
+ *  - stmt: Statement pointer to inspect.
+ *  - vars: Output set of scalar variable names.
+ *  - arrays: Output set of array names referenced.
+ * Returns:
+ *  - bool: True if the statement was handled.
+ */
 bool CodeGenerator::handleForBeforeLine(const Stmt* stmt,
                                         std::set<std::string, std::less<>>& vars,
                                         std::set<std::string, std::less<>>& arrays) {

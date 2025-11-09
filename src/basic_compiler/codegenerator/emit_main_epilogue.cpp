@@ -5,16 +5,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: emitMainEpilogue
+ * Summary: Emit exit label and return 0 to finish main.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::emitMainEpilogue(std::ostringstream& out) {
-    /*
-     * Function: CodeGenerator::emitMainEpilogue
-     * Inputs:
-     *  - out: IR output stream
-     * Outputs:
-     *  - void
-     * Theory of operation:
-     *  - Emits the exit label and returns 0 to finish main.
-     */
     out << "exit:" << Symbols::LF;
     out << "  ret i32 0" << Symbols::LF;
     out << "}" << Symbols::LF;

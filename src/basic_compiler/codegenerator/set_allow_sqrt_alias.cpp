@@ -11,6 +11,8 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-void CodeGenerator::setAllowSqrtAlias(bool allow) { allowSqrtAlias_ = allow; }
+void CodeGenerator::setAllowSqrtAlias(const bool allow) {
+    allowSqrtAlias_ = allow;
+}
 
 } // namespace gwbasic

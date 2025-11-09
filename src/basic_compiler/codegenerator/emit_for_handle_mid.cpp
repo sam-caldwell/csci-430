@@ -6,8 +6,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandleMidAssign
- * Purpose: Emit IR for MID$ assignment inside a FOR body (scalar or array).
+ * Function: emitForHandleMidAssign
+ * Summary: Emit IR for MID$ assignment inside a FOR body (scalar or array).
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - mid: Parsed MidAssignStmt node.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForHandleMidAssign(std::ostringstream& out, const MidAssignStmt* mid, const std::string& currLineLabel, int& localCounter) {
     static constexpr int kErrArrayBounds = 9;
@@ -94,4 +101,3 @@ void CodeGenerator::emitForHandleMidAssign(std::ostringstream& out, const MidAss
 }
 
 } // namespace gwbasic
-

@@ -5,8 +5,13 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForPrintPadZone
- * Purpose: Emit IR to pad to the next PRINT zone when using comma separators.
+ * Function: emitForPrintPadZone
+ * Summary: Emit IR to pad to the next PRINT zone when using commas.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - pr: Parsed PrintStmt node (for channel selection).
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForPrintPadZone(std::ostringstream& out, const PrintStmt* pr) {
     if (!printZones_) return;
@@ -31,4 +36,3 @@ void CodeGenerator::emitForPrintPadZone(std::ostringstream& out, const PrintStmt
 }
 
 } // namespace gwbasic
-

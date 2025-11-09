@@ -10,12 +10,29 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: handleWhileBeforeLine
+ * Summary: Collect names referenced by WHILE before a line.
+ * Parameters:
+ *  - s: Statement pointer to inspect.
+ *  - vars: Output set of scalar variable names.
+ *  - arrays: Output set of array names referenced.
+ * Returns:
+ *  - bool: True if the statement was handled.
+ */
 bool CodeGenerator::handleWhileBeforeLine(const Stmt *s,
                                           std::set<std::string, std::less<>> &vars,
                                           std::set<std::string, std::less<>> &arrays) {
+
     const auto ws = dyn_cast<const WhileStmt>(s);
-    if (!ws) return false;
+
+    if (!ws)
+        return false;
+
     collectVarsForBeforeLineFromExpr(ws->cond.get(), vars, arrays);
-    for (const auto &st: ws->body) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays);
+
+    for (const auto &st: ws->body)
+        collectVarsForBeforeLineFromStmt(st.get(), vars, arrays);
+
     return true;
 }

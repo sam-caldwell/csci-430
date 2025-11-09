@@ -6,8 +6,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandleOnGosub
- * Purpose: Emit IR for ON ... GOSUB inside a FOR body.
+ * Function: emitForHandleOnGosub
+ * Summary: Emit IR for ON ... GOSUB inside a FOR body.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - ogs: Parsed OnGosubStmt node.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForHandleOnGosub(std::ostringstream& out, const OnGosubStmt* ogs, const std::string& currLineLabel, int& localCounter) {
     std::string idx = emitExpr(out, ogs->index.get(), currLineLabel);
@@ -24,4 +31,3 @@ void CodeGenerator::emitForHandleOnGosub(std::ostringstream& out, const OnGosubS
 }
 
 } // namespace gwbasic
-

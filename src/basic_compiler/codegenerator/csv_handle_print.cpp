@@ -9,8 +9,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::csvHandlePrint
- * Purpose: Collect variables and string literals referenced by PRINT.
+ * Function: csvHandlePrint
+ * Summary: Collect variables and string literals referenced by PRINT.
+ * Parameters:
+ *  - printStmt: Parsed PrintStmt node.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::csvHandlePrint(const PrintStmt* printStmt) { // NOLINT(readability-function-size)
     auto visitExpr = [&](const Expr* expr) {

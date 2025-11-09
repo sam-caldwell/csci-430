@@ -4,16 +4,16 @@
 
 namespace gwbasic {
 
-    /**
-     * @brief Update accumulators from a single statement.
-     *
-     * Adds names from CommonStmt to @p accumCommon and forwards variable/array
-     * discovery to collectVarsForBeforeLineFromStmt().
-     *
-     * @param stmt         Pointer to the statement to analyze.
-     * @param accumCommon  Accumulator for common names discovered so far.
-     * @param accumVars    Accumulator for variable identifiers discovered so far.
-     * @param accumArrays  Accumulator for array identifiers discovered so far.
+    /*
+     * Function: cdAccumulateFromStatement
+     * Summary: Update before-line accumulators from a single statement.
+     * Parameters:
+     *  - stmt: Statement to analyze.
+     *  - accumCommon: Accumulator set for COMMON names.
+     *  - accumVars: Accumulator set for variable identifiers.
+     *  - accumArrays: Accumulator set for array identifiers.
+     * Returns:
+     *  - void
      */
     // NOLINTBEGIN(bugprone-easily-swappable-parameters)
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)

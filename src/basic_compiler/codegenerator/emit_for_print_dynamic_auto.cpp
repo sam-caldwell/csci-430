@@ -5,8 +5,18 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForPrintDynamicAuto
- * Purpose: PRINT numeric with automatic int/float formatting.
+ * Function: emitForPrintDynamicAuto
+ * Summary: PRINT numeric item with automatic int/float formatting.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - pr: Parsed PrintStmt node.
+ *  - val: SSA name of numeric value to print (double).
+ *  - addNL: Whether to print a trailing newline for this item.
+ *  - nextStartsWithSpace: Whether the next item begins with a space.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
+ *  - void
  */
 // NOLINTNEXTLINE(readability-function-size)
 void CodeGenerator::emitForPrintDynamicAuto(std::ostringstream& out, const PrintStmt* pr, const std::string& val,

@@ -3,16 +3,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: findLine
+ * Summary: Lookup a Line AST node by number.
+ * Parameters:
+ *  - ln: Line number to look up.
+ * Returns:
+ *  - const Line*: Pointer to the Line AST node or nullptr.
+ */
 const Line* CodeGenerator::findLine(int ln) const {
-    /*
-     * Function: CodeGenerator::findLine
-     * Inputs:
-     *  - ln: line number to look up
-     * Outputs:
-     *  - const Line*: pointer to the Line AST node or nullptr
-     * Theory of operation:
-     *  - Performs a map lookup using the prebuilt lineMap_.
-     */
     const auto it = lineMap_.find(ln);
     if (it == lineMap_.end()) return nullptr;
     return it->second;

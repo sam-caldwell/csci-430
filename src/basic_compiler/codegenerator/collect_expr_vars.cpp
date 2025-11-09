@@ -5,14 +5,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::collectExprVars
- * Inputs:
- *  - e: expression node to analyze
- * Outputs:
+ * Function: collectExprVars
+ * Summary: Collect variable references in an expression tree.
+ * Parameters:
+ *  - e: Expression node to analyze.
+ * Returns:
  *  - void (updates internal variable set)
- * Theory of operation:
- *  - Recursively visits the expression tree, recording any variable
- *    references for later allocation in the entry block.
  */
 void CodeGenerator::collectExprVars(const Expr* e) {
 

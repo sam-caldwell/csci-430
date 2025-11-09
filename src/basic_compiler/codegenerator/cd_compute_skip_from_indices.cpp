@@ -4,8 +4,13 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdComputeSkipFromIndices
- * Purpose: Compute the skip-to line number based on handler start/end indices.
+ * Function: cdComputeSkipFromIndices
+ * Summary: Compute the skip-to line number from handler start/end indices.
+ * Parameters:
+ *  - lines: Ordered kept line numbers.
+ *  - idx: Pair of (startIdx, endIdx) into lines; endIdx may be -1.
+ * Returns:
+ *  - int: Next line number to resume at, or -1 if none.
  */
 int CodeGenerator::cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &idx) {
     const int startIdx = idx.first;

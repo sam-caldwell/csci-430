@@ -6,8 +6,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandleOnGoto
- * Purpose: Emit IR for ON ... GOTO inside a FOR body.
+ * Function: emitForHandleOnGoto
+ * Summary: Emit IR for ON ... GOTO inside a FOR body.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - og: Parsed OnGotoStmt node.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForHandleOnGoto(std::ostringstream& out, const OnGotoStmt* og, const std::string& currLineLabel, int& localCounter) {
     std::string idx = emitExpr(out, og->index.get(), currLineLabel);
@@ -21,4 +28,3 @@ void CodeGenerator::emitForHandleOnGoto(std::ostringstream& out, const OnGotoStm
 }
 
 } // namespace gwbasic
-

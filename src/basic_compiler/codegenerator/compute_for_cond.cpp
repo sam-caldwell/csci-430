@@ -6,6 +6,17 @@
 
 namespace gwbasic {
 
+/*
+ * Function: computeForCond
+ * Summary: Compute the FOR loop condition based on step sign.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - curVal: SSA name of current induction variable value (double).
+ *  - endReg: SSA name of inclusive end bound (double).
+ *  - stepReg: SSA name of loop step (double).
+ * Returns:
+ *  - std::string: SSA register name holding the i1 condition value.
+ */
 std::string CodeGenerator::computeForCond(std::ostringstream& out,
                                           const std::string& curVal,
                                           const std::string& endReg,
@@ -22,4 +33,3 @@ std::string CodeGenerator::computeForCond(std::ostringstream& out,
 }
 
 } // namespace gwbasic
-

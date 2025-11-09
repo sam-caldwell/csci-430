@@ -5,8 +5,16 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForPrintDynamicOverride
- * Purpose: PRINT numeric with user-provided format string.
+ * Function: emitForPrintDynamicOverride
+ * Summary: PRINT numeric item with user-provided format string.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - pr: Parsed PrintStmt node.
+ *  - val: SSA name of numeric value to print (double).
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForPrintDynamicOverride(std::ostringstream& out, const PrintStmt* pr, const std::string& val,
                                                 std::string_view currLineLabel, int& localCounter) {

@@ -12,6 +12,15 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: emitStringExpr
+ * Summary: Emit IR computing a pointer to a string literal value.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - stringExpr: Parsed StringExpr node.
+ * Returns:
+ *  - std::string: SSA register name holding the pointer to the literal.
+ */
 std::string CodeGenerator::emitStringExpr(std::ostringstream& out, const StringExpr* stringExpr) {
     const int stringId = strLiteralId_[stringExpr->value];
     std::string gep = nextTemp();

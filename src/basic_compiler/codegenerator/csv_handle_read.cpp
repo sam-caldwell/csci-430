@@ -4,7 +4,14 @@
 
 namespace gwbasic {
 
-/* Collect variables for READ targets (scalars or arrays). */
+/*
+ * Function: csvHandleRead
+ * Summary: Collect variables referenced by READ targets (scalars/arrays).
+ * Parameters:
+ *  - readStmt: Parsed ReadStmt node.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::csvHandleRead(const ReadStmt* readStmt) { // NOLINT(readability-function-size)
     for (const auto& target : readStmt->targets) {
         if (!target.indices.empty()) {

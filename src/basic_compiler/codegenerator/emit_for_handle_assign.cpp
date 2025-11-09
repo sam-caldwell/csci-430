@@ -6,8 +6,14 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandleAssign
- * Purpose: Emit IR for an assignment inside a FOR body.
+ * Function: emitForHandleAssign
+ * Summary: Emit IR for an assignment inside a FOR body.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - asg: Parsed AssignStmt node.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForHandleAssign(std::ostringstream& out, const AssignStmt* asg, const std::string& currLineLabel) {
     (void)currLineLabel; // label not needed here
@@ -20,4 +26,3 @@ void CodeGenerator::emitForHandleAssign(std::ostringstream& out, const AssignStm
 }
 
 } // namespace gwbasic
-

@@ -5,7 +5,14 @@
 
 namespace gwbasic {
 
-/* Collect variables for ON ... GOTO */
+/*
+ * Function: csvHandleOnGoto
+ * Summary: Collect variables referenced by an ON ... GOTO statement.
+ * Parameters:
+ *  - onGotoStmt: Parsed OnGotoStmt node.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::csvHandleOnGoto(const OnGotoStmt* onGotoStmt) {
     collectExprVars(onGotoStmt->index.get());
     logSem() << "OnGoto targets=" << onGotoStmt->targets.size() << Symbols::LF;

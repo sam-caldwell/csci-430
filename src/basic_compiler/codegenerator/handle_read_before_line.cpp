@@ -10,15 +10,30 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: handleReadBeforeLine
+ * Summary: Collect names referenced by READ before a line.
+ * Parameters:
+ *  - s: Statement pointer to inspect.
+ *  - vars: Output set of scalar variable names.
+ *  - arrays: Output set of array names referenced.
+ * Returns:
+ *  - bool: True if the statement was handled.
+ */
 bool CodeGenerator::handleReadBeforeLine(const Stmt *s,
                                          std::set<std::string, std::less<>> &vars,
                                          std::set<std::string, std::less<>> &arrays) {
+
     const auto rd = dyn_cast<const ReadStmt>(s);
-    if (!rd) return false;
+
+    if (!rd)
+        return false;
+
     for (const auto &[name, indices]: rd->targets) {
         if (!indices.empty()) {
             arrays.insert(name);
-            for (const auto &ix: indices) collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays);
+            for (const auto &ix: indices)
+                collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays);
         } else {
             vars.insert(name);
         }

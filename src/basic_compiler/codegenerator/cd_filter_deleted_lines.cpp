@@ -5,8 +5,13 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdFilterDeletedLines
- * Purpose: Remove lines that fall within any DELETE range.
+ * Function: cdFilterDeletedLines
+ * Summary: Remove line numbers that fall within any DELETE range.
+ * Parameters:
+ *  - lines: In/out vector of kept line numbers.
+ *  - deleteRanges: List of [start,end] ranges to remove.
+ * Returns:
+ *  - void
  */
 // NOLINT(readability-convert-member-functions-to-static,readability-function-size)
 void CodeGenerator::cdFilterDeletedLines(std::vector<int>& lines, const std::vector<std::pair<int,int>>& deleteRanges) {

@@ -19,23 +19,27 @@ namespace gwbasic {
 void CodeGenerator::storeNumberToVar(std::ostringstream& out, const std::string& name, const std::string& doubleValSSA) {
     const std::string& dst = varAllocaName_[name];
     switch (numKindOf(name)) {
-        case NumKind::Int16: {
-            std::string iv = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i16", iv, doubleValSSA); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store i16 {}, ptr {}", iv, dst); out << ir << Symbols::LF; }
+        using enum gwbasic::CodeGenerator::NumKind;
+        case Int16: {
+            std::string iv = nextTemp();
+            out << std::format("  {} = fptosi double {} to i16", iv, doubleValSSA) << Symbols::LF
+                << std::format("  store i16 {}, ptr {}", iv, dst) << Symbols::LF;
             break;
         }
-        case NumKind::Long32: {
-            std::string iv = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", iv, doubleValSSA); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store i32 {}, ptr {}", iv, dst); out << ir << Symbols::LF; }
+        case Long32: {
+            std::string iv = nextTemp();
+            out << std::format("  {} = fptosi double {} to i32", iv, doubleValSSA) << Symbols::LF
+                << std::format("  store i32 {}, ptr {}", iv, dst) << Symbols::LF;
             break;
         }
-        case NumKind::Single: {
-            std::string fv = nextTemp(); { std::string ir = std::format("  {} = fptrunc double {} to float", fv, doubleValSSA); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store float {}, ptr {}", fv, dst); out << ir << Symbols::LF; }
+        case Single: {
+            std::string fv = nextTemp();
+            out << std::format("  {} = fptrunc double {} to float", fv, doubleValSSA) << Symbols::LF
+                << std::format("  store float {}, ptr {}", fv, dst) << Symbols::LF;
             break;
         }
-        case NumKind::Double: {
-            { std::string ir = std::format("  store double {}, ptr {}", doubleValSSA, dst); out << ir << Symbols::LF; }
+        case Double: {
+            out << std::format("  store double {}, ptr {}", doubleValSSA, dst) << Symbols::LF;
             break;
         }
     }

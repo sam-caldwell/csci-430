@@ -22,8 +22,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForBodyStatement
- * Purpose: Handle a single FOR-body statement; return true if terminates.
+ * Function: emitForBodyStatement
+ * Summary: Handle a single FOR-body statement; indicate termination.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - stmt: Statement node inside the FOR body.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
+ *  - bool: True if the statement terminates control flow.
  */
 bool CodeGenerator::emitForBodyStatement(std::ostringstream& out,
                                          const Stmt* stmt,

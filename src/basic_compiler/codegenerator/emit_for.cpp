@@ -6,18 +6,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitFor
- * Inputs:
- *  - out: IR stream
- *  - fs: ForStmt node
- *  - currLineLabel: label base for naming blocks
- *  - localCounter: reference counter to make unique labels
- * Outputs:
+ * Function: emitFor
+ * Summary: Emit IR for a FOR loop structure.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - fs: Parsed ForStmt node.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
  *  - void
- * Theory of operation:
- *  - Orchestrates the FOR loop emission: initialize the induction variable,
- *    evaluate the inclusive end-condition, branch to body or end, delegate the
- *    body emission to a helper, then perform the step increment and back-edge.
  */
 void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const std::string& currLineLabel, int& localCounter) {
     std::string loopId = std::to_string(++localCounter);

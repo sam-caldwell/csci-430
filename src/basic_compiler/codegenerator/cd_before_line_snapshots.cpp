@@ -4,15 +4,13 @@
 
 namespace gwbasic {
 
-/**
- * @brief Accumulate snapshot data for all provided line numbers.
- *
- * Maintains the same behavior as the original implementation while keeping
- * nesting to at most three levels. For each line, this records the current
- * accumulated sets of commons, vars, and arrays before visiting that line's
- * statements, then updates the accumulators from the statements (if any).
- *
- * @param lines Ordered collection of line numbers to snapshot before.
+/*
+ * Function: cdBuildBeforeLineSnapshots
+ * Summary: Build snapshots of common/var/array sets before each line.
+ * Parameters:
+ *  - lines: Ordered line numbers to snapshot.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::cdBuildBeforeLineSnapshots(const std::vector<int>& lines) {
     for (const int lineNum : lines) {
