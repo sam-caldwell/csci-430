@@ -1,4 +1,15 @@
 # file: .clang-tidy
+#
+# Note on docstring validation:
+#   clang-tidy-docstring is an external validator (not a clang-tidy plugin).
+#   It runs as part of `make lint` and the CMake target `validate_docstrings`.
+#   Requirement per function/method definition:
+#     - Docstring immediately above the definition
+#     - Fields: "Function:" (or "Method:"), "Parameters:", "Returns:" (or "Outputs:")
+#     - The function name and each parameter name must appear in the fields
+#   To run manually:
+#     ./build/clang_tidy_docstring -d include -d src
+#
 Checks: >
     bugprone-*,
     cert-msc51-cpp,

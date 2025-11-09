@@ -6,6 +6,8 @@
 #  - lint: builds CMake 'lint' target with Ninja parallelism, then runs script checks.
 
 lint: configure
+	@echo "Building and running clang-tidy-docstring validation..."
+	@$(CMAKE) --build $(BUILD_DIR) --target validate_docstrings -v -- -j$(NUM_CPUS)
 	@echo "Checking test docstrings and TEST constraints..."
 	@$(CMAKE) --build $(BUILD_DIR) --target check_test_docstrings -v -- -j$(NUM_CPUS)
 	@echo "Checking one-function-per-file convention..."

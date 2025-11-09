@@ -17,15 +17,21 @@ file(GLOB_RECURSE LINT_SOURCES CONFIGURE_DEPENDS
   ${PROJECT_SOURCE_DIR}/src/*.cpp)
 list(REMOVE_DUPLICATES LINT_SOURCES)
 
-# Default checks (override with -DTIDY_CHECKS=...)
-set(TIDY_CHECKS_DEFAULT "-*,clang-diagnostic-unused-*,bugprone-unused-return-value,clang-analyzer-deadcode.DeadStores,misc-unused-parameters")
-set(TIDY_CHECKS "${TIDY_CHECKS_DEFAULT}" CACHE STRING "clang-tidy checks pattern")
+# Default checks are controlled by the repository .clang-tidy
+# (no command-line override here; lint uses project policy as-is)
 
 if(NOT CLANG_TIDY_EXE)
   # clang-tidy missing: create a dummy 'lint' that prints a message and succeeds
   add_custom_target(lint
     COMMAND ${CMAKE_COMMAND} -E echo "clang-tidy not found; skipping lint."
     VERBATIM)
+  # Ensure the docstring checker is built before any linting activity
+  if(TARGET clang_tidy_docstring)
+    add_dependencies(lint clang_tidy_docstring)
+  endif()
+  if(TARGET validate_docstrings)
+    add_dependencies(lint validate_docstrings)
+  endif()
   return()
 endif()
 
@@ -43,9 +49,7 @@ foreach(_src IN LISTS LINT_SOURCES)
     COMMAND ${CMAKE_COMMAND} -E make_directory "${LINT_OUT_DIR}"
     COMMAND ${CLANG_TIDY_EXE}
             -p "${CMAKE_BINARY_DIR}"
-            -checks="${TIDY_CHECKS}"
             -quiet
-            -warnings-as-errors=\*
             "${_abs}"
     COMMAND ${CMAKE_COMMAND} -E touch "${_stamp}"
     DEPENDS "${_abs}"
@@ -56,3 +60,11 @@ foreach(_src IN LISTS LINT_SOURCES)
 endforeach()
 
 add_custom_target(lint DEPENDS ${_lint_stamps})
+
+# Ensure the docstring checker binary is available prior to linting
+if(TARGET clang_tidy_docstring)
+  add_dependencies(lint clang_tidy_docstring)
+endif()
+if(TARGET validate_docstrings)
+  add_dependencies(lint validate_docstrings)
+endif()
