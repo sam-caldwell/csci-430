@@ -1,5 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
+#include "basic_compiler/ast/Program.h"
+#include <utility>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -16,8 +18,11 @@ namespace gwbasic::phase_log_helpers {
  */
 void replaceOrAppendLine(gwbasic::Program& dst, gwbasic::Line&& line, const bool replace) {
     if (replace) {
-        for (auto& dl : dst.lines) {
-            if (dl.number == line.number) { dl = std::move(line); return; }
+        for (auto& dstLine : dst.lines) {
+            if (dstLine.number == line.number) {
+                dstLine = std::move(line);
+                return;
+            }
         }
     }
     dst.lines.emplace_back(std::move(line));

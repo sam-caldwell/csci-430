@@ -1,5 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/ast/CommonStmt.h"
+#include "basic_compiler/Symbols.h"
 
 namespace gwbasic {
 
@@ -7,15 +9,15 @@ namespace gwbasic {
  * Function: csvHandleCommon
  * Summary: Collect variables declared by COMMON.
  * Parameters:
- *  - cs: Parsed CommonStmt node.
+ *  - commonStmt: Parsed CommonStmt node.
  * Returns:
  *  - void
  */
-void CodeGenerator::csvHandleCommon(const CommonStmt* cs) {
-    for (const auto& n : cs->names) {
-        variables_.insert(n);
-        commonVariables_.insert(n);
-        logSem() << "Common " << n << " @ " << cs->pos.line << ':' << cs->pos.col << Symbols::LF;
+void CodeGenerator::csvHandleCommon(const CommonStmt* commonStmt) {
+    for (const auto& name : commonStmt->names) {
+        variables_.insert(name);
+        commonVariables_.insert(name);
+        logSem() << "Common " << name << " @ " << commonStmt->pos.line << ':' << commonStmt->pos.col << Symbols::LF;
     }
 }
 

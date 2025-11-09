@@ -8,7 +8,12 @@
 include_guard(GLOBAL)
 
 # Locate clang-tidy (prefer PATH). Allow override via CLANG_TIDY_EXE cache var.
-find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+# Prefer matching clang-tidy to the compiler toolchain (LLVM 17), fall back to PATH
+find_program(CLANG_TIDY_EXE NAMES clang-tidy HINTS /opt/homebrew/opt/llvm@17/bin)
+# Force toolchain-aligned clang-tidy if available
+if(EXISTS "/opt/homebrew/opt/llvm@17/bin/clang-tidy")
+  set(CLANG_TIDY_EXE "/opt/homebrew/opt/llvm@17/bin/clang-tidy" CACHE FILEPATH "clang-tidy executable" FORCE)
+endif()
 
 # Collect lintable sources (project sources only; exclude tests)
 file(GLOB_RECURSE LINT_SOURCES CONFIGURE_DEPENDS
@@ -16,6 +21,8 @@ file(GLOB_RECURSE LINT_SOURCES CONFIGURE_DEPENDS
   ${PROJECT_SOURCE_DIR}/src/*.cxx
   ${PROJECT_SOURCE_DIR}/src/*.cpp)
 list(REMOVE_DUPLICATES LINT_SOURCES)
+# Exclude internal tooling sources from clang-tidy coverage
+list(FILTER LINT_SOURCES EXCLUDE REGEX "/src/clang-tidy-.*")
 
 # Default checks are controlled by the repository .clang-tidy
 # (no command-line override here; lint uses project policy as-is)

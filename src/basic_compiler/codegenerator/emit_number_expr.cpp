@@ -18,7 +18,7 @@ using namespace gwbasic;
  * Returns:
  *  - std::string: Floating literal string (ensures decimal point or exponent).
  */
-std::string CodeGenerator::emitNumberExpr(std::ostringstream& out, const NumberExpr* num) {
+std::string CodeGenerator::emitNumberExpr(const std::ostringstream& out, const NumberExpr* num) {
     (void)out; // no IR emission needed for numeric literal
     char buf[64];
     std::snprintf(buf, sizeof(buf), "%.17g", num->value);

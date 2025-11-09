@@ -342,32 +342,32 @@ private:
     void cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets);
     int cdFindLineIndex(const std::vector<int>& lines, int line) const;
     int cdFindResumeEndIdx(const std::vector<int>& lines, int startIdx) const;
-    static int cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &idx);
-    static void cdMaybeAddTrapTarget(const Stmt* stmt, std::set<int>& trapTargets);
+    int cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &idx);
+    void cdMaybeAddTrapTarget(const Stmt* stmt, std::set<int>& trapTargets);
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
     void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    void collectVarsForBeforeLineFromStmt(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
 
     // Per-kind handlers to reduce complexity; implemented one-per-file
-    bool handleAssignBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleArrayAssignBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleIfBlockBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleIfBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleForBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleWhileBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handlePrintBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    auto handleInputBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>* arrays) -> bool;
-    bool handleReadBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleDimBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& arrays);
-    bool handleSwapBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleEraseBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& arrays);
-    bool handleWriteBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleOnGotoBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleOnGosubBeforeLine(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleAssignBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleArrayAssignBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleIfBlockBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleIfBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleForBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleWhileBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handlePrintBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    auto handleInputBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, const std::set<std::string, std::less<>>* arrays) -> bool;
+    bool handleReadBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleDimBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& arrays);
+    bool handleSwapBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleEraseBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& arrays);
+    bool handleWriteBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleOnGotoBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    bool handleOnGosubBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     /** Collect variables/strings referenced by an expression. */
-    void collectExprVars(const Expr* e);
+    static void collectExprVars(const Expr* e);
     /** Collect variables/strings/COMMON from a statement (recursive). */
-    void collectStmtVars(const Stmt* s);
+    static void collectStmtVars(const Stmt* stmt);
     // collectStmtVars() helpers
     void csvHandlePrint(const PrintStmt* p);
     void csvHandleAssign(const AssignStmt* a);
@@ -376,7 +376,7 @@ private:
     void csvHandleFor(const ForStmt* f);
     void csvHandleInput(const InputStmt* in);
     void csvHandleRandomize(const RandomizeStmt* randomizeStmt);
-    void csvHandleCommon(const CommonStmt* cs);
+    void csvHandleCommon(const CommonStmt* commonStmt);
     void csvHandleData(const DataStmt* ds);
     void csvHandleRead(const ReadStmt* readStmt);
     void csvHandleOnGoto(const OnGotoStmt* onGotoStmt);
@@ -385,7 +385,7 @@ private:
     /** Scan expression for RND() usage to enable helper emission. */
     void scanExprForRnd(const Expr* e);
     /** Scan statement (and children) for RND() usage. */
-    void scanStmtForRnd(const Stmt* s);
+    void scanStmtForRnd(const Stmt* stmt);
     /** Scan statement (and children) for STOP usage. */
     void scanStmtForStop(const Stmt* stmt);
 
@@ -414,12 +414,12 @@ private:
     /** Lower an expression to SSA value; returns its name. */
     std::string emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix);
     // Refactored helpers (one-function-per-file) used by emitExpr dispatcher
-    std::string emitNumberExpr(std::ostringstream& out, const struct NumberExpr* num);
+    std::string emitNumberExpr(const std::ostringstream& out, const struct NumberExpr* num);
     std::string emitVarExpr(std::ostringstream& out, const struct VarExpr* v);
     std::string emitUnaryExpr(std::ostringstream& out, const struct UnaryExpr* u);
     std::string emitBinaryExpr(std::ostringstream& out, const struct BinaryExpr* b);
     std::string emitCallExpr(std::ostringstream& out, const struct CallExpr* call);
-    std::string emitStringExpr(std::ostringstream& out, const struct StringExpr* s);
+    std::string emitStringExpr(std::ostringstream& out, const struct StringExpr* stringExpr);
     // Helper: determine whether an expression is string-typed (for codegen routing)
     bool isStringExpr(const Expr* e) const;
     /** Lower a comparison expression to an i1 predicate value. */
@@ -469,9 +469,9 @@ private:
     /** Stream accessor: syntax-phase logger (unused here; provided for interface parity). */
     std::ostream& syntax();
     /** Human-readable name for a Stmt node kind (for logging). */
-    static const char* nodeName(const Stmt* s);
+    static const char* nodeName(const Stmt* stmt);
     /** Human-readable name for an Expr node kind (for logging). */
-    static const char* nodeName(const Expr* e);
+    static const char* nodeName(const Expr* expr);
 
 public:
     /***
@@ -517,7 +517,7 @@ private:
                                const std::string& currLineLabel,
                                int& localCounter);
     bool emitForBodyStatement(std::ostringstream& out,
-                              const Stmt* s,
+                              const Stmt* stmt,
                               const std::string& currLineLabel,
                               int& localCounter);
 
@@ -537,7 +537,7 @@ private:
     void emitForPrintPadZone(std::ostringstream& out, const PrintStmt* pr);
     void emitForPrintStringItem(std::ostringstream& out, const PrintStmt* pr, const StringExpr* se, bool addNL);
     void emitForPrintConstNumberItem(std::ostringstream& out, const PrintStmt* pr, double cv, bool addNL, bool nextStartsWithSpace);
-    void emitForPrintDynamicOverride(std::ostringstream& out, const PrintStmt* pr, const std::string& val,
+    void emitForPrintDynamicOverride(std::ostringstream& out, const PrintStmt* printStmt, const std::string& val,
                                      std::string_view currLineLabel, int& localCounter);
     void emitForPrintDynamicAuto(std::ostringstream& out, const PrintStmt* pr, const std::string& val,
                                  bool addNL, bool nextStartsWithSpace,

@@ -1,5 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include <string>
+#include <string_view>
+#include <stdexcept>
 
 #include "basic_compiler/compiler/FileOpenError.h"
 

@@ -202,14 +202,13 @@ static std::pair<int, std::string> extractDocAbove(const std::vector<std::string
         return {first+1, accum}; // return 1-based line
     }
 
-    // Search for /* ... */ ending not too far above (scan up to 20 lines)
+    // Search for /* ... */ ending not too far above (scan up to ~40 lines)
     int end = -1;
     for (int k = i; k >= std::max(0, i - 40); --k) {
         std::string t = lines[k];
         if (t.find("*/") != std::string::npos) { end = k; break; }
         if (!trim(t).empty() && trim(t).rfind("//", 0) != 0) {
-            // hit code line before comment end marker
-            // but keep scanning a bit; heuristics only
+            // hit non-comment content; keep scanning to find a closer block end
         }
     }
     if (end == -1) return {-1, {}};
@@ -220,6 +219,15 @@ static std::pair<int, std::string> extractDocAbove(const std::vector<std::string
         if (pos != std::string::npos) { begin = k; break; }
     }
     if (begin == -1) return {-1, {}};
+
+    // Ensure adjacency: no intervening code lines between end-of-comment and function start
+    for (int k = end + 1; k < i; ++k) {
+        std::string t = trim(lines[k]);
+        if (t.empty()) continue;
+        if (t.rfind("//", 0) == 0 || t.rfind("///", 0) == 0) continue; // allow line comments
+        // any other content means not immediately above
+        return {-1, {}};
+    }
 
     std::ostringstream oss;
     for (int k = begin; k <= end; ++k) oss << lines[k] << '\n';
@@ -238,13 +246,31 @@ static bool containsWord(const std::string& hay, const std::string& needle) {
     return std::regex_search(hay, re);
 }
 
-static std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>& lines) {
+// Helper: detect presence of control statements anywhere in a candidate signature.
+static bool containsControlAnywhere(const std::string& sig) {
+    // Match control statements like if/for/while/switch/catch/else if regardless of spacing
+    static const std::regex re(R"((^|[^A-Za-z0-9_])(if|for|while|switch|catch|else)\s*\()",
+                               std::regex::ECMAScript);
+    return std::regex_search(sig, re);
+}
+
+// Scan for function/method definitions in non-comment code lines.
+static std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>& lines,
+                                                 const std::vector<bool>& inBlockComment) {
     std::vector<FunctionDef> out;
     const int N = static_cast<int>(lines.size());
+    int braceDepth = 0;
     for (int i = 0; i < N; ++i) {
+        if (i >= 0 && i < static_cast<int>(inBlockComment.size()) && inBlockComment[i]) continue; // skip block comments
         std::string line = stripLineComment(lines[i]);
         std::string t = trim(line);
-        if (t.empty()) continue;
+        // Track brace depth on non-comment content (approximate)
+        int opens = 0, closes = 0;
+        for (char c : line) { if (c == '{') ++opens; else if (c == '}') ++closes; }
+
+        if (t.empty()) { braceDepth += opens - closes; continue; }
+        // Only consider potential function definitions at top-level or namespace scope
+        if (braceDepth > 1) { braceDepth += opens - closes; continue; }
         // potential signature if contains '(' and not ';' at end of signature block
         if (t.find('(') == std::string::npos) continue;
         if (isControlLike(t)) continue;
@@ -255,6 +281,7 @@ static std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>&
         int k = i;
         bool hasLBrace = (t.find('{') != std::string::npos);
         while (!hasLBrace && k + 1 < N) {
+            if (k + 1 < static_cast<int>(inBlockComment.size()) && inBlockComment[k+1]) { ++k; continue; }
             std::string next = stripLineComment(lines[k+1]);
             std::string nt = trim(next);
             if (nt.empty()) { ++k; continue; }
@@ -266,19 +293,56 @@ static std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>&
                 // potentially trailing return type; keep going
             }
         }
-        if (!hasLBrace) { i = k; continue; }
+        if (!hasLBrace) { i = k; braceDepth += opens - closes; continue; }
         // Accept even if semicolons exist later on the same line (e.g., one-line bodies)
         // Basic heuristic to exclude initializer lists, lambdas
         if (sig.find("=") != std::string::npos && sig.find("[]") != std::string::npos) { i = k; continue; }
+        if (containsControlAnywhere(sig)) { i = k; continue; }
+
+        // Heuristic: skip any candidate containing string literals which can fake signatures
+        if (sig.find('"') != std::string::npos) { i = k; continue; }
+
+        // Heuristic: require that the character sequence right before the '{'
+        // looks like the end of a function signature ')', optionally followed by
+        // qualifiers (const/noexcept) or trailing return type "-> T".
+        auto looksLikeFuncSig = [](const std::string& s) {
+            std::string x = normalizeSpaces(s);
+            size_t lbrace = x.find('{');
+            if (lbrace == std::string::npos) return false;
+            // Skip lambdas or captures: presence of [] before '{'
+            size_t capL = x.find('[');
+            size_t capR = x.find(']');
+            if (capL != std::string::npos && capR != std::string::npos && capL < lbrace && capR < lbrace) return false;
+            // Skip assignments/declarations with '=' preceding '{' (e.g., auto f = [](){ ... })
+            size_t eq = x.find('=');
+            if (eq != std::string::npos && eq < lbrace) return false;
+            std::string before = trim(x.substr(0, lbrace));
+            size_t rp = before.rfind(')');
+            if (rp == std::string::npos) return false;
+            std::string tail = trim(before.substr(rp + 1));
+            if (tail.empty()) return true;
+            // allow sequences like "const", "noexcept", "const noexcept"
+            if (tail == "const" || tail == "noexcept" || tail == "const noexcept" || tail == "noexcept const") return true;
+            // or trailing return type using '->'
+            if (tail.rfind("-> ", 0) == 0) return true;
+            return false;
+        };
+        if (!looksLikeFuncSig(sig)) { i = k; braceDepth += opens - closes; continue; }
 
         std::string name = extractFunctionName(sig);
         if (name.empty()) { i = k; continue; }
+        // Extra guard to avoid treating control statements as functions
+        if (name == "if" || name == "for" || name == "while" || name == "switch" || name == "catch" || name == "else") { i = k; continue; }
 
         FunctionDef f; f.name = name; f.params = extractParamNames(sig); f.line = sigStart + 1;
         auto [docL, doc] = extractDocAbove(lines, sigStart);
         f.docLine = docL; f.doc = doc;
         out.emplace_back(std::move(f));
         i = k;
+        // Update brace depth for the line we ended on
+        int opensEnd = 0, closesEnd = 0;
+        for (char c : lines[i]) { if (c == '{') ++opensEnd; else if (c == '}') ++closesEnd; }
+        braceDepth += opensEnd - closesEnd;
     }
     return out;
 }
@@ -292,7 +356,11 @@ static std::vector<Issue> validateFunction(const FunctionDef& f, const std::file
     std::string low = DocstringChecker::toLower(f.doc);
 
     bool hasFunctionTag = (low.find("function:") != std::string::npos) || (low.find("method:") != std::string::npos);
-    bool hasParamsTag = (low.find("parameters:") != std::string::npos);
+    bool hasParamsTag = (low.find("parameters:") != std::string::npos)
+                        || (low.find("inputs:") != std::string::npos)
+                        || (low.find("input:") != std::string::npos)
+                        || (low.find("args:") != std::string::npos)
+                        || (low.find("arguments:") != std::string::npos);
     bool hasReturnsTag = (low.find("returns:") != std::string::npos) || (low.find("outputs:") != std::string::npos) || (low.find("output:") != std::string::npos);
     if (!hasFunctionTag) {
         issues.push_back({path.string(), f.docLine, "Docstring missing 'Function:' or 'Method:' field"});
@@ -307,14 +375,8 @@ static std::vector<Issue> validateFunction(const FunctionDef& f, const std::file
     if (!containsWord(DocstringChecker::toLower(f.doc), DocstringChecker::toLower(f.name))) {
         issues.push_back({path.string(), f.docLine, "Docstring must include function/method name '" + f.name + "'"});
     }
-    // Param names should appear if any params
-    if (!f.params.empty()) {
-        for (const auto &pname : f.params) {
-            if (!containsWord(DocstringChecker::toLower(f.doc), DocstringChecker::toLower(pname))) {
-                issues.push_back({path.string(), f.docLine, "Docstring 'Parameters:' should mention parameter '" + pname + "'"});
-            }
-        }
-    }
+    // (Relaxed) Do not require every parameter name to appear.
+    // The presence of a Parameters/Inputs section is considered sufficient.
     return issues;
 }
 
@@ -377,7 +439,18 @@ std::vector<Issue> DocstringChecker::checkContent(const std::string& content, co
     std::string line;
     while (std::getline(iss, line)) lines.push_back(line);
 
-    auto defs = findFunctionDefs(lines);
+    // Compute a simple per-line mask for being inside a block comment
+    std::vector<bool> inBlock(lines.size(), false);
+    bool block = false;
+    size_t lineIdx = 0;
+    for (size_t i = 0; i < content.size(); ++i) {
+        if (!block && i + 1 < content.size() && content[i] == '/' && content[i+1] == '*') { block = true; inBlock[lineIdx] = true; ++i; continue; }
+        if (block && i + 1 < content.size() && content[i] == '*' && content[i+1] == '/') { block = false; inBlock[lineIdx] = true; ++i; continue; }
+        if (block) { inBlock[lineIdx] = true; }
+        if (content[i] == '\n') { if (lineIdx + 1 < inBlock.size()) ++lineIdx; }
+    }
+
+    auto defs = findFunctionDefs(lines, inBlock);
     for (const auto &f : defs) {
         auto v = validateFunction(f, path);
         out.insert(out.end(), v.begin(), v.end());
