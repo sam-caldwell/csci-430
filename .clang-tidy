@@ -1,10 +1,15 @@
 # file: .clang-tidy
 Checks: >
     bugprone-*,
+    cert-msc51-cpp,
+    cert-msc50-cpp,
+    cert-err60-cpp,
+    cert-err33-c,
     concurrency-*,
     cppcoreguidelines-*,
     darwin-avoid-spinlock,
     darwin-dispatch-once-nonstatic,
+    hicpp-exception-baseclass,
     llvm-*,
     llvmlibc-*,
     misc-const-correctness,
@@ -28,11 +33,9 @@ Checks: >
     misc-use-internal-linkage,
     -modernize-*,
     performance-*,
+    portability-*,
     -portability-avoid-pragma-once,
-    portability-restrict-system-includes,
-    readability-function-cognitive-complexity,
-    readability-function-size,
-    readability-identifier-naming,
+    readability-*,
 # Tune complexity/size thresholds to your policy
 CheckOptions:
     - key: readability-function-cognitive-complexity.Threshold
