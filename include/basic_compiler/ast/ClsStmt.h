@@ -7,7 +7,7 @@
 namespace gwbasic {
 
 // CLS: Clear the virtual screen and reset cursor
-struct ClsStmt : ASTLeaf<NodeKind::ClsStmt, Stmt> {
+struct ClsStmt final : ASTLeaf<NodeKind::ClsStmt, Stmt> {
     ClsStmt() = default;
     explicit ClsStmt(const SourcePos& p) : ASTLeaf<NodeKind::ClsStmt, Stmt>(p) {}
     static bool classof(const Node* N) { return N && N->kind == NodeKind::ClsStmt; }
