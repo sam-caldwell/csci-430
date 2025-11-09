@@ -4,21 +4,25 @@
 
 namespace gwbasic {
 
-/*
- * Function: CodeGenerator::cdCollectTrapTargets
- * Purpose: Collect unique ON ERROR GOTO target line numbers.
- */
-void CodeGenerator::cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets) {
-    for (int ln : lines) {
-        const auto* lptr = lineMap_[ln];
-        if (!lptr) continue;
-        for (const auto& st : lptr->statements) {
-            if (const auto oeg = dyn_cast<const OnErrorGotoStmt>(st.get())) {
-                if (oeg->targetLine > 0) trapTargets.insert(oeg->targetLine);
+    /**
+     * @brief Collect positive OnErrorGoto targets from the given lines.
+     *
+     * Keeps nesting under three levels and avoids mutating lineMap_ on misses.
+     *
+     * @param lines       Ordered line numbers to scan.
+     * @param trapTargets Output set populated with unique positive target lines.
+     */
+    void CodeGenerator::cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets) {
+        for (int ln : lines) { // level 1
+            const auto it = lineMap_.find(ln);
+            if (it == lineMap_.end() || it->second == nullptr) continue;
+
+            const auto* lptr = it->second;
+            for (const auto& st : lptr->statements) { // level 2
+                cdMaybeAddTrapTarget(st.get(), trapTargets);
             }
         }
     }
-}
 
 } // namespace gwbasic
 
