@@ -20,21 +20,24 @@
 namespace gwbasic {
     void CodeGenerator::collectVarsForBeforeLineFromStmt(const Stmt *s, std::set<std::string, std::less<>> &vars,
                                                          std::set<std::string, std::less<>> &arrays) {
-        if (!s) return;
-        if (handleAssignBeforeLine(s, vars, arrays)) return;
-        if (handleArrayAssignBeforeLine(s, vars, arrays)) return;
-        if (handleIfBlockBeforeLine(s, vars, arrays)) return;
-        if (handleIfBeforeLine(s, vars, arrays)) return;
-        if (handleForBeforeLine(s, vars, arrays)) return;
-        if (handleWhileBeforeLine(s, vars, arrays)) return;
-        if (handlePrintBeforeLine(s, vars, arrays)) return;
-        if (handleInputBeforeLine(s, vars, &arrays)) return;
-        if (handleReadBeforeLine(s, vars, arrays)) return;
-        if (handleDimBeforeLine(s, arrays)) return;
-        if (handleSwapBeforeLine(s, vars, arrays)) return;
-        if (handleEraseBeforeLine(s, arrays)) return;
-        if (handleWriteBeforeLine(s, vars, arrays)) return;
-        if (handleOnGotoBeforeLine(s, vars, arrays)) return;
+        if (!s ||
+            handleAssignBeforeLine(s, vars, arrays) ||
+            handleArrayAssignBeforeLine(s, vars, arrays) ||
+            handleIfBlockBeforeLine(s, vars, arrays) ||
+            handleIfBeforeLine(s, vars, arrays) ||
+            handleForBeforeLine(s, vars, arrays) ||
+            handleWhileBeforeLine(s, vars, arrays) ||
+            handlePrintBeforeLine(s, vars, arrays) ||
+            handleInputBeforeLine(s, vars, &arrays) ||  // keep existing signature
+            handleReadBeforeLine(s, vars, arrays) ||
+            handleDimBeforeLine(s, arrays) ||
+            handleSwapBeforeLine(s, vars, arrays) ||
+            handleEraseBeforeLine(s, arrays) ||
+            handleWriteBeforeLine(s, vars, arrays) ||
+            handleOnGotoBeforeLine(s, vars, arrays)
+        )
+            return;
+
         (void)handleOnGosubBeforeLine(s, vars, arrays);
     }
 } // namespace gwbasic
