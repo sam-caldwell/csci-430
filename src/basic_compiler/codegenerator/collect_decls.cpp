@@ -45,7 +45,8 @@ void CodeGenerator::collectDecls(const Program& program) {
 
     // Phase A: gather and filter lines
     std::vector<std::pair<int,int>> delRanges;
-    int gmin = 0, gmax = 0;
+    int gmin = 0;
+    int gmax = 0;
     cdGatherLinesAndDeletes(program, lineNumbers_, lineMap_, printZones_, delRanges, gmin, gmax);
     if (lineNumbers_.empty()) return;
     cdFilterDeletedLines(lineNumbers_, delRanges);
