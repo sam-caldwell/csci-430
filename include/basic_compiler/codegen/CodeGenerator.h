@@ -387,7 +387,7 @@ private:
     /** Scan statement (and children) for RND() usage. */
     void scanStmtForRnd(const Stmt* s);
     /** Scan statement (and children) for STOP usage. */
-    void scanStmtForStop(const Stmt* s);
+    void scanStmtForStop(const Stmt* stmt);
 
     // Emission helpers
     /** Emit module-level declarations (printf, math, rng helpers). */
