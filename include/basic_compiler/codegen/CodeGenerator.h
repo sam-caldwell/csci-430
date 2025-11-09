@@ -369,8 +369,8 @@ private:
     void cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets);
     int cdFindLineIndex(const std::vector<int>& lines, int line) const;
     int cdFindResumeEndIdx(const std::vector<int>& lines, int startIdx) const;
-    int cdComputeSkipFromIndices(const std::vector<int>& lines, std::pair<int,int> idx) const;
-    void cdMaybeAddTrapTarget(const Stmt* st, std::set<int>& trapTargets);
+    static int cdComputeSkipFromIndices(const std::vector<int>& lines, std::pair<int,int> idx);
+    static void cdMaybeAddTrapTarget(const Stmt* st, std::set<int>& trapTargets);
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
     void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     void collectVarsForBeforeLineFromStmt(const Stmt* s, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
@@ -406,7 +406,7 @@ private:
     void csvHandleCommon(const CommonStmt* cs);
     void csvHandleData(const DataStmt* ds);
     void csvHandleRead(const ReadStmt* rd);
-    void csvHandleOnGoto(const OnGotoStmt* og);
+    void csvHandleOnGoto(const OnGotoStmt* onGotoStmt);
     void csvHandleOnGosub(const OnGosubStmt* ogs);
     // Lightweight scan for RND usage independent of semantics
     /** Scan expression for RND() usage to enable helper emission. */
