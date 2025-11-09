@@ -9,18 +9,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: ensureVarAllocated
+ * Summary: Ensure a local allocation exists for a given variable name.
+ * Parameters:
+ *  - out: IR stream (insertion point).
+ *  - name: Variable identifier.
+ * Returns:
+ *  - void (may emit an alloca and zero-initialize)
+ */
 void CodeGenerator::ensureVarAllocated(std::ostringstream& out, const std::string& name) { // NOLINT(readability-function-size)
-    /*
-     * Function: CodeGenerator::ensureVarAllocated
-     * Inputs:
-     *  - out: IR stream (insertion point)
-     *  - name: variable identifier
-     * Outputs:
-     *  - void (may emit an alloca+store 0.0)
-     * Theory of operation:
-     *  - Checks for an existing alloca mapping; if absent, emits an alloca
-     *    of type double and zero-initializes it.
-     */
     if (auto foundIt = varAllocaName_.find(name);
         foundIt != varAllocaName_.end() && !foundIt->second.empty()) {
         return;

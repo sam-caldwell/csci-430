@@ -5,7 +5,14 @@
 
 namespace gwbasic {
 
-/* Collect variables for FOR header and nested body. */
+/*
+ * Function: csvHandleFor
+ * Summary: Collect variables referenced by a FOR header and body.
+ * Parameters:
+ *  - forStmt: Parsed ForStmt node.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::csvHandleFor(const ForStmt* forStmt) {
     variables_.insert(forStmt->var);
     collectExprVars(forStmt->start.get());

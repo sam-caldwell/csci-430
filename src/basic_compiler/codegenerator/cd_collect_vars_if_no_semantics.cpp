@@ -5,8 +5,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdCollectVarsIfNoSemantics
- * Purpose: Walk kept lines and collect variables when semantics are not provided.
+ * Function: cdCollectVarsIfNoSemantics
+ * Summary: Collect variables if semantic analysis results are absent.
+ * Parameters:
+ *  - lines: Kept line numbers to scan.
+ * Returns:
+ *  - void
  */
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void CodeGenerator::cdCollectVarsIfNoSemantics(const std::vector<int>& lines) {

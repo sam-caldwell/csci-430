@@ -5,8 +5,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdCollectDataItemsFromStmt
- * Purpose: Flatten a single DATA statement's items into tables.
+ * Function: cdCollectDataItemsFromStmt
+ * Summary: Flatten a single DATA statement's items into internal tables.
+ * Parameters:
+ *  - dataStmt: Parsed DataStmt node (by const reference).
+ * Returns:
+ *  - void
  */
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void CodeGenerator::cdCollectDataItemsFromStmt(const DataStmt& dataStmt) {

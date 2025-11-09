@@ -3,6 +3,14 @@
 
 namespace gwbasic {
 
+/*
+ * Function: arrayElemType
+ * Summary: Determine the LLVM IR element type string for an array.
+ * Parameters:
+ *  - name: Array variable identifier.
+ * Returns:
+ *  - std::string: IR type name (e.g., "double", "float", "i32", "i64").
+ */
 std::string CodeGenerator::arrayElemType(const std::string& name) const {
     switch (numKindOf(name)) {
         case NumKind::Int16: return "i32";   // Integer arrays map to i32
@@ -13,4 +21,3 @@ std::string CodeGenerator::arrayElemType(const std::string& name) const {
 }
 
 } // namespace gwbasic
-

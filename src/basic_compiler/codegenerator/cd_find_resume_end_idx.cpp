@@ -5,8 +5,13 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdFindResumeEndIdx
- * Purpose: Search forward from startIdx for the first line containing RESUME.
+ * Function: cdFindResumeEndIdx
+ * Summary: Find the index of the first line at/after startIdx containing RESUME.
+ * Parameters:
+ *  - lines: Kept line numbers in order.
+ *  - startIdx: Starting index into lines.
+ * Returns:
+ *  - int: Index of the first line containing RESUME, or -1 if none.
  */
 // NOLINTNEXTLINE(readability-function-size,readability-convert-member-functions-to-static,bugprone-easily-swappable-parameters)
 int CodeGenerator::cdFindResumeEndIdx(const std::vector<int>& lines, const int startIdx) const {

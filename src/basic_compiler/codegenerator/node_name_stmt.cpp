@@ -5,6 +5,14 @@
 
 namespace gwbasic {
 
+/*
+ * Function: nodeName
+ * Summary: Pretty-print the AST kind for a statement node.
+ * Parameters:
+ *  - s: Statement pointer (nullable).
+ * Returns:
+ *  - const char*: Human-readable node kind name.
+ */
 const char* CodeGenerator::nodeName(const Stmt* s) {
     return prettyName(s ? s->getKind() : NodeKind::AbstractStmt);
 }

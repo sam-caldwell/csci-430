@@ -5,8 +5,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdCollectDataItems
- * Purpose: Flatten DATA items into tables and assign literal ids.
+ * Function: cdCollectDataItems
+ * Summary: Flatten DATA items into tables and assign literal ids.
+ * Parameters:
+ *  - lines: Kept line numbers to scan.
+ * Returns:
+ *  - void
  */
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void CodeGenerator::cdCollectDataItems(const std::vector<int>& lines) {

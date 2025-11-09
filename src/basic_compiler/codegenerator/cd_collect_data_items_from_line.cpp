@@ -6,8 +6,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdCollectDataItemsFromLine
- * Purpose: Collect DATA items from a single line.
+ * Function: cdCollectDataItemsFromLine
+ * Summary: Collect DATA items from a single line by number.
+ * Parameters:
+ *  - lineNum: Source line number to inspect.
+ * Returns:
+ *  - void
  */
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void CodeGenerator::cdCollectDataItemsFromLine(const int lineNum) {

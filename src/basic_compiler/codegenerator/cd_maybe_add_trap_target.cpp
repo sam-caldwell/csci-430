@@ -4,11 +4,14 @@
 #include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
-    /**
-     * @brief Insert the OnErrorGoto target into trapTargets if present and valid.
-     *
-     * @param st          Statement to inspect.
-     * @param trapTargets Set that receives the target line if > 0.
+    /*
+     * Function: cdMaybeAddTrapTarget
+     * Summary: Insert ON ERROR GOTO target into the set if present.
+     * Parameters:
+     *  - stmt: Statement to inspect.
+     *  - trapTargets: Set to receive the target line number when > 0.
+     * Returns:
+     *  - void
      */
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     void CodeGenerator::cdMaybeAddTrapTarget(const Stmt* stmt, std::set<int>& trapTargets) {

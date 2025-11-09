@@ -6,8 +6,13 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandleGoto
- * Purpose: Emit IR for GOTO inside a FOR body and signal termination.
+ * Function: emitForHandleGoto
+ * Summary: Emit IR for GOTO inside a FOR body and signal termination.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - gt: Parsed GotoStmt node.
+ * Returns:
+ *  - bool: Always true (handler terminates the loop body).
  */
 bool CodeGenerator::emitForHandleGoto(std::ostringstream& out, const GotoStmt* gt) {
     std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine);
@@ -16,4 +21,3 @@ bool CodeGenerator::emitForHandleGoto(std::ostringstream& out, const GotoStmt* g
 }
 
 } // namespace gwbasic
-

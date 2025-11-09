@@ -9,6 +9,15 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: emitNumberExpr
+ * Summary: Render a numeric literal as a canonical floating value string.
+ * Parameters:
+ *  - out: IR output stream (unused).
+ *  - num: Parsed NumberExpr node.
+ * Returns:
+ *  - std::string: Floating literal string (ensures decimal point or exponent).
+ */
 std::string CodeGenerator::emitNumberExpr(std::ostringstream& out, const NumberExpr* num) {
     (void)out; // no IR emission needed for numeric literal
     char buf[64];
@@ -18,4 +27,3 @@ std::string CodeGenerator::emitNumberExpr(std::ostringstream& out, const NumberE
         s += ".0";
     return s;
 }
-

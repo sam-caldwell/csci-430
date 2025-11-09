@@ -5,7 +5,14 @@
 
 namespace gwbasic {
 
-/* Collect variables for IF condition. */
+/*
+ * Function: csvHandleIf
+ * Summary: Collect variables referenced by an IF condition.
+ * Parameters:
+ *  - ifStmt: Parsed IfStmt node.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::csvHandleIf(const IfStmt* ifStmt) {
     collectExprVars(ifStmt->cond.get());
     logSem() << "If @ " << ifStmt->pos.line << ':' << ifStmt->pos.col << Symbols::LF;

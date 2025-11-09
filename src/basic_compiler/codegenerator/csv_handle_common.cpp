@@ -3,7 +3,14 @@
 
 namespace gwbasic {
 
-/* Collect variables for COMMON. */
+/*
+ * Function: csvHandleCommon
+ * Summary: Collect variables declared by COMMON.
+ * Parameters:
+ *  - cs: Parsed CommonStmt node.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::csvHandleCommon(const CommonStmt* cs) {
     for (const auto& n : cs->names) {
         variables_.insert(n);
@@ -13,4 +20,3 @@ void CodeGenerator::csvHandleCommon(const CommonStmt* cs) {
 }
 
 } // namespace gwbasic
-

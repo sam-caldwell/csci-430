@@ -4,12 +4,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandleSystem
- * Purpose: Emit SYSTEM handling inside a FOR body (exits program).
+ * Function: emitForHandleSystem
+ * Summary: Emit SYSTEM handling inside a FOR body (exit program).
+ * Parameters:
+ *  - out: IR output stream to append to.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForHandleSystem(std::ostringstream& out) {
     out << "  br label %exit" << Symbols::LF;
 }
 
 } // namespace gwbasic
-

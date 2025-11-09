@@ -6,8 +6,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandleArrayAssign
- * Purpose: Emit IR for array element assignment inside a FOR body.
+ * Function: emitForHandleArrayAssign
+ * Summary: Emit IR for array element assignment inside a FOR body.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - aaset: Parsed ArrayAssignStmt node.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForHandleArrayAssign(std::ostringstream& out, const ArrayAssignStmt* aaset, const std::string& currLineLabel, int& localCounter) {
     static constexpr int kErrArrayBounds = 9;
@@ -49,4 +56,3 @@ void CodeGenerator::emitForHandleArrayAssign(std::ostringstream& out, const Arra
 }
 
 } // namespace gwbasic
-

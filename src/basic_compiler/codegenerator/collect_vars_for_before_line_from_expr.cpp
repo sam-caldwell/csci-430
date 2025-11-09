@@ -8,6 +8,16 @@
 
 namespace gwbasic {
 
+/*
+ * Function: collectVarsForBeforeLineFromExpr
+ * Summary: Collect scalar and array names referenced by an expression.
+ * Parameters:
+ *  - e: Expression node to scan.
+ *  - vars: Output set of scalar variable names.
+ *  - arrays: Output set of array variable names.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays) {
     if (!e) return;
     if (const auto v = dyn_cast<const VarExpr>(e)) {

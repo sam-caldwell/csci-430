@@ -5,7 +5,14 @@
 
 namespace gwbasic {
 
-/* Collect variables for RANDOMIZE. */
+/*
+ * Function: csvHandleRandomize
+ * Summary: Collect variables referenced by RANDOMIZE.
+ * Parameters:
+ *  - randomizeStmt: Parsed RandomizeStmt node.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::csvHandleRandomize(const RandomizeStmt* randomizeStmt) {
     if (randomizeStmt->seed) {
         collectExprVars(randomizeStmt->seed.get());

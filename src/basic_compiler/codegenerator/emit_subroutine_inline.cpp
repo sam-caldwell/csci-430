@@ -8,20 +8,18 @@
 
 namespace gwbasic {
 
+/*
+ * Function: emitSubroutineInline
+ * Summary: Inline a subroutine from a target line until RETURN/END.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - targetLine: Line number of subroutine entry.
+ *  - entryLabel: Entry label at call site.
+ *  - returnLabel: Continuation label after subroutine returns.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine, const std::string& entryLabel, const std::string& returnLabel) {
-    /*
-     * Function: CodeGenerator::emitSubroutineInline
-     * Inputs:
-     *  - out: IR stream
-     *  - targetLine: line number of subroutine entry
-     *  - entryLabel/returnLabel: labels for entry/return points at call site
-     * Outputs:
-     *  - void
-     * Theory of operation:
-     *  - Walks lines starting at the target, emitting IR for each statement
-     *    until encountering RETURN/END or running out of lines, threading
-     *    through auto-generated continuation labels.
-     */
     int startIdx = -1;
     for (size_t i = 0; i < lineNumbers_.size(); ++i) if (lineNumbers_[i] == targetLine) { startIdx = static_cast<int>(i); break; }
     if (startIdx < 0) { out << entryLabel << ":" << Symbols::LF; out << "  br label %" << returnLabel << Symbols::LF; return; }

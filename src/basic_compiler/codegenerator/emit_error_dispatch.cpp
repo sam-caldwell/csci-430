@@ -6,6 +6,17 @@
 
 namespace gwbasic {
 
+/*
+ * Function: emitErrorDispatch
+ * Summary: Set error-related globals and dispatch to handler or exit.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - errCode: BASIC error code.
+ *  - lineNo: Source line number at error.
+ *  - stmtIndex: Statement index within line.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::emitErrorDispatch(std::ostringstream& out, int errCode, int lineNo, int stmtIndex) {
     out << std::format("  store i32 {}, ptr @gwb_err_code", errCode) << Symbols::LF;
     out << std::format("  store i32 {}, ptr @gwb_err_line", lineNo) << Symbols::LF;
@@ -23,4 +34,3 @@ void CodeGenerator::emitErrorDispatch(std::ostringstream& out, int errCode, int 
 }
 
 } // namespace gwbasic
-

@@ -6,8 +6,16 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForPrintConstNumberItem
- * Purpose: Emit IR for printing a constant numeric item.
+ * Function: emitForPrintConstNumberItem
+ * Summary: Emit IR for printing a constant numeric item.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - pr: Parsed PrintStmt node.
+ *  - cv: Constant numeric value.
+ *  - addNL: Whether to print a trailing newline.
+ *  - nextStartsWithSpace: Whether next item begins with a space.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForPrintConstNumberItem(std::ostringstream& out, const PrintStmt* pr, double cv, bool addNL, bool nextStartsWithSpace) {
     if (std::floor(cv) == cv) {
@@ -45,4 +53,3 @@ void CodeGenerator::emitForPrintConstNumberItem(std::ostringstream& out, const P
 }
 
 } // namespace gwbasic
-

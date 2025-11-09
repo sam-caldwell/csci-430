@@ -4,6 +4,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: lookupBinding
+ * Summary: Lookup a temporary binding for a given variable name.
+ * Parameters:
+ *  - name: Variable identifier to lookup.
+ *  - out: Output string to receive the bound SSA name.
+ * Returns:
+ *  - bool: True if a binding was found and set in out.
+ */
 bool CodeGenerator::lookupBinding(const std::string& name, std::string& out) const {
     for (const auto& it : std::ranges::reverse_view(bindingStack_)) {
         auto f = it.find(name);
@@ -16,4 +25,3 @@ bool CodeGenerator::lookupBinding(const std::string& name, std::string& out) con
 }
 
 } // namespace gwbasic
-

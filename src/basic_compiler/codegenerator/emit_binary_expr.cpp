@@ -8,6 +8,15 @@
 
 using namespace gwbasic;
 
+/*
+ * Function: emitBinaryExpr
+ * Summary: Emit IR for a binary expression and return its result.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - b: Parsed BinaryExpr node.
+ * Returns:
+ *  - std::string: SSA register name holding the resulting value.
+ */
 std::string CodeGenerator::emitBinaryExpr(std::ostringstream& out, const BinaryExpr* b) {
     if (b->op == BinaryOp::Eq || b->op == BinaryOp::Ne || b->op == BinaryOp::Lt || b->op == BinaryOp::Le || b->op == BinaryOp::Gt || b->op == BinaryOp::Ge) {
         std::string i1 = emitComparison(out, b);
@@ -55,4 +64,3 @@ std::string CodeGenerator::emitBinaryExpr(std::ostringstream& out, const BinaryE
     }
     return res;
 }
-

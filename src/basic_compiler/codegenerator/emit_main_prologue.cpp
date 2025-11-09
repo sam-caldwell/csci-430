@@ -4,18 +4,15 @@
 
 namespace gwbasic {
 
+/*
+ * Function: emitMainPrologue
+ * Summary: Emit function prologue, locals, and initial branch.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ * Returns:
+ *  - void
+ */
 void CodeGenerator::emitMainPrologue(std::ostringstream& out) {
-    /*
-     * Function: CodeGenerator::emitMainPrologue
-     * Inputs:
-     *  - out: IR output stream
-     * Outputs:
-     *  - void
-     * Theory of operation:
-     *  - Starts the main function, allocates all discovered variables on the
-     *    stack, initializes them to 0.0, and branches to the first line label
-     *    or returns 0 if the program has no lines.
-     */
     out << "define i32 @main() {" << Symbols::LF
         << "entry:" << Symbols::LF;
     // Hoist all local allocations (scalars/arrays) to the entry block so that

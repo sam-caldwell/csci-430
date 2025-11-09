@@ -4,8 +4,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdSeedFromSemantics
- * Purpose: If provided, seed variables/strings/common from prior semantic analysis.
+ * Function: cdSeedFromSemantics
+ * Summary: Seed variables/strings/common sets from semantic analysis results.
+ * Parameters:
+ *  - (none)
+ * Returns:
+ *  - void
  */
 void CodeGenerator::cdSeedFromSemantics() {
     if (!semProvided_) return;
@@ -18,4 +22,3 @@ void CodeGenerator::cdSeedFromSemantics() {
 }
 
 } // namespace gwbasic
-

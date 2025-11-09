@@ -5,6 +5,14 @@
 
 namespace gwbasic {
 
+/*
+ * Function: nodeName
+ * Summary: Pretty-print the AST kind for an expression node.
+ * Parameters:
+ *  - e: Expression pointer (nullable).
+ * Returns:
+ *  - const char*: Human-readable node kind name.
+ */
 const char* CodeGenerator::nodeName(const Expr* e) {
     return prettyName(e ? e->getKind() : NodeKind::AbstractExpr);
 }

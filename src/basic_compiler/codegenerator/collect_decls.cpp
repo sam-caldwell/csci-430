@@ -8,16 +8,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::collectDecls
- * Inputs:
- *  - program: AST to be compiled
- * Outputs:
- *  - void (initializes internal maps/sets and prepares line ordering)
- * Theory of operation:
- *  - Clear internal state,
- *  - Scan all lines/statements to populate the sets of variables and string literals,
- *  - Records and sorts line numbers and
- *  - builds a line-number to Line* map for later codegen.
+ * Function: collectDecls
+ * Summary: Pre-scan program to collect variables, literals, and line order.
+ * Parameters:
+ *  - program: Program AST to be compiled.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::collectDecls(const Program& program) {
     variables_.clear(); commonVariables_.clear(); varAllocaName_.clear(); strLiteralId_.clear();

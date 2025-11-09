@@ -10,8 +10,15 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::emitForHandlePrint
- * Purpose: Emit IR for a PRINT statement inside a FOR body.
+ * Function: emitForHandlePrint
+ * Summary: Emit IR for a PRINT statement inside a FOR body.
+ * Parameters:
+ *  - out: IR output stream to append to.
+ *  - pr: Parsed PrintStmt node.
+ *  - currLineLabel: Base label for naming emitted blocks.
+ *  - localCounter: Per-line counter to uniquify labels.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::emitForHandlePrint(std::ostringstream& out, const PrintStmt* pr, const std::string& currLineLabel, int& localCounter) {
     std::vector<const Expr*> items;

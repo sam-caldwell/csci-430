@@ -4,8 +4,12 @@
 namespace gwbasic {
 
 /*
- * Function: CodeGenerator::cdScanRndAndStop
- * Purpose: Scan kept lines to determine helper emission needs (RND, STOP).
+ * Function: cdScanRndAndStop
+ * Summary: Scan kept lines to determine helper emission needs (RND, STOP).
+ * Parameters:
+ *  - lines: Kept line numbers to scan.
+ * Returns:
+ *  - void
  */
 void CodeGenerator::cdScanRndAndStop(const std::vector<int>& lines) {
     for (int ln : lines) {
@@ -19,4 +23,3 @@ void CodeGenerator::cdScanRndAndStop(const std::vector<int>& lines) {
 }
 
 } // namespace gwbasic
-
