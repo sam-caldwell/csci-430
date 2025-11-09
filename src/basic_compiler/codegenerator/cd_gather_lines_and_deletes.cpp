@@ -2,6 +2,8 @@
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/OptionPrintZonesStmt.h"
 #include "basic_compiler/ast/DeleteStmt.h"
+#include <algorithm>
+#include <limits>
 
 namespace gwbasic {
 
@@ -51,4 +53,3 @@ void CodeGenerator::cdGatherLinesAndDeletes(const Program& program,
 }
 
 } // namespace gwbasic
-

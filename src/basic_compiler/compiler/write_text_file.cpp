@@ -1,6 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/WriteTextFile.h"
+#include <filesystem>
 #include <fstream>
+#include <string>
 
 /*
  * Function: writeTextFile

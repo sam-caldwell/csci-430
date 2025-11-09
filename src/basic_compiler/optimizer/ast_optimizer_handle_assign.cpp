@@ -4,17 +4,22 @@
  * Purpose: Implement AstOptimizer::optimizeAssignStmt handler.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
+#include <memory>
+#include <utility>
+#include <vector>
 
 using namespace gwbasic;
 
-auto AstOptimizer::optimizeAssignStmt(std::unique_ptr<Stmt>& st,
+auto AstOptimizer::optimizeAssignStmt(std::unique_ptr<Stmt>& stmt,
                                       std::vector<std::unique_ptr<Stmt>>& out) -> bool {
-    const auto asg = dyn_cast<AssignStmt>(st.get());
-    if (!asg) return false;
+    AssignStmt* asg = dyn_cast<AssignStmt>(stmt.get());
+    if (asg == nullptr) {
+        return false;
+    }
     asg->value = optExpr(std::move(asg->value));
-    out.emplace_back(std::move(st));
+    out.emplace_back(std::move(stmt));
     return true;
 }
-

@@ -1,6 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/OnErrorGotoStmt.h"
+#include <set>
+#include <vector>
 
 namespace gwbasic {
 
@@ -13,16 +14,17 @@ namespace gwbasic {
      * @param trapTargets Output set populated with unique positive target lines.
      */
     void CodeGenerator::cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets) {
-        for (int ln : lines) { // level 1
-            const auto it = lineMap_.find(ln);
-            if (it == lineMap_.end() || it->second == nullptr) continue;
+        for (const int lineNum : lines) { // level 1
+            const auto foundIt = lineMap_.find(lineNum);
+            if (foundIt == lineMap_.end() || foundIt->second == nullptr) {
+                continue;
+            }
 
-            const auto* lptr = it->second;
-            for (const auto& st : lptr->statements) { // level 2
-                cdMaybeAddTrapTarget(st.get(), trapTargets);
+            const auto* linePtr = foundIt->second;
+            for (const auto& stmtNode : linePtr->statements) { // level 2
+                cdMaybeAddTrapTarget(stmtNode.get(), trapTargets);
             }
         }
     }
 
 } // namespace gwbasic
-

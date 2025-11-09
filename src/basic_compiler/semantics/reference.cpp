@@ -1,6 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
-#include <sstream>
+#include "basic_compiler/ast/SourcePos.h"
+#include <string>
 
 namespace gwbasic {
 

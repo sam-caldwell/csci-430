@@ -1,7 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/PokeStmt.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <utility>
 
 namespace gwbasic {
 
@@ -22,4 +26,3 @@ std::unique_ptr<Stmt> Parser::parsePoke() {
 }
 
 } // namespace gwbasic
-

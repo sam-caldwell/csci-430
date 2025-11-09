@@ -1,7 +1,13 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
-#include "basic_compiler/ast/make_node.h"
 #include "basic_compiler/ast/RunStmt.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/ParseError.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <optional>
+#include <string>
 
 namespace gwbasic {
 
@@ -13,14 +19,22 @@ namespace gwbasic {
  */
 std::unique_ptr<Stmt> Parser::parseRun() {
     // Strict: require filename string; optional , <line>
-    if (!check(TokenType::String)) throw ParseError("Expected filename string after RUN");
-    std::string file = peek().lexeme; advance();
+    if (!check(TokenType::String)) {
+        throw ParseError("Expected filename string after RUN");
+    }
+    std::string file = peek().lexeme;
+    advance();
     int lineInfo = -1;
     if (match(TokenType::Comma)) {
-        if (!check(TokenType::Integer)) throw ParseError("Expected line number after comma in RUN");
-        lineInfo = std::stoi(peek().lexeme); advance();
+        if (!check(TokenType::Integer)) {
+            throw ParseError("Expected line number after comma in RUN");
+        }
+        lineInfo = std::stoi(peek().lexeme);
+        advance();
     }
-    if (lineInfo >= 0) return make_node<RunStmt>({peek().line, peek().col}, file, lineInfo);
+    if (lineInfo >= 0) {
+        return make_node<RunStmt>({peek().line, peek().col}, file, lineInfo);
+    }
     return make_node<RunStmt>({peek().line, peek().col}, file, std::optional<int>{});
 }
 

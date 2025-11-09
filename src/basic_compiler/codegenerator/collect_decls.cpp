@@ -2,27 +2,8 @@
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include <algorithm>
 // AST headers needed for per-line variable/array collection
-#include "basic_compiler/ast/AssignStmt.h"
-#include "basic_compiler/ast/ArrayAssignStmt.h"
-#include "basic_compiler/ast/IfBlockStmt.h"
-#include "basic_compiler/ast/IfStmt.h"
-#include "basic_compiler/ast/ForStmt.h"
-#include "basic_compiler/ast/WhileStmt.h"
-#include "basic_compiler/ast/PrintStmt.h"
-#include "basic_compiler/ast/InputStmt.h"
-#include "basic_compiler/ast/ReadStmt.h"
 #include "basic_compiler/ast/DimStmt.h"
-#include "basic_compiler/ast/DataStmt.h"
-#include "basic_compiler/ast/WriteStmt.h"
-#include "basic_compiler/ast/OnErrorGotoStmt.h"
-#include "basic_compiler/ast/ResumeStmt.h"
-#include "basic_compiler/ast/StopStmt.h"
-#include "basic_compiler/ast/OptionPrintZonesStmt.h"
-#include "basic_compiler/ast/DeleteStmt.h"
-#include "basic_compiler/ast/VarExpr.h"
-#include "basic_compiler/ast/CallExpr.h"
-#include "basic_compiler/ast/BinaryExpr.h"
-#include "basic_compiler/ast/UnaryExpr.h"
+
 
 namespace gwbasic {
 

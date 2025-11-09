@@ -1,19 +1,23 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/Symbols.h"
+#include "basic_compiler/ast/InputStmt.h"
 
 namespace gwbasic {
 
 /* Collect variables for INPUT statement. */
-void CodeGenerator::csvHandleInput(const InputStmt* in) {
+void CodeGenerator::csvHandleInput(const InputStmt* inputStmt) {
 
-    for (const auto& v : in->variables)
-        variables_.insert(v);
+    for (const auto& varName : inputStmt->variables) {
+        variables_.insert(varName);
+    }
 
-    if (in->promptLiteral && !strLiteralId_.contains(*in->promptLiteral))
-        strLiteralId_[*in->promptLiteral] = strCounter_++;
+    if (inputStmt->promptLiteral && !strLiteralId_.contains(*inputStmt->promptLiteral)) {
+        strLiteralId_[*inputStmt->promptLiteral] = strCounter_++;
+    }
 
-    logSem() << "Input vars=" << in->variables.size() << " @ " << in->pos.line << ':' << in->pos.col << Symbols::LF;
+    logSem() << "Input vars=" << inputStmt->variables.size() << " @ "
+             << inputStmt->pos.line << ':' << inputStmt->pos.col << Symbols::LF;
 }
 
 } // namespace gwbasic
-

@@ -1,6 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/DeriveDefaultLogPaths.h"
-#include <filesystem>
+#include <optional>
+#include <string>
+
+// NOLINTBEGIN(llvmlibc-implementation-in-namespace)
 
 /*
  * Function: deriveDefaultLogPaths
@@ -20,21 +23,32 @@ void deriveDefaultLogPaths(const std::string &input,
                            std::optional<std::string> &lexLogPath,
                            std::optional<std::string> &syntaxLogPath,
                            std::optional<std::string> &semanticLogPath) {
-    if (noLogs) return;
+    if (noLogs) {
+        return;
+    }
+
+    auto replace_ext = [](const std::string &path, const std::string &new_ext) -> std::string {
+        const auto slash = path.find_last_of("/\\");
+        const auto dot = path.find_last_of('.');
+        const bool has_ext = (dot != std::string::npos) && (slash == std::string::npos || dot > slash);
+        if (has_ext) {
+            return path.substr(0, dot) + new_ext;
+        }
+        return path + new_ext;
+    };
+
     if (!logPath) {
-        std::filesystem::path p = input; p.replace_extension(".codegen.log");
-        logPath = p.string();
+        logPath = replace_ext(input, ".codegen.log");
     }
     if (!lexLogPath) {
-        std::filesystem::path p = input; p.replace_extension(".lex.log");
-        lexLogPath = p.string();
+        lexLogPath = replace_ext(input, ".lex.log");
     }
     if (!syntaxLogPath) {
-        std::filesystem::path p = input; p.replace_extension(".syntax.log");
-        syntaxLogPath = p.string();
+        syntaxLogPath = replace_ext(input, ".syntax.log");
     }
     if (!semanticLogPath) {
-        std::filesystem::path p = input; p.replace_extension(".semantic.log");
-        semanticLogPath = p.string();
+        semanticLogPath = replace_ext(input, ".semantic.log");
     }
 }
+
+// NOLINTEND(llvmlibc-implementation-in-namespace)

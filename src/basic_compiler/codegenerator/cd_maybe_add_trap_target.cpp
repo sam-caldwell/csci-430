@@ -13,8 +13,7 @@ namespace gwbasic {
         const auto* oeg = dyn_cast<const OnErrorGotoStmt>(st); // level 1
         if (!oeg) return;
 
-        const int tgt = oeg->targetLine;
-        if (tgt > 0) { // level 2
+        if (const int tgt = oeg->targetLine; tgt > 0) { // level 2
             trapTargets.insert(tgt);
         }
     }

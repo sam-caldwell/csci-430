@@ -6,6 +6,7 @@
  *    literals in expression trees and extracting their values.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NumberExpr.h"
 #include "basic_compiler/ast/RTTI.h"
 
@@ -22,8 +23,11 @@ namespace gwbasic {
  *  - Returns true if `e` is a `NumberExpr`; false otherwise. On success,
  *    `out` is assigned the contained number.
  */
-bool AstOptimizer::asNumber(const Expr* e, double& out) {
-    if (const auto n = dyn_cast<const NumberExpr>(e)) { out = n->value; return true; }
+bool AstOptimizer::asNumber(const Expr* expr, double& out) {
+    if (const auto* const num = dyn_cast<const NumberExpr>(expr)) {
+        out = num->value;
+        return true;
+    }
     return false;
 }
 

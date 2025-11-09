@@ -1,5 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
+#include "basic_compiler/ast/Program.h"
+#include <climits>
+#include <string>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -21,11 +24,13 @@ gwbasic::Program tokenizeRootNoLogs(const std::string& path,
     auto prog = parseFileNoLogs(path);
     outCanon = canonicalPath(path);
     int minRoot = INT_MAX;
-    for (const auto&[number, statements] : prog.lines)
-        if (number < minRoot) minRoot = number;
+    for (const auto& [number, statements] : prog.lines) {
+        if (number < minRoot) {
+            minRoot = number;
+        }
+    }
     outMinLine = (minRoot == INT_MAX ? 0 : minRoot);
     return prog;
 }
 
 } // namespace gwbasic::phase_log_helpers
-

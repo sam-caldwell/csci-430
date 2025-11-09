@@ -4,21 +4,30 @@
  * Purpose: Implement CodeGenerator::handleForBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/ForStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
-bool CodeGenerator::handleForBeforeLine(const Stmt *s,
-                                        std::set<std::string, std::less<>> &vars,
-                                        std::set<std::string, std::less<>> &arrays) {
-    const auto fs = dyn_cast<const ForStmt>(s);
-    if (!fs) return false;
-    vars.insert(fs->var);
-    collectVarsForBeforeLineFromExpr(fs->start.get(), vars, arrays);
-    collectVarsForBeforeLineFromExpr(fs->end.get(), vars, arrays);
-    if (fs->step) collectVarsForBeforeLineFromExpr(fs->step.get(), vars, arrays);
-    for (const auto &st: fs->body) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays);
+bool CodeGenerator::handleForBeforeLine(const Stmt* stmt,
+                                        std::set<std::string, std::less<>>& vars,
+                                        std::set<std::string, std::less<>>& arrays) {
+    const auto* const forStmt = dyn_cast<const ForStmt>(stmt);
+    if (forStmt == nullptr) {
+        return false;
+    }
+    vars.insert(forStmt->var);
+    collectVarsForBeforeLineFromExpr(forStmt->start.get(), vars, arrays);
+    collectVarsForBeforeLineFromExpr(forStmt->end.get(), vars, arrays);
+    if (forStmt->step) {
+        collectVarsForBeforeLineFromExpr(forStmt->step.get(), vars, arrays);
+    }
+    for (const auto& bodyStmt : forStmt->body) {
+        collectVarsForBeforeLineFromStmt(bodyStmt.get(), vars, arrays);
+    }
     return true;
 }
-
