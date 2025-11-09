@@ -12,11 +12,12 @@ void CodeGenerator::cdBuildRegionDataStartIdx(const std::vector<int>& lines) {
     regionDataStartIdx_.clear();
     int dataCount = 0;
     for (int ln : lines) {
-        const int region = (ln / 1000) * 1000;
-        if (!regionDataStartIdx_.contains(region)) regionDataStartIdx_[region] = dataCount;
+        if (const int region = (ln / 1000) * 1000; !regionDataStartIdx_.contains(region))
+            regionDataStartIdx_[region] = dataCount;
         const auto* lptr = lineMap_[ln]; if (!lptr) continue;
         for (const auto& st : lptr->statements) {
-            if (const auto ds = dyn_cast<const DataStmt>(st.get())) dataCount += static_cast<int>(ds->items.size());
+            if (const auto ds = dyn_cast<const DataStmt>(st.get()))
+                dataCount += static_cast<int>(ds->items.size());
         }
     }
 }
