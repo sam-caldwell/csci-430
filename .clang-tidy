@@ -1,15 +1,38 @@
 # file: .clang-tidy
 Checks: >
+    bugprone-*,
+    concurrency-*,
+    cppcoreguidelines-*,
+    darwin-avoid-spinlock,
+    darwin-dispatch-once-nonstatic,
+    llvm-*,
+    llvmlibc-*,
+    misc-const-correctness,
+    misc-confusable-identifiers,
+    misc-coroutine-hostile-raii,
+    misc-definitions-in-headers,
+    misc-header-include-cycle,
+    misc-include-cleaner,
+    misc-misleading-bidirectional,
+    misc-misleading-identifier,
+    misc-misplaced-const,
+    misc-new-delete-overloads,
+    misc-non-copyable-objects,
+    misc-redundant-expression,
+    misc-static-assert,
+    misc-throw-by-value-catch-by-reference,
+    misc-uniqueptr-reset-release,
+    misc-unused-alias-decls,
+    misc-unused-parameters,  # we should be disabling this one on a line-by-line basis to be intentional.
+    misc-unused-using-decls,
+    misc-use-internal-linkage,
+    -modernize-*,
+    performance-*,
+    -portability-avoid-pragma-once,
+    portability-restrict-system-includes,
     readability-function-cognitive-complexity,
     readability-function-size,
     readability-identifier-naming,
-    cppcoreguidelines-*,
-    modernize-*,
-    bugprone-*,
-    performance-*,
-    -modernize-*,
-    -cppcoreguidelines-avoid-do-while
-
 # Tune complexity/size thresholds to your policy
 CheckOptions:
     - key: readability-function-cognitive-complexity.Threshold
@@ -22,5 +45,9 @@ CheckOptions:
       value: 6
     - key: readability-function-size.NestingThreshold
       value: 3
+    - key: StrictMode
+      value: true
+    - key: IgnoreVirtual
+      value: true
 WarningsAsErrors: '*'
 HeaderFilterRegex: '^(src|include)/'
