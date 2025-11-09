@@ -12,7 +12,9 @@ void CodeGenerator::cdSeedFromSemantics() {
     variables_ = semVariables_;
     commonVariables_ = semCommonVariables_;
     strLiteralId_.clear(); strCounter_ = 0;
-    for (const auto& s : semStrings_) if (!strLiteralId_.contains(s)) strLiteralId_[s] = strCounter_++;
+    for (const auto& s : semStrings_)
+        if (!strLiteralId_.contains(s))
+            strLiteralId_[s] = strCounter_++;
 }
 
 } // namespace gwbasic
