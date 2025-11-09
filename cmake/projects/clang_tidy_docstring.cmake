@@ -21,13 +21,16 @@ add_executable(clang_tidy_docstring ${PROJECT_SOURCE_DIR}/src/clang-tidy-docstri
 target_include_directories(clang_tidy_docstring PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(clang_tidy_docstring PRIVATE clang_tidy_docstring_lib)
 
-# Validation target: run the checker over include/ and src/
+# Validation target: run the checker over compiler sources only
+# Limit scope to basic_compiler to avoid linting the checker and unrelated samples.
 add_custom_target(validate_docstrings
-  COMMAND $<TARGET_FILE:clang_tidy_docstring> -d ${PROJECT_SOURCE_DIR}/include -d ${PROJECT_SOURCE_DIR}/src
+  COMMAND $<TARGET_FILE:clang_tidy_docstring>
+          -d ${PROJECT_SOURCE_DIR}/src/basic_compiler/lexer
+          -d ${PROJECT_SOURCE_DIR}/src/basic_compiler/parser
+          -d ${PROJECT_SOURCE_DIR}/src/basic_compiler/codegenerator
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   COMMENT "Validating docstrings for functions/methods (clang-tidy-docstring)"
   USES_TERMINAL
   VERBATIM)
 
 add_dependencies(validate_docstrings clang_tidy_docstring)
-

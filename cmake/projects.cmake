@@ -3,6 +3,7 @@
 # Purpose: Central registry delegating to modular project definitions.
 
 include(cmake/projects/clang_tidy_docstring.cmake)
+include(cmake/projects/clang_tidy_one_func.cmake)
 
 include(cmake/projects/hello_world.cmake)
 include(cmake/projects/hello_world/tests/unit.cmake)
