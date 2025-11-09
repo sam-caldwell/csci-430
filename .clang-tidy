@@ -11,7 +11,6 @@ Checks: >
     darwin-dispatch-once-nonstatic,
     hicpp-exception-baseclass,
     llvm-*,
-    llvmlibc-*,
     misc-const-correctness,
     misc-confusable-identifiers,
     misc-coroutine-hostile-raii,
