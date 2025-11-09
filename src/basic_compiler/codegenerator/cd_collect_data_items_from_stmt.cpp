@@ -9,12 +9,12 @@ namespace gwbasic {
  * Purpose: Flatten a single DATA statement's items into tables.
  */
 void CodeGenerator::cdCollectDataItemsFromStmt(const DataStmt& ds) {
-    for (const auto& it : ds.items) {
-        const std::string& txt = it.text;
+    for (const auto&[isString, text] : ds.items) {
+        const std::string& txt = text;
         if (!strLiteralId_.contains(txt)) strLiteralId_[txt] = strCounter_++;
         dataLiteralIds_.push_back(strLiteralId_[txt]);
-        dataIsString_.push_back(it.isString ? 1u : 0u);
-        dataNumValues_.push_back(it.isString ? 0.0 : (std::stod(txt)));
+        dataIsString_.push_back(isString ? 1u : 0u);
+        dataNumValues_.push_back(isString ? 0.0 : (std::stod(txt)));
     }
 }
 
