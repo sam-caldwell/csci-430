@@ -3,6 +3,8 @@
 #include "basic_compiler/Symbols.h"
 #include <format>
 #include <sstream>
+#include <string>
+#include <string_view>
 
 namespace gwbasic {
 
@@ -17,9 +19,10 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 void CodeGenerator::emitForIncrement(std::ostringstream& out,
                                      const std::string& varName,
-                                     const std::string& stepReg,
+                                     std::string_view stepReg,
                                      const std::string& condLbl) {
     std::string vcur = loadVarAsDouble(out, varName);
     std::string vnext = nextTemp();

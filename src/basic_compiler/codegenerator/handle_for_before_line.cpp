@@ -7,6 +7,7 @@
 #include "basic_compiler/ast/ForStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <functional>
 #include <set>
 #include <string>
 

@@ -27,11 +27,11 @@ void CodeGenerator::emitForPrintDynamicOverride(std::ostringstream& out, const P
     auto intVal = nextTemp(); out << std::format("  {} = fptosi double {} to i64", intVal, val) << Symbols::LF;
     auto dblVal = nextTemp(); out << std::format("  {} = sitofp i64 {} to double", dblVal, intVal) << Symbols::LF;
     auto isInt = nextTemp(); out << std::format("  {} = fcmp oeq double {}, {}", isInt, dblVal, val) << Symbols::LF;
-    auto intLbl = std::string(currLineLabel) + std::string("_print_int_") + std::to_string(++localCounter);
-    auto fltLbl = std::string(currLineLabel) + std::string("_print_flt_") + std::to_string(localCounter);
-    auto contLbl = std::string(currLineLabel) + std::string("_print_cont_") + std::to_string(localCounter);
+    const std::string intLbl = std::format("{}_print_int_{}", currLineLabel, ++localCounter);
+    const std::string fltLbl = std::format("{}_print_flt_{}", currLineLabel, localCounter);
+    const std::string contLbl = std::format("{}_print_cont_{}", currLineLabel, localCounter);
     out << std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl, fltLbl) << Symbols::LF;
-    out << intLbl << ":" << Symbols::LF;
+    out << std::format("{}:", intLbl) << Symbols::LF;
     if (printStmt->channel >= 1) {
         auto fptr = nextTemp(); out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, printStmt->channel - 1) << Symbols::LF;
         auto fileHandle = nextTemp(); out << std::format("  {} = load ptr, ptr {}", fileHandle, fptr) << Symbols::LF;
@@ -40,7 +40,7 @@ void CodeGenerator::emitForPrintDynamicOverride(std::ostringstream& out, const P
         out << std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", useFmt, intVal) << Symbols::LF;
     }
     out << std::format("  br label %{}", contLbl) << Symbols::LF;
-    out << fltLbl << ":" << Symbols::LF;
+    out << std::format("{}:", fltLbl) << Symbols::LF;
     if (printStmt->channel >= 1) {
         auto fptr = nextTemp(); out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, printStmt->channel - 1) << Symbols::LF;
         auto fileHandle = nextTemp(); out << std::format("  {} = load ptr, ptr {}", fileHandle, fptr) << Symbols::LF;
@@ -49,7 +49,7 @@ void CodeGenerator::emitForPrintDynamicOverride(std::ostringstream& out, const P
         out << std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", useFmt, val) << Symbols::LF;
     }
     out << std::format("  br label %{}", contLbl) << Symbols::LF;
-    out << contLbl << ":" << Symbols::LF;
+    out << std::format("{}:", contLbl) << Symbols::LF;
 }
 
 } // namespace gwbasic

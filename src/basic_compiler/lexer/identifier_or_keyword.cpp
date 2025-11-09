@@ -1,5 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
+#include "basic_compiler/token/Token.h"
+#include "basic_compiler/token/TokenType.h"
 
 namespace gwbasic {
 /*
@@ -24,14 +26,17 @@ Token Lexer::identifierOrKeyword() {
 
     std::string upper;
     upper.reserve(buf.size());
-    for (const char c : buf) upper.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(c))));
+    for (const char chr : buf) {
+        upper.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(chr))));
+    }
 
     if (upper == KW_REM) { // treat as comment to EOL
         skipToEOL();
         return Token{TokenType::NewLine, Symbols::LF.to_string(), startLine, startCol};
     }
-    if (const TokenType kw = lookupKeyword(upper); kw != TokenType::Identifier)
-        return Token{kw, buf, startLine, startCol};
+    if (const TokenType kwType = lookupKeyword(upper); kwType != TokenType::Identifier) {
+        return Token{kwType, buf, startLine, startCol};
+    }
     return Token{TokenType::Identifier, buf, startLine, startCol};
 }
 

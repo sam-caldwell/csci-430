@@ -5,7 +5,9 @@
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/NumberExpr.h"
-#include <cstdio>
+#include <format>
+#include <sstream>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,10 +22,10 @@ using namespace gwbasic;
  */
 std::string CodeGenerator::emitNumberExpr(const std::ostringstream& out, const NumberExpr* num) {
     (void)out; // no IR emission needed for numeric literal
-    char buf[64];
-    std::snprintf(buf, sizeof(buf), "%.17g", num->value);
-    std::string s(buf);
-    if (s.find('.') == std::string::npos && s.find('e') == std::string::npos && s.find('E') == std::string::npos)
-        s += ".0";
-    return s;
+    // Use general floating format with 17 significant digits (like "%.17g").
+    std::string formatted = std::format("{:.17g}", num->value);
+    if (!formatted.contains('.') && !formatted.contains('e') && !formatted.contains('E')) {
+        formatted += ".0";
+    }
+    return formatted;
 }

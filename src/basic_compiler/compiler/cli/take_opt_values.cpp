@@ -1,6 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/cli/TakeOptValues.h"
 #include "basic_compiler/cli/TakeOptValue.h"
+#include <initializer_list>
+#include <optional>
+#include <string>
+#include <string_view>
 
 namespace gwbasic::cli {
 
@@ -18,14 +22,16 @@ namespace gwbasic::cli {
  *  - Iterates 'names', delegating to the single-name overload until one
  *    matches; returns false if none match.
  */
-bool takeOptValue(const std::string& arg,
+bool takeOptValue(std::string_view arg,
                   std::initializer_list<const char*> names,
-                  int& i,
+                  int& index,
                   const int argc,
                   char** argv,
                   std::optional<std::string>& out) {
-    for (const auto name : names) {
-        if (takeOptValue(arg, name, i, argc, argv, out)) return true;
+    for (const auto* const name : names) {
+        if (takeOptValue(arg, name, index, argc, argv, out)) {
+            return true;
+        }
     }
     return false;
 }

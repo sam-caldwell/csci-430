@@ -1,9 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
+#include "basic_compiler/compiler/FileOpenError.h"
+#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <stdexcept>
-
-#include "basic_compiler/compiler/FileOpenError.h"
 
 namespace gwbasic {
 

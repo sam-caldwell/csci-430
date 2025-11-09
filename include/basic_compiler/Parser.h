@@ -187,6 +187,10 @@ private:
     std::unique_ptr<Stmt> tryParseDefFamily(const Token& startTok);
     std::unique_ptr<Stmt> tryParseGotoGosub(const Token& startTok);
     std::unique_ptr<Stmt> tryParseOtherKeywords(const Token& startTok);
+    // Handle LET MID$(...) = expr$ case; returns nullptr if not matched
+    std::unique_ptr<Stmt> parseMidAssignInLet(const Token& startTok);
+    // Handle array element assignment tail after identifier and '('
+    std::unique_ptr<Stmt> parseArrayAssignTail(const std::string& name, int lineNum, int colNum);
     /** Parse ON <expr> GOTO line[,line...] or ON <expr> GOSUB line[,line...] */
     std::unique_ptr<Stmt> parseOnGotoGosub();
     /** Parse ON ERROR GOTO (0|line) */

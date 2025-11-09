@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <optional>
 #include <string>
+#include <string_view>
 
 namespace gwbasic::cli {
 
@@ -23,7 +24,7 @@ namespace gwbasic::cli {
  * Theory of operation:
  *  - Iterates over 'names', delegating to the single-name takeOptValue.
  */
-bool takeOptValue(const std::string& arg,
+bool takeOptValue(std::string_view arg,
                   std::initializer_list<const char*> names,
                   int& i,
                   const int argc,

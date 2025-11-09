@@ -1,5 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/cli/TakeOptValue.h"
+#include <optional>
+#include <string>
+#include <string_view>
 
 namespace gwbasic::cli {
 
@@ -17,17 +20,17 @@ namespace gwbasic::cli {
  *  - If 'arg' equals 'name' and a following token exists, stores it in 'out'
  *    and increments 'i' to skip the consumed value; otherwise returns false.
  */
-bool takeOptValue(const std::string& arg,
+bool takeOptValue(std::string_view arg,
                   const char* name,
-                  int& i,
+                  int& index,
                   const int argc,
                   char** argv,
                   std::optional<std::string>& out) {
     if (arg == name) {
-        if (i + 1 < argc) {
-            ++i;
+        if (index + 1 < argc) {
+            ++index;
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            out = argv[i];
+            out = argv[index];
             return true;
         }
         // Missing value; do not consume. Let the caller handle error/reporting.

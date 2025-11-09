@@ -3,6 +3,7 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 
 namespace gwbasic::cli {
 
@@ -24,7 +25,7 @@ namespace gwbasic::cli {
  *    stores argv[++i] into 'out' and returns true. Missing values are not
  *    consumed; the caller can issue a usage error.
  */
-bool takeOptValue(const std::string& arg,
+bool takeOptValue(std::string_view arg,
                   const char* name,
                   int& i,
                   const int argc,

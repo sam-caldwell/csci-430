@@ -1,6 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/AsmUtils.h"
 #include <cctype>
+#include <string>
 
 /**
  * Function: asmCommentLeaderForTriple
@@ -14,9 +15,12 @@
  *    - Default GNU/ELF/Mach-O (x86/x86_64, etc.): "#"
  */
 std::string asmCommentLeaderForTriple(const std::string& triple) {
-    std::string t = triple;
-    for (auto& c : t) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-    if (t.find("aarch64") != std::string::npos || t.find("arm64") != std::string::npos) return "//";
+    std::string lowered = triple;
+    for (auto& chChar : lowered) {
+        chChar = static_cast<char>(std::tolower(static_cast<unsigned char>(chChar)));
+    }
+    if (lowered.contains("aarch64") || lowered.contains("arm64")) {
+        return "//";
+    }
     return "#";
 }
-

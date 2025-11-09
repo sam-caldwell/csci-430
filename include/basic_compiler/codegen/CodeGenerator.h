@@ -342,7 +342,7 @@ private:
     void cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets);
     int cdFindLineIndex(const std::vector<int>& lines, int line) const;
     int cdFindResumeEndIdx(const std::vector<int>& lines, int startIdx) const;
-    int cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &idx);
+    static int cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &idx);
     void cdMaybeAddTrapTarget(const Stmt* stmt, std::set<int>& trapTargets);
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
     void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
@@ -427,7 +427,7 @@ private:
 
     // Utilities
     /** Escape raw text to a safe LLVM IR string literal form. */
-    static std::string escapeForIR(const std::string& s);
+    static std::string escapeForIR(const std::string& raw);
     /** Find a Line* by BASIC line number (nullptr if absent). */
     const Line* findLine(int line) const;
     /** Allocate a stack slot for a variable if not already allocated. */
@@ -508,7 +508,7 @@ private:
     /** Emit step increment and branch back to cond label. */
     void emitForIncrement(std::ostringstream& out,
                           const std::string& varName,
-                          const std::string& stepReg,
+                          std::string_view stepReg,
                           const std::string& condLbl);
 
     /** Emit all statements inside a FOR body; returns true if body terminated (e.g., via GOTO). */
@@ -531,7 +531,7 @@ private:
     void emitForHandleGosub(std::ostringstream& out, const GosubStmt* gs, const std::string& currLineLabel, int& localCounter);
     void emitForHandleArrayAssign(std::ostringstream& out, const ArrayAssignStmt* aaset, const std::string& currLineLabel, int& localCounter);
     void emitForHandleStop(std::ostringstream& out);
-    void emitForHandleSystem(std::ostringstream& out);
+    static void emitForHandleSystem(std::ostringstream& out);
 
     // PRINT sub-helpers (FOR body)
     void emitForPrintPadZone(std::ostringstream& out, const PrintStmt* pr);

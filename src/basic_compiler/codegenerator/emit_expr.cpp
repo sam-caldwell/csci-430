@@ -1,11 +1,22 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
-#include <format>
 #include "basic_compiler/Symbols.h"
-#include <sstream>
-#include <iomanip>
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/BinaryOp.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NumberExpr.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/StringExpr.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+#include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/codegen/CodeGenError.h"
 #include <cctype>
+#include <format>
+#include <iomanip>
+#include <ios>
+#include <sstream>
+#include <string>
 
 namespace gwbasic {
 
@@ -20,319 +31,321 @@ namespace gwbasic {
  *  - std::string: Register name or literal with the resulting value.
  */
 // NOLINTNEXTLINE(readability-function-cognitive-complexity,readability-function-size)
-std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix) {
+std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* expr, [[maybe_unused]] const std::string& currBlockSuffix) {
     constexpr int kInt16Bytes = 2;
     constexpr int kInt32Bytes = 4;
     constexpr int kDoubleBytes = 8;
     constexpr int kSigDigits   = 17;
-    if (auto num = dyn_cast<const NumberExpr>(e)) {
+    if (const auto* num = dyn_cast<const NumberExpr>(expr)) {
         std::ostringstream oss;
         oss.setf(std::ios::fmtflags(0), std::ios::floatfield);
         oss << std::setprecision(kSigDigits) << std::defaultfloat << num->value;
-        std::string s = oss.str();
-        if (s.find('.') == std::string::npos && s.find('e') == std::string::npos && s.find('E') == std::string::npos)
-            s += ".0";
+        std::string numStr = oss.str();
+        if (numStr.find('.') == std::string::npos && numStr.find('e') == std::string::npos && numStr.find('E') == std::string::npos) {
+            numStr += ".0";
+        }
 
-        return s;
+        return numStr;
     }
-    if (auto v = dyn_cast<const VarExpr>(e)) {
+    if (const auto* varExpr = dyn_cast<const VarExpr>(expr)) {
         // Inline binding for DEF FN parameter?
-        if (std::string bound; lookupBinding(v->name, bound)) return bound;
+        if (std::string bound; lookupBinding(varExpr->name, bound)) { return bound; }
         // Special-case INKEY$/DATE$/TIME$ (built-in string functions without parentheses)
         {
-            std::string up = v->name; for (auto &ch : up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
-            if (up == "INKEY$") {
-                std::string p = nextTemp();
-                { std::string ir = std::format("  {} = getelementptr inbounds [1 x i8], ptr @.str_empty, i64 0, i64 0", p); out << ir << Symbols::LF; }
+            std::string upperName = varExpr->name;
+            for (auto &chr : upperName) { chr = static_cast<char>(std::toupper(static_cast<unsigned char>(chr))); }
+            if (upperName == "INKEY$") {
+                std::string ptr = nextTemp();
+                { const std::string irText = std::format("  {} = getelementptr inbounds [1 x i8], ptr @.str_empty, i64 0, i64 0", ptr); out << irText << Symbols::LF; }
                 log() << "line " << currentLine_ << " VarExpr(INKEY$) -> empty string" << Symbols::LF;
-                return p;
+                return ptr;
             }
-            if (up == "DATE$") {
-                std::string t = nextTemp(); { std::string ir = std::format("  {} = call i64 @time(ptr null)", t); out << ir << Symbols::LF; }
-                std::string tp = nextTemp(); { std::string ir = std::format("  {} = alloca i64", tp); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i64 {}, ptr {}", t, tp); out << ir << Symbols::LF; }
-                std::string tm = nextTemp(); { std::string ir = std::format("  {} = call ptr @localtime(ptr {})", tm, tp); out << ir << Symbols::LF; }
-                std::string sbuf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << ir << Symbols::LF; }
-                std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_date, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
-                std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, tm); out << ir << Symbols::LF; }
-                std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }
-                std::string mem = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << ir << Symbols::LF; }
+            if (upperName == "DATE$") {
+                std::string timeSec = nextTemp(); { const std::string irText = std::format("  {} = call i64 @time(ptr null)", timeSec); out << irText << Symbols::LF; }
+                std::string timePtr = nextTemp(); { const std::string irText = std::format("  {} = alloca i64", timePtr); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i64 {}, ptr {}", timeSec, timePtr); out << irText << Symbols::LF; }
+                std::string tmPtr = nextTemp(); { const std::string irText = std::format("  {} = call ptr @localtime(ptr {})", tmPtr, timePtr); out << irText << Symbols::LF; }
+                std::string sbuf = nextTemp(); { const std::string irText = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irText << Symbols::LF; }
+                std::string fmt = nextTemp(); { const std::string irText = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_date, i64 0, i64 0", fmt); out << irText << Symbols::LF; }
+                std::string numWritten = nextTemp(); { const std::string irText = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", numWritten, sbuf, fmt, tmPtr); out << irText << Symbols::LF; }
+                std::string size = nextTemp(); { const std::string irText = std::format("  {} = add i64 {}, 1", size, numWritten); out << irText << Symbols::LF; }
+                std::string mem = nextTemp(); { const std::string irText = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << irText << Symbols::LF; }
                 log() << "line " << currentLine_ << " VarExpr(DATE$) -> strftime" << Symbols::LF;
                 return mem;
             }
-            if (up == "TIME$") {
-                std::string t = nextTemp(); { std::string ir = std::format("  {} = call i64 @time(ptr null)", t); out << ir << Symbols::LF; }
-                std::string tp = nextTemp(); { std::string ir = std::format("  {} = alloca i64", tp); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i64 {}, ptr {}", t, tp); out << ir << Symbols::LF; }
-                std::string tm = nextTemp(); { std::string ir = std::format("  {} = call ptr @localtime(ptr {})", tm, tp); out << ir << Symbols::LF; }
-                std::string sbuf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << ir << Symbols::LF; }
-                std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_time, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
-                std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, tm); out << ir << Symbols::LF; }
-                std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }
-                std::string mem = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << ir << Symbols::LF; }
+            if (upperName == "TIME$") {
+                std::string timeSec = nextTemp(); { const std::string irText = std::format("  {} = call i64 @time(ptr null)", timeSec); out << irText << Symbols::LF; }
+                std::string timePtr = nextTemp(); { const std::string irText = std::format("  {} = alloca i64", timePtr); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i64 {}, ptr {}", timeSec, timePtr); out << irText << Symbols::LF; }
+                std::string tmPtr = nextTemp(); { const std::string irText = std::format("  {} = call ptr @localtime(ptr {})", tmPtr, timePtr); out << irText << Symbols::LF; }
+                std::string sbuf = nextTemp(); { const std::string irText = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irText << Symbols::LF; }
+                std::string fmt = nextTemp(); { const std::string irText = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_time, i64 0, i64 0", fmt); out << irText << Symbols::LF; }
+                std::string numWritten = nextTemp(); { const std::string irText = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", numWritten, sbuf, fmt, tmPtr); out << irText << Symbols::LF; }
+                std::string size = nextTemp(); { const std::string irText = std::format("  {} = add i64 {}, 1", size, numWritten); out << irText << Symbols::LF; }
+                std::string mem = nextTemp(); { const std::string irText = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << irText << Symbols::LF; }
                 log() << "line " << currentLine_ << " VarExpr(TIME$) -> strftime" << Symbols::LF;
                 return mem;
             }
         }
-        ensureVarAllocated(out, v->name);
-        std::string a = varAllocaName_[v->name];
-        std::string r = nextTemp();
+        ensureVarAllocated(out, varExpr->name);
+        std::string allocaPtr = varAllocaName_[varExpr->name];
+        std::string result = nextTemp();
 
-        if (isStringVarNameCG(v->name)) {
-            std::string ld = std::format("  {} = load ptr, ptr {}", r, a);
-            out << ld << Symbols::LF;
+        if (isStringVarNameCG(varExpr->name)) {
+            const std::string loadText = std::format("  {} = load ptr, ptr {}", result, allocaPtr);
+            out << loadText << Symbols::LF;
             // Wrap null pointers to empty string for safety
-            std::string safe = nextTemp();
-            { std::string ir = std::format("  {} = call ptr @gwb_safe_str(ptr {})", safe, r); out << ir << Symbols::LF; }
-            r = safe;
+            std::string safePtr = nextTemp();
+            { const std::string irText = std::format("  {} = call ptr @gwb_safe_str(ptr {})", safePtr, result); out << irText << Symbols::LF; }
+            result = safePtr;
             log() << "line " << currentLine_ << " VarExpr$ -> load+safe" << Symbols::LF;
         } else {
             // Load typed storage and convert to double for expression math
-            switch (numKindOf(v->name)) {
+            switch (numKindOf(varExpr->name)) {
                 case NumKind::Int16: {
-                    std::string l = nextTemp();
-                    { std::string ir = std::format("  {} = load i16, ptr {}", l, a); out << ir << Symbols::LF; }
-                    { std::string ir = std::format("  {} = sitofp i16 {} to double", r, l); out << ir << Symbols::LF; }
+                    std::string tmpVal = nextTemp();
+                    { const std::string irText = std::format("  {} = load i16, ptr {}", tmpVal, allocaPtr); out << irText << Symbols::LF; }
+                    { const std::string irText2 = std::format("  {} = sitofp i16 {} to double", result, tmpVal); out << irText2 << Symbols::LF; }
                     break;
                 }
                 case NumKind::Long32: {
-                    std::string l = nextTemp();
-                    { std::string ir = std::format("  {} = load i32, ptr {}", l, a); out << ir << Symbols::LF; }
-                    { std::string ir = std::format("  {} = sitofp i32 {} to double", r, l); out << ir << Symbols::LF; }
+                    std::string tmpVal = nextTemp();
+                    { const std::string irText = std::format("  {} = load i32, ptr {}", tmpVal, allocaPtr); out << irText << Symbols::LF; }
+                    { const std::string irText2 = std::format("  {} = sitofp i32 {} to double", result, tmpVal); out << irText2 << Symbols::LF; }
                     break;
                 }
                 case NumKind::Single: {
-                    std::string l = nextTemp();
-                    { std::string ir = std::format("  {} = load float, ptr {}", l, a); out << ir << Symbols::LF; }
-                    { std::string ir = std::format("  {} = fpext float {} to double", r, l); out << ir << Symbols::LF; }
+                    std::string tmpVal = nextTemp();
+                    { const std::string irText = std::format("  {} = load float, ptr {}", tmpVal, allocaPtr); out << irText << Symbols::LF; }
+                    { const std::string irText2 = std::format("  {} = fpext float {} to double", result, tmpVal); out << irText2 << Symbols::LF; }
                     break;
                 }
                 case NumKind::Double: {
-                    std::string ir = std::format("  {} = load double, ptr {}", r, a);
-                    out << ir << Symbols::LF;
+                    const std::string irText = std::format("  {} = load double, ptr {}", result, allocaPtr);
+                    out << irText << Symbols::LF;
                     break;
                 }
             }
             log() <<"line " << currentLine_ << " VarExpr -> load/convert to double" << Symbols::LF;
         }
-        return r;
+        return result;
     }
-    if (auto u = dyn_cast<const UnaryExpr>(e)) {
-        auto inner = emitExpr(out, u->inner.get(), "");
-        if (u->op == Symbols::PLUS.first()) return inner;
-        if (u->op == Symbols::MINUS.first()) {
+    if (const auto* unaryExpr = dyn_cast<const UnaryExpr>(expr)) {
+        auto inner = emitExpr(out, unaryExpr->inner.get(), "");
+        if (unaryExpr->op == Symbols::PLUS.first()) { return inner; }
+        if (unaryExpr->op == Symbols::MINUS.first()) {
             std::string res = nextTemp();
-            std::string ir = std::format("  {} = fsub double 0.0, {}", res, inner);
-            out << ir << Symbols::LF;
-            std::ostringstream m; m << "line " << currentLine_ << " UnaryExpr(-) -> " << ir; log() << m.str() << Symbols::LF;
+            const std::string irText = std::format("  {} = fsub double 0.0, {}", res, inner);
+            out << irText << Symbols::LF;
+            std::ostringstream msg; msg << "line " << currentLine_ << " UnaryExpr(-) -> " << irText; log() << msg.str() << Symbols::LF;
             return res;
         }
-        if (u->op == Symbols::EXCLAMATION.first()) {
+        if (unaryExpr->op == Symbols::EXCLAMATION.first()) {
             // Logical NOT (numeric truthy): 1.0 if inner == 0.0 else 0.0
             std::string isZero = nextTemp();
-            { std::string ir = std::format("  {} = fcmp oeq double {}, 0.0", isZero, inner); out << ir << Symbols::LF; }
+            { const std::string irText = std::format("  {} = fcmp oeq double {}, 0.0", isZero, inner); out << irText << Symbols::LF; }
             std::string res = nextTemp();
-            { std::string ir = std::format("  {} = uitofp i1 {} to double", res, isZero); out << ir << Symbols::LF; }
+            { const std::string irText = std::format("  {} = uitofp i1 {} to double", res, isZero); out << irText << Symbols::LF; }
             return res;
         }
     }
-    if (auto b = dyn_cast<const BinaryExpr>(e)) {
-        if (b->op == BinaryOp::Eq || b->op == BinaryOp::Ne || b->op == BinaryOp::Lt || b->op == BinaryOp::Le || b->op == BinaryOp::Gt || b->op == BinaryOp::Ge) {
-            std::string i1 = emitComparison(out, b);
-            std::string i1z = nextTemp();
+    if (const auto* binExpr = dyn_cast<const BinaryExpr>(expr)) {
+        if (binExpr->op == BinaryOp::Eq || binExpr->op == BinaryOp::Ne || binExpr->op == BinaryOp::Lt || binExpr->op == BinaryOp::Le || binExpr->op == BinaryOp::Gt || binExpr->op == BinaryOp::Ge) {
+            const std::string i1Val = emitComparison(out, binExpr);
+            std::string i1AsDouble = nextTemp();
             {
-                std::string ir = "  "; ir += i1z; ir += " = uitofp i1 "; ir += i1; ir += " to double";
-                out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(cmp) -> " << ir; log() << m.str() << Symbols::LF; }
+                std::string irText = "  "; irText += i1AsDouble; irText += " = uitofp i1 "; irText += i1Val; irText += " to double";
+                out << irText << Symbols::LF; { std::ostringstream msg; msg << "line " << currentLine_ << " BinaryExpr(cmp) -> " << irText; log() << msg.str() << Symbols::LF; }
             }
-            return i1z;
+            return i1AsDouble;
         }
-        auto L = emitExpr(out, b->lhs.get(), "");
-        auto R = emitExpr(out, b->rhs.get(), "");
+        auto lhsVal = emitExpr(out, binExpr->lhs.get(), "");
+        auto rhsVal = emitExpr(out, binExpr->rhs.get(), "");
         std::string res = nextTemp();
-        switch (b->op) {
+        switch (binExpr->op) {
             case BinaryOp::Add: {
-                const bool lhsStr = isStringExpr(b->lhs.get());
-                const bool rhsStr = isStringExpr(b->rhs.get());
+                const bool lhsStr = isStringExpr(binExpr->lhs.get());
+                const bool rhsStr = isStringExpr(binExpr->rhs.get());
                 if (lhsStr && rhsStr) {
                     // String concatenation: malloc(strlen(L)+strlen(R)+1); strcpy; strcat
                     std::string lenL = nextTemp();
                     {
-                        std::string ir = std::format("  {} = call i64 @strlen(ptr {})", lenL, L);
-                        out << ir << Symbols::LF;
+                        const std::string irText = std::format("  {} = call i64 @strlen(ptr {})", lenL, lhsVal);
+                        out << irText << Symbols::LF;
                         {
-                            std::ostringstream m;
-                            m << "line " << currentLine_ << " StrLen L -> " << ir; log() << m.str() << Symbols::LF;
+                            std::ostringstream msg;
+                            msg << "line " << currentLine_ << " StrLen L -> " << irText; log() << msg.str() << Symbols::LF;
                         }
                     }
                     std::string lenR = nextTemp();
                     {
-                        std::string ir = std::format("  {} = call i64 @strlen(ptr {})", lenR, R);
-                        out << ir << Symbols::LF;
+                        const std::string irText = std::format("  {} = call i64 @strlen(ptr {})", lenR, rhsVal);
+                        out << irText << Symbols::LF;
                         {
-                            std::ostringstream m;
-                            m << "line " << currentLine_ << " StrLen R -> " << ir; log() << m.str() << Symbols::LF;
+                            std::ostringstream msg;
+                            msg << "line " << currentLine_ << " StrLen R -> " << irText; log() << msg.str() << Symbols::LF;
                         }
                     }
                     std::string total = nextTemp();
                     {
-                        std::string ir = std::format("  {} = add i64 {}, {}", total, lenL, lenR);
-                        out << ir << Symbols::LF;
+                        const std::string irText = std::format("  {} = add i64 {}, {}", total, lenL, lenR);
+                        out << irText << Symbols::LF;
                         {
-                            std::ostringstream m;
-                            m << "line " << currentLine_ << " Add lens -> " << ir; log() << m.str() << Symbols::LF;
+                            std::ostringstream msg;
+                            msg << "line " << currentLine_ << " Add lens -> " << irText; log() << msg.str() << Symbols::LF;
                         }
                     }
                     std::string total1 = nextTemp();
                     {
-                        std::string ir = std::format("  {} = add i64 {}, 1", total1, total);
-                        out << ir << Symbols::LF;
+                        const std::string irText = std::format("  {} = add i64 {}, 1", total1, total);
+                        out << irText << Symbols::LF;
                         {
-                            std::ostringstream m;
-                            m << "line " << currentLine_ << " +1 -> " << ir; log() << m.str() << Symbols::LF;
+                            std::ostringstream msg;
+                            msg << "line " << currentLine_ << " +1 -> " << irText; log() << msg.str() << Symbols::LF;
                         }
                     }
                     std::string buf = nextTemp();
                     {
-                        std::string ir = std::format("  {} = call ptr @malloc(i64 {})", buf, total1);
-                        out << ir << Symbols::LF;
+                        const std::string irText = std::format("  {} = call ptr @malloc(i64 {})", buf, total1);
+                        out << irText << Symbols::LF;
                         {
-                            std::ostringstream m; m << "line " << currentLine_ << " malloc -> " << ir; log() << m.str() << Symbols::LF;
+                            std::ostringstream msg; msg << "line " << currentLine_ << " malloc -> " << irText; log() << msg.str() << Symbols::LF;
                         }
                     }
                     {
-                        std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", buf, L);
-                        out << ir << Symbols::LF;
+                        const std::string irText = std::format("  call ptr @strcpy(ptr {}, ptr {})", buf, lhsVal);
+                        out << irText << Symbols::LF;
                         {
-                            std::ostringstream m; m << "line " << currentLine_ << " strcpy -> " << ir; log() << m.str() << Symbols::LF;
+                            std::ostringstream msg; msg << "line " << currentLine_ << " strcpy -> " << irText; log() << msg.str() << Symbols::LF;
                         }
                     }
                     {
-                        std::string ir = std::format("  call ptr @strcat(ptr {}, ptr {})", buf, R);
-                        out << ir << Symbols::LF;
+                        const std::string irText = std::format("  call ptr @strcat(ptr {}, ptr {})", buf, rhsVal);
+                        out << irText << Symbols::LF;
                         {
-                            std::ostringstream m; m << "line " << currentLine_ << " strcat -> " << ir;
-                            log() << m.str() << Symbols::LF;
+                            std::ostringstream msg; msg << "line " << currentLine_ << " strcat -> " << irText;
+                            log() << msg.str() << Symbols::LF;
                         }
                     }
                     return buf;
                 }
-        std::string ir = std::format("  {} = fadd double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(+) -> " << ir; log() << m.str() << Symbols::LF; } break; }
-            case BinaryOp::Sub: { std::string ir = std::format("  {} = fsub double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(-) -> " << ir; log() << m.str() << Symbols::LF; } break; }
-            case BinaryOp::Mul: { std::string ir = std::format("  {} = fmul double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(*) -> " << ir; log() << m.str() << Symbols::LF; } break; }
+        const std::string addText = std::format("  {} = fadd double {}, {}", res, lhsVal, rhsVal); out << addText << Symbols::LF; { std::ostringstream msg; msg << "line " << currentLine_ << " BinaryExpr(+) -> " << addText; log() << msg.str() << Symbols::LF; } break; }
+            case BinaryOp::Sub: { const std::string irText = std::format("  {} = fsub double {}, {}", res, lhsVal, rhsVal); out << irText << Symbols::LF; { std::ostringstream msg; msg << "line " << currentLine_ << " BinaryExpr(-) -> " << irText; log() << msg.str() << Symbols::LF; } break; }
+            case BinaryOp::Mul: { const std::string irText = std::format("  {} = fmul double {}, {}", res, lhsVal, rhsVal); out << irText << Symbols::LF; { std::ostringstream msg; msg << "line " << currentLine_ << " BinaryExpr(*) -> " << irText; log() << msg.str() << Symbols::LF; } break; }
             case BinaryOp::Div: {
                 // Division with zero-divide error trap
-                std::string isz = nextTemp(); { std::string ir = std::format("  {} = fcmp oeq double {}, 0.0", isz, R); out << ir << Symbols::LF; }
+                std::string isz = nextTemp(); { const std::string irText = std::format("  {} = fcmp oeq double {}, 0.0", isz, rhsVal); out << irText << Symbols::LF; }
                 std::string okLbl = lineLabelName(currentLine_) + std::string("_div_ok_") + std::to_string(++tempCounter_);
                 std::string errLbl = lineLabelName(currentLine_) + std::string("_div_err_") + std::to_string(tempCounter_);
-                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isz, errLbl, okLbl); out << ir << Symbols::LF; }
+                { const std::string irText = std::format("  br i1 {}, label %{}, label %{}", isz, errLbl, okLbl); out << irText << Symbols::LF; }
                 // Error path: set division-by-zero error and dispatch
                 out << errLbl << ":" << Symbols::LF;
-                { std::string ir = std::format("  store i32 11, ptr @gwb_err_code"); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 11, ptr @gwb_err_code"); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i1 true, ptr @gwb_in_handler"); out << irText << Symbols::LF; }
                 ensureVarAllocated(out, "ERR"); ensureVarAllocated(out, "ERL");
-                { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 11 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
-                { std::string dln  = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                { std::string derr = nextTemp(); { const std::string irText = std::format("  {} = sitofp i32 11 to double", derr); out << irText << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                { std::string dln  = nextTemp(); { const std::string irText = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << irText << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
                 {
-                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
-                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    std::string trap = nextTemp(); { const std::string irText = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << irText << Symbols::LF; }
+                    { const std::string irText = std::format("  switch i32 {}, label %exit [", trap); out << irText << Symbols::LF; }
+                for (int lnum : lineNumbers_) { const std::string irText = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << irText << Symbols::LF; }
                     out << "  ]" << Symbols::LF;
                 }
                 // Ok path computes the division
                 out << okLbl << ":" << Symbols::LF;
-                { std::string ir = std::format("  {} = fdiv double {}, {}", res, L, R); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(/) -> " << ir; log() << m.str() << Symbols::LF; } }
+                { const std::string irText = std::format("  {} = fdiv double {}, {}", res, lhsVal, rhsVal); out << irText << Symbols::LF; { std::ostringstream msg; msg << "line " << currentLine_ << " BinaryExpr(/) -> " << irText; log() << msg.str() << Symbols::LF; } }
                 break;
             }
             case BinaryOp::IntDiv: {
                 // Integer division: truncates toward zero on integerized operands; trap on zero divisor
-                std::string li = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", li, L); out << ir << Symbols::LF; }
-                std::string ri = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", ri, R); out << ir << Symbols::LF; }
-                std::string isz = nextTemp(); { std::string ir = std::format("  {} = icmp eq i64 {}, 0", isz, ri); out << ir << Symbols::LF; }
+                std::string lhsInt = nextTemp(); { const std::string irText = std::format("  {} = fptosi double {} to i64", lhsInt, lhsVal); out << irText << Symbols::LF; }
+                std::string rhsInt = nextTemp(); { const std::string irText = std::format("  {} = fptosi double {} to i64", rhsInt, rhsVal); out << irText << Symbols::LF; }
+                std::string isz = nextTemp(); { const std::string irText = std::format("  {} = icmp eq i64 {}, 0", isz, rhsInt); out << irText << Symbols::LF; }
                 std::string okLbl = lineLabelName(currentLine_) + std::string("_idiv_ok_") + std::to_string(++tempCounter_);
                 std::string errLbl = lineLabelName(currentLine_) + std::string("_idiv_err_") + std::to_string(tempCounter_);
-                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isz, errLbl, okLbl); out << ir << Symbols::LF; }
+                { const std::string irText = std::format("  br i1 {}, label %{}, label %{}", isz, errLbl, okLbl); out << irText << Symbols::LF; }
                 // Error path: division by zero
                 out << errLbl << ":" << Symbols::LF;
-                { std::string ir = std::format("  store i32 11, ptr @gwb_err_code"); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 11, ptr @gwb_err_code"); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i1 true, ptr @gwb_in_handler"); out << irText << Symbols::LF; }
                 ensureVarAllocated(out, "ERR"); ensureVarAllocated(out, "ERL");
-                { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 11 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
-                { std::string dln  = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                { std::string derr = nextTemp(); { const std::string irText = std::format("  {} = sitofp i32 11 to double", derr); out << irText << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                { std::string dln  = nextTemp(); { const std::string irText = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << irText << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
                 {
-                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
-                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                for (int lnum : lineNumbers_) { std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    std::string trap = nextTemp(); { const std::string irText = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << irText << Symbols::LF; }
+                    { const std::string irText = std::format("  switch i32 {}, label %exit [", trap); out << irText << Symbols::LF; }
+                for (int lnum : lineNumbers_) { const std::string irText = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << irText << Symbols::LF; }
                     out << "  ]" << Symbols::LF;
                 }
                 // Ok path computes integer division
                 out << okLbl << ":" << Symbols::LF;
-                std::string q  = nextTemp(); { std::string ir = std::format("  {} = sdiv i64 {}, {}", q, li, ri); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  {} = sitofp i64 {} to double", res, q); out << ir << Symbols::LF; }
+                std::string quotient  = nextTemp(); { const std::string irText = std::format("  {} = sdiv i64 {}, {}", quotient, lhsInt, rhsInt); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  {} = sitofp i64 {} to double", res, quotient); out << irText << Symbols::LF; }
                 break;
             }
             case BinaryOp::Mod: {
                 // Integer remainder with sign of dividend; trap on zero divisor
-                std::string li = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", li, L); out << ir << Symbols::LF; }
-                std::string ri = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", ri, R); out << ir << Symbols::LF; }
-                std::string isz = nextTemp(); { std::string ir = std::format("  {} = icmp eq i64 {}, 0", isz, ri); out << ir << Symbols::LF; }
+                std::string lhsInt = nextTemp(); { const std::string irText = std::format("  {} = fptosi double {} to i64", lhsInt, lhsVal); out << irText << Symbols::LF; }
+                std::string rhsInt = nextTemp(); { const std::string irText = std::format("  {} = fptosi double {} to i64", rhsInt, rhsVal); out << irText << Symbols::LF; }
+                std::string isz = nextTemp(); { const std::string irText = std::format("  {} = icmp eq i64 {}, 0", isz, rhsInt); out << irText << Symbols::LF; }
                 std::string okLbl = lineLabelName(currentLine_) + std::string("_mod_ok_") + std::to_string(++tempCounter_);
                 std::string errLbl = lineLabelName(currentLine_) + std::string("_mod_err_") + std::to_string(tempCounter_);
-                { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isz, errLbl, okLbl); out << ir << Symbols::LF; }
+                { const std::string irText = std::format("  br i1 {}, label %{}, label %{}", isz, errLbl, okLbl); out << irText << Symbols::LF; }
                 // Error path: division by zero
                 out << errLbl << ":" << Symbols::LF;
-                { std::string ir = std::format("  store i32 11, ptr @gwb_err_code"); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  store i1 true, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 11, ptr @gwb_err_code"); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i32 0, ptr @gwb_resume_stmt"); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  store i1 true, ptr @gwb_in_handler"); out << irText << Symbols::LF; }
                 ensureVarAllocated(out, "ERR"); ensureVarAllocated(out, "ERL");
-                { std::string derr = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 11 to double", derr); out << ir << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
-                { std::string dln  = nextTemp(); { std::string ir = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << ir << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
+                { std::string derr = nextTemp(); { const std::string irText = std::format("  {} = sitofp i32 11 to double", derr); out << irText << Symbols::LF; } storeNumberToVar(out, "ERR", derr); }
+                { std::string dln  = nextTemp(); { const std::string irText = std::format("  {} = sitofp i32 {} to double", dln, currentLine_); out << irText << Symbols::LF; } storeNumberToVar(out, "ERL", dln); }
                 {
-                    std::string trap = nextTemp(); { std::string ir = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << ir << Symbols::LF; }
-                    { std::string ir = std::format("  switch i32 {}, label %exit [", trap); out << ir << Symbols::LF; }
-                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; std::string ir = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << ir << Symbols::LF; }
+                    std::string trap = nextTemp(); { const std::string irText = std::format("  {} = load i32, ptr @gwb_err_trap_line", trap); out << irText << Symbols::LF; }
+                    { const std::string irText = std::format("  switch i32 {}, label %exit [", trap); out << irText << Symbols::LF; }
+                    for (const auto & [lnum, lp] : lineMap_) { (void)lp; const std::string irText = std::format("    i32 {}, label %{}", lnum, lineLabelName(lnum)); out << irText << Symbols::LF; }
                     out << "  ]" << Symbols::LF;
                 }
                 // Ok path computes remainder
                 out << okLbl << ":" << Symbols::LF;
-                std::string rmd= nextTemp(); { std::string ir = std::format("  {} = srem i64 {}, {}", rmd, li, ri); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  {} = sitofp i64 {} to double", res, rmd); out << ir << Symbols::LF; }
+                std::string rmd= nextTemp(); { const std::string irText = std::format("  {} = srem i64 {}, {}", rmd, lhsInt, rhsInt); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  {} = sitofp i64 {} to double", res, rmd); out << irText << Symbols::LF; }
                 break;
             }
             case BinaryOp::And: {
-                std::string lb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", lb, L); out << ir << Symbols::LF; }
-                std::string rb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", rb, R); out << ir << Symbols::LF; }
-                std::string bb = nextTemp(); { std::string ir = std::format("  {} = and i1 {}, {}", bb, lb, rb); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  {} = uitofp i1 {} to double", res, bb); out << ir << Symbols::LF; }
+                std::string lhsBool = nextTemp(); { const std::string irText = std::format("  {} = fcmp one double {}, 0.0", lhsBool, lhsVal); out << irText << Symbols::LF; }
+                std::string rhsBool = nextTemp(); { const std::string irText = std::format("  {} = fcmp one double {}, 0.0", rhsBool, rhsVal); out << irText << Symbols::LF; }
+                std::string bothBool = nextTemp(); { const std::string irText = std::format("  {} = and i1 {}, {}", bothBool, lhsBool, rhsBool); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  {} = uitofp i1 {} to double", res, bothBool); out << irText << Symbols::LF; }
                 break;
             }
             case BinaryOp::Or: {
-                std::string lb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", lb, L); out << ir << Symbols::LF; }
-                std::string rb = nextTemp(); { std::string ir = std::format("  {} = fcmp one double {}, 0.0", rb, R); out << ir << Symbols::LF; }
-                std::string bb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bb, lb, rb); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  {} = uitofp i1 {} to double", res, bb); out << ir << Symbols::LF; }
+                std::string lhsBool = nextTemp(); { const std::string irText = std::format("  {} = fcmp one double {}, 0.0", lhsBool, lhsVal); out << irText << Symbols::LF; }
+                std::string rhsBool = nextTemp(); { const std::string irText = std::format("  {} = fcmp one double {}, 0.0", rhsBool, rhsVal); out << irText << Symbols::LF; }
+                std::string eitherBool = nextTemp(); { const std::string irText = std::format("  {} = or i1 {}, {}", eitherBool, lhsBool, rhsBool); out << irText << Symbols::LF; }
+                { const std::string irText = std::format("  {} = uitofp i1 {} to double", res, eitherBool); out << irText << Symbols::LF; }
                 break;
             }
             case BinaryOp::Pow: {
-                std::string ir = std::format("  {} = call double @pow(double {}, double {})", res, L, R);
-                out << ir << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " BinaryExpr(^) -> " << ir; log() << m.str() << Symbols::LF; }
+                const std::string irText = std::format("  {} = call double @pow(double {}, double {})", res, lhsVal, rhsVal);
+                out << irText << Symbols::LF;
+                { std::ostringstream msg; msg << "line " << currentLine_ << " BinaryExpr(^) -> " << irText; log() << msg.str() << Symbols::LF; }
                 break;
             }
             default: throw CodeGenError("Unsupported binary op in arithmetic");
         }
         return res;
     }
-    if (auto call = dyn_cast<const CallExpr>(e)) {
+    if (const auto* call = dyn_cast<const CallExpr>(expr)) {
         // Array element reference A(i[,j...]) handled as call-form
         if (arrayDims_.contains(call->callee)) {
             const auto &dims = arrayDims_[call->callee];
@@ -821,24 +834,24 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* e, [[ma
             }
             // Ok path
             out << okLbl << ":" << Symbols::LF;
-            std::string two = nextTemp(); { std::string ir = std::format("  {} = add i64 1, 1", two); out << ir << Symbols::LF; }
-            std::string buf = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 2)", buf); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " CallExpr chr$ malloc -> " << ir; log() << m.str() << Symbols::LF; } }
-            std::string ival = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", ival, argv[0]); out << ir << Symbols::LF; }
-            std::string b = nextTemp(); { std::string ir = std::format("  {} = trunc i32 {} to i8", b, ival); out << ir << Symbols::LF; }
-            std::string p0 = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", p0, buf); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store i8 {}, ptr {}", b, p0); out << ir << Symbols::LF; }
-            std::string p1 = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 1", p1, buf); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store i8 0, ptr {}", p1); out << ir << Symbols::LF; }
+            std::string two = nextTemp(); { const std::string irInstr = std::format("  {} = add i64 1, 1", two); out << irInstr << Symbols::LF; }
+            std::string buf = nextTemp(); { const std::string irInstr = std::format("  {} = call ptr @malloc(i64 2)", buf); out << irInstr << Symbols::LF; { std::ostringstream msg; msg << "line " << currentLine_ << " CallExpr chr$ malloc -> " << irInstr; log() << msg.str() << Symbols::LF; } }
+            std::string ival = nextTemp(); { const std::string irText = std::format("  {} = fptosi double {} to i32", ival, argv[0]); out << irText << Symbols::LF; }
+            std::string byteVal = nextTemp(); { const std::string irInstr = std::format("  {} = trunc i32 {} to i8", byteVal, ival); out << irInstr << Symbols::LF; }
+            std::string ptr0 = nextTemp(); { const std::string irText = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", ptr0, buf); out << irText << Symbols::LF; }
+            { const std::string irInstr = std::format("  store i8 {}, ptr {}", byteVal, ptr0); out << irInstr << Symbols::LF; }
+            std::string ptr1 = nextTemp(); { const std::string irText = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 1", ptr1, buf); out << irText << Symbols::LF; }
+            { const std::string irInstr = std::format("  store i8 0, ptr {}", ptr1); out << irInstr << Symbols::LF; }
             return buf;
         }
         throw CodeGenError("Unknown function call");
     }
-    if (auto s = dyn_cast<const StringExpr>(e)) {
-        int id = strLiteralId_[s->value];
+    if (const auto* const stringExpr = dyn_cast<const StringExpr>(expr)) {
+        const int strId = strLiteralId_[stringExpr->value];
         std::string gep = nextTemp();
-        std::string ir = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", gep, globalStringName(id));
-        out << ir << Symbols::LF;
-        std::ostringstream m; m << "line " << currentLine_ << " StringExpr -> " << ir; log() << m.str() << Symbols::LF;
+        const std::string irInstr = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", gep, globalStringName(strId));
+        out << irInstr << Symbols::LF;
+        std::ostringstream msg; msg << "line " << currentLine_ << " StringExpr -> " << irInstr; log() << msg.str() << Symbols::LF;
         return gep;
     }
     throw CodeGenError("Unknown expression kind");

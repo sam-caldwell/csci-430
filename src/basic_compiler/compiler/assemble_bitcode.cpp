@@ -1,6 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/AssembleBitcode.h"
+#include <cstdlib>
+#include <filesystem>
 #include <sstream>
+#include <string>
 
 /*
  * Function: assembleBitcode
@@ -16,5 +19,5 @@
 int assembleBitcode(const std::filesystem::path &llTmp, const std::string &outBC, const std::string& clangPath) {
     std::ostringstream oss;
     oss << clangPath << " -c -emit-llvm -x ir \"" << llTmp.string() << "\" -o \"" << outBC << "\"";
-    return std::system(oss.str().c_str());
+    return std::system(oss.str().c_str()); // NOLINT(concurrency-mt-unsafe)
 }

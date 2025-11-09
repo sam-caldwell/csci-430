@@ -2,8 +2,11 @@
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/Parser.h"
-#include <fstream>
+#include "basic_compiler/ast/Program.h"
 #include "basic_compiler/compiler/FileOpenError.h"
+#include <fstream>
+#include <string>
+#include <utility>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -20,11 +23,13 @@ namespace gwbasic::phase_log_helpers {
  */
 gwbasic::Program parseFileNoLogs(const std::string& fpath) {
     std::ifstream fin(fpath);
-    if (!fin) throw gwbasic::FileOpenError(fpath);
-    Lexer lx(fin);
-    auto toks = lx.tokenize();
-    Parser p(std::move(toks));
-    return p.parseProgram();
+    if (!fin) {
+        throw gwbasic::FileOpenError(fpath);
+    }
+    Lexer lexer(fin);
+    auto toks = lexer.tokenize();
+    Parser parser(std::move(toks));
+    return parser.parseProgram();
 }
 
 } // namespace gwbasic::phase_log_helpers

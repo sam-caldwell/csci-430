@@ -5,6 +5,7 @@
  *  - Define `AstOptimizer::isZero`, a helper to detect literal 0.0.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/ast/Expr.h"
 
 namespace gwbasic {
 
@@ -17,8 +18,9 @@ namespace gwbasic {
  * Outputs:
  *  - true if `e` is a `NumberExpr` equal to 0.0; false otherwise.
  */
-bool AstOptimizer::isZero(const Expr* e) {
-    double v = 0.0; return asNumber(e, v) && v == 0.0;
+bool AstOptimizer::isZero(const Expr* expr) {
+    double value = 0.0;
+    return asNumber(expr, value) && value == 0.0;
 }
 
 } // namespace gwbasic

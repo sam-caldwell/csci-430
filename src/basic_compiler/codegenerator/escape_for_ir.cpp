@@ -1,6 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/Symbols.h"
+#include <string>
 
 namespace gwbasic {
 
@@ -12,10 +12,10 @@ namespace gwbasic {
  * Returns:
  *  - std::string: IR-escaped string with byte escapes for special chars.
  */
-std::string CodeGenerator::escapeForIR(const std::string& s) {
+std::string CodeGenerator::escapeForIR(const std::string& raw) {
     std::string out;
-    for (const unsigned char c : s) {
-        CodeGenerator::appendEscapedByte(out, c);
+    for (const unsigned char chr : raw) {
+        CodeGenerator::appendEscapedByte(out, chr);
     }
     return out;
 }

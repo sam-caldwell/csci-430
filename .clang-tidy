@@ -22,6 +22,7 @@ Checks: >
     darwin-dispatch-once-nonstatic,
     hicpp-exception-baseclass,
     llvm-*,
+    -llvmlibc-*,
     misc-const-correctness,
     misc-confusable-identifiers,
     misc-coroutine-hostile-raii,
@@ -58,9 +59,5 @@ CheckOptions:
       value: 6
     - key: readability-function-size.NestingThreshold
       value: 3
-    - key: StrictMode
-      value: true
-    - key: IgnoreVirtual
-      value: true
 WarningsAsErrors: '*'
 HeaderFilterRegex: '^(src|include)/'

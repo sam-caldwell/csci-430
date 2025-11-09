@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,12 +23,14 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleAssignBeforeLine(const Stmt *s,
+bool CodeGenerator::handleAssignBeforeLine(const Stmt *stmt,
                                            std::set<std::string, std::less<>> &vars,
                                            std::set<std::string, std::less<>> &arrays) {
-    const auto a = dyn_cast<const AssignStmt>(s);
-    if (!a) return false;
-    vars.insert(a->name);
-    collectVarsForBeforeLineFromExpr(a->value.get(), vars, arrays);
+    const auto* const assignStmt = dyn_cast<const AssignStmt>(stmt);
+    if (assignStmt == nullptr) {
+        return false;
+    }
+    vars.insert(assignStmt->name);
+    collectVarsForBeforeLineFromExpr(assignStmt->value.get(), vars, arrays);
     return true;
 }
