@@ -15,8 +15,8 @@ namespace gwbasic {
  * Returns:
  *  - bool: true if a token was emitted; false if unrecognized
  */
-bool Lexer::tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, const char c) {
-    switch (c) {
+bool Lexer::tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, const char chr) {
+    switch (chr) {
         case Symbols::PLUS.first():       advance(); emitFixed<TokenType::Plus>(out, "+", line, col); break;
         case Symbols::MINUS.first():      advance(); emitFixed<TokenType::Minus>(out, "-", line, col); break;
         case Symbols::STAR.first():       advance(); emitFixed<TokenType::Star>(out, "*", line, col); break;
@@ -36,12 +36,14 @@ bool Lexer::tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, c
                 advance(); emitFixed<TokenType::NotEqual>(out, "<>", line, col);
             }
             else {
-                emitPairOrSingle<TokenType::Less, TokenType::LessEqual, Symbols::EQUALS.first()>(out, "<", "<=", line, col);
+                emitPairOrSingle<TokenType::Less, TokenType::LessEqual, Symbols::EQUALS.first()>(
+                    out, std::array<std::string_view, 2>{"<", "<="}, line, col);
             }
             break;
         case Symbols::GREATER_THAN.first():
             advance();
-            emitPairOrSingle<TokenType::Greater, TokenType::GreaterEqual, Symbols::EQUALS.first()>(out, ">", ">=", line, col);
+            emitPairOrSingle<TokenType::Greater, TokenType::GreaterEqual, Symbols::EQUALS.first()>(
+                out, std::array<std::string_view, 2>{">", ">="}, line, col);
             break;
         default:
             return false;

@@ -1,18 +1,23 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_LEXER_H
+#define BASIC_COMPILER_LEXER_H
 
-#include <string>
+#include <array>
+#include <cstddef>
 #include <istream>
+#include <ostream>
 #include <sstream>
-#include <vector>
-#include <fstream>
-#include "logger/Logger.h"
-#include "basic_compiler/Symbols.h"
-#include "basic_compiler/Symbol.h"
+#include <string>
 #include <string_view>
-#include "basic_compiler/token/Token.h"
-#include "basic_compiler/LexError.h"
+#include <utility>
+#include <vector>
+
+#include "basic_compiler/Symbol.h"
+#include "basic_compiler/Symbols.h"
 #include "basic_compiler/compiler/Metrics.h"
+#include "basic_compiler/token/Token.h"
+#include "basic_compiler/token/TokenType.h"
+#include "logger/Logger.h"
 
 namespace gwbasic {
 
@@ -39,9 +44,9 @@ public:
      * Inputs:
      *  - in: std::istream providing source characters (ifstream, stringstream, etc.)
      */
-    explicit Lexer(std::istream& in) {
+    explicit Lexer(std::istream& inputStream) {
         std::ostringstream buf;
-        buf << in.rdbuf();
+        buf << inputStream.rdbuf();
         src_ = std::move(buf).str();
     }
 
@@ -80,108 +85,108 @@ private:
     static constexpr std::string_view KW_REM = "REM";
 
     // Compile-time keyword table (REM is handled specially as a comment)
-    static constexpr struct { std::string_view kw; TokenType tt; } kKeywords_[] = {
+    static constexpr auto kKeywords_ = std::to_array<std::pair<std::string_view, TokenType>>({
         // REM intentionally omitted (treated as comment)
-        {"ALL",       TokenType::KwAll},
-        {"AND",       TokenType::KwAnd},
-        {"AS",        TokenType::KwAs},
-        {"BASE",      TokenType::KwBase},
-        {"BLOAD",     TokenType::KwBload},
-        {"BSAVE",     TokenType::KwBsave},
-        {"CALL",      TokenType::KwCall},
-        {"CHAIN",     TokenType::KwChain},
-        {"CHDIR",     TokenType::KwChdir},
-        {"CLEAR",     TokenType::KwClear},
-        {"CLOSE",     TokenType::KwClose},
-        {"COLOR",     TokenType::KwColor},
-        {"COMMON",    TokenType::KwCommon},
-        {"DATA",      TokenType::KwData},
-        {"DEF",       TokenType::KwDef},
-        {"DEFINT",    TokenType::KwDefInt},
-        {"DEFSNG",    TokenType::KwDefSng},
-        {"DEFDBL",    TokenType::KwDefDbl},
-        {"DEFSTR",    TokenType::KwDefStr},
-        {"DIM",       TokenType::KwDim},
-        {"ELSE",      TokenType::KwElse},
-        {"END",       TokenType::KwEnd},
-        {"ERASE",     TokenType::KwErase},
-        {"ERROR",     TokenType::KwError},
-        {"FOR",       TokenType::KwFor},
-        {"GOSUB",     TokenType::KwGosub},
-        {"GOTO",      TokenType::KwGoto},
-        {"FILES",     TokenType::KwFiles},
-        {"NAME",      TokenType::KwName},
-        {"KILL",      TokenType::KwKill},
-        {"MKDIR",     TokenType::KwMkdir},
-        {"RMDIR",     TokenType::KwRmdir},
-        {"WIDTH",     TokenType::KwWidth},
-        {"LOCATE",    TokenType::KwLocate},
-        {"CLS",       TokenType::KwCls},
-        {"PSET",      TokenType::KwPset},
-        {"PRESET",    TokenType::KwPreset},
-        {"PAINT",     TokenType::KwPaint},
-        {"DRAW",      TokenType::KwDraw},
-        {"VIEW",      TokenType::KwView},
-        {"WINDOW",    TokenType::KwWindow},
-        {"BEEP",      TokenType::KwBeep},
-        {"LPRINT",    TokenType::KwLprint},
-        {"SOUND",     TokenType::KwSound},
-        {"PLAY",      TokenType::KwPlay},
-        {"KEY",       TokenType::KwKey},
-        {"PEN",       TokenType::KwPen},
-        {"STRIG",     TokenType::KwStrig},
-        {"TIMER",     TokenType::KwTimer},
-        {"TRON",      TokenType::KwTron},
-        {"TROFF",     TokenType::KwTroff},
-        {"CONT",      TokenType::KwCont},
-        {"LOAD",      TokenType::KwLoad},
-        {"SAVE",      TokenType::KwSave},
-        {"NEW",       TokenType::KwNew},
-        {"DELETE",    TokenType::KwDelete},
-        {"LIST",      TokenType::KwList},
-        {"LLIST",     TokenType::KwLlist},
-        {"AUTO",      TokenType::KwAuto},
-        {"RENUM",     TokenType::KwRenum},
-        {"EDIT",      TokenType::KwEdit},
-        {"PCOPY",     TokenType::KwPcopy},
-        {"RESET",     TokenType::KwReset},
-        {"SHELL",     TokenType::KwShell},
-        {"ENVIRON",   TokenType::KwEnviron},
-        {"OUT",       TokenType::KwOut},
-        {"WAIT",      TokenType::KwWait},
-        {"IF",        TokenType::KwIf},
-        {"INPUT",     TokenType::KwInput},
-        {"LET",       TokenType::KwLet},
-        {"LINE",      TokenType::KwLine},
-        {"MERGE",     TokenType::KwMerge},
-        {"MOD",       TokenType::KwMod},
-        {"NEXT",      TokenType::KwNext},
-        {"NOT",       TokenType::KwNot},
-        {"ON",        TokenType::KwOn},
-        {"OPEN",      TokenType::KwOpen},
-        {"OPTION",    TokenType::KwOption},
-        {"OR",        TokenType::KwOr},
-        {"OUTPUT",    TokenType::KwOutput},
-        {"POKE",      TokenType::KwPoke},
-        {"PRINT",     TokenType::KwPrint},
-        {"RANDOMIZE", TokenType::KwRandomize},
-        {"READ",      TokenType::KwRead},
-        {"RESTORE",   TokenType::KwRestore},
-        {"RESUME",    TokenType::KwResume},
-        {"RETURN",    TokenType::KwReturn},
-        {"RUN",       TokenType::KwRun},
-        {"SEG",       TokenType::KwSeg},
-        {"STEP",      TokenType::KwStep},
-        {"STOP",      TokenType::KwStop},
-        {"SWAP",      TokenType::KwSwap},
-        {"SYSTEM",    TokenType::KwSystem},
-        {"THEN",      TokenType::KwThen},
-        {"TO",        TokenType::KwTo},
-        {"USING",     TokenType::KwUsing},
-        {"WEND",      TokenType::KwWend},
-        {"WHILE",     TokenType::KwWhile},
-        {"WRITE",     TokenType::KwWrite},
-    };
+        std::pair{"ALL",       TokenType::KwAll},
+        std::pair{"AND",       TokenType::KwAnd},
+        std::pair{"AS",        TokenType::KwAs},
+        std::pair{"BASE",      TokenType::KwBase},
+        std::pair{"BLOAD",     TokenType::KwBload},
+        std::pair{"BSAVE",     TokenType::KwBsave},
+        std::pair{"CALL",      TokenType::KwCall},
+        std::pair{"CHAIN",     TokenType::KwChain},
+        std::pair{"CHDIR",     TokenType::KwChdir},
+        std::pair{"CLEAR",     TokenType::KwClear},
+        std::pair{"CLOSE",     TokenType::KwClose},
+        std::pair{"COLOR",     TokenType::KwColor},
+        std::pair{"COMMON",    TokenType::KwCommon},
+        std::pair{"DATA",      TokenType::KwData},
+        std::pair{"DEF",       TokenType::KwDef},
+        std::pair{"DEFINT",    TokenType::KwDefInt},
+        std::pair{"DEFSNG",    TokenType::KwDefSng},
+        std::pair{"DEFDBL",    TokenType::KwDefDbl},
+        std::pair{"DEFSTR",    TokenType::KwDefStr},
+        std::pair{"DIM",       TokenType::KwDim},
+        std::pair{"ELSE",      TokenType::KwElse},
+        std::pair{"END",       TokenType::KwEnd},
+        std::pair{"ERASE",     TokenType::KwErase},
+        std::pair{"ERROR",     TokenType::KwError},
+        std::pair{"FOR",       TokenType::KwFor},
+        std::pair{"GOSUB",     TokenType::KwGosub},
+        std::pair{"GOTO",      TokenType::KwGoto},
+        std::pair{"FILES",     TokenType::KwFiles},
+        std::pair{"NAME",      TokenType::KwName},
+        std::pair{"KILL",      TokenType::KwKill},
+        std::pair{"MKDIR",     TokenType::KwMkdir},
+        std::pair{"RMDIR",     TokenType::KwRmdir},
+        std::pair{"WIDTH",     TokenType::KwWidth},
+        std::pair{"LOCATE",    TokenType::KwLocate},
+        std::pair{"CLS",       TokenType::KwCls},
+        std::pair{"PSET",      TokenType::KwPset},
+        std::pair{"PRESET",    TokenType::KwPreset},
+        std::pair{"PAINT",     TokenType::KwPaint},
+        std::pair{"DRAW",      TokenType::KwDraw},
+        std::pair{"VIEW",      TokenType::KwView},
+        std::pair{"WINDOW",    TokenType::KwWindow},
+        std::pair{"BEEP",      TokenType::KwBeep},
+        std::pair{"LPRINT",    TokenType::KwLprint},
+        std::pair{"SOUND",     TokenType::KwSound},
+        std::pair{"PLAY",      TokenType::KwPlay},
+        std::pair{"KEY",       TokenType::KwKey},
+        std::pair{"PEN",       TokenType::KwPen},
+        std::pair{"STRIG",     TokenType::KwStrig},
+        std::pair{"TIMER",     TokenType::KwTimer},
+        std::pair{"TRON",      TokenType::KwTron},
+        std::pair{"TROFF",     TokenType::KwTroff},
+        std::pair{"CONT",      TokenType::KwCont},
+        std::pair{"LOAD",      TokenType::KwLoad},
+        std::pair{"SAVE",      TokenType::KwSave},
+        std::pair{"NEW",       TokenType::KwNew},
+        std::pair{"DELETE",    TokenType::KwDelete},
+        std::pair{"LIST",      TokenType::KwList},
+        std::pair{"LLIST",     TokenType::KwLlist},
+        std::pair{"AUTO",      TokenType::KwAuto},
+        std::pair{"RENUM",     TokenType::KwRenum},
+        std::pair{"EDIT",      TokenType::KwEdit},
+        std::pair{"PCOPY",     TokenType::KwPcopy},
+        std::pair{"RESET",     TokenType::KwReset},
+        std::pair{"SHELL",     TokenType::KwShell},
+        std::pair{"ENVIRON",   TokenType::KwEnviron},
+        std::pair{"OUT",       TokenType::KwOut},
+        std::pair{"WAIT",      TokenType::KwWait},
+        std::pair{"IF",        TokenType::KwIf},
+        std::pair{"INPUT",     TokenType::KwInput},
+        std::pair{"LET",       TokenType::KwLet},
+        std::pair{"LINE",      TokenType::KwLine},
+        std::pair{"MERGE",     TokenType::KwMerge},
+        std::pair{"MOD",       TokenType::KwMod},
+        std::pair{"NEXT",      TokenType::KwNext},
+        std::pair{"NOT",       TokenType::KwNot},
+        std::pair{"ON",        TokenType::KwOn},
+        std::pair{"OPEN",      TokenType::KwOpen},
+        std::pair{"OPTION",    TokenType::KwOption},
+        std::pair{"OR",        TokenType::KwOr},
+        std::pair{"OUTPUT",    TokenType::KwOutput},
+        std::pair{"POKE",      TokenType::KwPoke},
+        std::pair{"PRINT",     TokenType::KwPrint},
+        std::pair{"RANDOMIZE", TokenType::KwRandomize},
+        std::pair{"READ",      TokenType::KwRead},
+        std::pair{"RESTORE",   TokenType::KwRestore},
+        std::pair{"RESUME",    TokenType::KwResume},
+        std::pair{"RETURN",    TokenType::KwReturn},
+        std::pair{"RUN",       TokenType::KwRun},
+        std::pair{"SEG",       TokenType::KwSeg},
+        std::pair{"STEP",      TokenType::KwStep},
+        std::pair{"STOP",      TokenType::KwStop},
+        std::pair{"SWAP",      TokenType::KwSwap},
+        std::pair{"SYSTEM",    TokenType::KwSystem},
+        std::pair{"THEN",      TokenType::KwThen},
+        std::pair{"TO",        TokenType::KwTo},
+        std::pair{"USING",     TokenType::KwUsing},
+        std::pair{"WEND",      TokenType::KwWend},
+        std::pair{"WHILE",     TokenType::KwWhile},
+        std::pair{"WRITE",     TokenType::KwWrite},
+    });
 
     /*
      * Function: Lexer::lookupKeyword
@@ -193,9 +198,11 @@ private:
      *  - TokenType: Matching keyword type, or Identifier if not matched.
      */
     static TokenType lookupKeyword(const std::string_view upper) {
-        for (const auto&[kw, tt] : kKeywords_)
-            if (kw == upper)
+        for (const auto& [kw, tt] : kKeywords_) {
+            if (kw == upper) {
                 return tt;
+            }
+        }
         return TokenType::Identifier;
     }
 
@@ -212,8 +219,9 @@ private:
     template <class Pred>
     std::string scanWhile(Pred&& pred) {
         std::string out;
-        while (!atEnd() && pred(peek()))
+        while (!atEnd() && std::forward<Pred>(pred)(peek())) {
             out.push_back(advance());
+        }
         return out;
     }
 
@@ -228,8 +236,9 @@ private:
      */
     template <class Pred>
     void skipWhile(Pred&& pred) {
-        while (!atEnd() && pred(peek()))
+        while (!atEnd() && std::forward<Pred>(pred)(peek())) {
             advance();
+        }
     }
 
     /*
@@ -243,27 +252,22 @@ private:
      * Outputs:
      *  - void (pushes token and logs it)
      */
-    template <TokenType TT, size_t N>
-    void emitFixed(std::vector<Token>& out, const char (&lex)[N], const int line, const int col) {
-        Token t{TT, std::string(lex, N - 1), line, col};
-        out.emplace_back(t);
-        logToken(t);
-    }
+    // Note: string_view overload preferred to avoid C-style arrays.
 
     // Overload: emitFixed from string_view
     template <TokenType TT>
     void emitFixed(std::vector<Token>& out, std::string_view lex, const int line, const int col) {
-        Token t{TT, std::string(lex), line, col};
-        out.emplace_back(t);
-        logToken(t);
+        Token token{TT, std::string(lex), line, col};
+        out.emplace_back(token);
+        logToken(token);
     }
 
     // Overload: emitFixed from Symbol
     template <TokenType TT>
     void emitFixed(std::vector<Token>& out, const Symbol& sym, const int line, const int col) {
-        Token t{TT, sym.to_string(), line, col};
-        out.emplace_back(t);
-        logToken(t);
+        Token token{TT, sym.to_string(), line, col};
+        out.emplace_back(token);
+        logToken(token);
     }
 
     /*
@@ -276,11 +280,13 @@ private:
      * Outputs:
      *  - void (pushes token and logs it)
      */
-    void emitToken(std::vector<Token>& out, const Token& t) {
-        out.emplace_back(t);
-        logToken(t);
+    void emitToken(std::vector<Token>& out, const Token& token) {
+        out.emplace_back(token);
+        logToken(token);
         // Metrics: count produced tokens when enabled
-        if (gMetrics) gMetrics->incToken();
+        if (gMetrics != nullptr) {
+            gMetrics->incToken();
+        }
     }
 
     /*
@@ -296,17 +302,17 @@ private:
      * Notes:
      *  - Assumes caller already consumed the first character with advance().
      */
-    template <TokenType Single, TokenType Pair, char Next, size_t N1, size_t N2>
+    template <TokenType Single, TokenType Pair, char Next>
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
     void emitPairOrSingle(std::vector<Token>& out,
-                          const char (&singleLex)[N1],
-                          const char (&pairLex)[N2],
+                          std::array<std::string_view, 2> lexemes,
                           const int line, const int col) {
 
         if (peek() == Next) {
             advance();
-            emitFixed<Pair>(out, pairLex, line, col);
+            emitFixed<Pair>(out, lexemes[1], line, col);
         } else {
-            emitFixed<Single>(out, singleLex, line, col);
+            emitFixed<Single>(out, lexemes[0], line, col);
         }
     }
 
@@ -474,7 +480,7 @@ private:
      * Outputs:
      *  - void (writes a line to the log file if open)
      */
-    void logToken(const Token& t);
+    void logToken(const Token& token);
     // Stream accessor for lex logging
     std::ostream& log() { return lexLogger_.stream(); }
 
@@ -487,13 +493,13 @@ private:
      * Outputs:
      *  - std::string: Escaped representation suitable for logs
      */
-    static std::string escapeForLog(const std::string& s);
+    static std::string escapeForLog(const std::string& text);
 
     // Lightweight helpers used by tokenize() to reduce branching
     bool tryEmitNewline(std::vector<Token>& out);
     bool tryEmitPrimary(std::vector<Token>& out);
     void emitAmpLiteral(std::vector<Token>& out, int line, int col);
-    bool tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, char c);
+    bool tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, char chr);
 
     // Friend accessor for tests: exposes a minimal surface to validate
     // internal cursor movement semantics without widening the public API.
@@ -504,15 +510,17 @@ private:
 // inspecting cursor state (line/col/bol) and peek/atEnd for verification.
 class LexerAccessorForTests {
 public:
-    static char advance(Lexer& lx) { return lx.advance(); }
-    static int line(const Lexer& lx) { return lx.line_; }
-    static int col(const Lexer& lx) { return lx.col_; }
-    static bool bol(const Lexer& lx) { return lx.bol_; }
-    static bool atEnd(const Lexer& lx) { return lx.atEnd(); }
-    static char peek(const Lexer& lx) { return lx.peek(); }
-    static void emitAmpLiteral(Lexer& lx, std::vector<Token>& out, int line, int col) { lx.emitAmpLiteral(out, line, col); }
-    static std::string escapeForLog(const std::string& s) { return Lexer::escapeForLog(s); }
-    static Token identifierOrKeyword(Lexer& lx) { return lx.identifierOrKeyword(); }
+    static char advance(Lexer& lexer) { return lexer.advance(); }
+    static int line(const Lexer& lexer) { return lexer.line_; }
+    static int col(const Lexer& lexer) { return lexer.col_; }
+    static bool bol(const Lexer& lexer) { return lexer.bol_; }
+    static bool atEnd(const Lexer& lexer) { return lexer.atEnd(); }
+    static char peek(const Lexer& lexer) { return lexer.peek(); }
+    static void emitAmpLiteral(Lexer& lexer, std::vector<Token>& out, int line, int col) { lexer.emitAmpLiteral(out, line, col); }
+    static std::string escapeForLog(const std::string& text) { return Lexer::escapeForLog(text); }
+    static Token identifierOrKeyword(Lexer& lexer) { return lexer.identifierOrKeyword(); }
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_LEXER_H

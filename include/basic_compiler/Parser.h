@@ -1,20 +1,22 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_PARSER_H
+#define BASIC_COMPILER_PARSER_H
 
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include <cstddef>
 #include <memory>
-#include <fstream>
-#include "logger/Logger.h"
-#include "basic_compiler/token/Token.h"
-#include "basic_compiler/ast/Program.h"
-#include "basic_compiler/ast/RTTI.h"
-#include "basic_compiler/ast/Expr.h"
-#include "basic_compiler/ast/Stmt.h"
-#include "basic_compiler/parser/ParseError.h"
-#include "basic_compiler/ast/Traits.h"
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "basic_compiler/ast/DefTypeStmt.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/Line.h"
+#include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/token/Token.h"
+#include "basic_compiler/token/TokenType.h"
+#include "logger/Logger.h"
 
 namespace gwbasic {
 
@@ -128,7 +130,7 @@ private:
         * Outputs:
         *  - bool: true if current token type equals 't'
         */
-    bool check(const TokenType t) const { return peek().type == t; }
+    bool check(const TokenType type) const { return peek().type == type; }
 
     /**
      * Function: Parser::match
@@ -139,8 +141,8 @@ private:
      * Outputs:
      *  - bool: true if matched and consumed; false otherwise
      */
-    bool match(const TokenType t) {
-        if (check(t)) {
+    bool match(const TokenType type) {
+        if (check(type)) {
             advance();
             return true;
         }
@@ -157,7 +159,7 @@ private:
      * Outputs:
      *  - void (advances on success)
      */
-    void consume(TokenType t, const std::string& what);
+    void consume(TokenType type, const std::string& what);
     
     /**
      * Function: Parser::parseLine
@@ -301,7 +303,7 @@ private:
     /** Parse DEF FNname(param) = expression */
     std::unique_ptr<Stmt> parseDefFn();
     /** Parse DEFSTR/DEFINT/DEFSNG/DEFDBL letter range list */
-    std::unique_ptr<Stmt> parseDefType(DefTypeStmt::Kind k);
+    std::unique_ptr<Stmt> parseDefType(DefTypeStmt::Kind kind);
     /** Parse DEF SEG [= expr] */
     std::unique_ptr<Stmt> parseDefSeg();
     /** Parse BLOAD "file"[,offset] */
@@ -451,7 +453,7 @@ private:
      * Outputs:
      *  - const char*: Human-readable kind name
      */
-    static const char* nodeName(const Stmt* s);
+    static const char* nodeName(const Stmt* stmt);
 
     /*
      * Property: sourcePath_
@@ -466,3 +468,5 @@ private:
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_PARSER_H

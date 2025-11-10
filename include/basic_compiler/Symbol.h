@@ -1,11 +1,13 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_SYMBOL_H
+#define BASIC_COMPILER_SYMBOL_H
 
 #include <array>
+#include <cstddef>
+#include <ostream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <stdexcept>
-#include <ostream>
 
 namespace gwbasic {
 
@@ -27,24 +29,26 @@ struct Symbol {
     constexpr Symbol() = default;
 
     // Construct from a single char.
-    explicit constexpr Symbol(char c) : buf{c, 0}, len(1) {}
+    explicit constexpr Symbol(char chr) : buf{chr, 0}, len(1) {}
 
     // Construct from a string literal of length 1 or 2 (N includes null terminator).
-    template <size_t N>
-    explicit constexpr Symbol(const char (&lit)[N]) {
+    template <std::size_t N>
+    explicit constexpr Symbol(const char (&lit)[N]) { // NOLINT(cppcoreguidelines-avoid-c-arrays)
         static_assert(N == 2 || N == 3, "Symbol literal must be 1 or 2 chars");
         if constexpr (N == 2) { buf[0] = lit[0]; len = 1; }
         else { buf[0] = lit[0]; buf[1] = lit[1]; len = 2; }
     }
 
     // Construct from runtime string_view of size 1 or 2.
-    explicit Symbol(std::string_view sv) {
-        if (sv.empty() || sv.size() > 2) {
+    explicit Symbol(std::string_view view) {
+        if (view.empty() || view.size() > 2) {
             throw std::invalid_argument("Symbol must be 1 or 2 bytes");
         }
-        buf[0] = sv[0];
-        if (sv.size() == 2) buf[1] = sv[1];
-        len = static_cast<unsigned char>(sv.size());
+        buf[0] = view[0];
+        if (view.size() == 2) {
+            buf[1] = view[1];
+        }
+        len = static_cast<unsigned char>(view.size());
     }
 
     // Number of bytes (1 or 2).
@@ -58,7 +62,9 @@ struct Symbol {
 
     // Return the single char (throws if size() != 1).
     [[nodiscard]] char to_char() const {
-        if (len != 1) throw std::logic_error("Symbol is not one byte");
+        if (len != 1) {
+            throw std::logic_error("Symbol is not one byte");
+        }
         return buf[0];
     }
 
@@ -66,38 +72,39 @@ struct Symbol {
     [[nodiscard]] constexpr char first() const noexcept { return buf[0]; }
 
     // Make a std::string copy.
-    [[nodiscard]] std::string to_string() const { return {buf.data(), buf.data() + len}; }
+    [[nodiscard]] std::string to_string() const { return std::string(buf.data(), static_cast<std::size_t>(len)); }
 
     // Explicit conversions
     explicit operator char() const { return to_char(); }
     explicit operator std::string_view() const noexcept { return to_string_view(); }
 
     // Equality with another Symbol.
-    friend constexpr bool operator==(const Symbol& a, const Symbol& b) noexcept {
-        return a.len == b.len && (a.len == 1 ? a.buf[0] == b.buf[0]
-                                             : (a.buf[0] == b.buf[0] && a.buf[1] == b.buf[1]));
+    friend constexpr bool operator==(const Symbol& lhs, const Symbol& rhs) noexcept {
+        return lhs.len == rhs.len && (lhs.len == 1 ? lhs.buf[0] == rhs.buf[0]
+                                                   : (lhs.buf[0] == rhs.buf[0] && lhs.buf[1] == rhs.buf[1]));
     }
 
     // Equality with char (either order).
-    friend constexpr bool operator==(const Symbol& a, char c) noexcept {
-        return a.len == 1 && a.buf[0] == c;
+    friend constexpr bool operator==(const Symbol& lhs, char chr) noexcept {
+        return lhs.len == 1 && lhs.buf[0] == chr;
     }
-    friend constexpr bool operator==(char c, const Symbol& a) noexcept {
-        return a == c;
+    friend constexpr bool operator==(char chr, const Symbol& rhs) noexcept {
+        return rhs == chr;
     }
 
     // Equality with string_view (size must be 1 or 2).
-    friend constexpr bool operator==(const Symbol& a, std::string_view sv) noexcept {
-        return a.to_string_view() == sv;
+    friend constexpr bool operator==(const Symbol& lhs, std::string_view view) noexcept {
+        return lhs.to_string_view() == view;
     }
-    friend constexpr bool operator==(std::string_view sv, const Symbol& a) noexcept {
-        return a == sv;
+    friend constexpr bool operator==(std::string_view view, const Symbol& rhs) noexcept {
+        return rhs == view;
     }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Symbol& s) {
-    return os << s.to_string_view();
+inline std::ostream& operator<<(std::ostream& ostr, const Symbol& sym) {
+    return ostr << sym.to_string_view();
 }
 
 } // namespace gwbasic
 
+#endif // BASIC_COMPILER_SYMBOL_H
