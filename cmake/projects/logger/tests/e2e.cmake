@@ -20,4 +20,4 @@ else()
   target_compile_definitions(logger_e2e_tests PRIVATE CLANG_PATH="clang")
 endif()
 
-gtest_discover_tests(logger_e2e_tests PROPERTIES LABELS e2e WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+gtest_discover_tests(logger_e2e_tests PROPERTIES LABELS e2e FAIL_REGULAR_EXPRESSION "warning:;WARNING:" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

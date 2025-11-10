@@ -14,4 +14,4 @@ target_include_directories(logger_integration_tests PRIVATE
 
 target_link_libraries(logger_integration_tests PRIVATE basic_compiler_lib GTest::gtest_main GTest::gtest)
 
-gtest_discover_tests(logger_integration_tests PROPERTIES LABELS integration)
+gtest_discover_tests(logger_integration_tests PROPERTIES LABELS integration FAIL_REGULAR_EXPRESSION "warning:;WARNING:")

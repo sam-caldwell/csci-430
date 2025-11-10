@@ -14,4 +14,4 @@ target_include_directories(logger_unit_tests PRIVATE
 
 target_link_libraries(logger_unit_tests PRIVATE logger_lib GTest::gtest_main GTest::gtest)
 
-gtest_discover_tests(logger_unit_tests PROPERTIES LABELS unit)
+gtest_discover_tests(logger_unit_tests PROPERTIES LABELS unit FAIL_REGULAR_EXPRESSION "warning:;WARNING:")

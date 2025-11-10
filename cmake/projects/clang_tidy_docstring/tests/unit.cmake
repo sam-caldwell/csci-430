@@ -13,5 +13,4 @@ target_include_directories(clang_tidy_docstring_unit_tests PRIVATE
 
 target_link_libraries(clang_tidy_docstring_unit_tests PRIVATE clang_tidy_docstring_lib GTest::gtest_main GTest::gtest)
 
-gtest_discover_tests(clang_tidy_docstring_unit_tests PROPERTIES LABELS unit)
-
+gtest_discover_tests(clang_tidy_docstring_unit_tests PROPERTIES LABELS unit FAIL_REGULAR_EXPRESSION "warning:;WARNING:")

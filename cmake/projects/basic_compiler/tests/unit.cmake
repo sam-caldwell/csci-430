@@ -30,4 +30,4 @@ target_compile_options(basic_compiler_unit_tests PRIVATE $<$<CXX_COMPILER_ID:Cla
 # Run unit tests under build/testrun to keep any incidental artifacts within build/
 set(GWB_TEST_WORKDIR "${CMAKE_BINARY_DIR}/testrun")
 file(MAKE_DIRECTORY "${GWB_TEST_WORKDIR}")
-gtest_discover_tests(basic_compiler_unit_tests PROPERTIES LABELS unit WORKING_DIRECTORY ${GWB_TEST_WORKDIR})
+gtest_discover_tests(basic_compiler_unit_tests PROPERTIES LABELS unit FAIL_REGULAR_EXPRESSION "warning:;WARNING:" WORKING_DIRECTORY ${GWB_TEST_WORKDIR})

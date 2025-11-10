@@ -25,4 +25,4 @@ add_dependencies(basic_compiler_integration_tests hello_world)
 # Run integration tests under build/testrun to keep artifacts within build/
 set(GWB_IT_WORKDIR "${CMAKE_BINARY_DIR}/testrun")
 file(MAKE_DIRECTORY "${GWB_IT_WORKDIR}")
-gtest_discover_tests(basic_compiler_integration_tests PROPERTIES LABELS integration WORKING_DIRECTORY ${GWB_IT_WORKDIR})
+gtest_discover_tests(basic_compiler_integration_tests PROPERTIES LABELS integration FAIL_REGULAR_EXPRESSION "warning:;WARNING:" WORKING_DIRECTORY ${GWB_IT_WORKDIR})
