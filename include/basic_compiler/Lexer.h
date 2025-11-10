@@ -1,8 +1,9 @@
-// (c) 2025 Sam Caldwell. All Rights Reserved.
 #ifndef BASIC_COMPILER_LEXER_H
 #define BASIC_COMPILER_LEXER_H
+// (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include <array>
+#include <cstddef>
 #include <istream>
 #include <ostream>
 #include <string>
@@ -10,9 +11,8 @@
 #include <utility>
 #include <vector>
 
+
 #include "basic_compiler/Symbol.h"
-#include "basic_compiler/Symbols.h"
-#include "basic_compiler/compiler/Metrics.h"
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/TokenType.h"
 #include "logger/Logger.h"
