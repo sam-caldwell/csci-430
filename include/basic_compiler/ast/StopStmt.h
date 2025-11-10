@@ -16,7 +16,7 @@ namespace gwbasic {
  *  - Emits a break message and terminates program flow.
  */
 struct StopStmt : ASTLeaf<NodeKind::StopStmt, Stmt> {
-    StopStmt() : ASTLeaf() {}
+    StopStmt() = default;
 };
 
 } // namespace gwbasic

@@ -23,8 +23,10 @@ template <NodeKind K, typename Base, typename Traits = DefaultNodeTraits>
 struct ASTLeaf : Base {
     using TraitsT = Traits;
     ASTLeaf() : Base(K) {}
-    explicit ASTLeaf(const SourcePos& p) : Base(K) { this->pos = p; }
-    static bool classof(const Node* N) { return N && N->kind == K; }
+    explicit ASTLeaf(const SourcePos& pos) : Base(K) { this->pos = pos; }
+    static bool classof(const Node* node_ptr) {
+        return node_ptr != nullptr && node_ptr->kind == K;
+    }
 };
 
 } // namespace gwbasic

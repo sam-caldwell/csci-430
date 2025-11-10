@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_NAMESTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -15,8 +16,8 @@ namespace gwbasic {
 struct NameStmt final : ASTLeaf<NodeKind::NameStmt, Stmt> {
     std::unique_ptr<Expr> oldName;
     std::unique_ptr<Expr> newName;
-    NameStmt(std::unique_ptr<Expr> o, std::unique_ptr<Expr> n)
-        : ASTLeaf(), oldName(std::move(o)), newName(std::move(n)) {}
+    NameStmt(std::unique_ptr<Expr> old_name_expr, std::unique_ptr<Expr> new_name_expr)
+        : oldName(std::move(old_name_expr)), newName(std::move(new_name_expr)) {}
 };
 
 } // namespace gwbasic

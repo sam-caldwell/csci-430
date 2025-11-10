@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_WRITESTMT_H
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/Expr.h"
@@ -27,8 +28,8 @@ namespace gwbasic {
 
         WriteStmt() = default;
 
-        explicit WriteStmt(const int ch, std::vector<std::unique_ptr<Expr> > xs)
-            : ASTLeaf(), channel(ch), items(std::move(xs)) {
+        explicit WriteStmt(const int channel_num, std::vector<std::unique_ptr<Expr> > exprs)
+            : channel(channel_num), items(std::move(exprs)) {
         }
     };
 

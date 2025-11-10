@@ -19,7 +19,7 @@ namespace gwbasic {
  */
 struct CloseStmt final : ASTLeaf<NodeKind::CloseStmt, Stmt> {
     int channel{1};
-    explicit CloseStmt(const int ch) : ASTLeaf(), channel(ch) {}
+    explicit CloseStmt(const int channel_num) : channel(channel_num) {}
 };
 
 } // namespace gwbasic

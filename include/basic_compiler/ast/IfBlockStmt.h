@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_IFBLOCKSTMT_H
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/Expr.h"
@@ -31,7 +32,8 @@ struct IfBlockStmt final : ASTLeaf<NodeKind::IfBlockStmt, Stmt> {
     // Inline IF blocks should not participate in END IF folding in the
     // parser's restructuring pass.
     bool inlineEnd{false};
-    explicit IfBlockStmt(std::unique_ptr<Expr> c) : ASTLeaf(), cond(std::move(c)) {}
+    explicit IfBlockStmt(std::unique_ptr<Expr> cond_expr)
+        : cond(std::move(cond_expr)) {}
 };
 
 } // namespace gwbasic

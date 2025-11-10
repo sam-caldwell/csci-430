@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_CHDIRSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -22,7 +23,8 @@ namespace gwbasic {
  */
 struct ChdirStmt final : ASTLeaf<NodeKind::ChdirStmt, Stmt> {
     std::unique_ptr<Expr> path;
-    explicit ChdirStmt(std::unique_ptr<Expr> p) : ASTLeaf(), path(std::move(p)) {}
+    explicit ChdirStmt(std::unique_ptr<Expr> path_expr)
+        : path(std::move(path_expr)) {}
 };
 
 } // namespace gwbasic

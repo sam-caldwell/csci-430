@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_DEFSEGSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -22,7 +23,8 @@ namespace gwbasic {
  */
 struct DefSegStmt : ASTLeaf<NodeKind::DefSegStmt, Stmt> {
     std::unique_ptr<Expr> value; // null means restore default
-    explicit DefSegStmt(std::unique_ptr<Expr> v) : ASTLeaf(), value(std::move(v)) {}
+    explicit DefSegStmt(std::unique_ptr<Expr> value_expr)
+        : value(std::move(value_expr)) {}
 };
 
 } // namespace gwbasic

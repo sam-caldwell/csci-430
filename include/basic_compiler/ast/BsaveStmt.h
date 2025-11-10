@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_BSAVESTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -26,8 +27,12 @@ struct BsaveStmt final : ASTLeaf<NodeKind::BsaveStmt, Stmt> {
     std::unique_ptr<Expr> filename; // string expr
     std::unique_ptr<Expr> offset;   // numeric
     std::unique_ptr<Expr> length;   // numeric
-    BsaveStmt(std::unique_ptr<Expr> fn, std::unique_ptr<Expr> off, std::unique_ptr<Expr> len)
-        : ASTLeaf(), filename(std::move(fn)), offset(std::move(off)), length(std::move(len)) {}
+    BsaveStmt(std::unique_ptr<Expr> filename_expr,
+              std::unique_ptr<Expr> offset_expr,
+              std::unique_ptr<Expr> length_expr)
+        : filename(std::move(filename_expr)),
+          offset(std::move(offset_expr)),
+          length(std::move(length_expr)) {}
 };
 
 } // namespace gwbasic

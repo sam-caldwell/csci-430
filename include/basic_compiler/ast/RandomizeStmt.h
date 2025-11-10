@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_RANDOMIZESTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -18,8 +19,9 @@ namespace gwbasic {
  */
 struct RandomizeStmt : ASTLeaf<NodeKind::RandomizeStmt, Stmt> {
     std::unique_ptr<Expr> seed; // optional
-    RandomizeStmt() : ASTLeaf() {}
-    explicit RandomizeStmt(std::unique_ptr<Expr> s) : ASTLeaf(), seed(std::move(s)) {}
+    RandomizeStmt() = default;
+    explicit RandomizeStmt(std::unique_ptr<Expr> seed_expr)
+        : seed(std::move(seed_expr)) {}
 };
 
 } // namespace gwbasic

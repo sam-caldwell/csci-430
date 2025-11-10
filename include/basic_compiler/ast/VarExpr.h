@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_VAREXPR_H
 
 #include <string>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -24,7 +25,7 @@ namespace gwbasic {
  */
 struct VarExpr : ASTLeaf<NodeKind::VarExpr, Expr> {
     std::string name;
-    explicit VarExpr(std::string n) : ASTLeaf(), name(std::move(n)) {}
+    explicit VarExpr(std::string name_str) : name(std::move(name_str)) {}
 };
 
 } // namespace gwbasic

@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_LINEINPUTSTMT_H
 
 #include <string>
+#include <utility>
 
 #include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
@@ -25,8 +26,8 @@ struct LineInputStmt : ASTLeaf<NodeKind::LineInputStmt, Stmt> {
     std::string name; // must be string variable
     LineInputStmt() = default;
 
-    LineInputStmt(const int ch, std::string n)
-        : ASTLeaf(), channel(ch), name(std::move(n)) {}
+    LineInputStmt(const int channel_num, std::string var_name)
+        : channel(channel_num), name(std::move(var_name)) {}
 };
 
 } // namespace gwbasic

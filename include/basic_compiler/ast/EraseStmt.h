@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_ERASESTMT_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/NodeKind.h"
@@ -21,7 +22,8 @@ namespace gwbasic {
 struct EraseStmt final : ASTLeaf<NodeKind::EraseStmt, Stmt> {
     std::vector<std::string> names;
     EraseStmt() = default;
-    explicit EraseStmt(std::vector<std::string> ns) : ASTLeaf(), names(std::move(ns)) {}
+    explicit EraseStmt(std::vector<std::string> names_vec)
+        : names(std::move(names_vec)) {}
 };
 
 } // namespace gwbasic

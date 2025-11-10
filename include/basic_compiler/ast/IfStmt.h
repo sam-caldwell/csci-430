@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_IFSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -26,7 +27,8 @@ namespace gwbasic {
 struct IfStmt : ASTLeaf<NodeKind::IfStmt, Stmt> {
     std::unique_ptr<Expr> cond;
     int targetLine;
-    IfStmt(std::unique_ptr<Expr> c, const int ln) : ASTLeaf(), cond(std::move(c)), targetLine(ln) {}
+    IfStmt(std::unique_ptr<Expr> cond_expr, const int line_number)
+        : cond(std::move(cond_expr)), targetLine(line_number) {}
 };
 
 } // namespace gwbasic

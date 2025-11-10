@@ -13,14 +13,18 @@ namespace gwbasic {
  */
 struct Node {
     virtual ~Node() = default;
+    Node(const Node&) = delete;
+    Node& operator=(const Node&) = delete;
+    Node(Node&&) = delete;
+    Node& operator=(Node&&) = delete;
     NodeKind kind;
     SourcePos pos{};
 protected:
-    explicit Node(const NodeKind k) : kind(k) {}
+    explicit Node(const NodeKind node_kind) : kind(node_kind) {}
 public:
     [[nodiscard]] NodeKind getKind() const { return kind; }
     /** Fluent setter to unify position assignment. */
-    Node& setPos(const SourcePos& p) { pos = p; return *this; }
+    Node& setPos(const SourcePos& position) { pos = position; return *this; }
 };
 
 } // namespace gwbasic

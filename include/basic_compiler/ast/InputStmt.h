@@ -4,6 +4,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/NodeKind.h"
@@ -32,7 +33,7 @@ struct InputStmt : ASTLeaf<NodeKind::InputStmt, Stmt> {
 
     InputStmt() = default;
     explicit InputStmt(std::vector<std::string> names)
-        : ASTLeaf(), variables(std::move(names)) {}
+        : variables(std::move(names)) {}
 };
 
 } // namespace gwbasic

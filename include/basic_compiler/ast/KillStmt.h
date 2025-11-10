@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_KILLSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -14,7 +15,8 @@ namespace gwbasic {
 /** KillStmt: KILL filespec$ */
 struct KillStmt final : ASTLeaf<NodeKind::KillStmt, Stmt> {
     std::unique_ptr<Expr> filespec;
-    explicit KillStmt(std::unique_ptr<Expr> f) : ASTLeaf(), filespec(std::move(f)) {}
+    explicit KillStmt(std::unique_ptr<Expr> filespec_expr)
+        : filespec(std::move(filespec_expr)) {}
 };
 
 } // namespace gwbasic

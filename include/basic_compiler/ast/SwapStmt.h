@@ -2,9 +2,7 @@
 #ifndef BASIC_COMPILER_AST_SWAPSTMT_H
 #define BASIC_COMPILER_AST_SWAPSTMT_H
 
-#include <memory>
-#include <string>
-#include <vector>
+#include <utility>
 
 #include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
@@ -24,7 +22,8 @@ struct SwapStmt final : ASTLeaf<NodeKind::SwapStmt, Stmt> {
     ReadTarget left;
     ReadTarget right;
     SwapStmt() = default;
-    SwapStmt(ReadTarget l, ReadTarget r) : ASTLeaf(), left(std::move(l)), right(std::move(r)) {}
+    SwapStmt(ReadTarget left_target, ReadTarget right_target)
+        : left(std::move(left_target)), right(std::move(right_target)) {}
 };
 
 } // namespace gwbasic

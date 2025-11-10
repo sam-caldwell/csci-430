@@ -23,13 +23,19 @@ namespace gwbasic {
 struct Expr : Node {
     // ReSharper disable once CppEnforceOverridingDestructorStyle
     ~Expr() override = default;
+    Expr(const Expr&) = delete;
+    Expr& operator=(const Expr&) = delete;
+    Expr(Expr&&) = delete;
+    Expr& operator=(Expr&&) = delete;
 protected:
-    explicit Expr(const NodeKind k) : Node(k) {}
+    explicit Expr(const NodeKind node_kind) : Node(node_kind) {}
     Expr() : Node(NodeKind::AbstractExpr) {}
 public:
-    static bool classof(const Node* N) {
-        if (!N) return false;
-        switch (N->kind) {
+    static bool classof(const Node* node_ptr) {
+        if (node_ptr == nullptr) {
+            return false;
+        }
+        switch (node_ptr->kind) {
             case NodeKind::AbstractExpr:
             case NodeKind::NumberExpr:
             case NodeKind::StringExpr:

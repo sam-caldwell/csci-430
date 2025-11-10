@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_CALLABSSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -22,7 +23,8 @@ namespace gwbasic {
  */
 struct CallAbsStmt final : ASTLeaf<NodeKind::CallAbsStmt, Stmt> {
     std::unique_ptr<Expr> address;
-    explicit CallAbsStmt(std::unique_ptr<Expr> a) : ASTLeaf(), address(std::move(a)) {}
+    explicit CallAbsStmt(std::unique_ptr<Expr> address_expr)
+        : address(std::move(address_expr)) {}
 };
 
 } // namespace gwbasic

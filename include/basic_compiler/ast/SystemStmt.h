@@ -14,7 +14,7 @@ namespace gwbasic {
  *  - SYSTEM: Terminate program and return to operating system.
  */
 struct SystemStmt : ASTLeaf<NodeKind::SystemStmt, Stmt> {
-    SystemStmt() : ASTLeaf() {}
+    SystemStmt() = default;
 };
 
 } // namespace gwbasic

@@ -16,7 +16,7 @@ namespace gwbasic {
 struct OptionBaseStmt : ASTLeaf<NodeKind::OptionBaseStmt, Stmt> {
     int base{0}; // 0 or 1
     OptionBaseStmt() = default;
-    explicit OptionBaseStmt(int b) : ASTLeaf(), base(b) {}
+    explicit OptionBaseStmt(int base_value) : base(base_value) {}
 };
 
 } // namespace gwbasic

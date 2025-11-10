@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_MKDIRSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -14,7 +15,8 @@ namespace gwbasic {
 /** MkdirStmt: MKDIR path$ */
 struct MkdirStmt final : ASTLeaf<NodeKind::MkdirStmt, Stmt> {
     std::unique_ptr<Expr> path;
-    explicit MkdirStmt(std::unique_ptr<Expr> p) : ASTLeaf(), path(std::move(p)) {}
+    explicit MkdirStmt(std::unique_ptr<Expr> path_expr)
+        : path(std::move(path_expr)) {}
 };
 
 } // namespace gwbasic

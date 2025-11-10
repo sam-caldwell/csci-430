@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_NEXTSTMT_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/NodeKind.h"
@@ -28,7 +29,8 @@ namespace gwbasic {
 struct NextStmt : ASTLeaf<NodeKind::NextStmt, Stmt> {
     std::vector<std::string> vars; // may be empty to indicate bare NEXT
     NextStmt() = default;
-    explicit NextStmt(std::vector<std::string> v) : ASTLeaf(), vars(std::move(v)) {}
+    explicit NextStmt(std::vector<std::string> var_names)
+        : vars(std::move(var_names)) {}
 };
 
 } // namespace gwbasic

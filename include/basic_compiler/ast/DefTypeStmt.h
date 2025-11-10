@@ -24,8 +24,8 @@ struct DefTypeStmt : ASTLeaf<NodeKind::DefTypeStmt, Stmt> {
     enum class Kind : std::uint8_t { Int, Sng, Dbl, Str };
     Kind kind;
     std::vector<std::pair<char,char>> ranges; // inclusive, uppercase
-    DefTypeStmt(const Kind k, std::vector<std::pair<char,char>> r)
-        : ASTLeaf(), kind(k), ranges(std::move(r)) {}
+    DefTypeStmt(const Kind type_kind, std::vector<std::pair<char,char>> ranges_vec)
+        : kind(type_kind), ranges(std::move(ranges_vec)) {}
 };
 
 } // namespace gwbasic

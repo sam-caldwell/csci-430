@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_UNARYEXPR_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -25,7 +26,8 @@ namespace gwbasic {
 struct UnaryExpr : ASTLeaf<NodeKind::UnaryExpr, Expr> {
     char op; // '+' or '-'
     std::unique_ptr<Expr> inner;
-    UnaryExpr(const char o, std::unique_ptr<Expr> e) : ASTLeaf(), op(o), inner(std::move(e)) {}
+    UnaryExpr(const char op_char, std::unique_ptr<Expr> expr)
+        : op(op_char), inner(std::move(expr)) {}
 };
 
 } // namespace gwbasic

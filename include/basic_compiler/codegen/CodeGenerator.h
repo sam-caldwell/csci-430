@@ -1,21 +1,20 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_CODEGEN_CODEGENERATOR_H
+#define BASIC_COMPILER_CODEGEN_CODEGENERATOR_H
 
+#include <cstdint>
+#include <functional>
 #include <map>
-#include <ranges>
+#include <ostream>
 #include <set>
-#include <string>
-#include <vector>
-#include <fstream>
 #include <sstream>
-#include <format>
+#include <string>
+#include <string_view>
 #include <utility>
-#include <cwchar>
-#include <wchar.h>
+#include <vector>
 #include "logger/Logger.h"
-#include "basic_compiler/Symbols.h"
 #include "basic_compiler/ast/Program.h"
-#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Line.h"
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/NumberExpr.h"
@@ -31,23 +30,16 @@
 #include "basic_compiler/ast/MidAssignStmt.h"
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
-#include "basic_compiler/ast/OpenStmt.h"
 #include "basic_compiler/ast/InputStmt.h"
 #include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/IfBlockStmt.h"
 #include "basic_compiler/ast/GotoStmt.h"
 #include "basic_compiler/ast/GosubStmt.h"
-#include "basic_compiler/ast/EndStmt.h"
-#include "basic_compiler/ast/ReturnStmt.h"
 #include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
-#include "basic_compiler/ast/RunStmt.h"
 #include "basic_compiler/ast/CommonStmt.h"
 #include "basic_compiler/ast/DataStmt.h"
 #include "basic_compiler/ast/ReadStmt.h"
-#include "basic_compiler/ast/ChainStmt.h"
-#include "basic_compiler/ast/MergeStmt.h"
-#include "basic_compiler/codegen/CodeGenError.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include "basic_compiler/ast/DefFnStmt.h"
 
@@ -99,7 +91,7 @@ public:
      * Outputs:
      *  - void (sets internal semantic caches)
      */
-    void setSemantics(const SemanticAnalyzer::Result& r);
+    void setSemantics(const SemanticAnalyzer::Result& results);
 
 private:
     // Counters and symbol maps
@@ -260,7 +252,7 @@ private:
      * Outputs:
      *  - std::string: Global symbol (e.g., "@.str.5")
      */
-    static std::string globalStringName(int id);
+    static std::string globalStringName(int literal_id);
     /**
      * Function: CodeGenerator::lineLabelName
      * Purpose:
@@ -270,14 +262,14 @@ private:
      * Outputs:
      *  - std::string: Label (e.g., "line100")
      */
-    static std::string lineLabelName(int ln);
+    static std::string lineLabelName(int line_num);
     /** Label for re-executing a specific statement index within a line. 1-based index. */
-    static std::string resumeLabelName(int ln, int stmtIndex);
+    static std::string resumeLabelName(int line_num, int stmt_index);
     /** Label for resuming at the statement after a given index within a line. 1-based index. */
-    static std::string resumeNextLabelName(int ln, int stmtIndex);
+    static std::string resumeNextLabelName(int line_num, int stmt_index);
 
     // Byte escaping helper for IR string literals (one-function-per-file)
-    static void appendEscapedByte(std::string& out, unsigned char c);
+    static void appendEscapedByte(std::string& out, unsigned char ch_byte);
 
     // Declaration collection
     /** Collect declarations, variables, strings, and line ordering. */
@@ -318,7 +310,7 @@ private:
     static int cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &idx);
     void cdMaybeAddTrapTarget(const Stmt* stmt, std::set<int>& trapTargets);
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
-    void collectVarsForBeforeLineFromExpr(const Expr* e, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
+    void collectVarsForBeforeLineFromExpr(const Expr* expr_ptr, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     void collectVarsForBeforeLineFromStmt(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
 
     // Per-kind handlers to reduce complexity; implemented one-per-file
@@ -338,16 +330,16 @@ private:
     bool handleOnGotoBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     bool handleOnGosubBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     /** Collect variables/strings referenced by an expression. */
-    void collectExprVars(const Expr* e);
+    void collectExprVars(const Expr* expr_ptr);
     /** Collect variables/strings/COMMON from a statement (recursive). */
     void collectStmtVars(const Stmt* stmt);
     // collectStmtVars() helpers
-    void csvHandlePrint(const PrintStmt* p);
-    void csvHandleAssign(const AssignStmt* a);
-    void csvHandleMidAssign(const MidAssignStmt* m);
-    void csvHandleIf(const IfStmt* i);
-    void csvHandleFor(const ForStmt* f);
-    void csvHandleInput(const InputStmt* in);
+    void csvHandlePrint(const PrintStmt* print_stmt);
+    void csvHandleAssign(const AssignStmt* assign_stmt);
+    void csvHandleMidAssign(const MidAssignStmt* mid_stmt);
+    void csvHandleIf(const IfStmt* if_stmt);
+    void csvHandleFor(const ForStmt* for_stmt);
+    void csvHandleInput(const InputStmt* input_stmt);
     void csvHandleRandomize(const RandomizeStmt* randomizeStmt);
     void csvHandleCommon(const CommonStmt* commonStmt);
     void csvHandleData(const DataStmt* dataStmt);
@@ -356,7 +348,7 @@ private:
     void csvHandleOnGosub(const OnGosubStmt* onGosubStmt);
     // Lightweight scan for RND usage independent of semantics
     /** Scan expression for RND() usage to enable helper emission. */
-    void scanExprForRnd(const Expr* e);
+    void scanExprForRnd(const Expr* expr_ptr);
     /** Scan statement (and children) for RND() usage. */
     void scanStmtForRnd(const Stmt* stmt);
     /** Scan statement (and children) for STOP usage. */
@@ -375,11 +367,11 @@ private:
     /** Emit IR for a single BASIC line block and branch/fallthrough. */
     void emitLineBlock(std::ostringstream& out, const Line& line, int lineIndex, int lastIndex);
     /** Emit a FOR...NEXT loop body/control. */
-    void emitFor(std::ostringstream& out, const ForStmt* fs, const std::string& currLineLabel, int& localCounter);
+    void emitFor(std::ostringstream& out, const ForStmt* for_stmt, const std::string& currLineLabel, int& localCounter);
     /** Emit an IF...THEN[/ELSE] structured block. */
-    void emitIfBlock(std::ostringstream& out, const IfBlockStmt* ib, const std::string& currLineLabel, int& localCounter);
+    void emitIfBlock(std::ostringstream& out, const IfBlockStmt* if_block_stmt, const std::string& currLineLabel, int& localCounter);
     /** Emit a WHILE...WEND loop block. */
-    void emitWhile(std::ostringstream& out, const WhileStmt* ws, const std::string& currLineLabel, int& localCounter);
+    void emitWhile(std::ostringstream& out, const WhileStmt* while_stmt, const std::string& currLineLabel, int& localCounter);
     /** Inline a GOSUB target and branch back to a continuation label. */
     void emitSubroutineInline(std::ostringstream& out, int targetLine, const std::string& entryLabel, const std::string& returnLabel);
     /*
@@ -395,18 +387,18 @@ private:
 
     // Expression lowering
     /** Lower an expression to SSA value; returns its name. */
-    std::string emitExpr(std::ostringstream& out, const Expr* e, [[maybe_unused]] const std::string& currBlockSuffix);
+    std::string emitExpr(std::ostringstream& out, const Expr* expr_ptr, [[maybe_unused]] const std::string& currBlockSuffix);
     // Refactored helpers (one-function-per-file) used by emitExpr dispatcher
     std::string emitNumberExpr(const std::ostringstream& out, const struct NumberExpr* num);
-    std::string emitVarExpr(std::ostringstream& out, const struct VarExpr* v);
-    std::string emitUnaryExpr(std::ostringstream& out, const struct UnaryExpr* u);
-    std::string emitBinaryExpr(std::ostringstream& out, const struct BinaryExpr* b);
+    std::string emitVarExpr(std::ostringstream& out, const struct VarExpr* var_expr);
+    std::string emitUnaryExpr(std::ostringstream& out, const struct UnaryExpr* unary_expr);
+    std::string emitBinaryExpr(std::ostringstream& out, const struct BinaryExpr* binary_expr);
     std::string emitCallExpr(std::ostringstream& out, const struct CallExpr* call);
     std::string emitStringExpr(std::ostringstream& out, const struct StringExpr* stringExpr);
     // Helper: determine whether an expression is string-typed (for codegen routing)
-    bool isStringExpr(const Expr* e) const;
+    bool isStringExpr(const Expr* expr_ptr) const;
     /** Lower a comparison expression to an i1 predicate value. */
-    std::string emitComparison(std::ostringstream& out, const BinaryExpr* c);
+    std::string emitComparison(std::ostringstream& out, const BinaryExpr* comp_expr);
 
     // Utilities
     /** Escape raw text to a safe LLVM IR string literal form. */
@@ -522,11 +514,11 @@ private:
 
     // FOR body per-kind helpers (one function per file)
     void emitForHandleAssign(std::ostringstream& out, const AssignStmt* asg, const std::string& currLineLabel);
-    void emitForHandlePrint(std::ostringstream& out, const PrintStmt* pr, const std::string& currLineLabel, int& localCounter);
+    void emitForHandlePrint(std::ostringstream& out, const PrintStmt* print_stmt, const std::string& currLineLabel, int& localCounter);
     void emitForHandleMidAssign(std::ostringstream& out, const MidAssignStmt* mid, const std::string& currLineLabel, int& localCounter);
-    void emitForHandleOnGoto(std::ostringstream& out, const OnGotoStmt* og, const std::string& currLineLabel, int& localCounter);
-    void emitForHandleOnGosub(std::ostringstream& out, const OnGosubStmt* ogs, const std::string& currLineLabel, int& localCounter);
-    bool emitForHandleGoto(std::ostringstream& out, const GotoStmt* gt);
+    void emitForHandleOnGoto(std::ostringstream& out, const OnGotoStmt* on_goto, const std::string& currLineLabel, int& localCounter);
+    void emitForHandleOnGosub(std::ostringstream& out, const OnGosubStmt* on_gosub, const std::string& currLineLabel, int& localCounter);
+    bool emitForHandleGoto(std::ostringstream& out, const GotoStmt* goto_stmt);
     void emitForHandleGosub(std::ostringstream& out, const GosubStmt* gosubStmt, const std::string& currLineLabel, int& localCounter);
     void emitForHandleArrayAssign(std::ostringstream& out, const ArrayAssignStmt* aaset, const std::string& currLineLabel, int& localCounter);
     void emitForHandleStop(std::ostringstream& out);
@@ -535,19 +527,19 @@ private:
     // -- Subroutine (GOSUB) per-kind helpers --
     void emitSubHandleAssign(std::ostringstream& out, const AssignStmt* asg, std::string_view entryLabel);
     void emitSubHandleMidAssign(std::ostringstream& out, const MidAssignStmt* mid, std::string_view entryLabel, int& localCounter);
-    void emitSubHandlePrint(std::ostringstream& out, const struct PrintStmt* pr, std::string_view entryLabel, int& localCounter);
+    void emitSubHandlePrint(std::ostringstream& out, const struct PrintStmt* print_stmt, std::string_view entryLabel, int& localCounter);
     void emitSubHandleInput(std::ostringstream& out, const struct InputStmt* ins, std::string_view entryLabel);
     void emitSubHandleIf(std::ostringstream& out, const struct IfStmt* ifStmt, std::string_view entryLabel, int& localCounter);
     void emitSubHandleGosub(std::ostringstream& out, const struct GosubStmt* gosubStmt, std::string_view entryLabel, int& localCounter);
-    void emitSubHandleFor(std::ostringstream& out, const struct ForStmt* fs, std::string_view entryLabel, int& localCounter);
+    void emitSubHandleFor(std::ostringstream& out, const struct ForStmt* for_stmt, std::string_view entryLabel, int& localCounter);
 
     // PRINT sub-helpers (FOR body)
-    void emitForPrintPadZone(std::ostringstream& out, const PrintStmt* pr);
-    void emitForPrintStringItem(std::ostringstream& out, const PrintStmt* pr, const StringExpr* se, bool addNL);
-    void emitForPrintConstNumberItem(std::ostringstream& out, const PrintStmt* pr, double cv, bool addNL, bool nextStartsWithSpace);
+    void emitForPrintPadZone(std::ostringstream& out, const PrintStmt* print_stmt);
+    void emitForPrintStringItem(std::ostringstream& out, const PrintStmt* print_stmt, const StringExpr* string_expr, bool addNL);
+    void emitForPrintConstNumberItem(std::ostringstream& out, const PrintStmt* print_stmt, double const_value, bool addNL, bool nextStartsWithSpace);
     void emitForPrintDynamicOverride(std::ostringstream& out, const PrintStmt* printStmt, const std::string& val,
                                      std::string_view currLineLabel, int& localCounter);
-    void emitForPrintDynamicAuto(std::ostringstream& out, const PrintStmt* pr, const std::string& val,
+    void emitForPrintDynamicAuto(std::ostringstream& out, const PrintStmt* print_stmt, const std::string& val,
                                  bool addNL, bool nextStartsWithSpace,
                                  std::string_view currLineLabel, int& localCounter);
 
@@ -561,3 +553,5 @@ private:
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_CODEGEN_CODEGENERATOR_H

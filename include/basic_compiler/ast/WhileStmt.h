@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_WHILESTMT_H
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/Expr.h"
@@ -23,7 +24,8 @@ struct WhileStmt : ASTLeaf<NodeKind::WhileStmt, Stmt> {
     std::unique_ptr<Expr> cond;
     std::vector<std::unique_ptr<Stmt>> body;
     bool inlineWend{false};
-    explicit WhileStmt(std::unique_ptr<Expr> c) : ASTLeaf(), cond(std::move(c)) {}
+    explicit WhileStmt(std::unique_ptr<Expr> cond_expr)
+        : cond(std::move(cond_expr)) {}
 };
 
 } // namespace gwbasic

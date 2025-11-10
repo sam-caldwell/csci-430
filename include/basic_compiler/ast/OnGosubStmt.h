@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_ONGOSUBSTMT_H
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/Expr.h"
@@ -26,8 +27,8 @@ namespace gwbasic {
 struct OnGosubStmt : ASTLeaf<NodeKind::OnGosubStmt, Stmt> {
     std::unique_ptr<Expr> index;
     std::vector<int> targets;
-    OnGosubStmt(std::unique_ptr<Expr> idx, std::vector<int> tgts)
-        : ASTLeaf(), index(std::move(idx)), targets(std::move(tgts)) {}
+    OnGosubStmt(std::unique_ptr<Expr> index_expr, std::vector<int> targets_vec)
+        : index(std::move(index_expr)), targets(std::move(targets_vec)) {}
 };
 
 } // namespace gwbasic

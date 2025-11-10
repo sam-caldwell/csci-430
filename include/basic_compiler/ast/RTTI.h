@@ -9,18 +9,18 @@ namespace gwbasic {
 // LLVM-style isa/dyn_cast support using NodeKind and classof() on types.
 
 template <typename T>
-bool isa(const Node* N) {
-    return T::classof(N);
+bool isa(const Node* node_ptr) {
+    return T::classof(node_ptr);
 }
 
 template <typename T>
-T* dyn_cast(Node* N) {
-    return T::classof(N) ? static_cast<T*>(N) : nullptr;
+T* dyn_cast(Node* node_ptr) {
+    return T::classof(node_ptr) ? static_cast<T*>(node_ptr) : nullptr;
 }
 
 template <typename T>
-const T* dyn_cast(const Node* N) {
-    return T::classof(N) ? static_cast<const T*>(N) : nullptr;
+const T* dyn_cast(const Node* node_ptr) {
+    return T::classof(node_ptr) ? static_cast<const T*>(node_ptr) : nullptr;
 }
 
 } // namespace gwbasic

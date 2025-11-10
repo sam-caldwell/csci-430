@@ -22,13 +22,19 @@ namespace gwbasic {
  */
 struct Stmt : Node {
     ~Stmt() override = default;
+    Stmt(const Stmt&) = delete;
+    Stmt& operator=(const Stmt&) = delete;
+    Stmt(Stmt&&) = delete;
+    Stmt& operator=(Stmt&&) = delete;
 protected:
-    explicit Stmt(NodeKind k) : Node(k) {}
+    explicit Stmt(NodeKind node_kind) : Node(node_kind) {}
     Stmt() : Node(NodeKind::AbstractStmt) {}
 public:
-    static bool classof(const Node* N) {
-        if (!N) return false;
-        switch (N->kind) {
+    static bool classof(const Node* node_ptr) {
+        if (node_ptr == nullptr) {
+            return false;
+        }
+        switch (node_ptr->kind) {
             case NodeKind::AbstractStmt:
             case NodeKind::AssignStmt:
             case NodeKind::PrintStmt:

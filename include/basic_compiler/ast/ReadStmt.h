@@ -2,6 +2,7 @@
 #ifndef BASIC_COMPILER_AST_READSTMT_H
 #define BASIC_COMPILER_AST_READSTMT_H
 
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/NodeKind.h"
@@ -19,7 +20,8 @@ namespace gwbasic {
 struct ReadStmt : ASTLeaf<NodeKind::ReadStmt, Stmt> {
     std::vector<ReadTarget> targets;
     ReadStmt() = default;
-    explicit ReadStmt(std::vector<ReadTarget> t) : ASTLeaf(), targets(std::move(t)) {}
+    explicit ReadStmt(std::vector<ReadTarget> targets_vec)
+        : targets(std::move(targets_vec)) {}
 };
 
 } // namespace gwbasic

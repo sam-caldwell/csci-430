@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <optional>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -16,8 +17,8 @@ namespace gwbasic {
 struct DefUsrStmt final : ASTLeaf<NodeKind::DefUsrStmt, Stmt> {
     std::optional<int> index; // optional USR index (e.g., USR0...USR9); not used semantically here
     std::unique_ptr<Expr> address;
-    DefUsrStmt(std::optional<int> i, std::unique_ptr<Expr> a)
-        : ASTLeaf(), index(i), address(std::move(a)) {}
+    DefUsrStmt(std::optional<int> index_opt, std::unique_ptr<Expr> address_expr)
+        : index(index_opt), address(std::move(address_expr)) {}
 };
 
 } // namespace gwbasic

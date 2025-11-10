@@ -21,7 +21,7 @@ namespace gwbasic {
  */
 struct GosubStmt : ASTLeaf<NodeKind::GosubStmt, Stmt> {
     int targetLine;
-    explicit GosubStmt(const int ln) : ASTLeaf(), targetLine(ln) {}
+    explicit GosubStmt(const int line_number) : targetLine(line_number) {}
 };
 
 } // namespace gwbasic

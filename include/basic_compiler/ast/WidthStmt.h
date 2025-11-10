@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_WIDTHSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/Node.h"
@@ -25,8 +26,10 @@ struct WidthStmt final : ASTLeaf<NodeKind::WidthStmt, Stmt> {
     std::unique_ptr<Expr> columns;  // numeric expression indicating width
     WidthStmt() = default;
     WidthStmt(std::unique_ptr<Expr> dev, std::unique_ptr<Expr> cols)
-        : ASTLeaf<NodeKind::WidthStmt, Stmt>(), device(std::move(dev)), columns(std::move(cols)) {}
-    static bool classof(const Node* N) { return N && N->kind == NodeKind::WidthStmt; }
+        : device(std::move(dev)), columns(std::move(cols)) {}
+    static bool classof(const Node* node_ptr) {
+        return node_ptr != nullptr && node_ptr->kind == NodeKind::WidthStmt;
+    }
 };
 
 } // namespace gwbasic

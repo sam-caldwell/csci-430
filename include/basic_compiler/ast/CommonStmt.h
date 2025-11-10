@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_COMMONSTMT_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/NodeKind.h"
@@ -25,7 +26,8 @@ namespace gwbasic {
 struct CommonStmt : ASTLeaf<NodeKind::CommonStmt, Stmt> {
     std::vector<std::string> names;
     CommonStmt() = default;
-    explicit CommonStmt(std::vector<std::string> ns) : ASTLeaf(), names(std::move(ns)) {}
+    explicit CommonStmt(std::vector<std::string> names_vec)
+        : names(std::move(names_vec)) {}
 };
 
 } // namespace gwbasic

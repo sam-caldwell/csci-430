@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -27,8 +28,12 @@ struct DefFnStmt : ASTLeaf<NodeKind::DefFnStmt, Stmt> {
     std::string paramName;  // e.g., "X" or "S$"
     std::unique_ptr<Expr> body; // expression defining the function
 
-    DefFnStmt(std::string fn, std::string pn, std::unique_ptr<Expr> b)
-        : ASTLeaf(), fnName(std::move(fn)), paramName(std::move(pn)), body(std::move(b)) {}
+    DefFnStmt(std::string function_name,
+              std::string parameter_name,
+              std::unique_ptr<Expr> body_expr)
+        : fnName(std::move(function_name)),
+          paramName(std::move(parameter_name)),
+          body(std::move(body_expr)) {}
 };
 
 } // namespace gwbasic

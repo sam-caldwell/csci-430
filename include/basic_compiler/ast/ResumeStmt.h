@@ -24,9 +24,9 @@ struct ResumeStmt : ASTLeaf<NodeKind::ResumeStmt, Stmt> {
     enum class Kind : std::uint8_t { Reexecute, Next, Line };
     Kind kind{Kind::Reexecute};
     int line{0}; // used only when kind==Line
-    ResumeStmt() : ASTLeaf() {}
-    explicit ResumeStmt(Kind k) : ASTLeaf(), kind(k) {}
-    ResumeStmt(Kind k, int ln) : ASTLeaf(), kind(k), line(ln) {}
+    ResumeStmt() = default;
+    explicit ResumeStmt(Kind resume_kind) : kind(resume_kind) {}
+    ResumeStmt(Kind resume_kind, int line_num) : kind(resume_kind), line(line_num) {}
 };
 
 } // namespace gwbasic

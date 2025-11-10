@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_BLOADSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -24,8 +25,8 @@ namespace gwbasic {
 struct BloadStmt final : ASTLeaf<NodeKind::BloadStmt, Stmt> {
     std::unique_ptr<Expr> filename; // string expr
     std::unique_ptr<Expr> offset;   // optional numeric
-    BloadStmt(std::unique_ptr<Expr> fn, std::unique_ptr<Expr> off)
-        : ASTLeaf(), filename(std::move(fn)), offset(std::move(off)) {}
+    BloadStmt(std::unique_ptr<Expr> filename_expr, std::unique_ptr<Expr> offset_expr)
+        : filename(std::move(filename_expr)), offset(std::move(offset_expr)) {}
 };
 
 } // namespace gwbasic

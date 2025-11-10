@@ -16,7 +16,7 @@ namespace gwbasic {
 struct OptionPrintZonesStmt : ASTLeaf<NodeKind::OptionPrintZonesStmt, Stmt> {
     bool enabled{false};
     OptionPrintZonesStmt() = default;
-    explicit OptionPrintZonesStmt(bool e) : ASTLeaf(), enabled(e) {}
+    explicit OptionPrintZonesStmt(bool enabled_flag) : enabled(enabled_flag) {}
 };
 
 } // namespace gwbasic

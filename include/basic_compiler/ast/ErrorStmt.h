@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_ERRORSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -20,7 +21,8 @@ namespace gwbasic {
  */
 struct ErrorStmt : ASTLeaf<NodeKind::ErrorStmt, Stmt> {
     std::unique_ptr<Expr> code;
-    explicit ErrorStmt(std::unique_ptr<Expr> c) : ASTLeaf(), code(std::move(c)) {}
+    explicit ErrorStmt(std::unique_ptr<Expr> code_expr)
+        : code(std::move(code_expr)) {}
 };
 
 } // namespace gwbasic

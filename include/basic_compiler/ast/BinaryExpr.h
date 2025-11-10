@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_BINARYEXPR_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/BinaryOp.h"
 #include "basic_compiler/ast/Expr.h"
@@ -28,8 +29,10 @@ struct BinaryExpr : ASTLeaf<NodeKind::BinaryExpr, Expr> {
     BinaryOp op;
     std::unique_ptr<Expr> lhs;
     std::unique_ptr<Expr> rhs;
-    BinaryExpr(const BinaryOp o, std::unique_ptr<Expr> a, std::unique_ptr<Expr> b)
-        : ASTLeaf(), op(o), lhs(std::move(a)), rhs(std::move(b)) {}
+    BinaryExpr(const BinaryOp op_kind,
+               std::unique_ptr<Expr> left_expr,
+               std::unique_ptr<Expr> right_expr)
+        : op(op_kind), lhs(std::move(left_expr)), rhs(std::move(right_expr)) {}
 };
 
 } // namespace gwbasic

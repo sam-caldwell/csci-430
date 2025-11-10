@@ -3,6 +3,8 @@
 #define BASIC_COMPILER_AST_RUNSTMT_H
 
 #include <optional>
+#include <string>
+#include <utility>
 
 #include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
@@ -25,8 +27,8 @@ struct RunStmt : ASTLeaf<NodeKind::RunStmt, Stmt> {
     std::optional<std::string> filename;
     std::optional<int> targetLine;
     RunStmt() = default;
-    RunStmt(std::optional<std::string> f, std::optional<int> ln)
-        : ASTLeaf(), filename(std::move(f)), targetLine(ln) {}
+    RunStmt(std::optional<std::string> filename_opt, std::optional<int> line_num)
+        : filename(std::move(filename_opt)), targetLine(line_num) {}
 };
 
 } // namespace gwbasic

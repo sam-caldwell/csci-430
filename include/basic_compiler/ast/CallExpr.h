@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/Expr.h"
@@ -23,8 +24,8 @@ namespace gwbasic {
 struct CallExpr : ASTLeaf<NodeKind::CallExpr, Expr> {
     std::string callee;
     std::vector<std::unique_ptr<Expr>> args;
-    explicit CallExpr(std::string name, std::vector<std::unique_ptr<Expr>> a)
-        : ASTLeaf(), callee(std::move(name)), args(std::move(a)) {}
+    explicit CallExpr(std::string name, std::vector<std::unique_ptr<Expr>> arguments)
+        : callee(std::move(name)), args(std::move(arguments)) {}
 };
 
 } // namespace gwbasic

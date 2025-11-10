@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_POKESTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -24,7 +25,8 @@ namespace gwbasic {
 struct PokeStmt final : ASTLeaf<NodeKind::PokeStmt, Stmt> {
     std::unique_ptr<Expr> address;
     std::unique_ptr<Expr> value;
-    PokeStmt(std::unique_ptr<Expr> a, std::unique_ptr<Expr> v) : ASTLeaf(), address(std::move(a)), value(std::move(v)) {}
+    PokeStmt(std::unique_ptr<Expr> address_expr, std::unique_ptr<Expr> value_expr)
+        : address(std::move(address_expr)), value(std::move(value_expr)) {}
 };
 
 } // namespace gwbasic

@@ -13,8 +13,10 @@ namespace gwbasic {
 // CLS: Clear the virtual screen and reset cursor
 struct ClsStmt final : ASTLeaf<NodeKind::ClsStmt, Stmt> {
     ClsStmt() = default;
-    explicit ClsStmt(const SourcePos& p) : ASTLeaf<NodeKind::ClsStmt, Stmt>(p) {}
-    static bool classof(const Node* N) { return N && N->kind == NodeKind::ClsStmt; }
+    explicit ClsStmt(const SourcePos& pos) : ASTLeaf<NodeKind::ClsStmt, Stmt>(pos) {}
+    static bool classof(const Node* node_ptr) {
+        return node_ptr != nullptr && node_ptr->kind == NodeKind::ClsStmt;
+    }
 };
 
 } // namespace gwbasic

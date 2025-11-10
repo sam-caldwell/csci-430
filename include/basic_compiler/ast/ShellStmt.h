@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_SHELLSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -15,7 +16,8 @@ namespace gwbasic {
 struct ShellStmt final : ASTLeaf<NodeKind::ShellStmt, Stmt> {
     std::unique_ptr<Expr> command; // optional
     ShellStmt() = default;
-    explicit ShellStmt(std::unique_ptr<Expr> c) : ASTLeaf(), command(std::move(c)) {}
+    explicit ShellStmt(std::unique_ptr<Expr> command_expr)
+        : command(std::move(command_expr)) {}
 };
 
 } // namespace gwbasic

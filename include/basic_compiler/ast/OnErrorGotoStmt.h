@@ -17,7 +17,7 @@ namespace gwbasic {
  */
 struct OnErrorGotoStmt : ASTLeaf<NodeKind::OnErrorGotoStmt, Stmt> {
     int targetLine{0}; // 0 => disable
-    explicit OnErrorGotoStmt(int target) : ASTLeaf(), targetLine(target) {}
+    explicit OnErrorGotoStmt(int target_line) : targetLine(target_line) {}
 };
 
 } // namespace gwbasic

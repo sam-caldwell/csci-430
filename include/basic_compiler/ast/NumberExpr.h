@@ -21,7 +21,7 @@ namespace gwbasic {
  */
 struct NumberExpr : ASTLeaf<NodeKind::NumberExpr, Expr> {
     double value;
-    explicit NumberExpr(const double v) : ASTLeaf(), value(v) {}
+    explicit NumberExpr(const double literal_value) : value(literal_value) {}
 };
 
 } // namespace gwbasic

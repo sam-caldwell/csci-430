@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_MERGESTMT_H
 
 #include <string>
+#include <utility>
 
 #include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
@@ -21,7 +22,7 @@ namespace gwbasic {
  */
 struct MergeStmt : ASTLeaf<NodeKind::MergeStmt, Stmt> {
     std::string filename;
-    explicit MergeStmt(std::string f) : ASTLeaf(), filename(std::move(f)) {}
+    explicit MergeStmt(std::string filename_str) : filename(std::move(filename_str)) {}
 };
 
 } // namespace gwbasic

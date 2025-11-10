@@ -4,6 +4,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
@@ -29,8 +30,10 @@ struct ChainStmt : ASTLeaf<NodeKind::ChainStmt, Stmt> {
     std::optional<int> targetLine;
     bool all{false};
     ChainStmt() = default;
-    ChainStmt(std::optional<std::string> f, const std::optional<int> ln, const bool a)
-        : ASTLeaf(), filename(std::move(f)), targetLine(ln), all(a) {}
+    ChainStmt(std::optional<std::string> filename_opt,
+              std::optional<int> target_line,
+              bool preserve_all)
+        : filename(std::move(filename_opt)), targetLine(target_line), all(preserve_all) {}
 };
 
 } // namespace gwbasic

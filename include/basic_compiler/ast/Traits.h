@@ -91,8 +91,8 @@ template <> struct NodeKindTraits<NodeKind::ListStmt>        { static constexpr 
 template <> struct NodeKindTraits<NodeKind::DeleteStmt>      { static constexpr auto pretty = "DeleteStmt"; };
 
 // Map a runtime NodeKind to a human-readable pretty name
-inline auto prettyName(const NodeKind k) {
-    switch (k) {
+inline auto prettyName(const NodeKind node_kind) { // NOLINT(readability-function-size)
+    switch (node_kind) {
         case NodeKind::AbstractExpr: return NodeKindTraits<NodeKind::AbstractExpr>::pretty;
         case NodeKind::AbstractStmt: return NodeKindTraits<NodeKind::AbstractStmt>::pretty;
         case NodeKind::NumberExpr: return NodeKindTraits<NodeKind::NumberExpr>::pretty;

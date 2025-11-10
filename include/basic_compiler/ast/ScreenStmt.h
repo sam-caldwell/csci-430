@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_SCREENSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -30,11 +31,14 @@ struct ScreenStmt final : ASTLeaf<NodeKind::ScreenStmt, Stmt> {
     std::unique_ptr<Expr> colorSwitch;
     std::unique_ptr<Expr> aPage;
     std::unique_ptr<Expr> vPage;
-    ScreenStmt(std::unique_ptr<Expr> m,
-               std::unique_ptr<Expr> cs,
-               std::unique_ptr<Expr> ap,
-               std::unique_ptr<Expr> vp)
-        : ASTLeaf(), mode(std::move(m)), colorSwitch(std::move(cs)), aPage(std::move(ap)), vPage(std::move(vp)) {}
+    ScreenStmt(std::unique_ptr<Expr> mode_expr,
+               std::unique_ptr<Expr> color_switch_expr,
+               std::unique_ptr<Expr> a_page_expr,
+               std::unique_ptr<Expr> v_page_expr)
+        : mode(std::move(mode_expr)),
+          colorSwitch(std::move(color_switch_expr)),
+          aPage(std::move(a_page_expr)),
+          vPage(std::move(v_page_expr)) {}
 };
 
 } // namespace gwbasic

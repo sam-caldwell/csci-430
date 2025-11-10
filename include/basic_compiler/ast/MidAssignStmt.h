@@ -3,8 +3,8 @@
 #define BASIC_COMPILER_AST_MIDASSIGNSTMT_H
 
 #include <memory>
-#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/Expr.h"
@@ -31,12 +31,16 @@ struct MidAssignStmt : ASTLeaf<NodeKind::MidAssignStmt, Stmt> {
     std::unique_ptr<Expr> len; // optional
     std::unique_ptr<Expr> value;
     MidAssignStmt() = default;
-    MidAssignStmt(std::string n,
-                  std::vector<std::unique_ptr<Expr>> idx,
-                  std::unique_ptr<Expr> s,
-                  std::unique_ptr<Expr> l,
-                  std::unique_ptr<Expr> v)
-        : ASTLeaf(), name(std::move(n)), indices(std::move(idx)), start(std::move(s)), len(std::move(l)), value(std::move(v)) {}
+    MidAssignStmt(std::string target_name,
+                  std::vector<std::unique_ptr<Expr>> index_exprs,
+                  std::unique_ptr<Expr> start_expr,
+                  std::unique_ptr<Expr> len_expr,
+                  std::unique_ptr<Expr> value_expr)
+        : name(std::move(target_name)),
+          indices(std::move(index_exprs)),
+          start(std::move(start_expr)),
+          len(std::move(len_expr)),
+          value(std::move(value_expr)) {}
 };
 
 } // namespace gwbasic

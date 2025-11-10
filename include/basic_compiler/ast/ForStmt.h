@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/Expr.h"
@@ -37,8 +38,14 @@ struct ForStmt : ASTLeaf<NodeKind::ForStmt, Stmt, ForStmtTraits> {
     std::unique_ptr<Expr> step; // may be null -> default 1
     std::vector<std::unique_ptr<Stmt>> body; // inline for body until NEXT (same line)
     bool inlineNext{false}; // true if NEXT consumed on same line
-    ForStmt(std::string v, std::unique_ptr<Expr> s, std::unique_ptr<Expr> e, std::unique_ptr<Expr> st)
-        : ASTLeaf(), var(std::move(v)), start(std::move(s)), end(std::move(e)), step(std::move(st)) {}
+    ForStmt(std::string var_name,
+            std::unique_ptr<Expr> start_expr,
+            std::unique_ptr<Expr> end_expr,
+            std::unique_ptr<Expr> step_expr)
+        : var(std::move(var_name)),
+          start(std::move(start_expr)),
+          end(std::move(end_expr)),
+          step(std::move(step_expr)) {}
 };
 
 } // namespace gwbasic

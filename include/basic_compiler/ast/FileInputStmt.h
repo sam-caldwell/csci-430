@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_FILEINPUTSTMT_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/NodeKind.h"
@@ -26,8 +27,8 @@ struct FileInputStmt : ASTLeaf<NodeKind::FileInputStmt, Stmt> {
     std::vector<std::string> variables; // names only; array targets not yet supported here
     FileInputStmt() = default;
 
-    explicit FileInputStmt(const int ch, std::vector<std::string> vars)
-        : ASTLeaf(), channel(ch), variables(std::move(vars)) {}
+    explicit FileInputStmt(const int channel_num, std::vector<std::string> vars)
+        : channel(channel_num), variables(std::move(vars)) {}
 };
 
 } // namespace gwbasic

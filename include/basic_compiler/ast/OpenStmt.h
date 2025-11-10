@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -30,8 +31,8 @@ struct OpenStmt final : ASTLeaf<NodeKind::OpenStmt, Stmt> {
     FileMode mode{FileMode::Input};
     int channel{1};
     OpenStmt() = default;
-    OpenStmt(std::unique_ptr<Expr> f, const FileMode m, const int ch)
-        : ASTLeaf(), filename(std::move(f)), mode(m), channel(ch) {}
+    OpenStmt(std::unique_ptr<Expr> filename_expr, const FileMode file_mode, const int channel_num)
+        : filename(std::move(filename_expr)), mode(file_mode), channel(channel_num) {}
 };
 
 } // namespace gwbasic

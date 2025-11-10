@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_CODEGEN_CODEGENERROR_H
+#define BASIC_COMPILER_CODEGEN_CODEGENERROR_H
 
 #include <stdexcept>
 
@@ -25,3 +26,5 @@ public:
 
 } // namespace gwbasic
 
+// NOLINTNEXTLINE(llvm-header-guard) -- header guard provided above
+#endif // BASIC_COMPILER_CODEGEN_CODEGENERROR_H

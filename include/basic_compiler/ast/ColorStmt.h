@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_COLORSTMT_H
 
 #include <memory>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -26,8 +27,12 @@ struct ColorStmt final : ASTLeaf<NodeKind::ColorStmt, Stmt> {
     std::unique_ptr<Expr> fg;
     std::unique_ptr<Expr> bg;
     std::unique_ptr<Expr> border;
-    ColorStmt(std::unique_ptr<Expr> f, std::unique_ptr<Expr> b, std::unique_ptr<Expr> br)
-        : ASTLeaf(), fg(std::move(f)), bg(std::move(b)), border(std::move(br)) {}
+    ColorStmt(std::unique_ptr<Expr> foreground_expr,
+              std::unique_ptr<Expr> background_expr,
+              std::unique_ptr<Expr> border_expr)
+        : fg(std::move(foreground_expr)),
+          bg(std::move(background_expr)),
+          border(std::move(border_expr)) {}
 };
 
 } // namespace gwbasic

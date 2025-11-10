@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/Expr.h"
@@ -42,13 +43,14 @@ struct PrintStmt : ASTLeaf<NodeKind::PrintStmt, Stmt> {
     // Optional: format expression from PRINT USING ... (string expr)
     std::unique_ptr<Expr> format;
 
-    explicit PrintStmt(std::unique_ptr<Expr> v) : ASTLeaf(), value(std::move(v)) {}
-    explicit PrintStmt(std::vector<std::unique_ptr<Expr>> v) : ASTLeaf() {
-        if (!v.empty()) {
-            value = std::move(v.front());
-            more.reserve(v.size() - 1);
-            for (std::size_t i = 1; i < v.size(); ++i) {
-                more.emplace_back(std::move(v[i]));
+    explicit PrintStmt(std::unique_ptr<Expr> single_value)
+        : value(std::move(single_value)) {}
+    explicit PrintStmt(std::vector<std::unique_ptr<Expr>> values) {
+        if (!values.empty()) {
+            value = std::move(values.front());
+            more.reserve(values.size() - 1);
+            for (std::size_t i = 1; i < values.size(); ++i) {
+                more.emplace_back(std::move(values[i]));
             }
         }
     }

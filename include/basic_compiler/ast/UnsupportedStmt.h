@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_UNSUPPORTEDSTMT_H
 
 #include <string>
+#include <utility>
 
 #include "basic_compiler/ast/Node.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -24,8 +25,11 @@ namespace gwbasic {
 struct UnsupportedStmt : ASTLeaf<NodeKind::UnsupportedStmt, Stmt> {
     std::string keyword;
     UnsupportedStmt() = default;
-    UnsupportedStmt(const SourcePos& p, std::string kw) : ASTLeaf<NodeKind::UnsupportedStmt, Stmt>(p), keyword(std::move(kw)) {}
-    static bool classof(const Node* N) { return N && N->kind == NodeKind::UnsupportedStmt; }
+    UnsupportedStmt(const SourcePos& pos, std::string keyword_str)
+        : ASTLeaf<NodeKind::UnsupportedStmt, Stmt>(pos), keyword(std::move(keyword_str)) {}
+    static bool classof(const Node* node_ptr) {
+        return node_ptr != nullptr && node_ptr->kind == NodeKind::UnsupportedStmt;
+    }
 };
 
 } // namespace gwbasic

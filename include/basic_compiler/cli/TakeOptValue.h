@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_CLI_TAKEOPTVALUE_H
+#define BASIC_COMPILER_CLI_TAKEOPTVALUE_H
 
 #include <optional>
 #include <string>
@@ -27,9 +28,11 @@ namespace gwbasic::cli {
  */
 bool takeOptValue(std::string_view arg,
                   const char* name,
-                  int& i,
-                  const int argc,
+                  int& index,
+                  int argc,
                   char** argv,
                   std::optional<std::string>& out);
 
 } // namespace gwbasic::cli
+
+#endif // BASIC_COMPILER_CLI_TAKEOPTVALUE_H

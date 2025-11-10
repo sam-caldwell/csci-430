@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_STRINGEXPR_H
 
 #include <string>
+#include <utility>
 
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NodeKind.h"
@@ -24,7 +25,7 @@ namespace gwbasic {
  */
 struct StringExpr : ASTLeaf<NodeKind::StringExpr, Expr> {
     std::string value;
-    explicit StringExpr(std::string v) : ASTLeaf(), value(std::move(v)) {}
+    explicit StringExpr(std::string value_str) : value(std::move(value_str)) {}
 };
 
 } // namespace gwbasic

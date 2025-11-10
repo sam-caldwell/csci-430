@@ -19,7 +19,7 @@ namespace gwbasic {
  *  - Subsequent lines are not executed.
  */
 struct EndStmt : ASTLeaf<NodeKind::EndStmt, Stmt> {
-    EndStmt() : ASTLeaf() {}
+    EndStmt() = default;
 };
 
 } // namespace gwbasic

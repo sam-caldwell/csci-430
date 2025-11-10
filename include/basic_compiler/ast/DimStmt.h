@@ -3,6 +3,7 @@
 #define BASIC_COMPILER_AST_DIMSTMT_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "basic_compiler/ast/NodeKind.h"
@@ -21,7 +22,8 @@ struct DimStmt : ASTLeaf<NodeKind::DimStmt, Stmt> {
     // Per-dimension declared upper bounds (inclusive), e.g., DIM A(10,20) -> {10,20}
     std::vector<int> upperBounds;
     DimStmt() = default;
-    DimStmt(std::string n, std::vector<int> ub) : ASTLeaf(), name(std::move(n)), upperBounds(std::move(ub)) {}
+    DimStmt(std::string name_str, std::vector<int> upper_bounds)
+        : name(std::move(name_str)), upperBounds(std::move(upper_bounds)) {}
 };
 
 } // namespace gwbasic
