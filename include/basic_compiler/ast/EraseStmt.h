@@ -1,10 +1,13 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_ERASESTMT_H
+#define BASIC_COMPILER_AST_ERASESTMT_H
 
 #include <string>
 #include <vector>
-#include "basic_compiler/ast/Stmt.h"
+
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -23,3 +26,4 @@ struct EraseStmt final : ASTLeaf<NodeKind::EraseStmt, Stmt> {
 
 } // namespace gwbasic
 
+#endif // BASIC_COMPILER_AST_ERASESTMT_H

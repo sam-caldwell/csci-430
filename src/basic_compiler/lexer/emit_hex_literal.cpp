@@ -1,7 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
-#include <sstream>
+#include "basic_compiler/LexError.h"
 #include <cctype>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace gwbasic {
 

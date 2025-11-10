@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_WITHTRIPLEHEADER_H
+#define BASIC_COMPILER_WITHTRIPLEHEADER_H
 
 #include <string>
 
@@ -13,5 +14,6 @@
  * Outputs:
  *  - std::string: IR with a leading target triple if it was absent.
  */
-std::string withTripleHeader(const std::string& ir, const std::string& triple);
+std::string withTripleHeader(const std::string& irText, const std::string& triple);
 
+#endif // BASIC_COMPILER_WITHTRIPLEHEADER_H

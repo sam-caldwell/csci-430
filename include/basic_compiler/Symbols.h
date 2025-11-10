@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_SYMBOLS_H
+#define BASIC_COMPILER_SYMBOLS_H
 
 #include "basic_compiler/Symbol.h"
 
@@ -15,8 +16,8 @@ struct Symbols {
     // Control/whitespace
     static inline constexpr Symbol SPACE        {' '};
     static inline constexpr Symbol TAB          {'\t'};
-    static inline constexpr Symbol LF           {'\n'};
-    static inline constexpr Symbol CR           {'\r'};
+    static inline constexpr Symbol LF           {'\n'}; // NOLINT(readability-identifier-length)
+    static inline constexpr Symbol CR           {'\r'}; // NOLINT(readability-identifier-length)
     static inline constexpr Symbol NUL          {'\0'};
     static inline constexpr Symbol DEL          {static_cast<char>(0x7F)};
 
@@ -50,11 +51,9 @@ struct Symbols {
     static inline constexpr Symbol NOT_EQUAL    {"<>"};
 
     // Common 1-byte string fragments (for streaming convenience)
-    // Note: kept for easy migration of existing STR_* uses.
-    static inline constexpr char STR_LF[2]        = "\n";
-    static inline constexpr char STR_DBL_QUOTE[2] = "\"";
-    static inline constexpr char STR_SPACE[2]     = " ";
-    static inline constexpr char STR_PERCENT[2]   = "%";
+    // (Removed legacy STR_* char arrays; prefer Symbol or string literals.)
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_SYMBOLS_H

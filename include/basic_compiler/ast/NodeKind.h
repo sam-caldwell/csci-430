@@ -1,5 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_NODEKIND_H
+#define BASIC_COMPILER_AST_NODEKIND_H
+
+#include <cstdint>
 
 namespace gwbasic {
 
@@ -7,7 +10,7 @@ namespace gwbasic {
  * Enum: NodeKind
  *  - Lightweight identifier for AST node kinds enabling LLVM-style RTTI.
  */
-enum class NodeKind {
+enum class NodeKind : std::uint8_t {
     // Abstract/base markers
     AbstractExpr,
     AbstractStmt,
@@ -93,3 +96,5 @@ enum class NodeKind {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_NODEKIND_H

@@ -1,8 +1,12 @@
+#ifndef BASIC_COMPILER_AST_CLSSTMT_H
+#define BASIC_COMPILER_AST_CLSSTMT_H
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
 
-#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/Node.h"
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/SourcePos.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -15,3 +19,4 @@ struct ClsStmt final : ASTLeaf<NodeKind::ClsStmt, Stmt> {
 
 } // namespace gwbasic
 
+#endif // BASIC_COMPILER_AST_CLSSTMT_H

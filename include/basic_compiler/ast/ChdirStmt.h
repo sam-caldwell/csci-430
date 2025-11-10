@@ -1,10 +1,13 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_CHDIRSTMT_H
+#define BASIC_COMPILER_AST_CHDIRSTMT_H
 
 #include <memory>
-#include "basic_compiler/ast/Stmt.h"
+
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -23,3 +26,5 @@ struct ChdirStmt final : ASTLeaf<NodeKind::ChdirStmt, Stmt> {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_CHDIRSTMT_H

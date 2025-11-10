@@ -1,10 +1,14 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_DEFTYPESTMT_H
+#define BASIC_COMPILER_AST_DEFTYPESTMT_H
 
-#include <vector>
+#include <cstdint>
 #include <utility>
-#include "basic_compiler/ast/Stmt.h"
+#include <vector>
+
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -17,7 +21,7 @@ namespace gwbasic {
  *  - ranges: list of inclusive letter ranges (uppercase A..Z)
  */
 struct DefTypeStmt : ASTLeaf<NodeKind::DefTypeStmt, Stmt> {
-    enum class Kind { Int, Sng, Dbl, Str };
+    enum class Kind : std::uint8_t { Int, Sng, Dbl, Str };
     Kind kind;
     std::vector<std::pair<char,char>> ranges; // inclusive, uppercase
     DefTypeStmt(const Kind k, std::vector<std::pair<char,char>> r)
@@ -26,3 +30,4 @@ struct DefTypeStmt : ASTLeaf<NodeKind::DefTypeStmt, Stmt> {
 
 } // namespace gwbasic
 
+#endif // BASIC_COMPILER_AST_DEFTYPESTMT_H

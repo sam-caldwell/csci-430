@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_WRITETEXTFILE_H
+#define BASIC_COMPILER_WRITETEXTFILE_H
 
 #include <filesystem>
 #include <string>
@@ -16,3 +17,4 @@
  */
 void writeTextFile(const std::filesystem::path &path, const std::string &content);
 
+#endif // BASIC_COMPILER_WRITETEXTFILE_H

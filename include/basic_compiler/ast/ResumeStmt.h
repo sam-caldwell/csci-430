@@ -1,8 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_RESUMESTMT_H
+#define BASIC_COMPILER_AST_RESUMESTMT_H
 
-#include "basic_compiler/ast/Stmt.h"
+#include <cstdint>
+
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -17,7 +21,7 @@ namespace gwbasic {
  *  - RESUME <line>     (branch to specified line)
  */
 struct ResumeStmt : ASTLeaf<NodeKind::ResumeStmt, Stmt> {
-    enum class Kind { Reexecute, Next, Line };
+    enum class Kind : std::uint8_t { Reexecute, Next, Line };
     Kind kind{Kind::Reexecute};
     int line{0}; // used only when kind==Line
     ResumeStmt() : ASTLeaf() {}
@@ -26,3 +30,5 @@ struct ResumeStmt : ASTLeaf<NodeKind::ResumeStmt, Stmt> {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_RESUMESTMT_H

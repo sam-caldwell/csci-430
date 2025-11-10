@@ -1,9 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_MERGESTMT_H
+#define BASIC_COMPILER_AST_MERGESTMT_H
 
 #include <string>
-#include "basic_compiler/ast/Stmt.h"
+
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -23,3 +26,4 @@ struct MergeStmt : ASTLeaf<NodeKind::MergeStmt, Stmt> {
 
 } // namespace gwbasic
 
+#endif // BASIC_COMPILER_AST_MERGESTMT_H

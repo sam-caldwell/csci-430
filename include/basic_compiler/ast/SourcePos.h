@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_SOURCEPOS_H
+#define BASIC_COMPILER_AST_SOURCEPOS_H
 
 namespace gwbasic {
 
@@ -23,3 +24,5 @@ struct SourcePos {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_SOURCEPOS_H

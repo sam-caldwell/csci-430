@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_TRAITS_H
+#define BASIC_COMPILER_AST_TRAITS_H
 
 #include "basic_compiler/ast/NodeKind.h"
 
@@ -177,3 +178,5 @@ inline auto prettyName(const NodeKind k) {
 struct ForStmtTraits { static constexpr double defaultStep = 1.0; };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_TRAITS_H

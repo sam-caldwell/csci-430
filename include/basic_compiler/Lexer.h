@@ -3,10 +3,8 @@
 #define BASIC_COMPILER_LEXER_H
 
 #include <array>
-#include <cstddef>
 #include <istream>
 #include <ostream>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -35,8 +33,7 @@ public:
      * Inputs:
      *  - source: Entire GW-BASIC program as a string.
      */
-    explicit Lexer(std::string source)
-        : src_(std::move(source)) {}
+    explicit Lexer(std::string source);
 
     /**
      * Construct a lexer from an input stream.
@@ -44,11 +41,7 @@ public:
      * Inputs:
      *  - in: std::istream providing source characters (ifstream, stringstream, etc.)
      */
-    explicit Lexer(std::istream& inputStream) {
-        std::ostringstream buf;
-        buf << inputStream.rdbuf();
-        src_ = std::move(buf).str();
-    }
+    explicit Lexer(std::istream& inputStream);
 
     /**
      * Tokenize: Produce the complete list of tokens for the source.
@@ -81,10 +74,13 @@ public:
 
 private:
 
-    // Keyword spellings used in special cases
+    /*
+     * Keyword spellings used in special cases
+     */
     static constexpr std::string_view KW_REM = "REM";
-
-    // Compile-time keyword table (REM is handled specially as a comment)
+    /**
+     * Compile-time keyword table (REM is handled specially as a comment)
+     */
     static constexpr auto kKeywords_ = std::to_array<std::pair<std::string_view, TokenType>>({
         // REM intentionally omitted (treated as comment)
         std::pair{"ALL",       TokenType::KwAll},
@@ -197,14 +193,7 @@ private:
      * Outputs:
      *  - TokenType: Matching keyword type, or Identifier if not matched.
      */
-    static TokenType lookupKeyword(const std::string_view upper) {
-        for (const auto& [kw, tt] : kKeywords_) {
-            if (kw == upper) {
-                return tt;
-            }
-        }
-        return TokenType::Identifier;
-    }
+    static TokenType lookupKeyword(std::string_view upper);
 
     /*
      * Template: Lexer::scanWhile
@@ -280,14 +269,7 @@ private:
      * Outputs:
      *  - void (pushes token and logs it)
      */
-    void emitToken(std::vector<Token>& out, const Token& token) {
-        out.emplace_back(token);
-        logToken(token);
-        // Metrics: count produced tokens when enabled
-        if (gMetrics != nullptr) {
-            gMetrics->incToken();
-        }
-    }
+    void emitToken(std::vector<Token>& out, const Token& token);
 
     /*
      * Template: Lexer::emitPairOrSingle
@@ -370,7 +352,7 @@ private:
      * Outputs:
      *  - bool: true when the cursor is at or beyond the last character
      */
-    bool atEnd() const { return pos_ >= src_.size(); }
+    bool atEnd() const;
 
     /*
      * Function: Lexer::peek
@@ -381,7 +363,7 @@ private:
      * Outputs:
      *  - char: current character or '\0' at end-of-input
      */
-    char peek() const { return atEnd() ? Symbols::NUL.first() : src_[pos_]; }
+    char peek() const;
 
     /*
      * Function: Lexer::peekNext
@@ -392,9 +374,7 @@ private:
      * Outputs:
      *  - char: next character or '\0' if beyond end-of-input
      */
-    char peekNext() const {
-        return (pos_ + 1 < src_.size()) ? src_[pos_ + 1] : Symbols::NUL.first();
-    }
+    char peekNext() const;
 
     /*
      * Function: Lexer::advance
@@ -482,7 +462,7 @@ private:
      */
     void logToken(const Token& token);
     // Stream accessor for lex logging
-    std::ostream& log() { return lexLogger_.stream(); }
+    std::ostream& log();
 
     /*
      * Function: Lexer::escapeForLog

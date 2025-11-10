@@ -1,9 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_READTARGET_H
+#define BASIC_COMPILER_AST_READTARGET_H
 
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
+
 #include "basic_compiler/ast/Expr.h"
 
 namespace gwbasic {
@@ -24,3 +26,5 @@ struct ReadTarget {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_READTARGET_H

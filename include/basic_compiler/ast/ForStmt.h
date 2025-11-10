@@ -1,12 +1,15 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_FORSTMT_H
+#define BASIC_COMPILER_AST_FORSTMT_H
 
 #include <memory>
 #include <string>
 #include <vector>
-#include "basic_compiler/ast/Stmt.h"
+
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/Traits.h"
 
 namespace gwbasic {
@@ -39,3 +42,5 @@ struct ForStmt : ASTLeaf<NodeKind::ForStmt, Stmt, ForStmtTraits> {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_FORSTMT_H

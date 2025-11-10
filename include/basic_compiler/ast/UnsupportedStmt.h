@@ -1,9 +1,14 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_UNSUPPORTEDSTMT_H
+#define BASIC_COMPILER_AST_UNSUPPORTEDSTMT_H
 
 #include <string>
-#include "basic_compiler/ast/Stmt.h"
+
+#include "basic_compiler/ast/Node.h"
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/SourcePos.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -25,3 +30,4 @@ struct UnsupportedStmt : ASTLeaf<NodeKind::UnsupportedStmt, Stmt> {
 
 } // namespace gwbasic
 
+#endif // BASIC_COMPILER_AST_UNSUPPORTEDSTMT_H

@@ -1,6 +1,9 @@
-#pragma once
+// (c) 2025 Sam Caldwell. All Rights Reserved.
+#ifndef BASIC_COMPILER_AST_MAKE_NODE_H
+#define BASIC_COMPILER_AST_MAKE_NODE_H
 
 #include <memory>
+#include <utility>
 #include "basic_compiler/ast/SourcePos.h"
 
 namespace gwbasic {
@@ -14,4 +17,5 @@ inline std::unique_ptr<T> make_node(const SourcePos& pos, Args&&... args) {
 }
 
 } // namespace gwbasic
-
+ 
+#endif // BASIC_COMPILER_AST_MAKE_NODE_H

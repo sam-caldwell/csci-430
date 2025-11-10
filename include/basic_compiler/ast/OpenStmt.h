@@ -1,13 +1,18 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_OPENSTMT_H
+#define BASIC_COMPILER_AST_OPENSTMT_H
 
-#include "basic_compiler/ast/Stmt.h"
+#include <cstdint>
+#include <memory>
+
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
-enum class FileMode { Input, Output };
+enum class FileMode : std::uint8_t { Input, Output };
 
 /**
  * Type: OpenStmt
@@ -30,3 +35,5 @@ struct OpenStmt final : ASTLeaf<NodeKind::OpenStmt, Stmt> {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_OPENSTMT_H

@@ -1,7 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_NODETEMPLATE_H
+#define BASIC_COMPILER_AST_NODETEMPLATE_H
 
 #include "basic_compiler/ast/Node.h"
+#include "basic_compiler/ast/NodeKind.h"
+#include "basic_compiler/ast/SourcePos.h"
 
 namespace gwbasic {
 
@@ -25,3 +28,5 @@ struct ASTLeaf : Base {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_NODETEMPLATE_H

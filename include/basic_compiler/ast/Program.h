@@ -1,7 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_PROGRAM_H
+#define BASIC_COMPILER_AST_PROGRAM_H
 
 #include <vector>
+
 #include "basic_compiler/ast/Line.h"
 
 
@@ -25,3 +27,5 @@ struct Program {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_PROGRAM_H

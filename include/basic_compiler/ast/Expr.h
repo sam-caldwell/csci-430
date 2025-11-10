@@ -1,7 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_EXPR_H
+#define BASIC_COMPILER_AST_EXPR_H
 
 #include "basic_compiler/ast/Node.h"
+#include "basic_compiler/ast/NodeKind.h"
 
 namespace gwbasic {
 
@@ -42,3 +44,5 @@ public:
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_EXPR_H

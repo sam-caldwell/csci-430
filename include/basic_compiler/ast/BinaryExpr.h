@@ -1,10 +1,13 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_BINARYEXPR_H
+#define BASIC_COMPILER_AST_BINARYEXPR_H
 
 #include <memory>
-#include "basic_compiler/ast/Expr.h"
-#include "basic_compiler/ast/NodeTemplate.h"
+
 #include "basic_compiler/ast/BinaryOp.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeKind.h"
+#include "basic_compiler/ast/NodeTemplate.h"
 
 namespace gwbasic {
 
@@ -30,3 +33,5 @@ struct BinaryExpr : ASTLeaf<NodeKind::BinaryExpr, Expr> {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_BINARYEXPR_H

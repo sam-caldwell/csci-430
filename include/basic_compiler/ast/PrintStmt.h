@@ -1,11 +1,16 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_PRINTSTMT_H
+#define BASIC_COMPILER_AST_PRINTSTMT_H
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <vector>
-#include "basic_compiler/ast/Stmt.h"
+
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -22,9 +27,9 @@ namespace gwbasic {
  */
 struct PrintStmt : ASTLeaf<NodeKind::PrintStmt, Stmt> {
     // Separator between successive items
-    enum class Sep { Comma, Semicolon };
+    enum class Sep : std::uint8_t { Comma, Semicolon };
     // Trailing terminator at end of PRINT
-    enum class Terminator { Newline, Semicolon, Comma };
+    enum class Terminator : std::uint8_t { Newline, Semicolon, Comma };
     // Backward-compatible single value; additional items in 'more'
     std::unique_ptr<Expr> value;
     std::vector<std::unique_ptr<Expr>> more;
@@ -42,9 +47,13 @@ struct PrintStmt : ASTLeaf<NodeKind::PrintStmt, Stmt> {
         if (!v.empty()) {
             value = std::move(v.front());
             more.reserve(v.size() - 1);
-            for (size_t i = 1; i < v.size(); ++i) more.emplace_back(std::move(v[i]));
+            for (std::size_t i = 1; i < v.size(); ++i) {
+                more.emplace_back(std::move(v[i]));
+            }
         }
     }
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_PRINTSTMT_H

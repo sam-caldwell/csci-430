@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_USAGE_H
+#define BASIC_COMPILER_USAGE_H
 
 /**
  * Function: usage
@@ -12,3 +13,4 @@
  */
 void usage(const char* argv0);
 
+#endif // BASIC_COMPILER_USAGE_H

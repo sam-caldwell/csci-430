@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_TARGETUTILS_H
+#define BASIC_COMPILER_TARGETUTILS_H
 
 #include <string>
 
@@ -13,3 +14,5 @@
  *  - bool: true if the triple is supported by this toolchain
  */
 bool isSupportedTargetTriple(const std::string& triple);
+
+#endif // BASIC_COMPILER_TARGETUTILS_H

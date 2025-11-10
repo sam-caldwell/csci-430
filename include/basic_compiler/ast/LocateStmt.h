@@ -1,10 +1,15 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_LOCATESTMT_H
+#define BASIC_COMPILER_AST_LOCATESTMT_H
 
 #include <memory>
-#include "basic_compiler/ast/Stmt.h"
+
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/Node.h"
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/SourcePos.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -20,3 +25,4 @@ struct LocateStmt : ASTLeaf<NodeKind::LocateStmt, Stmt> {
 
 } // namespace gwbasic
 
+#endif // BASIC_COMPILER_AST_LOCATESTMT_H

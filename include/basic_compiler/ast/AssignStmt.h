@@ -1,11 +1,15 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_ASSIGNSTMT_H
+#define BASIC_COMPILER_AST_ASSIGNSTMT_H
 
 #include <memory>
 #include <string>
-#include "basic_compiler/ast/Stmt.h"
+#include <utility>
+
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -24,8 +28,10 @@ namespace gwbasic {
 struct AssignStmt : ASTLeaf<NodeKind::AssignStmt, Stmt> {
     std::string name;
     std::unique_ptr<Expr> value;
-    AssignStmt(std::string n, std::unique_ptr<Expr> v)
-        : ASTLeaf(), name(std::move(n)), value(std::move(v)) {}
+    AssignStmt(std::string nameStr, std::unique_ptr<Expr> valueExpr)
+        : name(std::move(nameStr)), value(std::move(valueExpr)) {}
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_ASSIGNSTMT_H

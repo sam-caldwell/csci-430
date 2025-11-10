@@ -1,5 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_BINARYOP_H
+#define BASIC_COMPILER_AST_BINARYOP_H
+
+#include <cstdint>
 
 namespace gwbasic {
 
@@ -12,10 +15,12 @@ namespace gwbasic {
  *  - Add, Sub, Mul, Div: arithmetic
  *  - Eq, Ne, Lt, Le, Gt, Ge: comparisons yielding 0.0/1.0 in codegen
  */
-enum class BinaryOp {
+enum class BinaryOp : std::uint8_t {
     Add, Sub, Mul, Div, IntDiv, Mod, Pow,
     And, Or,
     Eq, Ne, Lt, Le, Gt, Ge
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_BINARYOP_H

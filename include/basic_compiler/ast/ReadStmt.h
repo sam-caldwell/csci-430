@@ -1,10 +1,13 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_AST_READSTMT_H
+#define BASIC_COMPILER_AST_READSTMT_H
 
 #include <vector>
-#include "basic_compiler/ast/Stmt.h"
-#include "basic_compiler/ast/ReadTarget.h"
+
+#include "basic_compiler/ast/NodeKind.h"
 #include "basic_compiler/ast/NodeTemplate.h"
+#include "basic_compiler/ast/ReadTarget.h"
+#include "basic_compiler/ast/Stmt.h"
 
 namespace gwbasic {
 
@@ -20,3 +23,5 @@ struct ReadStmt : ASTLeaf<NodeKind::ReadStmt, Stmt> {
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_AST_READSTMT_H
