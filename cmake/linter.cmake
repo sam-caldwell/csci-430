@@ -1,94 +1,69 @@
 #! File: cmake/linter.cmake
-#! Purpose: Define a single aggregate 'lint' target that:
-#!   - Validates docstrings and test docstrings
-#!   - Runs static organization checks
-#!   - Runs clang-tidy over project sources (if available)
+#! Purpose: Define a CMake-driven 'lint' target that:
+#!  - Globs all .h and .cpp files in the repo (src/ and include/)
+#!  - Runs clang-tidy (configured by .clang-tidy) against each file
+#!  - Executes sequentially and fails fast on the first warning/error
 #! Notes:
-#!   - Uses compile_commands.json from the build tree (-p ${CMAKE_BINARY_DIR}).
-#!   - Falls back gracefully if clang-tidy is not installed.
+#!  - Uses compile_commands.json from the build tree (-p ${CMAKE_BINARY_DIR}).
+#!  - Treats all warnings as errors via -warnings-as-errors=*
 
 include_guard(GLOBAL)
 
 # Locate clang-tidy (prefer PATH). Allow override via CLANG_TIDY_EXE cache var.
-# Prefer matching clang-tidy to the compiler toolchain (LLVM 17), fall back to PATH
-find_program(CLANG_TIDY_EXE NAMES clang-tidy HINTS /opt/homebrew/opt/llvm@17/bin)
-if(EXISTS "/opt/homebrew/opt/llvm@17/bin/clang-tidy")
-  set(CLANG_TIDY_EXE "/opt/homebrew/opt/llvm@17/bin/clang-tidy" CACHE FILEPATH "clang-tidy executable" FORCE)
+find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+
+# Collect lintable sources: headers and C++ source files only, per request
+file(GLOB_RECURSE LINT_HEADERS CONFIGURE_DEPENDS
+     ${PROJECT_SOURCE_DIR}/include/*.h
+     ${PROJECT_SOURCE_DIR}/src/*.h)
+file(GLOB_RECURSE LINT_CPPS CONFIGURE_DEPENDS
+     ${PROJECT_SOURCE_DIR}/src/*.cpp)
+set(LINT_FILES ${LINT_HEADERS} ${LINT_CPPS})
+list(REMOVE_DUPLICATES LINT_FILES)
+list(SORT LINT_FILES)
+
+if(NOT CLANG_TIDY_EXE)
+    add_custom_target(lint
+        COMMAND ${CMAKE_COMMAND} -E echo "clang-tidy not found; skipping lint."
+        VERBATIM)
+    return()
 endif()
 
-# Subtarget: run clang-tidy across sources (project-only)
-if(CLANG_TIDY_EXE)
-  # Collect lintable sources (exclude internal tooling and tests)
-  file(GLOB_RECURSE LINT_SOURCES CONFIGURE_DEPENDS
-    ${PROJECT_SOURCE_DIR}/src/*.cc
-    ${PROJECT_SOURCE_DIR}/src/*.cxx
-    ${PROJECT_SOURCE_DIR}/src/*.cpp)
-  list(REMOVE_DUPLICATES LINT_SOURCES)
-  list(FILTER LINT_SOURCES EXCLUDE REGEX "/src/clang-tidy-.*")
-  list(FILTER LINT_SOURCES EXCLUDE REGEX "/test/.*")
+# Emit a small CMake script that iterates files and runs clang-tidy sequentially.
+set(LINT_DIR "${CMAKE_BINARY_DIR}/.lint")
+file(MAKE_DIRECTORY "${LINT_DIR}")
+set(LINT_SCRIPT "${LINT_DIR}/run_clang_tidy_failfast.cmake")
 
-  set(LINT_OUT_DIR "${CMAKE_BINARY_DIR}/.lint")
-  set(_lint_stamps)
-  foreach(_src IN LISTS LINT_SOURCES)
-    get_filename_component(_abs "${_src}" ABSOLUTE)
-    string(MD5 _hash "${_abs}")
-    set(_stamp "${LINT_OUT_DIR}/${_hash}.ok")
+file(WRITE "${LINT_SCRIPT}" "# Auto-generated: run clang-tidy sequentially and fail fast\n")
+file(APPEND "${LINT_SCRIPT}" "cmake_minimum_required(VERSION 3.16)\n")
+file(APPEND "${LINT_SCRIPT}" "set(CLANG_TIDY_EXE \"${CLANG_TIDY_EXE}\")\n")
+file(APPEND "${LINT_SCRIPT}" "set(BINARY_DIR \"${CMAKE_BINARY_DIR}\")\n")
+file(APPEND "${LINT_SCRIPT}" "set(FILES\n")
+foreach(_f IN LISTS LINT_FILES)
+    file(APPEND "${LINT_SCRIPT}" "  \"${_f}\"\n")
+endforeach()
+file(APPEND "${LINT_SCRIPT}" ")\n")
 
-    add_custom_command(
-      OUTPUT "${_stamp}"
-      COMMAND ${CMAKE_COMMAND} -E make_directory "${LINT_OUT_DIR}"
-      COMMAND ${CLANG_TIDY_EXE}
-              -p "${CMAKE_BINARY_DIR}"
-              -quiet
-              "${_abs}"
-      COMMAND ${CMAKE_COMMAND} -E touch "${_stamp}"
-      DEPENDS "${_abs}"
-      COMMENT "clang-tidy ${_src}"
-      VERBATIM)
+file(APPEND "${LINT_SCRIPT}" [=[
+foreach(f IN LISTS FILES)
+  message(STATUS "clang-tidy: ${f}")
+  execute_process(
+    COMMAND "${CLANG_TIDY_EXE}" -p "${BINARY_DIR}" "-warnings-as-errors=*" "${f}"
+    RESULT_VARIABLE rv
+    OUTPUT_VARIABLE out
+    ERROR_VARIABLE err
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_STRIP_TRAILING_WHITESPACE)
+  if(NOT rv EQUAL 0)
+    message(STATUS "clang-tidy output:
+${out}
+${err}")
+    message(FATAL_ERROR "clang-tidy failed for: ${f}")
+  endif()
+endforeach()
+]=])
 
-    list(APPEND _lint_stamps "${_stamp}")
-  endforeach()
-
-  add_custom_target(lint_clang_tidy DEPENDS ${_lint_stamps})
-else()
-  # No clang-tidy: create a noop subtarget to keep aggregate flow simple
-  add_custom_target(lint_clang_tidy
-    COMMAND ${CMAKE_COMMAND} -E echo "clang-tidy not found; skipping clang-tidy checks."
+add_custom_target(lint
+    COMMAND ${CMAKE_COMMAND} -P "${LINT_SCRIPT}"
+    USES_TERMINAL
     VERBATIM)
-endif()
-
-# Helper to add serialized lint steps (fail-fast ordering)
-function(lint_add_step)
-  set(options)
-  set(oneValueArgs NAME)
-  set(multiValueArgs DEPS)
-  cmake_parse_arguments(LA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  if(NOT LA_NAME)
-    message(FATAL_ERROR "lint_add_step requires NAME")
-  endif()
-  add_custom_target(${LA_NAME})
-  # Chain to previous step to serialize execution
-  get_property(_prev GLOBAL PROPERTY LINT_LAST_STEP)
-  if(_prev)
-    add_dependencies(${LA_NAME} ${_prev})
-  endif()
-  foreach(_d IN LISTS LA_DEPS)
-    if(TARGET ${_d})
-      add_dependencies(${LA_NAME} ${_d})
-    endif()
-  endforeach()
-  set_property(GLOBAL PROPERTY LINT_LAST_STEP ${LA_NAME})
-endfunction()
-
-# Define ordered steps: docstrings -> test docstrings -> one-func-per-file -> clang-tidy
-lint_add_step(NAME lint_step_validate DEPS validate_docstrings)
-lint_add_step(NAME lint_step_testdocs DEPS check_test_docstrings)
-lint_add_step(NAME lint_step_onefunc DEPS check_one_function_per_file)
-lint_add_step(NAME lint_step_clangtidy DEPS lint_clang_tidy)
-
-# Final aggregate lint target depends only on the last step to ensure fail-fast
-add_custom_target(lint)
-get_property(_lint_last GLOBAL PROPERTY LINT_LAST_STEP)
-if(_lint_last)
-  add_dependencies(lint ${_lint_last})
-endif()
