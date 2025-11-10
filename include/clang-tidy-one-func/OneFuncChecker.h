@@ -17,10 +17,10 @@ struct Issue {
 
 class OneFuncChecker {
 public:
-    void addPath(const std::filesystem::path& p);
+    void addPath(const std::filesystem::path& path);
     std::vector<Issue> run();
-    std::vector<Issue> checkContent(const std::string& content,
-                                    const std::filesystem::path& path) const;
+    static std::vector<Issue> checkContent(const std::string& content,
+                                           const std::filesystem::path& path);
 
 private:
     std::vector<std::filesystem::path> paths_{};
@@ -28,4 +28,3 @@ private:
 };
 
 } // namespace onefunc
-

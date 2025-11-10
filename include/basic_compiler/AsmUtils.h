@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_ASMUTILS_H
+#define BASIC_COMPILER_ASMUTILS_H
 
 #include <string>
 
@@ -16,3 +17,5 @@
  * ToDo: I'm too damned tired.  review this...was it necessary, did it work?
  */
 std::string asmCommentLeaderForTriple(const std::string& triple);
+
+#endif // BASIC_COMPILER_ASMUTILS_H

@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_ASSEMBLEBITCODE_H
+#define BASIC_COMPILER_ASSEMBLEBITCODE_H
 
 #include <filesystem>
 #include <string>
@@ -17,3 +18,4 @@
  */
 int assembleBitcode(const std::filesystem::path &llTmp, const std::string &outBC, const std::string& clangPath);
 
+#endif // BASIC_COMPILER_ASSEMBLEBITCODE_H

@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_DERIVEDEFAULTLOGPATHS_H
+#define BASIC_COMPILER_DERIVEDEFAULTLOGPATHS_H
 
 #include <optional>
 #include <string>
@@ -16,8 +17,10 @@
  *  - void (updates optionals in place when not already set).
  */
 void deriveDefaultLogPaths(const std::string &input,
-                           const bool noLogs,
+                           bool noLogs,
                            std::optional<std::string> &logPath,
                            std::optional<std::string> &lexLogPath,
                            std::optional<std::string> &syntaxLogPath,
                            std::optional<std::string> &semanticLogPath);
+
+#endif // BASIC_COMPILER_DERIVEDEFAULTLOGPATHS_H

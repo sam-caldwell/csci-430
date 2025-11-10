@@ -2,7 +2,11 @@
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/Parser.h"
+#include "basic_compiler/ast/Program.h"
 #include <fstream>
+#include <string>
+#include <utility>
+#include <climits>
 #include "basic_compiler/compiler/FileOpenError.h"
 
 namespace gwbasic::phase_log_helpers {
@@ -27,18 +31,23 @@ gwbasic::Program tokenizeRootWithLogs(const std::string& path,
                                       const std::string& syntaxLogPath,
                                       std::string& outCanon,
                                       int& outMinLine) {
-    std::ifstream in(path);
-    if (!in) throw gwbasic::FileOpenError(path);
-    Lexer lex(in);
+    std::ifstream input(path);
+    if (!input) {
+        throw gwbasic::FileOpenError(path);
+    }
+    Lexer lex(input);
     lex.setLexLogPath(lexLogPath);
     auto toks = lex.tokenize();
-    Parser rp(std::move(toks));
-    rp.setSyntaxLogPath(syntaxLogPath);
-    auto prog = rp.parseProgram();
+    Parser parser(std::move(toks));
+    parser.setSyntaxLogPath(syntaxLogPath);
+    auto prog = parser.parseProgram();
     outCanon = canonicalPath(path);
     int minRoot = INT_MAX;
-    for (const auto&[number, statements] : prog.lines)
-        if (number < minRoot) minRoot = number;
+    for (const auto& [number, statements] : prog.lines) {
+        if (number < minRoot) {
+            minRoot = number;
+        }
+    }
     outMinLine = (minRoot == INT_MAX ? 0 : minRoot);
     return prog;
 }

@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_DETECTDEFAULTTRIPLE_H
+#define BASIC_COMPILER_DETECTDEFAULTTRIPLE_H
 
 #include <string>
 
@@ -14,3 +15,4 @@
  */
 std::string detectDefaultTriple(const std::string& clangPath);
 
+#endif // BASIC_COMPILER_DETECTDEFAULTTRIPLE_H

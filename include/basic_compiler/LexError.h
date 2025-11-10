@@ -1,8 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_LEXERROR_H
+#define BASIC_COMPILER_LEXERROR_H
 
 #include <stdexcept>
-#include <string>
 
 namespace gwbasic {
 
@@ -29,3 +29,4 @@ public:
 
 } // namespace gwbasic
 
+#endif // BASIC_COMPILER_LEXERROR_H

@@ -3,7 +3,10 @@
 
 #include "clang-tidy-one-func/OneFuncChecker.h"
 
+#include <exception>
 #include <iostream>
+#include <span>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -13,39 +16,64 @@ static void printUsage(const char* argv0) {
               << "at most one function/method definition.\n";
 }
 
-int main(int argc, char** argv) {
+struct ShowHelp final : public std::exception { };
+static std::string gProgramName = "onefunc";
+
+static std::vector<std::string> gatherInputs(int argc, char** argv) {
+    std::vector<std::string> inputs;
+    std::span<char* const> args{argv, static_cast<std::size_t>(argc)};
+    if (args.size() == 1) {
+        inputs.emplace_back("src/basic_compiler");
+        return inputs;
+    }
+    for (std::size_t i = 1; i < args.size(); ++i) {
+        const std::string arg = args[i];
+        if (arg == "-h" || arg == "--help") {
+            throw ShowHelp{};
+        }
+        if (arg == "-d" && i + 1 < args.size()) {
+            inputs.emplace_back(args[++i]);
+        } else {
+            throw std::invalid_argument("Unknown argument: " + arg);
+        }
+    }
+    if (inputs.empty()) {
+        inputs.emplace_back("src/basic_compiler");
+    }
+    return inputs;
+}
+
+int main(int argc, char** argv) try {
     using namespace onefunc;
     OneFuncChecker checker;
-    std::vector<std::string> inputs;
-
-    if (argc == 1) {
-        inputs.push_back("src/basic_compiler");
-    } else {
-        for (int i = 1; i < argc; ++i) {
-            std::string arg = argv[i];
-            if (arg == "-h" || arg == "--help") { printUsage(argv[0]); return 0; }
-            if (arg == "-d" && i + 1 < argc) {
-                inputs.push_back(argv[++i]);
-            } else {
-                std::cerr << "Unknown argument: " << arg << "\n";
-                printUsage(argv[0]);
-                return 2;
-            }
+    const std::vector<std::string> inputs = gatherInputs(argc, argv);
+    {
+        std::span<char* const> args{argv, static_cast<std::size_t>(argc)};
+        if (!args.empty() && args.front() != nullptr) {
+            gProgramName = args.front();
         }
-        if (inputs.empty()) { inputs = {"src/basic_compiler"}; }
     }
-
-    for (const auto &p : inputs) checker.addPath(p);
-    auto issues = checker.run();
+    for (const auto &path : inputs) {
+        checker.addPath(path);
+    }
+    const auto issues = checker.run();
     if (issues.empty()) {
         std::cout << "One-function-per-file check: OK\n";
         return 0;
     }
-    for (const auto &is : issues) {
-        std::cerr << is.file << ":" << is.line << ": error: " << is.message
+    for (const auto &issue : issues) {
+        std::cerr << issue.file << ":" << issue.line << ": error: " << issue.message
                   << " [clang-tidy-one-func]\n";
     }
     std::cerr << "One-function-per-file check failed with " << issues.size() << " issue(s).\n";
     return 1;
+} catch (const ShowHelp&) {
+    printUsage(gProgramName.c_str());
+    return 0;
+} catch (const std::exception& ex) {
+    std::cerr << "error: " << ex.what() << "\n";
+    return 2;
+} catch (...) {
+    std::cerr << "error: unknown exception\n";
+    return 2;
 }
-
