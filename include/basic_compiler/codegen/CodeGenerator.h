@@ -18,64 +18,37 @@
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/Stmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/NumberExpr.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/VarExpr.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/UnaryExpr.h"
 #include "basic_compiler/ast/BinaryExpr.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/CallExpr.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/StringExpr.h"
 #include "basic_compiler/ast/ForStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/AssignStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/PrintStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/ArrayAssignStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/MidAssignStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/OnGotoStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/OnGosubStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/OpenStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/InputStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/IfBlockStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/GotoStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/GosubStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/EndStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/ReturnStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/RandomizeStmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/RunStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/CommonStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/DataStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/ReadStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/ChainStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/ast/MergeStmt.h"
-// ReSharper disable once CppUnusedIncludeDirective
 #include "basic_compiler/codegen/CodeGenError.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
-#include "basic_compiler/ast/Traits.h"
 #include "basic_compiler/ast/DefFnStmt.h"
 
 namespace gwbasic {

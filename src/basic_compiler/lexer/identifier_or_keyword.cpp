@@ -1,8 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
+#include "basic_compiler/Symbols.h"
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/TokenType.h"
-#include "basic_compiler/Symbols.h"
 #include <cctype>
 #include <string>
 
@@ -20,9 +20,9 @@ Token Lexer::identifierOrKeyword() {
 
     const int startLine = line_;
     const int startCol = col_;
-    auto buf = scanWhile([](const char ch){
-        const auto uch = static_cast<unsigned char>(ch);
-        return std::isalnum(uch) != 0 || ch == '_';
+    auto buf = scanWhile([](const char chr){
+        const auto uch = static_cast<unsigned char>(chr);
+        return std::isalnum(uch) != 0 || chr == '_';
     });
     if (peek() == Symbols::DOLLARSIGN.first() || peek() == Symbols::PERCENT.first() || peek() == Symbols::EXCLAMATION.first() || peek() == Symbols::HASH.first() || peek() == Symbols::AMPERSAND.first()) {
         buf.push_back(advance());
