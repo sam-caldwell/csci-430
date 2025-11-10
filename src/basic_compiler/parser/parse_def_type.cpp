@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
+#include "basic_compiler/parser/ParseError.h"
 #include "basic_compiler/ast/DefTypeStmt.h"
 #include "basic_compiler/ast/make_node.h"
 #include "basic_compiler/token/ToString.h"

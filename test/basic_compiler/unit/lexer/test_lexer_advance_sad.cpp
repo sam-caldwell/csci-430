@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <string>
-#include "basic_compiler/Lexer.h"
+#include "basic_compiler/LexerAccessorForTests.h"
 
 using namespace gwbasic;
 
@@ -29,4 +29,3 @@ TEST(Lexer, Advance_SadPath_AtEnd) {
     EXPECT_EQ(LexerAccessorForTests::col(lx), col);
     EXPECT_EQ(LexerAccessorForTests::bol(lx), bol);
 }
-

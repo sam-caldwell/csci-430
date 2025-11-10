@@ -1,5 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
+#include "logger/Logger.h"
+#include <memory>
 #include <sstream>
 
 namespace gwbasic {
@@ -13,7 +15,7 @@ namespace gwbasic {
  * Returns:
  *  - none
  */
-Lexer::Lexer(std::istream& inputStream) {
+Lexer::Lexer(std::istream& inputStream) : lexLogger_(std::make_unique<logger::Logger>()) {
     std::ostringstream buf;
     buf << inputStream.rdbuf();
     src_ = buf.str();

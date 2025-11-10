@@ -21,6 +21,10 @@
 
 namespace gwbasic {
 
+// Forward declarations to avoid heavy includes and mismatched tag warnings
+struct UnaryExpr;
+struct BinaryExpr;
+
 /**
  * Class: SemanticAnalyzer
  *  - Performs a semantic pass over the AST to resolve symbols, record
@@ -282,8 +286,8 @@ private:
     static bool constEval(const Expr* e, double& out);
 
     // Helpers for constEval (defined in separate TUs to maintain one-function-per-file)
-    static bool constEvalUnary(const class UnaryExpr& u, double& out);
-    static bool constEvalBinary(const class BinaryExpr& b, double& out);
+    static bool constEvalUnary(const UnaryExpr& u, double& out);
+    static bool constEvalBinary(const BinaryExpr& b, double& out);
 
     // Function utilities
     /**

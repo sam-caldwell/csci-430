@@ -1,5 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
+#include "logger/Logger.h"
+#include <memory>
 #include <string>
 
 namespace gwbasic {
@@ -13,6 +15,6 @@ namespace gwbasic {
  * Returns:
  *  - none
  */
-Lexer::Lexer(std::string source) : src_(source) {}
+Lexer::Lexer(std::string source) : src_(source), lexLogger_(std::make_unique<logger::Logger>()) {}
 
 } // namespace gwbasic

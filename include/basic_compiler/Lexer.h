@@ -1,21 +1,30 @@
+// NOLINTBEGIN(llvm-header-guard)
 #ifndef BASIC_COMPILER_LEXER_H
 #define BASIC_COMPILER_LEXER_H
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 
+// Standard library includes (sorted)
 #include <array>
 #include <cstddef>
-#include <istream>
-#include <ostream>
+// Work around libc++ forward-decl requirements during clang-tidy TU
+// NOLINTNEXTLINE(misc-include-cleaner,llvm-include-order)
+#include <wchar.h>
+#include <iosfwd>
+// NOLINTNEXTLINE(misc-include-cleaner)
+#include <stdlib.h>
+// NOLINTNEXTLINE(misc-include-cleaner)
+#include <memory>
 #include <string>
 #include <string_view>
 #include <utility>
+// NOLINTNEXTLINE(misc-include-cleaner)
 #include <vector>
 
 
 #include "basic_compiler/Symbol.h"
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/TokenType.h"
-#include "logger/Logger.h"
+namespace logger { class Logger; }
 
 namespace gwbasic {
 
@@ -448,7 +457,7 @@ private:
     void skipToEOL();
 
     // Lexical logging via ostream-based logger
-    logger::Logger lexLogger_{};
+    std::unique_ptr<logger::Logger> lexLogger_{};
 
     /*
      * Function: Lexer::logToken
@@ -481,26 +490,11 @@ private:
     void emitAmpLiteral(std::vector<Token>& out, int line, int col);
     bool tryEmitOperatorOrPunct(std::vector<Token>& out, int line, int col, char chr);
 
-    // Friend accessor for tests: exposes a minimal surface to validate
-    // internal cursor movement semantics without widening the public API.
+    // Friend accessor for tests (defined in its own header to keep one class per file)
     friend class LexerAccessorForTests;
 };
-
-// Minimal friend accessor for tests: allows calling advance() and
-// inspecting cursor state (line/col/bol) and peek/atEnd for verification.
-class LexerAccessorForTests {
-public:
-    static char advance(Lexer& lexer) { return lexer.advance(); }
-    static int line(const Lexer& lexer) { return lexer.line_; }
-    static int col(const Lexer& lexer) { return lexer.col_; }
-    static bool bol(const Lexer& lexer) { return lexer.bol_; }
-    static bool atEnd(const Lexer& lexer) { return lexer.atEnd(); }
-    static char peek(const Lexer& lexer) { return lexer.peek(); }
-    static void emitAmpLiteral(Lexer& lexer, std::vector<Token>& out, int line, int col) { lexer.emitAmpLiteral(out, line, col); }
-    static std::string escapeForLog(const std::string& text) { return Lexer::escapeForLog(text); }
-    static Token identifierOrKeyword(Lexer& lexer) { return lexer.identifierOrKeyword(); }
-};
-
+ 
 } // namespace gwbasic
 
 #endif // BASIC_COMPILER_LEXER_H
+// NOLINTEND(llvm-header-guard)

@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
+#include "logger/Logger.h"
 #include <ostream>
 
 namespace gwbasic {
@@ -13,7 +14,6 @@ namespace gwbasic {
  * Returns:
  *  - std::ostream&: stream for lex log
  */
-std::ostream& Lexer::log() { return lexLogger_.stream(); }
+std::ostream& Lexer::log() { return lexLogger_->stream(); }
 
 } // namespace gwbasic
-

@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
+#include "logger/Logger.h"
 #include <fstream>
 
 namespace gwbasic {
@@ -14,8 +15,8 @@ namespace gwbasic {
  *  - void
  */
 void Lexer::setLexLogPath(const std::string& path) {
-    lexLogger_.open(path, /*append=*/false);
-    lexLogger_.setEnabled(true);
+    lexLogger_->open(path, /*append=*/false);
+    lexLogger_->setEnabled(true);
 }
 
 } // namespace gwbasic

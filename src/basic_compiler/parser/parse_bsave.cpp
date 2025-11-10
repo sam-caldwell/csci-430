@@ -2,6 +2,7 @@
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/BsaveStmt.h"
 #include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/ParseError.h"
 
 namespace gwbasic {
 
