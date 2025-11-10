@@ -4,9 +4,12 @@
  * Purpose: Implement CodeGenerator::handleEraseBeforeLine.
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/EraseStmt.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -19,10 +22,14 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleEraseBeforeLine(const Stmt *s,
-                                          std::set<std::string, std::less<>> &arrays) {
-    const auto er = dyn_cast<const EraseStmt>(s);
-    if (!er) return false;
-    for (const auto &n: er->names) arrays.erase(n);
+bool CodeGenerator::handleEraseBeforeLine(const Stmt* stmt,
+                                          std::set<std::string, std::less<>>& arrays) {
+    const auto* eraseStmt = dyn_cast<const EraseStmt>(stmt);
+    if (eraseStmt == nullptr) {
+        return false;
+    }
+    for (const auto& name : eraseStmt->names) {
+        arrays.erase(name);
+    }
     return true;
 }

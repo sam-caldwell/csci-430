@@ -1,11 +1,16 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/Compiler.h"
-#include "basic_compiler/compiler/PhaseLogHelpers.h"
-#include "basic_compiler/util/TransparentSVHasher.h"
-#include <string_view>
-#include <unordered_map>
+#include "basic_compiler/ast/Line.h"
 #include "basic_compiler/compiler/Metrics.h"
+#include "basic_compiler/compiler/PhaseLogHelpers.h"
 #include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/util/TransparentSVHasher.h"
+#include <cstddef>
+#include <functional>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace gwbasic {
 
@@ -25,7 +30,7 @@ namespace gwbasic {
  */
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 // NOLINTBEGIN(bugprone-easily-swappable-parameters)
-std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
+std::string Compiler::compileFileWithPhaseLogs(const std::string& path, // NOLINT(readability-function-size)
                                                const std::string& lexLogPath,
                                                const std::string& syntaxLogPath,
                                                const std::string& semanticLogPath,
@@ -50,33 +55,33 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
     gwbasic::Program program; // composite result
     while (!stack.empty()) {
         // ReSharper disable once CppUseStructuredBinding
-        auto& fr = stack.back();
-        if (fr.idx >= fr.prog.lines.size()) { stack.pop_back(); continue; }
+        auto& frame = stack.back();
+        if (frame.idx >= frame.prog.lines.size()) { stack.pop_back(); continue; }
 
         using enum gwbasic::phase_log_helpers::Dir;
-        gwbasic::Line& ln = fr.prog.lines[fr.idx++];
+        gwbasic::Line& lineObj = frame.prog.lines[frame.idx++];
         auto dir{None};
         std::string incPath;
-        bool had = phase_log_helpers::detectDirective(ln, fr.path, dir, incPath);
+        const bool foundDirective = phase_log_helpers::detectDirective(lineObj, frame.path, dir, incPath);
 
-        if (had && (dir == Chain || dir == Run)) {
-            if (gwbasic::phase_log_helpers::ImportedProg ip;
-                gwbasic::phase_log_helpers::processChainRun(fr.path, incPath, dir == Chain, imported, ln, ip)
+        if (foundDirective && (dir == Chain || dir == Run)) {
+            if (gwbasic::phase_log_helpers::ImportedProg importedProg;
+                gwbasic::phase_log_helpers::processChainRun(frame.path, incPath, dir == Chain, imported, lineObj, importedProg)
             ) {
-                stack.emplace_back(ip.path, std::move(ip.prog), 0, false);
+                stack.emplace_back(importedProg.path, std::move(importedProg.prog), 0, false);
             }
-            phase_log_helpers::replaceOrAppendLine(program, std::move(ln), fr.mergeMode);
+            phase_log_helpers::replaceOrAppendLine(program, std::move(lineObj), frame.mergeMode);
             continue;
         }
 
-        if (had && dir == Merge) {
+        if (foundDirective && dir == Merge) {
             gwbasic::phase_log_helpers::processMerge(incPath, program);
             continue;
         }
 
-        phase_log_helpers::replaceOrAppendLine(program, std::move(ln), fr.mergeMode);
+        phase_log_helpers::replaceOrAppendLine(program, std::move(lineObj), frame.mergeMode);
     }
-    if (gMetrics) {
+    if (gMetrics != nullptr) {
         gMetrics->recordParsedSnapshot(program);
         gMetrics->setAnalyzeOnly(true);
         gwbasic::AstOptimizer::optimize(program);
@@ -84,7 +89,7 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path,
         gMetrics->recordAfterSemanticsSnapshot(program);
     }
     auto irBody = phase_log_helpers::generateIRWithLogs(program, semanticLogPath, codegenLogPath);
-    if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(irBody));
+    if (gMetrics != nullptr) { gMetrics->setIrInstructionCount(Metrics::countIrInstructions(irBody)); }
     return Compiler::addDefaultTripleIfMissing(irBody);
 }
 // NOLINTEND(bugprone-easily-swappable-parameters)

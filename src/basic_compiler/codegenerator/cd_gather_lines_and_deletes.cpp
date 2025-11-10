@@ -28,59 +28,21 @@ namespace gwbasic {
  *  - void
  */
 // NOLINTBEGIN(bugprone-easily-swappable-parameters)
-void CodeGenerator::cdGatherLinesAndDeletes(const Program& program, // NOLINT(readability-convert-member-functions-to-static,readability-function-cognitive-complexity,readability-function-size)
+void CodeGenerator::cdGatherLinesAndDeletes(const Program& program, // NOLINT(readability-convert-member-functions-to-static)
                                             std::vector<int>& linesOut,
                                             std::map<int, const Line*>& lineMapOut,
                                             bool& printZones,
                                             std::vector<std::pair<int,int>>& deleteRanges,
                                             int& globalMin,
                                             int& globalMax) {
-    globalMin = std::numeric_limits<int>::max();
-    globalMax = std::numeric_limits<int>::min();
-    linesOut.clear();
-    lineMapOut.clear();
-    for (const auto& line : program.lines) {
-        linesOut.push_back(line.number);
-        lineMapOut[line.number] = &line;
-        globalMin = std::min(globalMin, line.number);
-        globalMax = std::max(globalMax, line.number);
-        for (const auto& stmtNode : line.statements) {
-            if (const auto* const opz = dyn_cast<const OptionPrintZonesStmt>(stmtNode.get())) {
-                printZones = opz->enabled;
-            }
-            if (const auto* const del = dyn_cast<const DeleteStmt>(stmtNode.get())) {
-                int start = del->startLine.has_value() ? *del->startLine : globalMin;
-                int end   = del->endLine.has_value()   ? *del->endLine   : globalMax;
-                if (del->startIsDot) {
-                    start = line.number;
-                }
-                if (del->endIsDot) {
-                    end = line.number;
-                }
-                deleteRanges.emplace_back(start, end);
-            }
-        }
-    }
+    // Pass 1: collect lines, map, and min/max bounds
+    cdCollectLinesAndBounds(program, linesOut, lineMapOut, globalMin, globalMax);
     std::ranges::sort(linesOut);
     linesOut.erase(std::ranges::unique(linesOut).begin(), linesOut.end());
-    if (globalMin == std::numeric_limits<int>::max()) {
-        globalMin = 0;
-    }
-    if (globalMax == std::numeric_limits<int>::min()) {
-        globalMax = 0;
-    }
-    // Normalize open-ended ranges based on discovered global bounds
-    for (auto& range : deleteRanges) {
-        if (range.first < globalMin) {
-            range.first = globalMin;
-        }
-        if (range.second < range.first) {
-            range.second = range.first;
-        }
-        if (range.second > globalMax) {
-            range.second = globalMax;
-        }
-    }
+    // Pass 2: collect delete ranges and options
+    cdCollectDeleteAndOptions(program, printZones, deleteRanges, globalMin, globalMax);
+    // Final normalization of bounds and ranges
+    cdNormalizeBoundsAndRanges(globalMin, globalMax, deleteRanges);
 }
 
 // NOLINTEND(bugprone-easily-swappable-parameters)

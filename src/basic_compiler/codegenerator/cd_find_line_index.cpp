@@ -12,6 +12,7 @@ namespace gwbasic {
  * Returns:
  *  - int: Index within 'lines' or -1 if missing.
  */
+// ReSharper disable once CppMemberFunctionMayBeStatic
 int CodeGenerator::cdFindLineIndex(const std::vector<int>& lines, const int line) const {
     for (size_t i = 0; i < lines.size(); ++i) if (lines[i] == line) return static_cast<int>(i);
     return -1;

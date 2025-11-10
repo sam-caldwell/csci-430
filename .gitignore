@@ -27,6 +27,7 @@ CTestTestfile.cmake
 CMakePresets.json
 tmp/
 log/
+*.out
 
 # Objects and libraries
 *.o

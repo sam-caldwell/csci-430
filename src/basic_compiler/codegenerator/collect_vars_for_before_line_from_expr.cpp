@@ -33,8 +33,7 @@ void CodeGenerator::collectVarsForBeforeLineFromExpr(const Expr* expr,
         return;
     }
     if (const auto* const call = dyn_cast<const CallExpr>(expr)) {
-        const bool isArrayCall = arrayDims_.contains(call->callee);
-        if (isArrayCall) {
+        if (arrayDims_.contains(call->callee)) {
             arrays.insert(call->callee);
         }
         for (const auto& arg : call->args) {

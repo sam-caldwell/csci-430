@@ -14,21 +14,21 @@ static void printUsage(const char* argv0) {
               << "with fields: Function:, Parameters:, Returns: (or Outputs:).\n";
 }
 
-int main(int argc, char** argv) {
+int main(const int argc, char** argv) {
     using namespace doccheck;
     DocstringChecker checker;
     std::vector<std::string> inputs;
 
     // Default: scan ./include and ./src if no -d given
     if (argc == 1) {
-        inputs.push_back("include");
-        inputs.push_back("src");
+        inputs.emplace_back("include");
+        inputs.emplace_back("src");
     } else {
         for (int i = 1; i < argc; ++i) {
             std::string arg = argv[i];
             if (arg == "-h" || arg == "--help") { printUsage(argv[0]); return 0; }
             if (arg == "-d" && i + 1 < argc) {
-                inputs.push_back(argv[++i]);
+                inputs.emplace_back(argv[++i]);
             } else {
                 std::cerr << "Unknown argument: " << arg << "\n";
                 printUsage(argv[0]);

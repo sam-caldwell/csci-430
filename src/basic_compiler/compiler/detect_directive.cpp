@@ -1,9 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
-#include "basic_compiler/ast/MergeStmt.h"
 #include "basic_compiler/ast/ChainStmt.h"
-#include "basic_compiler/ast/RunStmt.h"
+#include "basic_compiler/ast/Line.h"
+#include "basic_compiler/ast/MergeStmt.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/RunStmt.h"
+#include <string>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -18,7 +20,9 @@ namespace gwbasic::phase_log_helpers {
  * Outputs:
  *  - bool: true if a directive was found; false otherwise
  */
-bool detectDirective(const gwbasic::Line& ln,
+// NOLINTNEXTLINE(readability-function-size)
+// NOLINTNEXTLINE(readability-function-size)
+bool detectDirective(const gwbasic::Line& lineObj,
                      const std::string& curPath,
                      Dir& dir,
                      std::string& outIncPath) {
@@ -26,15 +30,25 @@ bool detectDirective(const gwbasic::Line& ln,
     using enum gwbasic::phase_log_helpers::Dir;
     dir = None; outIncPath.clear();
 
-    for (const auto& st : ln.statements) {
-        if (const auto mg = gwbasic::dyn_cast<gwbasic::MergeStmt>(st.get())) {
-            dir = Merge; outIncPath = resolvePath(curPath, mg->filename); return true;
+    for (const auto& stmtPtr : lineObj.statements) {
+        if (const auto* mergeStmt = gwbasic::dyn_cast<gwbasic::MergeStmt>(stmtPtr.get())) {
+            dir = Merge;
+            outIncPath = resolvePath(curPath, mergeStmt->filename);
+            return true;
         }
-        if (const auto ch = gwbasic::dyn_cast<gwbasic::ChainStmt>(st.get())) {
-            if (ch->filename.has_value()) { dir = Chain; outIncPath = resolvePath(curPath, *ch->filename); return true; }
+        if (const auto* chainStmt = gwbasic::dyn_cast<gwbasic::ChainStmt>(stmtPtr.get())) {
+            if (chainStmt->filename.has_value()) {
+                dir = Chain;
+                outIncPath = resolvePath(curPath, *chainStmt->filename);
+                return true;
+            }
         }
-        if (const auto rn = gwbasic::dyn_cast<gwbasic::RunStmt>(st.get())) {
-            if (rn->filename.has_value()) { dir = Run; outIncPath = resolvePath(curPath, *rn->filename); return true; }
+        if (const auto* runStmt = gwbasic::dyn_cast<gwbasic::RunStmt>(stmtPtr.get())) {
+            if (runStmt->filename.has_value()) {
+                dir = Run;
+                outIncPath = resolvePath(curPath, *runStmt->filename);
+                return true;
+            }
         }
     }
     return false;

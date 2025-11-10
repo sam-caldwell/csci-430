@@ -1,6 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
+#include "basic_compiler/ast/Line.h"
+#include "basic_compiler/util/TransparentSVHasher.h"
+#include <functional>
+#include <string>
 #include <string_view>
+#include <unordered_map>
+#include <utility>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -26,12 +32,12 @@ bool processChainRun(const std::string& curPath,
                      const bool isChain,
                      std::unordered_map<std::string, std::pair<int,int>,
                      TransparentSVHasher, std::equal_to<>>& imported,
-                     Line& ln,
+                     Line& lineObj,
                      ImportedProg& out) {
     const std::string canon = canonicalPath(incPath);
     const bool added = ensureImported(canon, curPath, imported, out);
-    const auto it = imported.find(std::string_view(canon));
-    patchTargetsForChainOrRun(ln, it->second, isChain);
+    const auto itImported = imported.find(std::string_view(canon));
+    patchTargetsForChainOrRun(lineObj, itImported->second, isChain);
     return added;
 }
 

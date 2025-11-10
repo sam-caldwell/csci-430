@@ -18,7 +18,8 @@ using namespace gwbasic;
  *  - std::string: SSA register name holding the resulting value.
  */
 std::string CodeGenerator::emitBinaryExpr(std::ostringstream& out, const BinaryExpr* b) {
-    if (b->op == BinaryOp::Eq || b->op == BinaryOp::Ne || b->op == BinaryOp::Lt || b->op == BinaryOp::Le || b->op == BinaryOp::Gt || b->op == BinaryOp::Ge) {
+    using enum gwbasic::BinaryOp;
+    if (b->op == Eq || b->op == Ne || b->op == Lt || b->op == Le || b->op == Gt || b->op == Ge) {
         std::string i1 = emitComparison(out, b);
         std::string i1z = nextTemp();
         out << std::format("  {} = uitofp i1 {} to double", i1z, i1) << Symbols::LF;
@@ -28,7 +29,7 @@ std::string CodeGenerator::emitBinaryExpr(std::ostringstream& out, const BinaryE
     auto R = emitExpr(out, b->rhs.get(), "");
     std::string res = nextTemp();
     switch (b->op) {
-        case BinaryOp::Add: {
+        case Add: {
             const bool lhsStr = isStringExpr(b->lhs.get());
             if (const bool rhsStr = isStringExpr(b->rhs.get()); lhsStr && rhsStr) {
                 std::string lenL = nextTemp();
@@ -48,15 +49,15 @@ std::string CodeGenerator::emitBinaryExpr(std::ostringstream& out, const BinaryE
             out << std::format("  {} = fadd double {}, {}", res, L, R) << Symbols::LF;
             break;
         }
-        case BinaryOp::Sub: {
+        case Sub: {
             out << std::format("  {} = fsub double {}, {}", res, L, R) << Symbols::LF;
             break;
         }
-        case BinaryOp::Mul: {
+        case Mul: {
             out << std::format("  {} = fmul double {}, {}", res, L, R) << Symbols::LF;
             break;
         }
-        case BinaryOp::Div: {
+        case Div: {
             out << std::format("  {} = fdiv double {}, {}", res, L, R) << Symbols::LF;
             break;
         }

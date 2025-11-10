@@ -50,12 +50,12 @@ std::unique_ptr<Stmt> Parser::parseIf() {
             auto ib = make_node<IfBlockStmt>({l, c}, std::move(cond));
             ib->inlineEnd = true;
             ib->thenBody.push_back(make_node<GotoStmt>({l, c}, target));
-            while (!atEnd()) {
-                if (check(TokenType::NewLine)) break;
-                auto st = parseStatement();
-                ib->elseBody.push_back(std::move(st));
-                if (match(TokenType::Colon)) continue;
-                if (check(TokenType::NewLine) || check(TokenType::EndOfFile)) break;
+            if (!(check(TokenType::NewLine) || check(TokenType::EndOfFile))) {
+                // Parse first ELSE statement (if any), then any colon-separated tail
+                ib->elseBody.push_back(parseStatement());
+                while (match(TokenType::Colon)) {
+                    ib->elseBody.push_back(parseStatement());
+                }
             }
             return ib;
         }
@@ -67,31 +67,20 @@ std::unique_ptr<Stmt> Parser::parseIf() {
     if (!(check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile))) {
         auto ib = make_node<IfBlockStmt>({l, c}, std::move(cond));
         ib->inlineEnd = true;
-        // THEN statement-list: parse statements until ELSE or end-of-line
-        while (!atEnd()) {
-            if (check(TokenType::KwElse)) break; // do not consume here
-            // Stop if end of line
-            if (check(TokenType::NewLine)) break;
-            // Parse a statement into thenBody
-            auto st = parseStatement();
-            ib->thenBody.push_back(std::move(st));
-            // THEN list may be colon-separated
-            if (match(TokenType::Colon)) {
-                // If next token is ELSE immediately after colon, handle in next loop
-                continue;
+        // THEN statement-list: optionally a first statement, then colon-separated tail
+        if (!(check(TokenType::KwElse) || check(TokenType::NewLine))) {
+            ib->thenBody.push_back(parseStatement());
+            while (match(TokenType::Colon)) {
+                ib->thenBody.push_back(parseStatement());
             }
-            // Otherwise stop at end-of-line
-            if (check(TokenType::NewLine) || check(TokenType::EndOfFile)) break;
-            // If ELSE appears next, loop will break
         }
         // Optional ELSE
         if (match(TokenType::KwElse)) {
-            while (!atEnd()) {
-                if (check(TokenType::NewLine)) break;
-                auto st = parseStatement();
-                ib->elseBody.push_back(std::move(st));
-                if (match(TokenType::Colon)) continue;
-                if (check(TokenType::NewLine) || check(TokenType::EndOfFile)) break;
+            if (!check(TokenType::NewLine)) {
+                ib->elseBody.push_back(parseStatement());
+                while (match(TokenType::Colon)) {
+                    ib->elseBody.push_back(parseStatement());
+                }
             }
         }
         return ib;

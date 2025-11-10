@@ -1,6 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-// STL dependencies are provided via CodeGenerator.h
+// STL dependencies are provided via CodeGenerator.h, but include-cleaner expects explicit includes here.
+#include <set>
+#include <utility>
+#include <vector>
 
 namespace gwbasic {
 
@@ -13,7 +16,8 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-// NOLINT(readability-convert-member-functions-to-static,readability-function-size)
+// ReSharper disable once CppMemberFunctionMayBeStatic
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static,readability-function-size)
 void CodeGenerator::cdFilterDeletedLines(std::vector<int>& lines, const std::vector<std::pair<int,int>>& deleteRanges) {
     if (deleteRanges.empty()) {
         return;

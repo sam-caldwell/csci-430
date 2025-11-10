@@ -13,13 +13,13 @@ namespace gwbasic {
  *  - void
  */
 void CodeGenerator::csvHandleRead(const ReadStmt* readStmt) { // NOLINT(readability-function-size)
-    for (const auto& target : readStmt->targets) {
-        if (!target.indices.empty()) {
-            for (const auto& indexExpr : target.indices) {
+    for (const auto&[name, indices] : readStmt->targets) {
+        if (!indices.empty()) {
+            for (const auto& indexExpr : indices) {
                 collectExprVars(indexExpr.get());
             }
         } else {
-            variables_.insert(target.name);
+            variables_.insert(name);
         }
     }
 }

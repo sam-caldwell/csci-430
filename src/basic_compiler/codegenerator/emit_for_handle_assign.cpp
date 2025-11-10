@@ -16,7 +16,7 @@ namespace gwbasic {
  *  - void
  */
 void CodeGenerator::emitForHandleAssign(std::ostringstream& out, const AssignStmt* asg, const std::string& currLineLabel) {
-    (void)currLineLabel; // label not needed here
+    (void)currLineLabel; // label isn't needed here
     std::string val = emitExpr(out, asg->value.get(), currLineLabel);
     if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
         out << std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]) << Symbols::LF;

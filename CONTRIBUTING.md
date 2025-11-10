@@ -33,6 +33,10 @@ Build artifacts are written under `build/`. The compiler binary is `build/basic_
 - Tests should be deterministic and fast; skip E2E gracefully when `clang` is unavailable 
   (see existing tests for patterns).
 - Use docstrings for all functions/classes/methods and tests
+- "std::print" or "std::format" should be used instead of standard output manipulators
+- Use "contains" instead of "find" where possible.
+- Use std::format instead of concatenating pieces manually.
+- Replace this const reference to "std::string" by a "std::string_view" when appropriate.
 
 ## Tests
 

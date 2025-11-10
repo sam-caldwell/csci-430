@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Lexer.h"
+#include "basic_compiler/Symbols.h"
 
 namespace gwbasic {
 
@@ -13,7 +14,7 @@ namespace gwbasic {
  *  - void
  */
 void Lexer::skipToEOL() {
-    skipWhile([](const char c){ return c != Symbols::LF.first(); });
+    skipWhile([](const char chr){ return chr != Symbols::LF.first(); });
 }
 
 } // namespace gwbasic

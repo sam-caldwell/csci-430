@@ -22,7 +22,7 @@ public:
     void addPath(const std::filesystem::path& p);
 
     // Run the checker over all added paths. Returns a list of issues.
-    std::vector<Issue> run();
+    std::vector<Issue> run() const;
 
     // Exposed for unit tests: check raw content as if it came from 'path'.
     std::vector<Issue> checkContent(const std::string& content,

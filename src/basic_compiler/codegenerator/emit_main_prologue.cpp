@@ -1,6 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/Symbols.h"
+#include <algorithm>
+#include <format>
+#include <numeric>
 #include <sstream>
+#include <string>
 
 namespace gwbasic {
 
@@ -20,8 +25,8 @@ void CodeGenerator::emitMainPrologue(std::ostringstream& out) {
     // "Instruction does not dominate all uses!" seen under lli and avoids
     // undefined behavior at runtime.
     // 1) Scalars discovered during declaration collection
-    for (const auto& v : variables_) {
-        ensureVarAllocated(out, v);
+    for (const auto& varName : variables_) {
+        ensureVarAllocated(out, varName);
     }
     // Ensure error reporting temporaries always exist; these may be referenced
     // by bounds/range checks even if the program never explicitly declares them.
@@ -30,21 +35,26 @@ void CodeGenerator::emitMainPrologue(std::ostringstream& out) {
     // 2) Arrays: allocate backing storage for all arrays discovered by semantics
     //    using their declared extents and current OPTION BASE.
     for (const auto& [name, dims] : arrayDims_) {
-        long long total = 1;
-        for (int ub : dims) {
-            long long ext = static_cast<long long>(ub) - optionBase_ + 1;
-            if (ext < 0) ext = 0;
-            total *= ext;
-        }
-        if (total < 0) total = 0; // defensive (shouldn't happen)
+        const long long total = std::accumulate(
+            dims.begin(), dims.end(), 1LL,
+            [this](long long acc, int upperBound) {
+                const long long extent = std::max<long long>(static_cast<long long>(upperBound) - optionBase_ + 1, 0LL);
+                return acc * extent;
+            });
         if (isStringArrayNameCG(name)) {
             ensureStringArrayAllocated(out, name, static_cast<int>(total));
         } else {
             ensureArrayAllocated(out, name, static_cast<int>(total));
         }
     }
-    if (!lineNumbers_.empty()) { std::string br = "  br label %"; br += lineLabelName(lineNumbers_.front()); out << br << Symbols::LF; log() << "entry -> " << br << Symbols::LF; }
-    else { out << "  ret i32 0" << Symbols::LF; out << "}" << Symbols::LF; }
+    if (!lineNumbers_.empty()) {
+        const std::string branchInstr = std::format("  br label %{}", lineLabelName(lineNumbers_.front()));
+        out << branchInstr << Symbols::LF;
+        log() << "entry -> " << branchInstr << Symbols::LF;
+    } else {
+        out << "  ret i32 0" << Symbols::LF;
+        out << "}" << Symbols::LF;
+    }
 }
 
 } // namespace gwbasic

@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/WriteStmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,17 +23,15 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleWriteBeforeLine(const Stmt *s,
+bool CodeGenerator::handleWriteBeforeLine(const Stmt *stmt,
                                           std::set<std::string, std::less<>> &vars,
                                           std::set<std::string, std::less<>> &arrays) {
-
-    const auto wr = dyn_cast<const WriteStmt>(s);
-
-    if (!wr)
+    const auto *const writeStmt = dyn_cast<const WriteStmt>(stmt);
+    if (writeStmt == nullptr) {
         return false;
-
-    for (const auto &e: wr->items)
-        collectVarsForBeforeLineFromExpr(e.get(), vars, arrays);
-
+    }
+    for (const auto &exprPtr : writeStmt->items) {
+        collectVarsForBeforeLineFromExpr(exprPtr.get(), vars, arrays);
+    }
     return true;
 }

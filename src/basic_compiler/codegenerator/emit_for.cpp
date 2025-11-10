@@ -18,10 +18,10 @@ namespace gwbasic {
  */
 void CodeGenerator::emitFor(std::ostringstream& out, const ForStmt* fs, const std::string& currLineLabel, int& localCounter) {
     std::string loopId = std::to_string(++localCounter);
-    std::string condLbl = currLineLabel; condLbl += "_for_cond"; condLbl += loopId;
-    std::string bodyLbl = currLineLabel; bodyLbl += "_for_body"; bodyLbl += loopId;
-    std::string incLbl  = currLineLabel; incLbl  += "_for_inc";  incLbl  += loopId;
-    std::string endLbl  = currLineLabel; endLbl  += "_for_end";  endLbl  += loopId;
+    std::string condLbl = std::format("{}_for_cond{}", currLineLabel, loopId);
+    std::string bodyLbl = std::format("{}_for_body{}", currLineLabel, loopId);
+    std::string incLbl  = std::format("{}_for_inc{}",  currLineLabel, loopId);
+    std::string endLbl  = std::format("{}_for_end{}",  currLineLabel, loopId);
 
     // Initialize loop variable and jump to condition
     ensureVarAllocated(out, fs->var);

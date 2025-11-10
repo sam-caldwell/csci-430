@@ -1,7 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
 #include "basic_compiler/ast/ShellStmt.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <utility>
 
 namespace gwbasic {
 
@@ -19,8 +23,8 @@ std::unique_ptr<Stmt> Parser::parseShell() {
     if (check(TokenType::NewLine) || check(TokenType::Colon)) {
         return make_node<ShellStmt>({0,0});
     }
-    auto e = parseExpression();
-    return make_node<ShellStmt>({0,0}, std::move(e));
+    auto exprPtr = parseExpression();
+    return make_node<ShellStmt>({0,0}, std::move(exprPtr));
 }
 
 } // namespace gwbasic

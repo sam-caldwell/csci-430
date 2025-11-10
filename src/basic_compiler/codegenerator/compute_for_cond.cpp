@@ -22,13 +22,14 @@ std::string CodeGenerator::computeForCond(std::ostringstream& out,
                                           const std::string& endReg,
                                           const std::string& stepReg) {
     std::string isNeg = nextTemp();
-    out << std::format("  {} = fcmp olt double {}, 0.0", isNeg, stepReg) << Symbols::LF;
     std::string condLe = nextTemp();
-    out << std::format("  {} = fcmp ole double {}, {}", condLe, curVal, endReg) << Symbols::LF;
     std::string condGe = nextTemp();
-    out << std::format("  {} = fcmp oge double {}, {}", condGe, curVal, endReg) << Symbols::LF;
     std::string cond = nextTemp();
-    out << std::format("  {} = select i1 {}, i1 {}, i1 {}", cond, isNeg, condGe, condLe) << Symbols::LF;
+    out << std::format("  {} = fcmp olt double {}, 0.0", isNeg, stepReg) << Symbols::LF
+        << std::format("  {} = fcmp ole double {}, {}", condLe, curVal, endReg) << Symbols::LF
+        << std::format("  {} = fcmp oge double {}, {}", condGe, curVal, endReg) << Symbols::LF
+        << std::format("  {} = select i1 {}, i1 {}, i1 {}", cond, isNeg, condGe, condLe)
+        << Symbols::LF;
     return cond;
 }
 

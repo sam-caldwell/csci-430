@@ -12,6 +12,7 @@
 #include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/parser/ParseError.h"
 #include "basic_compiler/token/TokenType.h"
+#include <cstddef>
 #include <utility>
 #include <vector>
 
@@ -67,6 +68,15 @@ Program Parser::parseProgram() {
         static BlockEntry While(WhileStmt* ptr) { BlockEntry entry; entry.kind = Kind::WhileK; entry.w = ptr; return entry; }
     };
     std::vector<BlockEntry> stack;
+    // Helper: find the last index of a given block kind in the stack
+    auto findLastOfKind = [&](BlockEntry::Kind kind) -> int {
+        for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
+            if (stack[static_cast<size_t>(i)].kind == kind) {
+                return i; // return avoids inner-loop break usage
+            }
+        }
+        return -1;
+    };
     for (auto&[number, statements] : prog.lines) {
         Line out; out.number = number;
         for (auto& stmtNode : statements) {
@@ -75,10 +85,7 @@ Program Parser::parseProgram() {
                 // Handle NEXT with optional var-list: NEXT v1[,v2...]
                 // Empty list => close exactly one innermost FOR.
                 auto popOne = [&]() {
-                    int idx = -1;
-                    for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
-                        if (stack[i].kind == BlockEntry::Kind::ForK) { idx = i; break; }
-                    }
+                    const int idx = findLastOfKind(BlockEntry::Kind::ForK);
                     if (idx < 0) {
                         throw ParseError("NEXT without matching FOR");
                     }
@@ -91,10 +98,7 @@ Program Parser::parseProgram() {
                 }
                 for (const auto& vname : nextStmt->vars) {
                     // Find innermost FOR and enforce variable match
-                    int idx = -1;
-                    for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
-                        if (stack[i].kind == BlockEntry::Kind::ForK) { idx = i; break; }
-                    }
+                    const int idx = findLastOfKind(BlockEntry::Kind::ForK);
                     if (idx < 0) {
                         throw ParseError("NEXT without matching FOR");
                     }
@@ -108,10 +112,7 @@ Program Parser::parseProgram() {
             if (const auto* const elseStmt = dyn_cast<ElseStmt>(stmtNode.get())) {
                 (void)elseStmt;
                 // Toggle else for innermost IF
-                int idx = -1;
-                for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
-                    if (stack[i].kind == BlockEntry::Kind::IfK) { idx = i; break; }
-                }
+                const int idx = findLastOfKind(BlockEntry::Kind::IfK);
                 if (idx < 0) {
                     throw ParseError("ELSE without matching IF");
                 }
@@ -124,10 +125,7 @@ Program Parser::parseProgram() {
             if (const auto* const endIfStmt = dyn_cast<EndIfStmt>(stmtNode.get())) {
                 (void)endIfStmt;
                 // Close innermost IF
-                int idx = -1;
-                for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
-                    if (stack[i].kind == BlockEntry::Kind::IfK) { idx = i; break; }
-                }
+                const int idx = findLastOfKind(BlockEntry::Kind::IfK);
                 if (idx < 0) {
                     throw ParseError("END IF without matching IF");
                 }
@@ -136,10 +134,7 @@ Program Parser::parseProgram() {
             }
             if (const auto* const wendStmt = dyn_cast<WendStmt>(stmtNode.get())) {
                 (void)wendStmt;
-                int idx = -1;
-                for (int i = static_cast<int>(stack.size()) - 1; i >= 0; --i) {
-                    if (stack[i].kind == BlockEntry::Kind::WhileK) { idx = i; break; }
-                }
+                const int idx = findLastOfKind(BlockEntry::Kind::WhileK);
                 if (idx < 0) {
                     throw ParseError("WEND without matching WHILE");
                 }

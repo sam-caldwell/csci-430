@@ -360,14 +360,14 @@ private:
     bool handleReadBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     bool handleDimBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& arrays);
     bool handleSwapBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
-    bool handleEraseBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& arrays);
+    static bool handleEraseBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& arrays);
     bool handleWriteBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     bool handleOnGotoBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     bool handleOnGosubBeforeLine(const Stmt* stmt, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);
     /** Collect variables/strings referenced by an expression. */
-    static void collectExprVars(const Expr* e);
+    void collectExprVars(const Expr* e);
     /** Collect variables/strings/COMMON from a statement (recursive). */
-    static void collectStmtVars(const Stmt* stmt);
+    void collectStmtVars(const Stmt* stmt);
     // collectStmtVars() helpers
     void csvHandlePrint(const PrintStmt* p);
     void csvHandleAssign(const AssignStmt* a);
@@ -377,7 +377,7 @@ private:
     void csvHandleInput(const InputStmt* in);
     void csvHandleRandomize(const RandomizeStmt* randomizeStmt);
     void csvHandleCommon(const CommonStmt* commonStmt);
-    void csvHandleData(const DataStmt* ds);
+    void csvHandleData(const DataStmt* dataStmt);
     void csvHandleRead(const ReadStmt* readStmt);
     void csvHandleOnGoto(const OnGotoStmt* onGotoStmt);
     void csvHandleOnGosub(const OnGosubStmt* onGosubStmt);
@@ -409,6 +409,16 @@ private:
     void emitWhile(std::ostringstream& out, const WhileStmt* ws, const std::string& currLineLabel, int& localCounter);
     /** Inline a GOSUB target and branch back to a continuation label. */
     void emitSubroutineInline(std::ostringstream& out, int targetLine, const std::string& entryLabel, const std::string& returnLabel);
+    /*
+     * Function: CodeGenerator::emitSubroutineInlineStatement
+     * Purpose: Dispatch a single statement in an inlined subroutine.
+     * Returns true if the statement terminates control flow.
+     */
+    bool emitSubroutineInlineStatement(std::ostringstream& out,
+                                       const Stmt* stmt,
+                                       std::string_view entryLabel,
+                                       const std::string& returnLabel,
+                                       int& localCounter);
 
     // Expression lowering
     /** Lower an expression to SSA value; returns its name. */
@@ -460,6 +470,22 @@ private:
     std::string loadArrayElemAsDouble(std::ostringstream& out,
                                       const std::string& arrayName,
                                       const std::string& elemPtrSSA);
+
+    // cdGatherLinesAndDeletes split helpers
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+    static void cdCollectLinesAndBounds(const Program& program,
+                                        std::vector<int>& linesOut,
+                                        std::map<int, const Line*>& lineMapOut,
+                                        int& globalMin,
+                                        int& globalMax);
+    static void cdCollectDeleteAndOptions(const Program& program,
+                                          bool& printZones,
+                                          std::vector<std::pair<int,int>>& deleteRanges,
+                                          int globalMin,
+                                          int globalMax); // NOLINT(bugprone-easily-swappable-parameters)
+    static void cdNormalizeBoundsAndRanges(int& globalMin,
+                                           int& globalMax,
+                                           std::vector<std::pair<int,int>>& deleteRanges);
 
     // Logging utilities
     /** Stream accessor: codegen-phase logger (ostream sink when disabled). */
@@ -513,7 +539,7 @@ private:
 
     /** Emit all statements inside a FOR body; returns true if body terminated (e.g., via GOTO). */
     bool emitForBodyStatements(std::ostringstream& out,
-                               const ForStmt* fs,
+                               const ForStmt* forStmt,
                                const std::string& currLineLabel,
                                int& localCounter);
     bool emitForBodyStatement(std::ostringstream& out,
@@ -528,10 +554,19 @@ private:
     void emitForHandleOnGoto(std::ostringstream& out, const OnGotoStmt* og, const std::string& currLineLabel, int& localCounter);
     void emitForHandleOnGosub(std::ostringstream& out, const OnGosubStmt* ogs, const std::string& currLineLabel, int& localCounter);
     bool emitForHandleGoto(std::ostringstream& out, const GotoStmt* gt);
-    void emitForHandleGosub(std::ostringstream& out, const GosubStmt* gs, const std::string& currLineLabel, int& localCounter);
+    void emitForHandleGosub(std::ostringstream& out, const GosubStmt* gosubStmt, const std::string& currLineLabel, int& localCounter);
     void emitForHandleArrayAssign(std::ostringstream& out, const ArrayAssignStmt* aaset, const std::string& currLineLabel, int& localCounter);
     void emitForHandleStop(std::ostringstream& out);
     static void emitForHandleSystem(std::ostringstream& out);
+
+    // -- Subroutine (GOSUB) per-kind helpers --
+    void emitSubHandleAssign(std::ostringstream& out, const AssignStmt* asg, std::string_view entryLabel);
+    void emitSubHandleMidAssign(std::ostringstream& out, const MidAssignStmt* mid, std::string_view entryLabel, int& localCounter);
+    void emitSubHandlePrint(std::ostringstream& out, const struct PrintStmt* pr, std::string_view entryLabel, int& localCounter);
+    void emitSubHandleInput(std::ostringstream& out, const struct InputStmt* ins, std::string_view entryLabel);
+    void emitSubHandleIf(std::ostringstream& out, const struct IfStmt* ifStmt, std::string_view entryLabel, int& localCounter);
+    void emitSubHandleGosub(std::ostringstream& out, const struct GosubStmt* gosubStmt, std::string_view entryLabel, int& localCounter);
+    void emitSubHandleFor(std::ostringstream& out, const struct ForStmt* fs, std::string_view entryLabel, int& localCounter);
 
     // PRINT sub-helpers (FOR body)
     void emitForPrintPadZone(std::ostringstream& out, const PrintStmt* pr);

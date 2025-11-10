@@ -27,15 +27,21 @@ void CodeGenerator::emitForHandlePrint(std::ostringstream& out, const PrintStmt*
     auto emit_pad_to_next_zone = [&]() { emitForPrintPadZone(out, pr); };
     if (items.empty()) {
         if (pr->channel >= 1) {
-            auto fptr = nextTemp(); out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1) << Symbols::LF;
-            auto fh = nextTemp(); out << std::format("  {} = load ptr, ptr {}", fh, fptr) << Symbols::LF;
-            out << std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr @.fmt_str, ptr @.empty)", fh) << Symbols::LF;
+            auto fptr = nextTemp();
+            auto fh = nextTemp();
+            out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1) << Symbols::LF
+                << std::format("  {} = load ptr, ptr {}", fh, fptr) << Symbols::LF
+                << std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr @.fmt_str, ptr @.empty)", fh) << Symbols::LF;
         } else {
             out << "  call i32 (ptr, ...) @printf(ptr @.fmt_str, ptr @.empty)" << Symbols::LF;
-            auto sbuf = nextTemp(); out << std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf) << Symbols::LF;
-            auto n = nextTemp(); out << std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr @.fmt_str, ptr @.empty)", n, sbuf) << Symbols::LF;
-            auto n64 = nextTemp(); out << std::format("  {} = sext i32 {} to i64", n64, n) << Symbols::LF;
-            out << std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64) << Symbols::LF;
+            auto sbuf = nextTemp();
+            auto n = nextTemp();
+            auto n64 = nextTemp();
+            out << std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf) << Symbols::LF
+                << std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr @.fmt_str, ptr @.empty)", n, sbuf) << Symbols::LF
+                << std::format("  {} = sext i32 {} to i64", n64, n) << Symbols::LF
+                << std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64)
+                << Symbols::LF;
         }
         return;
     }
@@ -47,7 +53,9 @@ void CodeGenerator::emitForHandlePrint(std::ostringstream& out, const PrintStmt*
         if (const auto cnum = dyn_cast<const NumberExpr>(items[pi])) {
             bool nextStartsWithSpace = false;
             if (!last && (pi + 1) < items.size()) {
-                if (const auto* ns = dyn_cast<const StringExpr>(items[pi + 1])) { if (!ns->value.empty() && ns->value.front() == ' ') nextStartsWithSpace = true; }
+                if (const auto* ns = dyn_cast<const StringExpr>(items[pi + 1])) {
+                    if (!ns->value.empty() && ns->value.front() == ' ') nextStartsWithSpace = true;
+                }
             }
             emitForPrintConstNumberItem(out, pr, cnum->value, addNL, nextStartsWithSpace);
             continue;
@@ -71,15 +79,21 @@ void CodeGenerator::emitForHandlePrint(std::ostringstream& out, const PrintStmt*
     }
     if (pr->trail == PrintStmt::Terminator::Newline) {
         if (pr->channel >= 1) {
-            auto fptr = nextTemp(); out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1) << Symbols::LF;
-            auto fh = nextTemp(); out << std::format("  {} = load ptr, ptr {}", fh, fptr) << Symbols::LF;
-            out << std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr @.fmt_str, ptr @.nl)", fh) << Symbols::LF;
+            auto fptr = nextTemp();
+            auto fh = nextTemp();
+            out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1) << Symbols::LF
+                << std::format("  {} = load ptr, ptr {}", fh, fptr) << Symbols::LF
+                << std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr @.fmt_str, ptr @.nl)", fh) << Symbols::LF;
         } else {
             out << "  call i32 (ptr, ...) @printf(ptr @.fmt_str, ptr @.nl)" << Symbols::LF;
-            auto sbuf = nextTemp(); out << std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf) << Symbols::LF;
-            auto n = nextTemp(); out << std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr @.fmt_str, ptr @.nl)", n, sbuf) << Symbols::LF;
-            auto n64 = nextTemp(); out << std::format("  {} = sext i32 {} to i64", n64, n) << Symbols::LF;
-            out << std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64) << Symbols::LF;
+            auto sbuf = nextTemp();
+            auto n = nextTemp();
+            auto n64 = nextTemp();
+            out << std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf) << Symbols::LF
+                << std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr @.fmt_str, ptr @.nl)", n, sbuf) << Symbols::LF
+                << std::format("  {} = sext i32 {} to i64", n64, n) << Symbols::LF
+                << std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64)
+                << Symbols::LF;
         }
     } else if (pr->trail == PrintStmt::Terminator::Comma) {
         emit_pad_to_next_zone();

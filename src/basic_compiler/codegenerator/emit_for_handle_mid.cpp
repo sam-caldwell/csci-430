@@ -22,7 +22,12 @@ void CodeGenerator::emitForHandleMidAssign(std::ostringstream& out, const MidAss
     if (!mid->indices.empty()) {
         const auto &dims = arrayDims_[mid->name];
         long long total = 1;
-        for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+        for (int ub : dims) {
+            long long ext = (static_cast<long long>(ub) - optionBase_ + 1);
+            if (ext < 0)
+                ext = 0;
+            total *= ext;
+        }
         ensureStringArrayAllocated(out, mid->name, static_cast<int>(total));
         std::string base = arrayAllocaName_[mid->name];
         std::vector<std::string> idxI64s; idxI64s.reserve(mid->indices.size());

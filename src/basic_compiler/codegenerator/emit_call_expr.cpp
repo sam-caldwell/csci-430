@@ -5,7 +5,6 @@
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/CallExpr.h"
-#include "basic_compiler/ast/RTTI.h"
 
 using namespace gwbasic;
 

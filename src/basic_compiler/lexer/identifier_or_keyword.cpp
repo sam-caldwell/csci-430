@@ -2,6 +2,9 @@
 #include "basic_compiler/Lexer.h"
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/TokenType.h"
+#include "basic_compiler/Symbols.h"
+#include <cctype>
+#include <string>
 
 namespace gwbasic {
 /*
@@ -21,8 +24,9 @@ Token Lexer::identifierOrKeyword() {
         const auto uch = static_cast<unsigned char>(ch);
         return std::isalnum(uch) != 0 || ch == '_';
     });
-    if (peek() == Symbols::DOLLARSIGN.first() || peek() == Symbols::PERCENT.first() || peek() == Symbols::EXCLAMATION.first() || peek() == Symbols::HASH.first() || peek() == Symbols::AMPERSAND.first())
+    if (peek() == Symbols::DOLLARSIGN.first() || peek() == Symbols::PERCENT.first() || peek() == Symbols::EXCLAMATION.first() || peek() == Symbols::HASH.first() || peek() == Symbols::AMPERSAND.first()) {
         buf.push_back(advance());
+    }
 
     std::string upper;
     upper.reserve(buf.size());

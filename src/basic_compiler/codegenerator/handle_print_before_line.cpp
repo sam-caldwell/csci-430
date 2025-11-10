@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/PrintStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,20 +23,18 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handlePrintBeforeLine(const Stmt *s,
+bool CodeGenerator::handlePrintBeforeLine(const Stmt *stmt,
                                           std::set<std::string, std::less<>> &vars,
                                           std::set<std::string, std::less<>> &arrays) {
-
-    const auto pr = dyn_cast<const PrintStmt>(s);
-
-    if (!pr)
+    const auto *const printStmt = dyn_cast<const PrintStmt>(stmt);
+    if (printStmt == nullptr) {
         return false;
-
-    if (pr->value)
-        collectVarsForBeforeLineFromExpr(pr->value.get(), vars, arrays);
-
-    for (const auto &v: pr->more)
-        collectVarsForBeforeLineFromExpr(v.get(), vars, arrays);
-
+    }
+    if (printStmt->value) {
+        collectVarsForBeforeLineFromExpr(printStmt->value.get(), vars, arrays);
+    }
+    for (const auto &exprPtr : printStmt->more) {
+        collectVarsForBeforeLineFromExpr(exprPtr.get(), vars, arrays);
+    }
     return true;
 }

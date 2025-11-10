@@ -23,16 +23,14 @@ std::string CodeGenerator::emitUnaryExpr(std::ostringstream& out, const UnaryExp
     if (u->op == Symbols::PLUS.first()) return inner;
     if (u->op == Symbols::MINUS.first()) {
         std::string res = nextTemp();
-        std::string ir = std::format("  {} = fsub double 0.0, {}", res, inner);
-        out << ir << Symbols::LF;
-        std::ostringstream m; m << "line " << currentLine_ << " UnaryExpr(-) -> " << ir; log() << m.str() << Symbols::LF;
+        out << std::format("  {} = fsub double 0.0, {}", res, inner) << Symbols::LF;
         return res;
     }
     if (u->op == Symbols::EXCLAMATION.first()) {
         std::string isZero = nextTemp();
-        { std::string ir = std::format("  {} = fcmp oeq double {}, 0.0", isZero, inner); out << ir << Symbols::LF; }
         std::string res = nextTemp();
-        { std::string ir = std::format("  {} = uitofp i1 {} to double", res, isZero); out << ir << Symbols::LF; }
+        out << std::format("  {} = fcmp oeq double {}, 0.0", isZero, inner) << Symbols::LF
+            << std::format("  {} = uitofp i1 {} to double", res, isZero) << Symbols::LF;
         return res;
     }
     return inner;

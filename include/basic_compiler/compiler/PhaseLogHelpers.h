@@ -63,7 +63,7 @@ void replaceOrAppendLine(gwbasic::Program& dst, gwbasic::Line&& line, bool repla
  * Outputs:
  *  - bool: true if a directive was found; false otherwise
  */
-bool detectDirective(const gwbasic::Line& ln,
+bool detectDirective(const gwbasic::Line& lineObj,
                      const std::string& curPath,
                      Dir& dir,
                      std::string& outIncPath);
@@ -247,7 +247,7 @@ bool processChainRun(const std::string& curPath,
                      const std::string& incPath,
                      bool isChain,
                      std::unordered_map<std::string, std::pair<int,int>, gwbasic::TransparentSVHasher, std::equal_to<>>& imported,
-                     gwbasic::Line& ln,
+                     gwbasic::Line& lineObj,
                      ImportedProg& out);
 
 /**

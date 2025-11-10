@@ -1,6 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include <string>
+#include <format>
 
 namespace gwbasic {
 
@@ -13,9 +14,7 @@ namespace gwbasic {
  *  - std::string: Symbol name like "@.str.<id>".
  */
 std::string CodeGenerator::globalStringName(int id) {
-    std::string s = "@.str.";
-    s += std::to_string(id);
-    return s;
+    return std::format("@.str.{}", id);
 }
 
 } // namespace gwbasic

@@ -27,15 +27,9 @@ namespace gwbasic {
     void CodeGenerator::emitIfBlock(std::ostringstream &out, const IfBlockStmt *ib, const std::string &currLineLabel,
                                     int &localCounter) {
         std::string ifId = std::to_string(++localCounter);
-        std::string thenLbl = currLineLabel;
-        thenLbl += "_if_then";
-        thenLbl += ifId;
-        std::string elseLbl = currLineLabel;
-        elseLbl += "_if_else";
-        elseLbl += ifId;
-        std::string endLbl = currLineLabel;
-        endLbl += "_if_end";
-        endLbl += ifId;
+        std::string thenLbl = std::format("{}_if_then{}", currLineLabel, ifId);
+        std::string elseLbl = std::format("{}_if_else{}", currLineLabel, ifId);
+        std::string endLbl = std::format("{}_if_end{}", currLineLabel, ifId);
 
         // Emit condition: accept either a comparison or a general truthy numeric expression
         std::string cond;
@@ -56,21 +50,11 @@ namespace gwbasic {
             out << std::format("  {} = fcmp one double {}, 0.0", cond, val) << Symbols::LF;
         }
         if (!ib->elseBody.empty()) {
-            std::string br = "  br i1 ";
-            br += cond;
-            br += ", label %";
-            br += thenLbl;
-            br += ", label %";
-            br += elseLbl;
+            std::string br = std::format("  br i1 {}, label %{}, label %{}", cond, thenLbl, elseLbl);
             out << br << Symbols::LF;
             log() << "line " << currentLine_ << " IfBlock -> " << br << Symbols::LF;
         } else {
-            std::string br = "  br i1 ";
-            br += cond;
-            br += ", label %";
-            br += thenLbl;
-            br += ", label %";
-            br += endLbl;
+            std::string br = std::format("  br i1 {}, label %{}, label %{}", cond, thenLbl, endLbl);
             out << br << Symbols::LF;
             log() << "line " << currentLine_ << " IfBlock -> " << br << Symbols::LF;
         }
@@ -82,11 +66,7 @@ namespace gwbasic {
             if (auto asg = dyn_cast<AssignStmt>(s.get())) {
                 std::string val = emitExpr(out, asg->value.get(), currLineLabel);
                 if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
-                    std::string ir = "  ";
-                    ir += "store ptr ";
-                    ir += val;
-                    ir += ", ptr ";
-                    ir += varAllocaName_[asg->name];
+                    std::string ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
                     out << ir << Symbols::LF;
                     log() << "line " << currentLine_ << " IfBlock then Assign$ -> " << ir << Symbols::LF;
                 } else {
@@ -144,9 +124,9 @@ namespace gwbasic {
                         }
                         anyBad = nb;
                     }
-                    std::string doLbl = currLineLabel + std::string("_mid_ok2_") + std::to_string(++localCounter);
-                    std::string errLblOld = currLineLabel + std::string("_mid_err2_") + std::to_string(localCounter);
-                    std::string errLblNew = currLineLabel + std::string("_mid_idx_err_") + std::to_string(localCounter);
+                    std::string doLbl = std::format("{}_mid_ok2_{}", currLineLabel, ++localCounter);
+                    std::string errLblOld = std::format("{}_mid_err2_{}", currLineLabel, localCounter);
+                    std::string errLblNew = std::format("{}_mid_idx_err_{}", currLineLabel, localCounter);
                     {
                         std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLblOld, doLbl);
                         out << ir << Symbols::LF;
@@ -359,8 +339,8 @@ namespace gwbasic {
                     std::string ir = std::format("  {} = or i1 {}, {}", bad, negOff, geLen);
                     out << ir << Symbols::LF;
                 }
-                std::string doLbl = currLineLabel + std::string("_mid_do_") + std::to_string(++localCounter);
-                std::string endLbl2 = currLineLabel + std::string("_mid_end_") + std::to_string(localCounter);
+                std::string doLbl = std::format("{}_mid_do_{}", currLineLabel, ++localCounter);
+                std::string endLbl2 = std::format("{}_mid_end_{}", currLineLabel, localCounter);
                 {
                     std::string ir = std::format("  br i1 {}, label %{}, label %{}", bad, endLbl2, doLbl);
                     out << ir << Symbols::LF;
@@ -541,12 +521,9 @@ namespace gwbasic {
                                 std::string ir = std::format("  {} = fcmp oeq double {}, {}", isInt, dv, val);
                                 out << ir << Symbols::LF;
                             }
-                            std::string intLbl = currLineLabel + std::string("_print_int_") + std::to_string(
-                                                     ++localCounter);
-                            std::string fltLbl = currLineLabel + std::string("_print_flt_") + std::to_string(
-                                                     localCounter);
-                            std::string contLbl = currLineLabel + std::string("_print_cont_") + std::to_string(
-                                                      localCounter);
+                            std::string intLbl = std::format("{}_print_int_{}", currLineLabel, ++localCounter);
+                            std::string fltLbl = std::format("{}_print_flt_{}", currLineLabel, localCounter);
+                            std::string contLbl = std::format("{}_print_cont_{}", currLineLabel, localCounter);
                             {
                                 std::string ir = std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl, fltLbl);
                                 out << ir << Symbols::LF;
@@ -628,12 +605,9 @@ namespace gwbasic {
                                 std::string ir = std::format("  {} = fcmp oeq double {}, {}", isInt, dv, val);
                                 out << ir << Symbols::LF;
                             }
-                            std::string intLbl = currLineLabel + std::string("_print_int_") + std::to_string(
-                                                     ++localCounter);
-                            std::string fltLbl = currLineLabel + std::string("_print_flt_") + std::to_string(
-                                                     localCounter);
-                            std::string contLbl = currLineLabel + std::string("_print_cont_") + std::to_string(
-                                                      localCounter);
+                            std::string intLbl = std::format("{}_print_int_{}", currLineLabel, ++localCounter);
+                            std::string fltLbl = std::format("{}_print_flt_{}", currLineLabel, localCounter);
+                            std::string contLbl = std::format("{}_print_cont_{}", currLineLabel, localCounter);
                             {
                                 std::string ir = std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl, fltLbl);
                                 out << ir << Symbols::LF;
@@ -872,8 +846,8 @@ namespace gwbasic {
                     }
                     anyBad = nb;
                 }
-                std::string doLbl = currLineLabel + std::string("_arr_ok_") + std::to_string(++localCounter);
-                std::string errLbl = currLineLabel + std::string("_arr_err_") + std::to_string(localCounter);
+                std::string doLbl = std::format("{}_arr_ok_{}", currLineLabel, ++localCounter);
+                std::string errLbl = std::format("{}_arr_err_{}", currLineLabel, localCounter);
                 {
                     std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl);
                     out << ir << Symbols::LF;
@@ -1014,7 +988,7 @@ namespace gwbasic {
                     throw CodeGenError("IF condition must be a comparison");
                 }
                 std::string cond2 = emitComparison(out, be2);
-                std::string contLbl2 = currLineLabel + std::string("_cont_") + std::to_string(++localCounter);
+                std::string contLbl2 = std::format("{}_cont_{}", currLineLabel, ++localCounter);
                 std::string irb2 = std::format("  br i1 {}, label %{}, label %{}", cond2, lineLabelName(is->targetLine),
                                                contLbl2);
                 out << irb2 << Symbols::LF;
@@ -1070,7 +1044,7 @@ namespace gwbasic {
                     out << ir << Symbols::LF;
                     log() << "line " << currentLine_ << " IfBlock then OnGoto fptosi -> " << ir << Symbols::LF;
                 }
-                std::string contLbl = currLineLabel + std::string("_on_cont_") + std::to_string(++localCounter);
+                std::string contLbl = std::format("{}_on_cont_{}", currLineLabel, ++localCounter);
                 {
                     std::ostringstream ir;
                     ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
@@ -1093,12 +1067,11 @@ namespace gwbasic {
                     out << ir << Symbols::LF;
                     log() << "line " << currentLine_ << " IfBlock then OnGosub fptosi -> " << ir << Symbols::LF;
                 }
-                std::string contLbl = currLineLabel + std::string("_on_gs_cont_") + std::to_string(++localCounter);
+                std::string contLbl = std::format("{}_on_gs_cont_{}", currLineLabel, ++localCounter);
                 std::vector<std::string> entryLbls;
                 entryLbls.reserve(ogs->targets.size());
                 for (size_t i = 0; i < ogs->targets.size(); ++i) entryLbls.push_back(
-                    currLineLabel + std::string("_on_gs_entry_") + std::to_string(localCounter) + std::string("_") +
-                    std::to_string(i + 1));
+                    std::format("{}_on_gs_entry_{}_{}", currLineLabel, localCounter, i + 1));
                 {
                     std::ostringstream ir;
                     ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
@@ -1150,9 +1123,9 @@ namespace gwbasic {
                         out << std::format("  {} = sitofp i64 {} to double", dv, iv) << Symbols::LF;
                         std::string isInt = nextTemp();
                         out << std::format("  {} = fcmp oeq double {}, {}", isInt, dv, val) << Symbols::LF;
-                        std::string il = currLineLabel + std::string("_w_i_") + std::to_string(++localCounter);
-                        std::string fl = currLineLabel + std::string("_w_f_") + std::to_string(localCounter);
-                        std::string cl = currLineLabel + std::string("_w_c_") + std::to_string(localCounter);
+                        std::string il = std::format("{}_w_i_{}", currLineLabel, ++localCounter);
+                        std::string fl = std::format("{}_w_f_{}", currLineLabel, localCounter);
+                        std::string cl = std::format("{}_w_c_{}", currLineLabel, localCounter);
                         out << std::format("  br i1 {}, label %{}, label %{}", isInt, il, fl) << Symbols::LF;
                         out << il << ":" << Symbols::LF;
                         if (wr->channel >= 1) {
@@ -1215,20 +1188,15 @@ namespace gwbasic {
                 thenTerminated = true;
                 break;
             } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
-                std::string ir = "  br label %";
-                ir += lineLabelName(gt->targetLine);
+                std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine));
                 out << ir << Symbols::LF;
                 log() << "line " << currentLine_ << " IfBlock then Goto -> " << ir << Symbols::LF;
             } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
-                std::string contLbl = currLineLabel;
-                contLbl += "_gosub_cont";
-                contLbl += std::to_string(++localCounter);
-                std::string entryLbl = currLineLabel;
-                entryLbl += "_gosub_entry";
-                entryLbl += std::to_string(localCounter);
-                out << "  br label %" << entryLbl << Symbols::LF;
+                std::string contLbl = std::format("{}_gosub_cont{}", currLineLabel, ++localCounter);
+                std::string entryLbl = std::format("{}_gosub_entry{}", currLineLabel, localCounter);
+                out << std::format("  br label %{}", entryLbl) << Symbols::LF;
                 emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
-                out << contLbl << ":" << Symbols::LF;
+                out << std::format("{}:", contLbl) << Symbols::LF;
             } else if (auto ins = dyn_cast<InputStmt>(s.get())) {
                 // Optional prompt
                 if (ins->promptLiteral || ins->promptVar) {
@@ -1339,8 +1307,8 @@ namespace gwbasic {
                         std::string ir = std::format("  {} = icmp sgt i64 {}, 0", gt0, len);
                         out << ir << Symbols::LF;
                     }
-                    std::string contLbl = currLineLabel + std::string("_li_cont_") + std::to_string(++localCounter);
-                    std::string doLbl = currLineLabel + std::string("_li_do_") + std::to_string(localCounter);
+                    std::string contLbl = std::format("{}_li_cont_{}", currLineLabel, ++localCounter);
+                    std::string doLbl = std::format("{}_li_do_{}", currLineLabel, localCounter);
                     {
                         std::string ir = std::format("  br i1 {}, label %{}, label %{}", gt0, doLbl, contLbl);
                         out << ir << Symbols::LF;
@@ -1366,7 +1334,7 @@ namespace gwbasic {
                         std::string ir = std::format("  {} = icmp eq i8 {}, 10", islf, ch);
                         out << ir << Symbols::LF;
                     }
-                    std::string endLbl = currLineLabel + std::string("_li_end_") + std::to_string(localCounter);
+                    std::string endLbl = std::format("{}_li_end_{}", currLineLabel, localCounter);
                     {
                         std::string ir = std::format("  br i1 {}, label %{}, label %{}", islf, endLbl, contLbl);
                         out << ir << Symbols::LF;
@@ -1493,11 +1461,9 @@ namespace gwbasic {
                             }
                             anyBad = nb;
                         }
-                        std::string doLbl = currLineLabel + std::string("_mid_ok3_") + std::to_string(++localCounter);
-                        std::string errLblOld = currLineLabel + std::string("_mid_err3_") +
-                                                std::to_string(localCounter);
-                        std::string errLblNew = currLineLabel + std::string("_mid_idx_err_") + std::to_string(
-                                                    localCounter);
+                        std::string doLbl = std::format("{}_mid_ok3_{}", currLineLabel, ++localCounter);
+                        std::string errLblOld = std::format("{}_mid_err3_{}", currLineLabel, localCounter);
+                        std::string errLblNew = std::format("{}_mid_idx_err_{}", currLineLabel, localCounter);
                         {
                             std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLblOld, doLbl);
                             out << ir << Symbols::LF;
@@ -1672,8 +1638,8 @@ namespace gwbasic {
                         std::string ir = std::format("  {} = or i1 {}, {}", bad, negOff, geLen);
                         out << ir << Symbols::LF;
                     }
-                    std::string doLbl = currLineLabel + std::string("_mid_do_") + std::to_string(++localCounter);
-                    std::string endLbl2 = currLineLabel + std::string("_mid_end_") + std::to_string(localCounter);
+                    std::string doLbl = std::format("{}_mid_do_{}", currLineLabel, ++localCounter);
+                    std::string endLbl2 = std::format("{}_mid_end_{}", currLineLabel, localCounter);
                     {
                         std::string ir = std::format("  br i1 {}, label %{}, label %{}", bad, endLbl2, doLbl);
                         out << ir << Symbols::LF;
@@ -1829,12 +1795,9 @@ namespace gwbasic {
                                     std::string ir = std::format("  {} = fcmp oeq double {}, {}", isInt, dv, val);
                                     out << ir << Symbols::LF;
                                 }
-                                std::string intLbl = currLineLabel + std::string("_print_int_") + std::to_string(
-                                                         ++localCounter);
-                                std::string fltLbl = currLineLabel + std::string("_print_flt_") + std::to_string(
-                                                         localCounter);
-                                std::string contLbl = currLineLabel + std::string("_print_cont_") + std::to_string(
-                                                          localCounter);
+                                std::string intLbl = std::format("{}_print_int_{}", currLineLabel, ++localCounter);
+                                std::string fltLbl = std::format("{}_print_flt_{}", currLineLabel, localCounter);
+                                std::string contLbl = std::format("{}_print_cont_{}", currLineLabel, localCounter);
                                 {
                                     std::string ir = std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl,
                                                                  fltLbl);
@@ -1918,12 +1881,9 @@ namespace gwbasic {
                                     std::string ir = std::format("  {} = fcmp oeq double {}, {}", isInt, dv, val);
                                     out << ir << Symbols::LF;
                                 }
-                                std::string intLbl = currLineLabel + std::string("_print_int_") + std::to_string(
-                                                         ++localCounter);
-                                std::string fltLbl = currLineLabel + std::string("_print_flt_") + std::to_string(
-                                                         localCounter);
-                                std::string contLbl = currLineLabel + std::string("_print_cont_") + std::to_string(
-                                                          localCounter);
+                                std::string intLbl = std::format("{}_print_int_{}", currLineLabel, ++localCounter);
+                                std::string fltLbl = std::format("{}_print_flt_{}", currLineLabel, localCounter);
+                                std::string contLbl = std::format("{}_print_cont_{}", currLineLabel, localCounter);
                                 {
                                     std::string ir = std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl,
                                                                  fltLbl);
@@ -2088,8 +2048,8 @@ namespace gwbasic {
                         }
                         anyBad = nb;
                     }
-                    std::string doLbl = currLineLabel + std::string("_arr_ok_") + std::to_string(++localCounter);
-                    std::string errLbl = currLineLabel + std::string("_arr_err_") + std::to_string(localCounter);
+                    std::string doLbl = std::format("{}_arr_ok_{}", currLineLabel, ++localCounter);
+                    std::string errLbl = std::format("{}_arr_err_{}", currLineLabel, localCounter);
                     {
                         std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl);
                         out << ir << Symbols::LF;
@@ -2230,7 +2190,7 @@ namespace gwbasic {
                         throw CodeGenError("IF condition must be a comparison");
                     }
                     std::string cond2 = emitComparison(out, be2);
-                    std::string contLbl2 = currLineLabel + std::string("_cont_") + std::to_string(++localCounter);
+                    std::string contLbl2 = std::format("{}_cont_{}", currLineLabel, ++localCounter);
                     std::string irb2 = std::format("  br i1 {}, label %{}, label %{}", cond2,
                                                    lineLabelName(is->targetLine), contLbl2);
                     out << irb2 << Symbols::LF;
@@ -2290,7 +2250,7 @@ namespace gwbasic {
                         out << ir << Symbols::LF;
                         log() << "line " << currentLine_ << " IfBlock else OnGoto fptosi -> " << ir << Symbols::LF;
                     }
-                    std::string contLbl = currLineLabel + std::string("_on_cont_") + std::to_string(++localCounter);
+                    std::string contLbl = std::format("{}_on_cont_{}", currLineLabel, ++localCounter);
                     {
                         std::ostringstream ir;
                         ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
@@ -2314,12 +2274,11 @@ namespace gwbasic {
                         out << ir << Symbols::LF;
                         log() << "line " << currentLine_ << " IfBlock else OnGosub fptosi -> " << ir << Symbols::LF;
                     }
-                    std::string contLbl = currLineLabel + std::string("_on_gs_cont_") + std::to_string(++localCounter);
+                    std::string contLbl = std::format("{}_on_gs_cont_{}", currLineLabel, ++localCounter);
                     std::vector<std::string> entryLbls;
                     entryLbls.reserve(ogs->targets.size());
                     for (size_t i = 0; i < ogs->targets.size(); ++i) entryLbls.push_back(
-                        currLineLabel + std::string("_on_gs_entry_") + std::to_string(localCounter) + std::string("_") +
-                        std::to_string(i + 1));
+                        std::format("{}_on_gs_entry_{}_{}", currLineLabel, localCounter, i + 1));
                     {
                         std::ostringstream ir;
                         ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
@@ -2372,9 +2331,9 @@ namespace gwbasic {
                             out << std::format("  {} = sitofp i64 {} to double", dv, iv) << Symbols::LF;
                             std::string isInt = nextTemp();
                             out << std::format("  {} = fcmp oeq double {}, {}", isInt, dv, val) << Symbols::LF;
-                            std::string il = currLineLabel + std::string("_w_i_") + std::to_string(++localCounter);
-                            std::string fl = currLineLabel + std::string("_w_f_") + std::to_string(localCounter);
-                            std::string cl = currLineLabel + std::string("_w_c_") + std::to_string(localCounter);
+                            std::string il = std::format("{}_w_i_{}", currLineLabel, ++localCounter);
+                            std::string fl = std::format("{}_w_f_{}", currLineLabel, localCounter);
+                            std::string cl = std::format("{}_w_c_{}", currLineLabel, localCounter);
                             out << std::format("  br i1 {}, label %{}, label %{}", isInt, il, fl) << Symbols::LF;
                             out << il << ":" << Symbols::LF;
                             if (wr->channel >= 1) {
@@ -2430,20 +2389,15 @@ namespace gwbasic {
                     out << ir << Symbols::LF;
                     log() << "line " << currentLine_ << " IfBlock else System -> " << ir << Symbols::LF;
                 } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
-                    std::string ir = "  br label %";
-                    ir += lineLabelName(gt->targetLine);
+                    std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine));
                     out << ir << Symbols::LF;
                     log() << "line " << currentLine_ << " IfBlock else Goto -> " << ir << Symbols::LF;
                 } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
-                    std::string contLbl = currLineLabel;
-                    contLbl += "_gosub_cont";
-                    contLbl += std::to_string(++localCounter);
-                    std::string entryLbl = currLineLabel;
-                    entryLbl += "_gosub_entry";
-                    entryLbl += std::to_string(localCounter);
-                    out << "  br label %" << entryLbl << Symbols::LF;
+                    std::string contLbl = std::format("{}_gosub_cont{}", currLineLabel, ++localCounter);
+                    std::string entryLbl = std::format("{}_gosub_entry{}", currLineLabel, localCounter);
+                    out << std::format("  br label %{}", entryLbl) << Symbols::LF;
                     emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
-                    out << contLbl << ":" << Symbols::LF;
+                    out << std::format("{}:", contLbl) << Symbols::LF;
                 } else if (auto ins = dyn_cast<InputStmt>(s.get())) {
                     if (ins->promptLiteral || ins->promptVar) {
                         std::string pstr;
@@ -2556,8 +2510,8 @@ namespace gwbasic {
                             std::string ir = std::format("  {} = icmp sgt i64 {}, 0", gt0, len);
                             out << ir << Symbols::LF;
                         }
-                        std::string contLbl = currLineLabel + std::string("_li_cont_") + std::to_string(++localCounter);
-                        std::string doLbl = currLineLabel + std::string("_li_do_") + std::to_string(localCounter);
+                        std::string contLbl = std::format("{}_li_cont_{}", currLineLabel, ++localCounter);
+                        std::string doLbl = std::format("{}_li_do_{}", currLineLabel, localCounter);
                         {
                             std::string ir = std::format("  br i1 {}, label %{}, label %{}", gt0, doLbl, contLbl);
                             out << ir << Symbols::LF;
@@ -2584,7 +2538,7 @@ namespace gwbasic {
                             std::string ir = std::format("  {} = icmp eq i8 {}, 10", islf, ch);
                             out << ir << Symbols::LF;
                         }
-                        std::string endLbl = currLineLabel + std::string("_li_end_") + std::to_string(localCounter);
+                        std::string endLbl = std::format("{}_li_end_{}", currLineLabel, localCounter);
                         {
                             std::string ir = std::format("  br i1 {}, label %{}, label %{}", islf, endLbl, contLbl);
                             out << ir << Symbols::LF;

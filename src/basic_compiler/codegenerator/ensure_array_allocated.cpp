@@ -21,7 +21,7 @@ void CodeGenerator::ensureArrayAllocated(std::ostringstream& out, const std::str
     if (auto foundIt = arrayAllocaName_.find(name); foundIt != arrayAllocaName_.end() && !foundIt->second.empty()) {
         return;
     }
-    std::string allocName = sanitizeLocal(name + std::string("_arr"));
+    std::string allocName = sanitizeLocal(std::format("{}_arr", name));
     arrayAllocaName_[name] = allocName;
     std::string elemType = arrayElemType(name);
     const std::string irLine = std::format("  {} = alloca [{} x {}]", allocName, length, elemType);

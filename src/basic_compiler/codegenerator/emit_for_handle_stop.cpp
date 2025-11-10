@@ -12,9 +12,10 @@ namespace gwbasic {
  *  - void
  */
 void CodeGenerator::emitForHandleStop(std::ostringstream& out) {
-    std::string fmt = nextTemp(); out << std::format("  {} = getelementptr inbounds i8, ptr @.msg_break, i64 0", fmt) << Symbols::LF;
-    out << std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 {})", fmt, currentLine_) << Symbols::LF;
-    out << "  br label %exit" << Symbols::LF;
+    std::string fmt = nextTemp();
+    out << std::format("  {} = getelementptr inbounds i8, ptr @.msg_break, i64 0", fmt) << Symbols::LF
+        << std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 {})", fmt, currentLine_) << Symbols::LF
+        << "  br label %exit" << Symbols::LF;
 }
 
 } // namespace gwbasic

@@ -84,8 +84,8 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
                 }
                 std::string anyBad = bads[0];
                 for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); out << std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]) << Symbols::LF; anyBad = nb; }
-                std::string doLbl = currLineLabel + std::string("_while_mid_ok_") + std::to_string(++localCounter);
-                std::string errLbl = currLineLabel + std::string("_while_mid_err_") + std::to_string(localCounter);
+                std::string doLbl = std::format("{}_while_mid_ok_{}", currLineLabel, ++localCounter);
+                std::string errLbl = std::format("{}_while_mid_err_{}", currLineLabel, localCounter);
                 out << std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl) << Symbols::LF;
                 out << errLbl << ":" << Symbols::LF;
                 out << std::format("  store i32 9, ptr @gwb_err_code") << Symbols::LF;
@@ -140,8 +140,8 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             std::string negOff = nextTemp(); { std::string ir = std::format("  {} = icmp slt i64 {}, 0", negOff, off); out << ir << Symbols::LF; }
             std::string geLen = nextTemp(); { std::string ir = std::format("  {} = icmp sge i64 {}, {}", geLen, off, dlen); out << ir << Symbols::LF; }
             std::string bad = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", bad, negOff, geLen); out << ir << Symbols::LF; }
-            std::string doLbl = currLineLabel + std::string("_mid_do_") + std::to_string(++localCounter);
-            std::string endLbl2 = currLineLabel + std::string("_mid_end_") + std::to_string(localCounter);
+            std::string doLbl = std::format("{}_mid_do_{}", currLineLabel, ++localCounter);
+            std::string endLbl2 = std::format("{}_mid_end_{}", currLineLabel, localCounter);
             { std::string ir = std::format("  br i1 {}, label %{}, label %{}", bad, endLbl2, doLbl); out << ir << Symbols::LF; }
             out << doLbl << ":" << Symbols::LF;
             std::string avail = nextTemp(); { std::string ir = std::format("  {} = sub i64 {}, {}", avail, dlen, off); out << ir << Symbols::LF; }
@@ -190,9 +190,9 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
                         std::string iv = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", iv, val); out << ir << Symbols::LF; }
                         std::string dv = nextTemp(); { std::string ir = std::format("  {} = sitofp i64 {} to double", dv, iv); out << ir << Symbols::LF; }
                         std::string isInt = nextTemp(); { std::string ir = std::format("  {} = fcmp oeq double {}, {}", isInt, dv, val); out << ir << Symbols::LF; }
-                        std::string intLbl = currLineLabel + std::string("_wprint_int_") + std::to_string(++localCounter);
-                        std::string fltLbl = currLineLabel + std::string("_wprint_flt_") + std::to_string(localCounter);
-                        std::string contLbl = currLineLabel + std::string("_wprint_cont_") + std::to_string(localCounter);
+                        std::string intLbl = std::format("{}_wprint_int_{}", currLineLabel, ++localCounter);
+                        std::string fltLbl = std::format("{}_wprint_flt_{}", currLineLabel, localCounter);
+                        std::string contLbl = std::format("{}_wprint_cont_{}", currLineLabel, localCounter);
                         { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl, fltLbl); out << ir << Symbols::LF; }
                         out << intLbl << ":" << Symbols::LF;
                         { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmtI, iv); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Print int -> " << ir2 << Symbols::LF; }
@@ -220,8 +220,8 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             }
             std::string anyBad = bads[0];
             for (size_t i = 1; i < bads.size(); ++i) { std::string nb = nextTemp(); { std::string ir = std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]); out << ir << Symbols::LF; } anyBad = nb; }
-            std::string doLbl = currLineLabel + std::string("_while_arr_ok_") + std::to_string(++localCounter);
-            std::string errLbl = currLineLabel + std::string("_while_arr_err_") + std::to_string(localCounter);
+            std::string doLbl = std::format("{}_while_arr_ok_{}", currLineLabel, ++localCounter);
+            std::string errLbl = std::format("{}_while_arr_err_{}", currLineLabel, localCounter);
             { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl); out << ir << Symbols::LF; }
             out << errLbl << ":" << Symbols::LF;
             emitErrorDispatch(out, 9, currentLine_, 0);
@@ -266,34 +266,30 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
         } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
             std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine)); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body Goto -> " << ir << Symbols::LF;
         } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
-            std::string contLbl = currLineLabel; contLbl += "_gosub_cont"; contLbl += std::to_string(++localCounter);
-            std::string entryLbl = currLineLabel; entryLbl += "_gosub_entry"; entryLbl += std::to_string(localCounter);
+            std::string contLbl = std::format("{}_gosub_cont{}", currLineLabel, ++localCounter);
+            std::string entryLbl = std::format("{}_gosub_entry{}", currLineLabel, localCounter);
             out << std::format("  br label %{}", entryLbl) << Symbols::LF;
             emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
-            out << contLbl << ":" << Symbols::LF;
+            out << std::format("{}:", contLbl) << Symbols::LF;
         } else if (auto og = dyn_cast<OnGotoStmt>(s.get())) {
             std::string idx = emitExpr(out, og->index.get(), currLineLabel);
             std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body OnGoto fptosi -> " << ir << Symbols::LF; }
-            std::string contLbl = currLineLabel + std::string("_on_cont_") + std::to_string(++localCounter);
-            {
-                std::ostringstream ir; ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
-                for (size_t i = 0; i < og->targets.size(); ++i) ir << " i32 " << (i+1) << ", label %" << lineLabelName(og->targets[i]);
-                ir << " ]"; out << ir.str() << Symbols::LF; log() << "line " << currentLine_ << " While body OnGoto switch -> " << ir.str() << Symbols::LF;
-            }
-            out << contLbl << ":" << Symbols::LF;
+            std::string contLbl = std::format("{}_on_cont_{}", currLineLabel, ++localCounter);
+            out << std::format("  switch i32 {}, label %{} [", idxi32, contLbl) << Symbols::LF;
+            for (size_t i = 0; i < og->targets.size(); ++i) out << std::format("    i32 {}, label %{}", i+1, lineLabelName(og->targets[i])) << Symbols::LF;
+            out << "  ]" << Symbols::LF;
+            out << std::format("{}:", contLbl) << Symbols::LF;
         } else if (auto ogs = dyn_cast<OnGosubStmt>(s.get())) {
             std::string idx = emitExpr(out, ogs->index.get(), currLineLabel);
             std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body OnGosub fptosi -> " << ir << Symbols::LF; }
-            std::string contLbl = currLineLabel + std::string("_on_gs_cont_") + std::to_string(++localCounter);
+            std::string contLbl = std::format("{}_on_gs_cont_{}", currLineLabel, ++localCounter);
             std::vector<std::string> entryLbls; entryLbls.reserve(ogs->targets.size());
-            for (size_t i = 0; i < ogs->targets.size(); ++i) entryLbls.push_back(currLineLabel + std::string("_on_gs_entry_") + std::to_string(localCounter) + std::string("_") + std::to_string(i+1));
-            {
-                std::ostringstream ir; ir << "  switch i32 " << idxi32 << ", label %" << contLbl << " [";
-                for (size_t i = 0; i < ogs->targets.size(); ++i) ir << " i32 " << (i+1) << ", label %" << entryLbls[i];
-                ir << " ]"; out << ir.str() << Symbols::LF; log() << "line " << currentLine_ << " While body OnGosub switch -> " << ir.str() << Symbols::LF;
-            }
+            for (size_t i = 0; i < ogs->targets.size(); ++i) entryLbls.push_back(std::format("{}_on_gs_entry_{}_{}", currLineLabel, localCounter, i+1));
+            out << std::format("  switch i32 {}, label %{} [", idxi32, contLbl) << Symbols::LF;
+            for (size_t i = 0; i < ogs->targets.size(); ++i) out << std::format("    i32 {}, label %{}", i+1, entryLbls[i]) << Symbols::LF;
+            out << "  ]" << Symbols::LF;
             for (size_t i = 0; i < ogs->targets.size(); ++i) emitSubroutineInline(out, ogs->targets[i], entryLbls[i], contLbl);
-            out << contLbl << ":" << Symbols::LF;
+            out << std::format("{}:", contLbl) << Symbols::LF;
         } else if (isa<StopStmt>(s.get())) {
             std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.msg_break, i64 0", fmt); out << ir << Symbols::LF; }
             { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 {})", fmt, currentLine_); out << ir << Symbols::LF; }

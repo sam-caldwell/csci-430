@@ -2,6 +2,7 @@
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/GotoStmt.h"
 #include <sstream>
+#include <format>
 
 namespace gwbasic {
 
@@ -14,8 +15,9 @@ namespace gwbasic {
  * Returns:
  *  - bool: Always true (handler terminates the loop body).
  */
+// ReSharper disable once CppMemberFunctionMayBeStatic
 bool CodeGenerator::emitForHandleGoto(std::ostringstream& out, const GotoStmt* gt) {
-    std::string ir = "  br label %"; ir += lineLabelName(gt->targetLine);
+    std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine));
     out << ir << Symbols::LF;
     return true;
 }

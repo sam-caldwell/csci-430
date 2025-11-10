@@ -23,24 +23,25 @@ struct FunctionDef {
     std::string doc; // extracted doc block text
 };
 
-static inline bool isWordChar(char c) {
+inline bool isWordChar(char c) {
     return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
 }
 
 static std::string trim(const std::string& s) {
-    size_t i = 0, j = s.size();
+    size_t i = 0;
+    size_t j = s.size();
     while (i < j && std::isspace(static_cast<unsigned char>(s[i]))) ++i;
     while (j > i && std::isspace(static_cast<unsigned char>(s[j-1]))) --j;
     return s.substr(i, j - i);
 }
 
-static std::string stripLineComment(const std::string& s) {
+std::string stripLineComment(const std::string& s) {
     // Remove // comments (naive, ignores // within strings)
     size_t p = s.find("//");
     return (p == std::string::npos) ? s : s.substr(0, p);
 }
 
-static std::string removeBlockComments(const std::string& in) {
+std::string removeBlockComments(const std::string& in) {
     std::string out;
     out.reserve(in.size());
     bool inBlock = false;
@@ -56,7 +57,7 @@ static std::string removeBlockComments(const std::string& in) {
     return out;
 }
 
-static std::string normalizeSpaces(std::string s) {
+std::string normalizeSpaces(std::string s) {
     // Collapse consecutive whitespace to single spaces
     std::string out; out.reserve(s.size());
     bool inSpace = false;
@@ -73,12 +74,12 @@ static std::string normalizeSpaces(std::string s) {
     return out;
 }
 
-// Attempt to extract function name from a signature string.
-// Strategy: find last '('; scan backward to previous non-space sequence;
+// Attempt to extract a function name from a signature string.
+// Strategy: find the last '('; scan backward to a previous non-space sequence;
 // take token after last '::' and before '(' as name.
-static std::string extractFunctionName(const std::string& maybeSig) {
-    auto sig = normalizeSpaces(maybeSig);
-    size_t lp = sig.rfind('(');
+std::string extractFunctionName(const std::string& maybeSig) {
+    const auto sig = normalizeSpaces(maybeSig);
+    const size_t lp = sig.rfind('(');
     if (lp == std::string::npos) return {};
     // skip any spaces before '('
     size_t i = lp;
@@ -92,14 +93,13 @@ static std::string extractFunctionName(const std::string& maybeSig) {
     token = trim(token);
     // Handle operators like operator<<, operator new, etc.
     if (token.rfind("operator", 0) == 0) return token; // accept as-is
-    // strip qualifiers like Class::
-    size_t pos = token.rfind("::");
-    if (pos != std::string::npos) token = token.substr(pos + 2);
+    // strip qualifiers like Class:
+    if (const size_t pos = token.rfind("::"); pos != std::string::npos) token = token.substr(pos + 2);
     return token;
 }
 
 // Parse parameter names from inside parentheses of a signature string.
-static std::vector<std::string> extractParamNames(const std::string& sig) {
+std::vector<std::string> extractParamNames(const std::string& sig) {
     std::vector<std::string> out;
     size_t lp = sig.rfind('(');
     size_t rp = sig.find(')', lp == std::string::npos ? 0 : lp);
@@ -110,7 +110,9 @@ static std::vector<std::string> extractParamNames(const std::string& sig) {
     s = removeBlockComments(s);
     // simple split by commas but honor template/paren/nesting
     std::vector<std::string> parts;
-    int angle = 0, paren = 0, brace = 0;
+    int angle = 0;
+    int paren = 0;
+    int brace = 0;
     std::string cur;
     for (size_t i = 0; i < s.size(); ++i) {
         char c = s[i];
@@ -247,7 +249,7 @@ static bool containsWord(const std::string& hay, const std::string& needle) {
 }
 
 // Helper: detect presence of control statements anywhere in a candidate signature.
-static bool containsControlAnywhere(const std::string& sig) {
+bool containsControlAnywhere(const std::string& sig) {
     // Match control statements like if/for/while/switch/catch/else if regardless of spacing
     static const std::regex re(R"((^|[^A-Za-z0-9_])(if|for|while|switch|catch|else)\s*\()",
                                std::regex::ECMAScript);
@@ -255,31 +257,32 @@ static bool containsControlAnywhere(const std::string& sig) {
 }
 
 // Scan for function/method definitions in non-comment code lines.
-static std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>& lines,
+std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>& lines,
                                                  const std::vector<bool>& inBlockComment) {
     std::vector<FunctionDef> out;
-    const int N = static_cast<int>(lines.size());
+    const auto N = static_cast<int>(lines.size());
     int braceDepth = 0;
     for (int i = 0; i < N; ++i) {
         if (i >= 0 && i < static_cast<int>(inBlockComment.size()) && inBlockComment[i]) continue; // skip block comments
         std::string line = stripLineComment(lines[i]);
         std::string t = trim(line);
         // Track brace depth on non-comment content (approximate)
-        int opens = 0, closes = 0;
+        int opens = 0;
+        int closes = 0;
         for (char c : line) { if (c == '{') ++opens; else if (c == '}') ++closes; }
 
         if (t.empty()) { braceDepth += opens - closes; continue; }
         // Only consider potential function definitions at top-level or namespace scope
         if (braceDepth > 1) { braceDepth += opens - closes; continue; }
         // potential signature if contains '(' and not ';' at end of signature block
-        if (t.find('(') == std::string::npos) continue;
+        if (!t.contains('(')) continue;
         if (isControlLike(t)) continue;
 
         // accumulate up to reach an opening '{' or end with '{' on same/next line
         std::string sig = t;
         int sigStart = i;
         int k = i;
-        bool hasLBrace = (t.find('{') != std::string::npos);
+        bool hasLBrace = (t.contains('{'));
         while (!hasLBrace && k + 1 < N) {
             if (k + 1 < static_cast<int>(inBlockComment.size()) && inBlockComment[k+1]) { ++k; continue; }
             std::string next = stripLineComment(lines[k+1]);
@@ -287,20 +290,22 @@ static std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>&
             if (nt.empty()) { ++k; continue; }
             sig += ' '; sig += nt;
             ++k;
-            if (nt.find('{') != std::string::npos) { hasLBrace = true; break; }
+            if (nt.contains('{')) { hasLBrace = true; break; }
             if (nt.back() == ';') break; // declaration only
-            if (nt.find("->") != std::string::npos) {
+            if (nt.contains("->")) {
                 // potentially trailing return type; keep going
             }
         }
         if (!hasLBrace) { i = k; braceDepth += opens - closes; continue; }
         // Accept even if semicolons exist later on the same line (e.g., one-line bodies)
         // Basic heuristic to exclude initializer lists, lambdas
-        if (sig.find("=") != std::string::npos && sig.find("[]") != std::string::npos) { i = k; continue; }
+        if (sig.contains("=") && sig.find("[]") != std::string::npos) { i = k; continue; }
         if (containsControlAnywhere(sig)) { i = k; continue; }
 
         // Heuristic: skip any candidate containing string literals which can fake signatures
-        if (sig.find('"') != std::string::npos) { i = k; continue; }
+        if (sig.contains('"')) {
+            i = k; continue;
+        }
 
         // Heuristic: require that the character sequence right before the '{'
         // looks like the end of a function signature ')', optionally followed by
@@ -310,12 +315,10 @@ static std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>&
             size_t lbrace = x.find('{');
             if (lbrace == std::string::npos) return false;
             // Skip lambdas or captures: presence of [] before '{'
-            size_t capL = x.find('[');
-            size_t capR = x.find(']');
-            if (capL != std::string::npos && capR != std::string::npos && capL < lbrace && capR < lbrace) return false;
+            const size_t capL = x.find('[');
+            if (const size_t capR = x.find(']'); capL != std::string::npos && capR != std::string::npos && capL < lbrace && capR < lbrace) return false;
             // Skip assignments/declarations with '=' preceding '{' (e.g., auto f = [](){ ... })
-            size_t eq = x.find('=');
-            if (eq != std::string::npos && eq < lbrace) return false;
+            if (const size_t eq = x.find('='); eq != std::string::npos && eq < lbrace) return false;
             std::string before = trim(x.substr(0, lbrace));
             size_t rp = before.rfind(')');
             if (rp == std::string::npos) return false;
@@ -340,40 +343,41 @@ static std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>&
         out.emplace_back(std::move(f));
         i = k;
         // Update brace depth for the line we ended on
-        int opensEnd = 0, closesEnd = 0;
+        int opensEnd = 0;
+        int closesEnd = 0;
         for (char c : lines[i]) { if (c == '{') ++opensEnd; else if (c == '}') ++closesEnd; }
         braceDepth += opensEnd - closesEnd;
     }
     return out;
 }
 
-static std::vector<Issue> validateFunction(const FunctionDef& f, const std::filesystem::path& path) {
+std::vector<Issue> validateFunction(const FunctionDef& f, const std::filesystem::path& path) {
     std::vector<Issue> issues;
     if (f.docLine < 0 || f.doc.empty()) {
-        issues.push_back({path.string(), f.line, "Missing docstring immediately above function: " + f.name});
+        issues.emplace_back(path.string(), f.line, "Missing docstring immediately above function: " + f.name);
         return issues;
     }
     std::string low = DocstringChecker::toLower(f.doc);
 
-    bool hasFunctionTag = (low.find("function:") != std::string::npos) || (low.find("method:") != std::string::npos);
-    bool hasParamsTag = (low.find("parameters:") != std::string::npos)
-                        || (low.find("inputs:") != std::string::npos)
-                        || (low.find("input:") != std::string::npos)
-                        || (low.find("args:") != std::string::npos)
-                        || (low.find("arguments:") != std::string::npos);
-    bool hasReturnsTag = (low.find("returns:") != std::string::npos) || (low.find("outputs:") != std::string::npos) || (low.find("output:") != std::string::npos);
+    bool hasFunctionTag = (low.contains("function:")) || (low.contains("method:"));
+    bool hasParamsTag = (low.contains("parameters:"))
+                        || (low.contains("inputs:"))
+                        || (low.contains("input:"))
+                        || (low.contains("args:"))
+                        || (low.contains("arguments:"));
+    const bool hasReturnsTag = (low.contains("returns:")) || (low.contains("outputs:")) || (low.contains("output:"));
     if (!hasFunctionTag) {
-        issues.push_back({path.string(), f.docLine, "Docstring missing 'Function:' or 'Method:' field"});
+        issues.emplace_back(path.string(), f.docLine, "Docstring missing 'Function:' or 'Method:' field");
     }
     if (!hasParamsTag) {
-        issues.push_back({path.string(), f.docLine, "Docstring missing 'Parameters:' field"});
+        issues.emplace_back(path.string(), f.docLine, "Docstring missing 'Parameters:' field");
     }
     if (!hasReturnsTag) {
-        issues.push_back({path.string(), f.docLine, "Docstring missing 'Returns:' (or 'Outputs:') field"});
+        issues.emplace_back(path.string(), f.docLine, "Docstring missing 'Returns:' (or 'Outputs:') field");
     }
     // Function name must appear in the docstring
     if (!containsWord(DocstringChecker::toLower(f.doc), DocstringChecker::toLower(f.name))) {
-        issues.push_back({path.string(), f.docLine, "Docstring must include function/method name '" + f.name + "'"});
+        issues.emplace_back(path.string(), f.docLine, "Docstring must include function/method name '" + f.name + "'");
     }
     // (Relaxed) Do not require every parameter name to appear.
     // The presence of a Parameters/Inputs section is considered sufficient.
@@ -400,7 +404,7 @@ void DocstringChecker::addPath(const std::filesystem::path& p) {
     paths_.push_back(p);
 }
 
-std::vector<Issue> DocstringChecker::run() {
+std::vector<Issue> DocstringChecker::run() const {
     std::vector<Issue> all;
     for (const auto &p : paths_) {
         std::error_code ec;
@@ -430,6 +434,7 @@ std::vector<Issue> DocstringChecker::run() {
     return all;
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 std::vector<Issue> DocstringChecker::checkContent(const std::string& content, const std::filesystem::path& path) const {
     std::vector<Issue> out;
     // split content into lines
@@ -444,14 +449,19 @@ std::vector<Issue> DocstringChecker::checkContent(const std::string& content, co
     bool block = false;
     size_t lineIdx = 0;
     for (size_t i = 0; i < content.size(); ++i) {
-        if (!block && i + 1 < content.size() && content[i] == '/' && content[i+1] == '*') { block = true; inBlock[lineIdx] = true; ++i; continue; }
-        if (block && i + 1 < content.size() && content[i] == '*' && content[i+1] == '/') { block = false; inBlock[lineIdx] = true; ++i; continue; }
+        if (!block && i + 1 < content.size() && content[i] == '/' && content[i+1] == '*') {
+            block = true; inBlock[lineIdx] = true; ++i; continue;
+        }
+        if (block && i + 1 < content.size() && content[i] == '*' && content[i+1] == '/') {
+            block = false; inBlock[lineIdx] = true; ++i; continue;
+        }
         if (block) { inBlock[lineIdx] = true; }
-        if (content[i] == '\n') { if (lineIdx + 1 < inBlock.size()) ++lineIdx; }
+        if ((content[i] == '\n') && (lineIdx + 1 < inBlock.size())) {
+            ++lineIdx;
+        }
     }
 
-    auto defs = findFunctionDefs(lines, inBlock);
-    for (const auto &f : defs) {
+    for (const auto defs = findFunctionDefs(lines, inBlock); const auto &f : defs) {
         auto v = validateFunction(f, path);
         out.insert(out.end(), v.begin(), v.end());
     }

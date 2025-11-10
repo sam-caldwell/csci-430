@@ -1,7 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/Parser.h"
-#include "basic_compiler/ast/make_node.h"
 #include "basic_compiler/ast/CloseStmt.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/ParseError.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <string>
 
 namespace gwbasic {
 
@@ -15,11 +20,15 @@ namespace gwbasic {
  *  - std::unique_ptr<Stmt>: CloseStmt with channel number
  */
 std::unique_ptr<Stmt> Parser::parseClose() {
-    int l = peek().line, c = peek().col;
+    const int lineNum = peek().line;
+    const int colNum = peek().col;
     consume(TokenType::Hash, "#");
-    if (!check(TokenType::Integer)) throw ParseError("Expected channel number after '#'");
-    int ch = std::stoi(peek().lexeme); advance();
-    return make_node<CloseStmt>({l, c}, ch);
+    if (!check(TokenType::Integer)) {
+        throw ParseError("Expected channel number after '#'");
+    }
+    const int channel = std::stoi(peek().lexeme);
+    advance();
+    return make_node<CloseStmt>({lineNum, colNum}, channel);
 }
 
 } // namespace gwbasic

@@ -1,7 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/Symbols.h"
 #include "basic_compiler/ast/GosubStmt.h"
+#include <format>
 #include <sstream>
+#include <string>
 
 namespace gwbasic {
 
@@ -16,12 +19,12 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-void CodeGenerator::emitForHandleGosub(std::ostringstream& out, const GosubStmt* gs, const std::string& currLineLabel, int& localCounter) {
-    std::string contLbl = currLineLabel + std::string("_gosub_cont") + std::to_string(++localCounter);
-    std::string entryLbl = currLineLabel + std::string("_gosub_entry") + std::to_string(localCounter);
-    out << "  br label %" << entryLbl << Symbols::LF;
-    emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
-    out << contLbl << ":" << Symbols::LF;
+void CodeGenerator::emitForHandleGosub(std::ostringstream& out, const GosubStmt* gosubStmt, const std::string& currLineLabel, int& localCounter) {
+    const std::string contLbl = std::format("{}_gosub_cont{}", currLineLabel, ++localCounter);
+    const std::string entryLbl = std::format("{}_gosub_entry{}", currLineLabel, localCounter);
+    out << std::format("  br label %{}", entryLbl) << Symbols::LF;
+    emitSubroutineInline(out, gosubStmt->targetLine, entryLbl, contLbl);
+    out << std::format("{}:", contLbl) << Symbols::LF;
 }
 
 } // namespace gwbasic
