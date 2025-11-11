@@ -22,7 +22,11 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-void CodeGenerator::emitForHandleArrayAssign(std::ostringstream& out, const ArrayAssignStmt* aaset, const std::string& currLineLabel, int& localCounter) {
+void CodeGenerator::emitForHandleArrayAssign(std::ostringstream& out,
+                                             const ArrayAssignStmt* aaset,
+                                             const std::string& currLineLabel,
+                                             int& localCounter) {
+
     static constexpr int kErrArrayBounds = 9;
     const auto &dims = arrayDims_[aaset->name];
     long long total = 1;
@@ -52,13 +56,20 @@ void CodeGenerator::emitForHandleArrayAssign(std::ostringstream& out, const Arra
         out << std::format("  {} = or i1 {}, {}", next_bad, anyBad, bads[i]) << Symbols::LF;
         anyBad = next_bad;
     }
+
     const std::string doLbl = std::format("{}_for_arr_ok_{}", currLineLabel, ++localCounter);
+
     const std::string errLbl = std::format("{}_for_arr_err_{}", currLineLabel, localCounter);
-    out << std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl) << Symbols::LF;
-    out << errLbl << ":" << Symbols::LF;
+
+    out << std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl) << Symbols::LF
+        << errLbl << ":" << Symbols::LF;
+
     emitErrorDispatch(out, kErrArrayBounds, currentLine_, /*stmtIndex=*/0);
+
     out << doLbl << ":" << Symbols::LF;
+
     const std::string lin = emitLinearIndex(out, idxI64s, dims);
+
     if (isStringArrayNameCG(aaset->name)) {
         ensureStringArrayAllocated(out, aaset->name, static_cast<int>(total));
         const std::string base = arrayAllocaName_[aaset->name];

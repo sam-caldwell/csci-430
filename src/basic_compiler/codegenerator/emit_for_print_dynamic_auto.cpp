@@ -24,13 +24,25 @@ namespace gwbasic {
  *  - void
  */
 // NOLINTNEXTLINE(readability-function-size)
-void CodeGenerator::emitForPrintDynamicAuto(std::ostringstream& out, const PrintStmt* printStmt, const std::string& val,
+void CodeGenerator::emitForPrintDynamicAuto(std::ostringstream& out, const PrintStmt* print_stmt, const std::string& val,
                                             bool addNL, bool nextStartsWithSpace,
                                             std::string_view currLineLabel, int& localCounter) {
-    auto fmtF = nextTemp();
-    out << std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtF, (addNL ? "@.fmt_num" : (nextStartsWithSpace ? "@.fmt_num_ns" : "@.fmt_num_sp"))) << Symbols::LF;
-    auto fmtI = nextTemp();
-    out << std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtI, (addNL ? "@.fmt_int" : (nextStartsWithSpace ? "@.fmt_int_ns" : "@.fmt_int_sp"))) << Symbols::LF;
+    const std::string fmtF = nextTemp();
+    const char* symF = nullptr;
+    if (addNL) {
+        symF = "@.fmt_num";
+    } else {
+        symF = nextStartsWithSpace ? "@.fmt_num_ns" : "@.fmt_num_sp";
+    }
+    out << std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtF, symF) << Symbols::LF;
+    const std::string fmtI = nextTemp();
+    const char* symI = nullptr;
+    if (addNL) {
+        symI = "@.fmt_int";
+    } else {
+        symI = nextStartsWithSpace ? "@.fmt_int_ns" : "@.fmt_int_sp";
+    }
+    out << std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtI, symI) << Symbols::LF;
     auto intValReg = nextTemp(); out << std::format("  {} = fptosi double {} to i64", intValReg, val) << Symbols::LF;
     auto doubleFromInt = nextTemp(); out << std::format("  {} = sitofp i64 {} to double", doubleFromInt, intValReg) << Symbols::LF;
     auto isInt = nextTemp(); out << std::format("  {} = fcmp oeq double {}, {}", isInt, doubleFromInt, val) << Symbols::LF;
@@ -39,8 +51,8 @@ void CodeGenerator::emitForPrintDynamicAuto(std::ostringstream& out, const Print
     auto contLbl = std::format("{}_print_cont_{}", currLineLabel, localCounter);
     out << std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl, fltLbl) << Symbols::LF;
     out << intLbl << ":" << Symbols::LF;
-    if (printStmt->channel >= 1) {
-        auto fptr = nextTemp(); out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, printStmt->channel - 1) << Symbols::LF;
+    if (print_stmt->channel >= 1) {
+        auto fptr = nextTemp(); out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, print_stmt->channel - 1) << Symbols::LF;
         auto fileHandle = nextTemp(); out << std::format("  {} = load ptr, ptr {}", fileHandle, fptr) << Symbols::LF;
         out << std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr {}, i64 {})", fileHandle, fmtI, intValReg) << Symbols::LF;
     } else {
@@ -52,8 +64,8 @@ void CodeGenerator::emitForPrintDynamicAuto(std::ostringstream& out, const Print
     }
     out << std::format("  br label %{}", contLbl) << Symbols::LF;
     out << fltLbl << ":" << Symbols::LF;
-    if (printStmt->channel >= 1) {
-        auto fptr = nextTemp(); out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, printStmt->channel - 1) << Symbols::LF;
+    if (print_stmt->channel >= 1) {
+        auto fptr = nextTemp(); out << std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, print_stmt->channel - 1) << Symbols::LF;
         auto fileHandle = nextTemp(); out << std::format("  {} = load ptr, ptr {}", fileHandle, fptr) << Symbols::LF;
         out << std::format("  call i32 (ptr, ...) @fprintf(ptr {}, ptr {}, double {})", fileHandle, fmtF, val) << Symbols::LF;
     } else {

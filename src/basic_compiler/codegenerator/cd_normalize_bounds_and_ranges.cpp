@@ -22,9 +22,7 @@ void CodeGenerator::cdNormalizeBoundsAndRanges(int& globalMin,
                                                std::vector<std::pair<int,int>>& deleteRanges) {
     if (globalMin == std::numeric_limits<int>::max()) { globalMin = 0; }
     if (globalMax == std::numeric_limits<int>::min()) { globalMax = 0; }
-    for (auto& rng : deleteRanges) {
-        int& fst = rng.first;
-        int& snd = rng.second;
+    for (auto&[fst, snd] : deleteRanges) {
         fst = std::max(fst, globalMin);
         snd = std::max(snd, fst);
         snd = std::min(snd, globalMax);

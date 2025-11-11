@@ -1,6 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
+#include "basic_compiler/Symbols.h"
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include <cstddef>
+#include <format>
 #include <sstream>
+#include <string>
 
 namespace gwbasic {
     /*
@@ -15,6 +19,7 @@ namespace gwbasic {
      *    global arrays with unnamed_addr for efficient addressing, along with
      *    various runtime globals used by BASIC features.
      */
+    // NOLINTNEXTLINE(readability-function-size)
     void CodeGenerator::emitGlobals(std::ostringstream &out) {
         // Printf format strings:
         //  - For the last item in a PRINT list, append a newline ("%f\n" / "%s\n").
@@ -54,15 +59,15 @@ namespace gwbasic {
                 << R"(@.str_eq = private unnamed_addr constant [2 x i8] c"=\00")" << Symbols::LF
                 << "@gwb_last_rnd = global float 0.0" << Symbols::LF; // RNG state (single precision) for RND(0)
         for (const auto &[fst, snd]: strLiteralId_) {
-            const std::string &s = fst;
-            const int id = snd;
-            std::string esc = escapeForIR(s);
-            const size_t N = s.size() + 1;
-            out << globalStringName(id)
-                    << " = private unnamed_addr constant [" << N << " x i8] c\""
+            const std::string &lit = fst;
+            const int literal_id = snd;
+            const std::string esc = escapeForIR(lit);
+            const size_t char_count = lit.size() + 1;
+            out << globalStringName(literal_id)
+                    << " = private unnamed_addr constant [" << char_count << " x i8] c\""
                     << esc << R"(\00")" << Symbols::LF;
             // Log discovery of string literals by streaming directly
-            log() << "emitGlobals: literal " << globalStringName(id) << " from StringExpr \"" << s << "\"" <<
+            log() << "emitGlobals: literal " << globalStringName(literal_id) << " from StringExpr \"" << lit << "\"" <<
                     Symbols::LF;
         }
         out << Symbols::LF;
@@ -113,24 +118,24 @@ namespace gwbasic {
         {
             // Always provide an index variable; table may be size 0
             out << "@gwb_data_idx = global i32 0" << Symbols::LF;
-            const size_t N = dataLiteralIds_.size();
-            out << "@gwb_data = internal constant [" << N << " x ptr] [";
-            for (size_t i = 0; i < N; ++i) {
-                if (i) out << ", ";
+            const size_t table_size = dataLiteralIds_.size();
+            out << "@gwb_data = internal constant [" << table_size << " x ptr] [";
+            for (size_t i = 0; i < table_size; ++i) {
+                if (i != 0U) { out << ", "; }
                 out << "ptr " << globalStringName(dataLiteralIds_[i]);
             }
             out << "]" << Symbols::LF;
             // is-string marker table (i8 1 when original item was quoted string)
-            out << "@gwb_data_isstr = internal constant [" << N << " x i8] [";
-            for (size_t i = 0; i < N; ++i) {
-                if (i) out << ", ";
+            out << "@gwb_data_isstr = internal constant [" << table_size << " x i8] [";
+            for (size_t i = 0; i < table_size; ++i) {
+                if (i != 0U) { out << ", "; }
                 out << "i8 " << static_cast<int>(dataIsString_[i]);
             }
             out << "]" << Symbols::LF;
             // numeric value table (double) for numeric items; undefined for strings (0.0)
-            out << "@gwb_data_num = internal constant [" << N << " x double] [";
-            for (size_t i = 0; i < N; ++i) {
-                if (i) out << ", ";
+            out << "@gwb_data_num = internal constant [" << table_size << " x double] [";
+            for (size_t i = 0; i < table_size; ++i) {
+                if (i != 0U) { out << ", "; }
                 // Emit as floating literal with exponent to satisfy LLVM parser (e.g., 0.000000e+00)
                 out << "double " << std::format("{:.6e}", dataNumValues_[i]);
             }

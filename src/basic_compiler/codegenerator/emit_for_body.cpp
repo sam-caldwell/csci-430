@@ -22,7 +22,9 @@ bool CodeGenerator::emitForBodyStatements(std::ostringstream& out,
                                           const std::string& currLineLabel,
                                           int& localCounter) {
     for (const auto& stmtNode : forStmt->body) {
-        if (emitForBodyStatement(out, stmtNode.get(), currLineLabel, localCounter)) { return true; }
+        if (emitForBodyStatement(out, stmtNode.get(), currLineLabel, localCounter)) {
+            return true;
+        }
     }
     return false;
 }

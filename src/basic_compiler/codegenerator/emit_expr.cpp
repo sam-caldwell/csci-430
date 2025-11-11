@@ -26,30 +26,40 @@ namespace gwbasic {
  * Returns:
  *  - std::string: Register name or literal with the resulting value.
  */
-std::string CodeGenerator::emitExpr(std::ostringstream& out, const Expr* expr, [[maybe_unused]] const std::string& currBlockSuffix) {
-    if (const auto* num = dyn_cast<const NumberExpr>(expr)) {
+std::string CodeGenerator::emitExpr(std::ostringstream& out,
+                                    const Expr* expr_ptr,
+                                    [[maybe_unused]] const std::string& currBlockSuffix) {
+
+    if (const auto* num = dyn_cast<const NumberExpr>(expr_ptr)) {
         return emitNumberExpr(out, num);
     }
-    if (const auto* var = dyn_cast<const VarExpr>(expr)) {
+
+    if (const auto* var = dyn_cast<const VarExpr>(expr_ptr)) {
         return emitVarExpr(out, var);
     }
-    if (const auto* unary = dyn_cast<const UnaryExpr>(expr)) {
+
+    if (const auto* unary = dyn_cast<const UnaryExpr>(expr_ptr)) {
         return emitUnaryExpr(out, unary);
     }
-    if (const auto* binary = dyn_cast<const BinaryExpr>(expr)) {
+
+    if (const auto* binary = dyn_cast<const BinaryExpr>(expr_ptr)) {
         return emitBinaryExpr(out, binary);
     }
-    if (const auto* call = dyn_cast<const CallExpr>(expr)) {
+
+    if (const auto* call = dyn_cast<const CallExpr>(expr_ptr)) {
         return emitCallExpr(out, call);
     }
-    if (const auto* strExpr = dyn_cast<const StringExpr>(expr)) {
+
+    if (const auto* strExpr = dyn_cast<const StringExpr>(expr_ptr)) {
         const int strId = strLiteralId_[strExpr->value];
         std::string gep = nextTemp();
         out << std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", gep, globalStringName(strId)) << Symbols::LF;
         log() << std::format("line {} StringExpr -> gep", currentLine_) << Symbols::LF;
         return gep;
     }
+
     throw CodeGenError("Unknown expression kind");
+
 }
 
 } // namespace gwbasic

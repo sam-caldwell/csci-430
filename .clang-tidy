@@ -22,6 +22,7 @@ Checks: >
     darwin-dispatch-once-nonstatic,
     hicpp-exception-baseclass,
     llvm-*,
+    -llvm-header-guard,
     -llvmlibc-*,
     misc-const-correctness,
     misc-confusable-identifiers,
