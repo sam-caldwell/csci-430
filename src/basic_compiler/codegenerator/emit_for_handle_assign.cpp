@@ -1,7 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/Symbols.h"
 #include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/codegen/CodeGenerator.h"
+#include <format>
 #include <sstream>
+#include <string>
 
 namespace gwbasic {
 
@@ -17,7 +20,7 @@ namespace gwbasic {
  */
 void CodeGenerator::emitForHandleAssign(std::ostringstream& out, const AssignStmt* asg, const std::string& currLineLabel) {
     (void)currLineLabel; // label isn't needed here
-    std::string val = emitExpr(out, asg->value.get(), currLineLabel);
+    const std::string val = emitExpr(out, asg->value.get(), currLineLabel);
     if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
         out << std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]) << Symbols::LF;
     } else {
