@@ -3,6 +3,7 @@
 #include "basic_compiler/Symbols.h"
 #include <format>
 #include <sstream>
+#include <string>
 
 namespace gwbasic {
 

@@ -1,6 +1,7 @@
-// (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-header-guard)
 #ifndef BASIC_COMPILER_ASMUTILS_H
 #define BASIC_COMPILER_ASMUTILS_H
+// (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include <string>
 
@@ -19,3 +20,4 @@
 std::string asmCommentLeaderForTriple(const std::string& triple);
 
 #endif // BASIC_COMPILER_ASMUTILS_H
+// NOLINTEND(llvm-header-guard)

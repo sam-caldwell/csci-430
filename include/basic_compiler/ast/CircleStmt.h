@@ -28,6 +28,7 @@ struct CircleStmt final : ASTLeaf<NodeKind::CircleStmt, Stmt> {
     std::unique_ptr<Expr> end;     // optional
     std::unique_ptr<Expr> aspect;  // optional
     bool step{false};              // optional STEP for relative coords (parsed but not used now)
+    // NOLINTNEXTLINE(readability-function-size)
     CircleStmt(std::unique_ptr<Expr> x_expr,
                std::unique_ptr<Expr> y_expr,
                std::unique_ptr<Expr> radius_expr,

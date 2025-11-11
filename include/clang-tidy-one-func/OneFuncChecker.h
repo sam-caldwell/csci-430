@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <vector>
-#include <filesystem>
 
 namespace onefunc {
 
@@ -23,8 +23,8 @@ public:
                                            const std::filesystem::path& path);
 
 private:
-    std::vector<std::filesystem::path> paths_{};
-    static bool isSourceFile(const std::filesystem::path& p);
+    std::vector<std::filesystem::path> paths_;
+    static bool isSourceFile(const std::filesystem::path& path);
 };
 
 } // namespace onefunc

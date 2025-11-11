@@ -9,13 +9,13 @@ namespace gwbasic {
  * Function: csvHandleIf
  * Summary: Collect variables referenced by an IF condition.
  * Parameters:
- *  - ifStmt: Parsed IfStmt node.
+ *  - if_stmt: Parsed IfStmt node.
  * Returns:
  *  - void
  */
-void CodeGenerator::csvHandleIf(const IfStmt* ifStmt) {
-    collectExprVars(ifStmt->cond.get());
-    logSem() << "If @ " << ifStmt->pos.line << ':' << ifStmt->pos.col << Symbols::LF;
+void CodeGenerator::csvHandleIf(const IfStmt* if_stmt) {
+    collectExprVars(if_stmt->cond.get());
+    logSem() << "If @ " << if_stmt->pos.line << ':' << if_stmt->pos.col << Symbols::LF;
 }
 
 } // namespace gwbasic

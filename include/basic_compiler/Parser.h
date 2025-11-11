@@ -1,6 +1,7 @@
-// (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-header-guard)
 #ifndef BASIC_COMPILER_PARSER_H
 #define BASIC_COMPILER_PARSER_H
+// (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include <cstddef>
 #include <memory>
@@ -63,7 +64,7 @@ private:
      * Notes:
      *  - Includes NewLine tokens and a terminating EndOfFile.
      */
-    std::vector<Token> tokens_{};
+    std::vector<Token> tokens_;
 
     /*
      * Property: pos_
@@ -75,7 +76,7 @@ private:
     size_t pos_{0};
 
     // Syntax-phase logging via ostream-based logger
-    logger::Logger syntaxLogger_{};
+    logger::Logger syntaxLogger_;
 
     /**
      * Function: Parser::peek
@@ -464,9 +465,10 @@ private:
      *  - Typically set when compiling from a file, empty when compiling
      *    from a raw string.
      */
-    std::string sourcePath_{};
+    std::string sourcePath_;
 };
 
 } // namespace gwbasic
 
 #endif // BASIC_COMPILER_PARSER_H
+// NOLINTEND(llvm-header-guard)

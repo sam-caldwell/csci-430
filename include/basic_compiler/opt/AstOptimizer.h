@@ -1,9 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #pragma once
 
-#include <memory>
-#include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/Stmt.h"
+
+#include <memory>
+#include <vector>
 
 namespace gwbasic {
 
@@ -55,7 +58,7 @@ private:
      *    with a GOTO, remove it, or leave it unchanged. Appends zero or one
      *    statements to 'out'.
      */
-    static auto rewriteIf(std::unique_ptr<Stmt>& st,
+    static auto rewriteIf(std::unique_ptr<Stmt>& statement,
                           std::vector<std::unique_ptr<Stmt>>& out) -> void;
 
     /**
@@ -64,14 +67,14 @@ private:
      *  - Simplify expressions within a FOR body and perform STEP elision
      *    handling (the STEP value is processed by the caller).
      */
-    static auto optimizeForBody(ForStmt& fs) -> void;
+    static auto optimizeForBody(ForStmt& forStmt) -> void;
 
     // Per-kind statement handlers (one-function-per-file definitions)
-    static auto optimizeAssignStmt(std::unique_ptr<Stmt>& st,
+    static auto optimizeAssignStmt(std::unique_ptr<Stmt>& statement,
                                    std::vector<std::unique_ptr<Stmt>>& out) -> bool;
-    static auto optimizePrintStmt(std::unique_ptr<Stmt>& st,
+    static auto optimizePrintStmt(std::unique_ptr<Stmt>& statement,
                                   std::vector<std::unique_ptr<Stmt>>& out) -> bool;
-    static auto optimizeForStmt(std::unique_ptr<Stmt>& st,
+    static auto optimizeForStmt(std::unique_ptr<Stmt>& statement,
                                 std::vector<std::unique_ptr<Stmt>>& out) -> bool;
     /**
      * Function: AstOptimizer::optExpr
@@ -84,7 +87,7 @@ private:
      * Outputs:
      *  - Returns simplified expression, possibly a new node.
      */
-    static std::unique_ptr<Expr> optExpr(std::unique_ptr<Expr> e);
+    static std::unique_ptr<Expr> optExpr(std::unique_ptr<Expr> expr);
 
     /**
      * Function: AstOptimizer::isZero
@@ -95,7 +98,7 @@ private:
      * Outputs:
      *  - bool: true if 'e' is a NumberExpr with value 0.0
      */
-    static bool isZero(const Expr* e);
+    static bool isZero(const Expr* expr);
 
     /**
      * Function: AstOptimizer::isOne
@@ -106,7 +109,7 @@ private:
      * Outputs:
      *  - bool: true if 'e' is a NumberExpr with value 1.0
      */
-    static bool isOne(const Expr* e) ;
+    static bool isOne(const Expr* expr) ;
 
     /**
      * Function: AstOptimizer::asNumber
@@ -118,7 +121,7 @@ private:
      * Outputs:
      *  - bool: true if 'e' is NumberExpr and 'out' was set; false otherwise
      */
-    static bool asNumber(const Expr* e, double& out);
+    static bool asNumber(const Expr* expr, double& out);
 };
 
 } // namespace gwbasic

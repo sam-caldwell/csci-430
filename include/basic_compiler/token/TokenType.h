@@ -1,6 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #pragma once
-
+#include <cstdint>
 namespace gwbasic {
 
 /**
@@ -15,7 +15,7 @@ namespace gwbasic {
  *              Gosub, Return, Input
  *  - Operators/punct: arithmetic, comparison, parens, colon, comma
  */
-enum class TokenType {
+enum class TokenType : std::uint8_t {
     // Special
     EndOfFile,
     NewLine,

@@ -2,6 +2,7 @@
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/Line.h"
 #include "basic_compiler/ast/Program.h"
+#include <algorithm>
 #include <limits>
 #include <map>
 #include <vector>
@@ -32,12 +33,8 @@ void CodeGenerator::cdCollectLinesAndBounds(const Program& program,
     for (const auto& line : program.lines) {
         linesOut.push_back(line.number);
         lineMapOut[line.number] = &line;
-        if (line.number < globalMin) {
-            globalMin = line.number;
-        }
-        if (line.number > globalMax) {
-            globalMax = line.number;
-        }
+        globalMin = std::min(line.number, globalMin);
+        globalMax = std::max(line.number, globalMax);
     }
 }
 // NOLINTEND(bugprone-easily-swappable-parameters)

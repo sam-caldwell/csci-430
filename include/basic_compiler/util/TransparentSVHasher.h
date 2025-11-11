@@ -1,9 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #pragma once
 
+#include <cstddef>
+#include <functional>
 #include <string>
 #include <string_view>
-#include <functional>
 
 namespace gwbasic {
 
@@ -28,16 +29,15 @@ namespace gwbasic {
 struct TransparentSVHasher {
     using is_transparent = void; // enables heterogeneous lookup in associative containers
 
-    size_t operator()(std::string_view sv) const noexcept {
-        return std::hash<std::string_view>{}(sv);
+    size_t operator()(std::string_view str_view) const noexcept {
+        return std::hash<std::string_view>{}(str_view);
     }
-    size_t operator()(const std::string& s) const noexcept {
-        return std::hash<std::string_view>{}(s);
+    size_t operator()(const std::string& str) const noexcept {
+        return std::hash<std::string_view>{}(str);
     }
-    size_t operator()(const char* s) const noexcept {
-        return std::hash<std::string_view>{}(s);
+    size_t operator()(const char* cstr) const noexcept {
+        return std::hash<std::string_view>{}(cstr);
     }
 };
 
 } // namespace gwbasic
-

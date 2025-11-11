@@ -1,22 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/Stmt.h"
-#include "basic_compiler/ast/RTTI.h"
-#include "basic_compiler/ast/AssignStmt.h"
-#include "basic_compiler/ast/ArrayAssignStmt.h"
-#include "basic_compiler/ast/IfBlockStmt.h"
-#include "basic_compiler/ast/IfStmt.h"
-#include "basic_compiler/ast/ForStmt.h"
-#include "basic_compiler/ast/WhileStmt.h"
-#include "basic_compiler/ast/PrintStmt.h"
-#include "basic_compiler/ast/InputStmt.h"
-#include "basic_compiler/ast/ReadStmt.h"
-#include "basic_compiler/ast/DimStmt.h"
-#include "basic_compiler/ast/WriteStmt.h"
-#include "basic_compiler/ast/OnGotoStmt.h"
-#include "basic_compiler/ast/OnGosubStmt.h"
-#include "basic_compiler/ast/EraseStmt.h"
-#include "basic_compiler/ast/SwapStmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 namespace gwbasic {
     /*
@@ -32,7 +19,7 @@ namespace gwbasic {
      */
     void CodeGenerator::collectVarsForBeforeLineFromStmt(const Stmt *stmt, std::set<std::string, std::less<>> &vars,
                                                          std::set<std::string, std::less<>> &arrays) {
-        if (!stmt ||
+        if ((stmt == nullptr) ||
             handleAssignBeforeLine(stmt, vars, arrays) ||
             handleArrayAssignBeforeLine(stmt, vars, arrays) ||
             handleIfBlockBeforeLine(stmt, vars, arrays) ||
@@ -47,8 +34,9 @@ namespace gwbasic {
             handleEraseBeforeLine(stmt, arrays) ||
             handleWriteBeforeLine(stmt, vars, arrays) ||
             handleOnGotoBeforeLine(stmt, vars, arrays)
-        )
+        ) {
             return;
+        }
 
         (void)handleOnGosubBeforeLine(stmt, vars, arrays);
     }

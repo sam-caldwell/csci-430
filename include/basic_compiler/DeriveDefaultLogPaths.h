@@ -1,6 +1,7 @@
-// (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-header-guard)
 #ifndef BASIC_COMPILER_DERIVEDEFAULTLOGPATHS_H
 #define BASIC_COMPILER_DERIVEDEFAULTLOGPATHS_H
+// (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include <optional>
 #include <string>
@@ -24,3 +25,4 @@ void deriveDefaultLogPaths(const std::string &input,
                            std::optional<std::string> &semanticLogPath);
 
 #endif // BASIC_COMPILER_DERIVEDEFAULTLOGPATHS_H
+// NOLINTEND(llvm-header-guard)

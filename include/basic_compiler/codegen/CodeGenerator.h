@@ -2,6 +2,36 @@
 #ifndef BASIC_COMPILER_CODEGEN_CODEGENERATOR_H
 #define BASIC_COMPILER_CODEGEN_CODEGENERATOR_H
 
+#include "basic_compiler/ast/ArrayAssignStmt.h"
+#include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/CommonStmt.h"
+#include "basic_compiler/ast/DataStmt.h"
+#include "basic_compiler/ast/DefFnStmt.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/ForStmt.h"
+#include "basic_compiler/ast/GosubStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
+#include "basic_compiler/ast/IfBlockStmt.h"
+#include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/InputStmt.h"
+#include "basic_compiler/ast/Line.h"
+#include "basic_compiler/ast/MidAssignStmt.h"
+#include "basic_compiler/ast/NumberExpr.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
+#include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/RandomizeStmt.h"
+#include "basic_compiler/ast/ReadStmt.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/StringExpr.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+#include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/WhileStmt.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "logger/Logger.h"
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -12,36 +42,6 @@
 #include <string_view>
 #include <utility>
 #include <vector>
-#include "logger/Logger.h"
-#include "basic_compiler/ast/Program.h"
-#include "basic_compiler/ast/Line.h"
-#include "basic_compiler/ast/Expr.h"
-#include "basic_compiler/ast/Stmt.h"
-#include "basic_compiler/ast/NumberExpr.h"
-#include "basic_compiler/ast/VarExpr.h"
-#include "basic_compiler/ast/UnaryExpr.h"
-#include "basic_compiler/ast/BinaryExpr.h"
-#include "basic_compiler/ast/CallExpr.h"
-#include "basic_compiler/ast/StringExpr.h"
-#include "basic_compiler/ast/ForStmt.h"
-#include "basic_compiler/ast/AssignStmt.h"
-#include "basic_compiler/ast/PrintStmt.h"
-#include "basic_compiler/ast/ArrayAssignStmt.h"
-#include "basic_compiler/ast/MidAssignStmt.h"
-#include "basic_compiler/ast/OnGotoStmt.h"
-#include "basic_compiler/ast/OnGosubStmt.h"
-#include "basic_compiler/ast/InputStmt.h"
-#include "basic_compiler/ast/IfStmt.h"
-#include "basic_compiler/ast/IfBlockStmt.h"
-#include "basic_compiler/ast/GotoStmt.h"
-#include "basic_compiler/ast/GosubStmt.h"
-#include "basic_compiler/ast/RandomizeStmt.h"
-#include "basic_compiler/ast/WhileStmt.h"
-#include "basic_compiler/ast/CommonStmt.h"
-#include "basic_compiler/ast/DataStmt.h"
-#include "basic_compiler/ast/ReadStmt.h"
-#include "basic_compiler/semantics/SemanticAnalyzer.h"
-#include "basic_compiler/ast/DefFnStmt.h"
 
 namespace gwbasic {
 
@@ -125,18 +125,18 @@ private:
      *  - Map string literal value to a unique id used for global names.
      */
     std::map<std::string, int, std::less<>> strLiteralId_;
-    std::map<std::string, std::vector<int>, std::less<>> arrayDims_{};
-    std::map<std::string, std::string, std::less<>> arrayAllocaName_{};
+    std::map<std::string, std::vector<int>, std::less<>> arrayDims_;
+    std::map<std::string, std::string, std::less<>> arrayAllocaName_;
     // OPTION BASE setting (0 default; 1 if OPTION BASE 1 seen)
     int optionBase_{0};
     bool printZones_{false};
     // User-defined functions by uppercase name
-    std::map<std::string, const DefFnStmt*, std::less<>> userFunctions_{};
+    std::map<std::string, const DefFnStmt*, std::less<>> userFunctions_;
     // Variables determined as string-typed (by suffix or DEFSTR)
-    std::set<std::string, std::less<>> semStringVariables_{};
+    std::set<std::string, std::less<>> semStringVariables_;
     // Variables numeric kind mapping (non-strings only)
-    enum class NumKind { Int16, Long32, Single, Double };
-    std::map<std::string, NumKind, std::less<>> semNumericKinds_{};
+    enum class NumKind : std::uint8_t { Int16, Long32, Single, Double };
+    std::map<std::string, NumKind, std::less<>> semNumericKinds_;
     /***
      * Property: lineNumbers_
      * Purpose:
@@ -165,7 +165,7 @@ private:
     // Whether STOP appears anywhere (to emit break message global)
     bool needsBreakMsg_{false};
     // Inline call-time substitution bindings (stack of name->SSA value)
-    std::vector<std::map<std::string, std::string>> bindingStack_{};
+    std::vector<std::map<std::string, std::string>> bindingStack_;
     // Optional semantic input
     /***
      * Property: semProvided_
@@ -178,61 +178,61 @@ private:
      * Purpose:
      *  - Variables set provided by semantic analysis.
      */
-    std::set<std::string, std::less<>> semVariables_{};
+    std::set<std::string, std::less<>> semVariables_;
     /***
      * Property: semStrings_
      * Purpose:
      *  - String literals set provided by semantics.
      */
-    std::set<std::string, std::less<>> semStrings_{};
+    std::set<std::string, std::less<>> semStrings_;
     /***
      * Property: semLineNumbers_
      * Purpose:
      *  - Line numbers set provided by semantics.
      */
-    std::set<int> semLineNumbers_{};
+    std::set<int> semLineNumbers_;
     /***
      * Property: semCommonVariables_
      * Purpose:
      *  - Variables marked as COMMON by semantics.
      */
-    std::set<std::string, std::less<>> semCommonVariables_{};
+    std::set<std::string, std::less<>> semCommonVariables_;
     /***
      * Property: commonVariables_
      * Purpose:
      *  - Variables declared as COMMON in the current program.
      */
-    std::set<std::string, std::less<>> commonVariables_{};
+    std::set<std::string, std::less<>> commonVariables_;
     /***
      * Property: commonBeforeLine_
      * Purpose:
      *  - Snapshot of COMMON variables in effect before each line number to
      *    drive CHAIN scoping behavior.
      */
-    std::map<int, std::set<std::string, std::less<>>> commonBeforeLine_{};
+    std::map<int, std::set<std::string, std::less<>>> commonBeforeLine_;
     // Snapshot of variables seen before each line (in source order)
-    std::map<int, std::set<std::string, std::less<>>> varsBeforeLine_{};
+    std::map<int, std::set<std::string, std::less<>>> varsBeforeLine_;
     // Snapshot of arrays seen (DIM'd or referenced) before each line
-    std::map<int, std::set<std::string, std::less<>>> arraysBeforeLine_{};
+    std::map<int, std::set<std::string, std::less<>>> arraysBeforeLine_;
     // For error handlers: map trap start line -> first non-handler line after the
     // handler region (i.e., the line following the first line containing RESUME)
-    std::map<int, int> handlerSkipAfter_{};
+    std::map<int, int> handlerSkipAfter_;
     // Mapping from 1000-based line region base (e.g., 0, 1000, 2000, ...)
     // to the DATA table index at the start of that region. Used to reset
     // the DATA pointer on CHAIN to a new program segment.
-    std::map<int, int> regionDataStartIdx_{};
+    std::map<int, int> regionDataStartIdx_;
     // DATA items as string literal ids in program order
-    std::vector<int> dataLiteralIds_{};
+    std::vector<int> dataLiteralIds_;
     // DATA item kind markers (1 when originally quoted string, 0 when numeric)
-    std::vector<uint8_t> dataIsString_{};
+    std::vector<uint8_t> dataIsString_;
     // DATA numeric values (double) for numeric items; undefined for string items
-    std::vector<double> dataNumValues_{};
+    std::vector<double> dataNumValues_;
 
     // Phase logging via ostream-based logger
-    logger::Logger codegenLogger_{};
-    logger::Logger semLogger_{};
+    logger::Logger codegenLogger_;
+    logger::Logger semLogger_;
     // Optional: a syntax logger accessor exists for unified interface
-    logger::Logger syntaxLogger_{};
+    logger::Logger syntaxLogger_;
 
     // Naming helpers
     /**
@@ -307,7 +307,7 @@ private:
     void cdCollectTrapTargets(const std::vector<int>& lines, std::set<int>& trapTargets);
     int cdFindLineIndex(const std::vector<int>& lines, int line) const;
     int cdFindResumeEndIdx(const std::vector<int>& lines, int startIdx) const;
-    static int cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &idx);
+    static int cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &index_pair);
     void cdMaybeAddTrapTarget(const Stmt* stmt, std::set<int>& trapTargets);
     // Helpers to collect variable/array references for varsBeforeLine_/arraysBeforeLine_
     void collectVarsForBeforeLineFromExpr(const Expr* expr_ptr, std::set<std::string, std::less<>>& vars, std::set<std::string, std::less<>>& arrays);

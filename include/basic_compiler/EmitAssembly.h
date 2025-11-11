@@ -1,6 +1,7 @@
-// (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-header-guard)
 #ifndef BASIC_COMPILER_EMITASSEMBLY_H
 #define BASIC_COMPILER_EMITASSEMBLY_H
+// (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include <filesystem>
 #include <string>
@@ -25,3 +26,4 @@ int emitAssembly(const std::filesystem::path &llTmp,
                  const std::string& clangPath);
 
 #endif // BASIC_COMPILER_EMITASSEMBLY_H
+// NOLINTEND(llvm-header-guard)

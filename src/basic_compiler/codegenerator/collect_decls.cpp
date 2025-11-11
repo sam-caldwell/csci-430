@@ -1,8 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include <algorithm>
-// AST headers needed for per-line variable/array collection
-#include "basic_compiler/ast/DimStmt.h"
+#include "basic_compiler/ast/Program.h"
+#include <utility>
+#include <vector>
 
 
 namespace gwbasic {
@@ -30,7 +30,7 @@ void CodeGenerator::collectDecls(const Program& program) {
         delRanges, gmin, gmax
     );
 
-    if (lineNumbers_.empty()) return;
+    if (lineNumbers_.empty()) { return; }
     cdFilterDeletedLines(lineNumbers_, delRanges);
 
     // Phase B: per-line scans and snapshots

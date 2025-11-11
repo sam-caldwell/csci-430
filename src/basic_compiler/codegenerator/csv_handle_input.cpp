@@ -9,22 +9,22 @@ namespace gwbasic {
  * Function: csvHandleInput
  * Summary: Collect variables and prompt literal for INPUT.
  * Parameters:
- *  - inputStmt: Parsed InputStmt node.
+ *  - input_stmt: Parsed InputStmt node.
  * Returns:
  *  - void
  */
-void CodeGenerator::csvHandleInput(const InputStmt* inputStmt) {
+void CodeGenerator::csvHandleInput(const InputStmt* input_stmt) {
 
-    for (const auto& varName : inputStmt->variables) {
+    for (const auto& varName : input_stmt->variables) {
         variables_.insert(varName);
     }
 
-    if (inputStmt->promptLiteral && !strLiteralId_.contains(*inputStmt->promptLiteral)) {
-        strLiteralId_[*inputStmt->promptLiteral] = strCounter_++;
+    if (input_stmt->promptLiteral && !strLiteralId_.contains(*input_stmt->promptLiteral)) {
+        strLiteralId_[*input_stmt->promptLiteral] = strCounter_++;
     }
 
-    logSem() << "Input vars=" << inputStmt->variables.size() << " @ "
-             << inputStmt->pos.line << ':' << inputStmt->pos.col << Symbols::LF;
+    logSem() << "Input vars=" << input_stmt->variables.size() << " @ "
+             << input_stmt->pos.line << ':' << input_stmt->pos.col << Symbols::LF;
 }
 
 } // namespace gwbasic

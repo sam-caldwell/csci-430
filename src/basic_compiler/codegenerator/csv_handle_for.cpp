@@ -9,22 +9,22 @@ namespace gwbasic {
  * Function: csvHandleFor
  * Summary: Collect variables referenced by a FOR header and body.
  * Parameters:
- *  - forStmt: Parsed ForStmt node.
+ *  - for_stmt: Parsed ForStmt node.
  * Returns:
  *  - void
  */
-void CodeGenerator::csvHandleFor(const ForStmt* forStmt) {
-    variables_.insert(forStmt->var);
-    collectExprVars(forStmt->start.get());
-    collectExprVars(forStmt->end.get());
-    if (forStmt->step) {
-        collectExprVars(forStmt->step.get());
+void CodeGenerator::csvHandleFor(const ForStmt* for_stmt) {
+    variables_.insert(for_stmt->var);
+    collectExprVars(for_stmt->start.get());
+    collectExprVars(for_stmt->end.get());
+    if (for_stmt->step) {
+        collectExprVars(for_stmt->step.get());
     }
-    for (const auto& bodyStmt : forStmt->body) {
+    for (const auto& bodyStmt : for_stmt->body) {
         collectStmtVars(bodyStmt.get());
     }
-    logSem() << "For var=" << forStmt->var << " @ "
-             << forStmt->pos.line << ':' << forStmt->pos.col << Symbols::LF;
+    logSem() << "For var=" << for_stmt->var << " @ "
+             << for_stmt->pos.line << ':' << for_stmt->pos.col << Symbols::LF;
 }
 
 } // namespace gwbasic

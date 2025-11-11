@@ -1,22 +1,24 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #pragma once
 
-#include <set>
-#include <map>
-#include <string>
-#include <unordered_set>
-#include <optional>
-#include <vector>
-#include <fstream>
+#include "basic_compiler/ast/DefFnStmt.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/Line.h"
+#include "basic_compiler/ast/Program.h"
+#include "basic_compiler/ast/SourcePos.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "logger/Logger.h"
 
-#include "basic_compiler/ast/Program.h"
-#include "basic_compiler/ast/Expr.h"
-#include "basic_compiler/ast/Stmt.h"
-#include "basic_compiler/ast/RTTI.h"
-#include "basic_compiler/semantics/SemanticError.h"
-#include "basic_compiler/ast/DefFnStmt.h"
-#include "basic_compiler/ast/DefTypeStmt.h"
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <map>
+#include <optional>
+#include <ostream>
+#include <set>
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 
 namespace gwbasic {
@@ -59,7 +61,7 @@ public:
         // Variables determined to be strings (by suffix or DEFSTR)
         std::set<std::string> stringVariables;
         // Per-variable numeric kind (for non-strings). Only includes non-string vars.
-        enum class NumericKind { Int16, Long32, Single, Double };
+        enum class NumericKind : std::uint8_t { Int16, Long32, Single, Double };
         std::map<std::string, NumericKind> numericKinds;
     };
 
@@ -150,17 +152,18 @@ private:
     // User-defined functions by uppercase name
     std::map<std::string, const DefFnStmt*> userFunctions_;
     // Current DEF FN parameter name (skip global reference tracking when set)
-    std::optional<std::string> currentFnParam_{};
+    std::optional<std::string> currentFnParam_;
     // Default type mapping by letter (A..Z). Only String affects codegen typing.
-    enum class DefaultKind { None, Int, Sng, Dbl, Str };
-    DefaultKind defaultKinds_[26]{}; // initialized to None
+    enum class DefaultKind : std::uint8_t { None, Int, Sng, Dbl, Str };
+    static constexpr std::size_t kAlphabetSize = 26; // NOLINT(readability-magic-numbers,cppcoreguidelines-avoid-magic-numbers)
+    std::array<DefaultKind, kAlphabetSize> defaultKinds_{}; // initialized to None
     // Helper: determine if a variable name is string-typed by suffix or DEFSTR rules.
     bool varNameIsString(const std::string& name) const;
     // Helper: determine numeric kind for a non-string variable name
     Result::NumericKind numericKindOf(const std::string& name) const;
 
     // Logging via ostream-based logger
-    logger::Logger logger_{};
+    logger::Logger logger_;
 
     /*
      * Property: currentLine_
@@ -189,7 +192,7 @@ private:
      * Purpose:
      *  - Pop the current scope if not global and log the event.
      */
-    void exitScope() { if (scopes_.size() > 1) scopes_.pop_back(); log() << "ScopeExit" << '\n'; }
+    void exitScope() { if (scopes_.size() > 1) { scopes_.pop_back(); } log() << "ScopeExit" << '\n'; }
 
     /**
      * Function: SemanticAnalyzer::isDeclared
@@ -219,7 +222,7 @@ private:
      *  - name: Variable identifier
      *  - pos: Source position for logging context
      */
-    void reference(const std::string& name, const SourcePos& pos);
+    void reference(const std::string& name, const SourcePos& position);
 
     // Stream accessor for integration symmetry with other phases
     std::ostream& log() { return logger_.stream(); }
@@ -238,14 +241,14 @@ private:
      * Purpose:
      *  - Analyze a statement node, updating state or throwing on errors.
      */
-    void analyzeStmt(const Stmt* s);
+    void analyzeStmt(const Stmt* stmt);
 
     /**
      * Function: SemanticAnalyzer::analyzeExpr
      * Purpose:
      *  - Analyze an expression node for type/usage and collect strings.
      */
-    void analyzeExpr(const Expr* e);
+    void analyzeExpr(const Expr* expr);
 
     // Basic type analysis (numeric or string)
     /**
@@ -255,7 +258,7 @@ private:
      * Values:
      *  - Number, String
      */
-    enum class ValueType { Number, String };
+    enum class ValueType : std::uint8_t { Number, String };
 
     /**
      * Function: SemanticAnalyzer::typeOf
@@ -263,7 +266,7 @@ private:
      *  - Determine the value type of an expression, raising errors for
      *    invalid operations (e.g., string arithmetic) as needed.
      */
-    ValueType typeOf(const Expr* e);
+    ValueType typeOf(const Expr* expr);
 
     // Extra semantic helpers
     /**
@@ -271,7 +274,7 @@ private:
      * Purpose:
      *  - Identify whether an expression is a comparison operation.
      */
-    static bool isComparisonExpr(const Expr* e);
+    static bool isComparisonExpr(const Expr* expr);
 
     /**
      * Function: SemanticAnalyzer::constEval
@@ -283,11 +286,11 @@ private:
      * Outputs:
      *  - bool: true if constant value was produced
      */
-    static bool constEval(const Expr* e, double& out);
+    static bool constEval(const Expr* expr, double& out);
 
     // Helpers for constEval (defined in separate TUs to maintain one-function-per-file)
-    static bool constEvalUnary(const UnaryExpr& u, double& out);
-    static bool constEvalBinary(const BinaryExpr& b, double& out);
+    static bool constEvalUnary(const UnaryExpr& unary, double& out);
+    static bool constEvalBinary(const BinaryExpr& binary, double& out);
 
     // Function utilities
     /**
@@ -325,7 +328,7 @@ public:
 // Minimal friend accessor for tests: exposes constEval without widening API surface
 class SemanticAnalyzerConstEvalAccessorForTests {
 public:
-    static bool constEval(const Expr* e, double& out) { return SemanticAnalyzer::constEval(e, out); }
+    static bool constEval(const Expr* expr, double& out) { return SemanticAnalyzer::constEval(expr, out); }
 };
 
 } // namespace gwbasic

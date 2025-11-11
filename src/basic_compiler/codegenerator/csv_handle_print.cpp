@@ -12,11 +12,11 @@ namespace gwbasic {
  * Function: csvHandlePrint
  * Summary: Collect variables and string literals referenced by PRINT.
  * Parameters:
- *  - printStmt: Parsed PrintStmt node.
+ *  - print_stmt: Parsed PrintStmt node.
  * Returns:
  *  - void
  */
-void CodeGenerator::csvHandlePrint(const PrintStmt* printStmt) { // NOLINT(readability-function-size)
+void CodeGenerator::csvHandlePrint(const PrintStmt* print_stmt) { // NOLINT(readability-function-size)
     auto visitExpr = [&](const Expr* expr) {
         collectExprVars(expr);
         if (const auto* const stringExpr = dyn_cast<StringExpr>(expr)) {
@@ -27,10 +27,10 @@ void CodeGenerator::csvHandlePrint(const PrintStmt* printStmt) { // NOLINT(reada
                      << stringExpr->pos.col << Symbols::LF;
         }
     };
-    if (printStmt->value) {
-        visitExpr(printStmt->value.get());
+    if (print_stmt->value) {
+        visitExpr(print_stmt->value.get());
     }
-    for (const auto& moreExpr : printStmt->more) {
+    for (const auto& moreExpr : print_stmt->more) {
         visitExpr(moreExpr.get());
     }
 }

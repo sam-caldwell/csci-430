@@ -1,10 +1,16 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_COMPILER_PHASELOGHELPERS_H
+#define BASIC_COMPILER_COMPILER_PHASELOGHELPERS_H
 
-#include <string>
-#include <unordered_map>
+#include "basic_compiler/ast/Line.h"
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/util/TransparentSVHasher.h"
+
+#include <cstdint>
+#include <functional>
+#include <string>
+#include <unordered_map>
+#include <utility>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -14,7 +20,7 @@ namespace gwbasic::phase_log_helpers {
  *  - Classify import-like directives discovered in a line.
  * Members: None, Merge, Chain, Run
  */
-enum class Dir { None, Merge, Chain, Run };
+enum class Dir : std::uint8_t { None, Merge, Chain, Run };
 
 /**
  * Function: resolvePath
@@ -37,7 +43,7 @@ std::string resolvePath(const std::string& baseFile, const std::string& rel);
  * Outputs:
  *  - std::string: Weakly canonical absolute path
  */
-std::string canonicalPath(const std::string& p);
+std::string canonicalPath(const std::string& path);
 
 /**
  * Function: replaceOrAppendLine
@@ -131,8 +137,9 @@ template <class Map>
 int assignBase(const std::string& canon,
                const std::string& curPath,
                const Map& imported) {
-    if (canon == curPath) return 0;
-    return static_cast<int>(imported.size()) * 1000 + 1000;
+    if (canon == curPath) { return 0; }
+    constexpr int kBaseStep = 1000; // NOLINT(readability-magic-numbers,cppcoreguidelines-avoid-magic-numbers)
+    return (static_cast<int>(imported.size()) * kBaseStep) + kBaseStep;
 }
 
 /**
@@ -194,7 +201,7 @@ bool ensureImported(const std::string& canon,
                     const std::string& curPath,
                     Map& imported,
                     ImportedProg& out) {
-    if (imported.find(canon) != imported.end()) return false;
+    if (imported.find(canon) != imported.end()) { return false; }
     gwbasic::Program nextProg = parseFileNoLogs(canon);
     int minImported = 0;
     const int base = assignBase(canon, curPath, imported);
@@ -215,7 +222,7 @@ bool ensureImported(const std::string& canon,
  *  - importInfo: {base, minLine} pair for imported program
  *  - isChain: true to patch CHAIN; false to patch RUN
  */
-void patchTargetsForChainOrRun(const gwbasic::Line& ln,
+void patchTargetsForChainOrRun(const gwbasic::Line& lineObj,
                                const std::pair<int,int>& importInfo,
                                bool isChain);
 
@@ -261,3 +268,5 @@ bool processChainRun(const std::string& curPath,
 void processMerge(const std::string& incPath, gwbasic::Program& program);
 
 } // namespace gwbasic::phase_log_helpers
+
+#endif // BASIC_COMPILER_COMPILER_PHASELOGHELPERS_H

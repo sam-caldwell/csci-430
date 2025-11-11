@@ -2,7 +2,6 @@
 #pragma once
 
 #include <stdexcept>
-#include <string>
 
 namespace gwbasic {
 
@@ -23,4 +22,3 @@ public:
 };
 
 } // namespace gwbasic
-

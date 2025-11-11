@@ -1,12 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/DeleteStmt.h"
 #include "basic_compiler/ast/Line.h"
-#include "basic_compiler/ast/OptionPrintZonesStmt.h"
 #include "basic_compiler/ast/Program.h"
-#include "basic_compiler/ast/RTTI.h"
 #include <algorithm>
-#include <limits>
 #include <map>
 #include <utility>
 #include <vector>
@@ -28,7 +24,7 @@ namespace gwbasic {
  *  - void
  */
 // NOLINTBEGIN(bugprone-easily-swappable-parameters)
-void CodeGenerator::cdGatherLinesAndDeletes(const Program& program, // NOLINT(readability-convert-member-functions-to-static)
+void CodeGenerator::cdGatherLinesAndDeletes(const Program& program, // NOLINT(readability-convert-member-functions-to-static,readability-function-size)
                                             std::vector<int>& linesOut,
                                             std::map<int, const Line*>& lineMapOut,
                                             bool& printZones,

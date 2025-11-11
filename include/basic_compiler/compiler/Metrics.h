@@ -1,10 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_COMPILER_METRICS_H
+#define BASIC_COMPILER_COMPILER_METRICS_H
 
 #include <cstddef>
-#include <cstdint>
-#include <map>
-#include <optional>
 #include <ostream>
 #include <string>
 #include <string_view>
@@ -27,7 +25,7 @@ public:
     Metrics() = default;
 
     // Control analysis-only mode (prevents optimizer mutations during counting)
-    void setAnalyzeOnly(const bool v) { analyze_only_ = v; }
+    void setAnalyzeOnly(const bool analyzeOnly) { analyze_only_ = analyzeOnly; }
     [[nodiscard]] bool isAnalyzeOnly() const { return analyze_only_; }
 
     // Lexer
@@ -60,8 +58,8 @@ public:
 
     // Codegen
     void setIrInstructionCount(std::size_t n) { codegen_.ir_instructions = n; }
-    void setOptPhaseCounts(std::vector<std::pair<std::string, std::size_t>> v) {
-        codegen_.opt_phase_ir_counts = std::move(v);
+    void setOptPhaseCounts(std::vector<std::pair<std::string, std::size_t>> phases) {
+        codegen_.opt_phase_ir_counts = std::move(phases);
     }
 
     // Counting helpers
@@ -73,7 +71,7 @@ public:
 
     // Print summary table to stdout or provided stream
     void print() const; // stdout
-    void print(std::ostream& os) const; // custom stream
+    void print(std::ostream& out) const; // custom stream
 
 private:
     // Data containers
@@ -106,38 +104,41 @@ private:
 // Minimal friend accessor for tests to seed metrics without exposing internals
 class MetricsAccessorForTests {
 public:
-    static void setLexerTokenCount(Metrics& m, const std::size_t n) { m.lexer_.token_count = n; }
-    static void setAstParsed(Metrics& m, const std::size_t lines, const std::size_t statements,
+    static void setLexerTokenCount(Metrics& metrics, const std::size_t count) { metrics.lexer_.token_count = count; }
+    static void setAstParsed(Metrics& metrics, const std::size_t lines, const std::size_t statements,
                              const std::size_t expressions, const std::size_t max_expr_depth,
                              const double avg_expr_depth) {
-        m.ast_parsed_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
+        metrics.ast_parsed_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
     }
-    static void setAstAfterSemantics(Metrics& m, const std::size_t lines, const std::size_t statements,
+    static void setAstAfterSemantics(Metrics& metrics, const std::size_t lines, const std::size_t statements,
                                      const std::size_t expressions, const std::size_t max_expr_depth,
                                      const double avg_expr_depth) {
-        m.ast_after_semantics_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
+        metrics.ast_after_semantics_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
     }
-    static void setAstOptimized(Metrics& m, const std::size_t lines, const std::size_t statements,
+    static void setAstOptimized(Metrics& metrics, const std::size_t lines, const std::size_t statements,
                                 const std::size_t expressions, const std::size_t max_expr_depth,
                                 const double avg_expr_depth) {
-        m.ast_after_opt_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
+        metrics.ast_after_opt_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
     }
-    static void setSemanticsBasic(Metrics& m, const std::size_t const_folds,
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+    static void setSemanticsBasic(Metrics& metrics, const std::size_t const_folds,
                                   const std::size_t fold_add, const std::size_t fold_mul,
                                   const std::size_t unary_elim_plus, const std::size_t id_add_zero) {
-        m.semantics_opt_.const_folds = const_folds;
-        m.semantics_opt_.fold_add = fold_add;
-        m.semantics_opt_.fold_mul = fold_mul;
-        m.semantics_opt_.unary_elim_plus = unary_elim_plus;
-        m.semantics_opt_.id_add_zero = id_add_zero;
+        metrics.semantics_opt_.const_folds = const_folds;
+        metrics.semantics_opt_.fold_add = fold_add;
+        metrics.semantics_opt_.fold_mul = fold_mul;
+        metrics.semantics_opt_.unary_elim_plus = unary_elim_plus;
+        metrics.semantics_opt_.id_add_zero = id_add_zero;
     }
-    static void setIrInstructions(Metrics& m, std::size_t n) { m.codegen_.ir_instructions = n; }
-    static void setOptPhaseCounts(Metrics& m, std::vector<std::pair<std::string, std::size_t>> v) {
-        m.codegen_.opt_phase_ir_counts = std::move(v);
+    static void setIrInstructions(Metrics& metrics, std::size_t count) { metrics.codegen_.ir_instructions = count; }
+    static void setOptPhaseCounts(Metrics& metrics, std::vector<std::pair<std::string, std::size_t>> values) {
+        metrics.codegen_.opt_phase_ir_counts = std::move(values);
     }
 };
 
 // Global metrics context (optional)
-inline Metrics* gMetrics = nullptr;
+inline Metrics* gMetrics = nullptr; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_COMPILER_METRICS_H

@@ -1,6 +1,7 @@
-// (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-header-guard)
 #ifndef BASIC_COMPILER_TARGETUTILS_H
 #define BASIC_COMPILER_TARGETUTILS_H
+// (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include <string>
 
@@ -16,3 +17,4 @@
 bool isSupportedTargetTriple(const std::string& triple);
 
 #endif // BASIC_COMPILER_TARGETUTILS_H
+// NOLINTEND(llvm-header-guard)

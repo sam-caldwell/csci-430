@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_COMPILER_FILEOPENERROR_H
+#define BASIC_COMPILER_COMPILER_FILEOPENERROR_H
 
 #include <stdexcept>
 #include <string_view>
@@ -24,3 +25,5 @@ public:
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_COMPILER_FILEOPENERROR_H

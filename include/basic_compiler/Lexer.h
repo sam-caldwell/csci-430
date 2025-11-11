@@ -314,7 +314,7 @@ private:
      * Notes:
      *  - The lexer operates over this immutable buffer using 'pos_'.
      */
-    std::string src_{};
+    std::string src_;
 
     /*
      * Property: pos_
@@ -457,7 +457,7 @@ private:
     void skipToEOL();
 
     // Lexical logging via ostream-based logger
-    std::unique_ptr<logger::Logger> lexLogger_{};
+    std::unique_ptr<logger::Logger> lexLogger_;
 
     /*
      * Function: Lexer::logToken

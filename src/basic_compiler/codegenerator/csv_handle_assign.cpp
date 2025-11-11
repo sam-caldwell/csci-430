@@ -9,15 +9,15 @@ namespace gwbasic {
  * Function: csvHandleAssign
  * Summary: Collect variables referenced by a simple assignment.
  * Parameters:
- *  - assignStmt: Parsed AssignStmt node.
+ *  - assign_stmt: Parsed AssignStmt node.
  * Returns:
  *  - void
  */
-void CodeGenerator::csvHandleAssign(const AssignStmt* assignStmt) {
-    variables_.insert(assignStmt->name);
-    collectExprVars(assignStmt->value.get());
-    logSem() << "Assign " << assignStmt->name << " @ "
-             << assignStmt->pos.line << ':' << assignStmt->pos.col
+void CodeGenerator::csvHandleAssign(const AssignStmt* assign_stmt) {
+    variables_.insert(assign_stmt->name);
+    collectExprVars(assign_stmt->value.get());
+    logSem() << "Assign " << assign_stmt->name << " @ "
+             << assign_stmt->pos.line << ':' << assign_stmt->pos.col
              << Symbols::LF;
 }
 

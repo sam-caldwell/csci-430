@@ -14,9 +14,9 @@ namespace gwbasic {
  * Returns:
  *  - int: Next line number to resume at, or -1 if none.
  */
-int CodeGenerator::cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &idx) {
-    const int startIdx = idx.first;
-    if (const int endIdx = idx.second; endIdx >= 0) {
+int CodeGenerator::cdComputeSkipFromIndices(const std::vector<int>& lines, const std::pair<int,int> &index_pair) {
+    const int startIdx = index_pair.first;
+    if (const int endIdx = index_pair.second; endIdx >= 0) {
         if (const int next = endIdx + 1; next < static_cast<int>(lines.size())) {
             return lines[next];
         }

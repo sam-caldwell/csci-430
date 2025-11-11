@@ -1,6 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/ResumeStmt.h" // IWYU pragma: keep
+#include <vector>
 
 namespace gwbasic {
 

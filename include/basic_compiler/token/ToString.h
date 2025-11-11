@@ -1,8 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #pragma once
 
-#include <string>
 #include "basic_compiler/token/TokenType.h"
+#include <string>
 
 namespace gwbasic {
 
@@ -16,8 +16,9 @@ namespace gwbasic {
  * Outputs:
  *  - std::string: Short name (e.g., "PRINT", "+", "IDENT")
  */
-inline std::string to_string(const TokenType t) {
-    switch (t) {
+// NOLINTNEXTLINE(readability-function-size)
+inline std::string to_string(const TokenType type) {
+    switch (type) {
         case TokenType::EndOfFile: return "EOF";
         case TokenType::NewLine: return "NEWLINE";
         case TokenType::Integer: return "INT";

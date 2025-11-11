@@ -1,6 +1,7 @@
-// (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-header-guard)
 #ifndef BASIC_COMPILER_SYMBOL_H
 #define BASIC_COMPILER_SYMBOL_H
+// (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include <array>
 #include <cstddef>
@@ -108,3 +109,4 @@ inline std::ostream& operator<<(std::ostream& ostr, const Symbol& sym) {
 } // namespace gwbasic
 
 #endif // BASIC_COMPILER_SYMBOL_H
+// NOLINTEND(llvm-header-guard)

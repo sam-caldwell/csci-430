@@ -9,22 +9,22 @@ namespace gwbasic {
  * Function: csvHandleMidAssign
  * Summary: Collect variables referenced by MID$ assignment (scalar/array).
  * Parameters:
- *  - midAssign: Parsed MidAssignStmt node.
+ *  - mid_stmt: Parsed MidAssignStmt node.
  * Returns:
  *  - void
  */
-void CodeGenerator::csvHandleMidAssign(const MidAssignStmt* midAssign) {
-    variables_.insert(midAssign->name);
-    for (const auto& indexExpr : midAssign->indices) {
+void CodeGenerator::csvHandleMidAssign(const MidAssignStmt* mid_stmt) {
+    variables_.insert(mid_stmt->name);
+    for (const auto& indexExpr : mid_stmt->indices) {
         collectExprVars(indexExpr.get());
     }
-    collectExprVars(midAssign->start.get());
-    if (midAssign->len) {
-        collectExprVars(midAssign->len.get());
+    collectExprVars(mid_stmt->start.get());
+    if (mid_stmt->len) {
+        collectExprVars(mid_stmt->len.get());
     }
-    collectExprVars(midAssign->value.get());
-    logSem() << "MidAssign " << midAssign->name << " @ "
-             << midAssign->pos.line << ':' << midAssign->pos.col << Symbols::LF;
+    collectExprVars(mid_stmt->value.get());
+    logSem() << "MidAssign " << mid_stmt->name << " @ "
+             << mid_stmt->pos.line << ':' << mid_stmt->pos.col << Symbols::LF;
 }
 
 } // namespace gwbasic

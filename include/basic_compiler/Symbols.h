@@ -1,6 +1,7 @@
-// (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-header-guard)
 #ifndef BASIC_COMPILER_SYMBOLS_H
 #define BASIC_COMPILER_SYMBOLS_H
+// (c) 2025 Sam Caldwell. All Rights Reserved.
 
 #include "basic_compiler/Symbol.h"
 
@@ -14,41 +15,41 @@ namespace gwbasic {
  */
 struct Symbols {
     // Control/whitespace
-    static inline constexpr Symbol SPACE        {' '};
-    static inline constexpr Symbol TAB          {'\t'};
-    static inline constexpr Symbol LF           {'\n'}; // NOLINT(readability-identifier-length)
-    static inline constexpr Symbol CR           {'\r'}; // NOLINT(readability-identifier-length)
-    static inline constexpr Symbol NUL          {'\0'};
-    static inline constexpr Symbol DEL          {static_cast<char>(0x7F)};
+    static constexpr Symbol SPACE        {' '};
+    static constexpr Symbol TAB          {'\t'};
+    static constexpr Symbol LF           {'\n'}; // NOLINT(readability-identifier-length)
+    static constexpr Symbol CR           {'\r'}; // NOLINT(readability-identifier-length)
+    static constexpr Symbol NUL          {'\0'};
+    static constexpr Symbol DEL          {static_cast<char>(0x7F)};
 
     // Quotes and identifier markers
-    static inline constexpr Symbol SINGLE_QUOTE {'\''};
-    static inline constexpr Symbol DOUBLE_QUOTE {'"'};
-    static inline constexpr Symbol DOLLARSIGN   {'$'};
+    static constexpr Symbol SINGLE_QUOTE {'\''};
+    static constexpr Symbol DOUBLE_QUOTE {'"'};
+    static constexpr Symbol DOLLARSIGN   {'$'};
 
     // Operators / punctuation (single)
-    static inline constexpr Symbol PLUS         {'+'};
-    static inline constexpr Symbol MINUS        {'-'};
-    static inline constexpr Symbol STAR         {'*'};
-    static inline constexpr Symbol SLASH        {'/'};
-    static inline constexpr Symbol LPAREN       {'('};
-    static inline constexpr Symbol RPAREN       {')'};
-    static inline constexpr Symbol COLON        {':'};
-    static inline constexpr Symbol SEMICOLON    {';'};
-    static inline constexpr Symbol COMMA        {','};
-    static inline constexpr Symbol HASH         {'#'};
-    static inline constexpr Symbol EQUALS       {'='};
-    static inline constexpr Symbol LESS_THAN    {'<'};
-    static inline constexpr Symbol GREATER_THAN {'>'};
-    static inline constexpr Symbol AMPERSAND    {'&'};
-    static inline constexpr Symbol PERCENT      {'%'};
-    static inline constexpr Symbol EXCLAMATION  {'!'};
-    static inline constexpr Symbol CARET        {'^'};
+    static constexpr Symbol PLUS         {'+'};
+    static constexpr Symbol MINUS        {'-'};
+    static constexpr Symbol STAR         {'*'};
+    static constexpr Symbol SLASH        {'/'};
+    static constexpr Symbol LPAREN       {'('};
+    static constexpr Symbol RPAREN       {')'};
+    static constexpr Symbol COLON        {':'};
+    static constexpr Symbol SEMICOLON    {';'};
+    static constexpr Symbol COMMA        {','};
+    static constexpr Symbol HASH         {'#'};
+    static constexpr Symbol EQUALS       {'='};
+    static constexpr Symbol LESS_THAN    {'<'};
+    static constexpr Symbol GREATER_THAN {'>'};
+    static constexpr Symbol AMPERSAND    {'&'};
+    static constexpr Symbol PERCENT      {'%'};
+    static constexpr Symbol EXCLAMATION  {'!'};
+    static constexpr Symbol CARET        {'^'};
 
     // Operators (double)
-    static inline constexpr Symbol LESS_EQUAL   {"<="};
-    static inline constexpr Symbol GREATER_EQUAL{">="};
-    static inline constexpr Symbol NOT_EQUAL    {"<>"};
+    static constexpr Symbol LESS_EQUAL   {"<="};
+    static constexpr Symbol GREATER_EQUAL{">="};
+    static constexpr Symbol NOT_EQUAL    {"<>"};
 
     // Common 1-byte string fragments (for streaming convenience)
     // (Removed legacy STR_* char arrays; prefer Symbol or string literals.)
@@ -57,3 +58,4 @@ struct Symbols {
 } // namespace gwbasic
 
 #endif // BASIC_COMPILER_SYMBOLS_H
+// NOLINTEND(llvm-header-guard)

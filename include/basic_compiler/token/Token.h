@@ -22,14 +22,14 @@ namespace gwbasic {
  */
 struct Token {
     TokenType type{};
-    std::string lexeme{};
+    std::string lexeme;
     int line{1};
     int col{1};
 
     Token() = default;
-    Token(const TokenType t, std::string lx, int ln, int cl)
-        : type(t), lexeme(std::move(lx)), line(ln), col(cl) {}
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+    Token(const TokenType typeVal, std::string lexemeStr, int lineNum, int colNum)
+        : type(typeVal), lexeme(std::move(lexemeStr)), line(lineNum), col(colNum) {}
 };
 
 } // namespace gwbasic
-

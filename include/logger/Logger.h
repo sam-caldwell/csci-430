@@ -15,6 +15,12 @@ class Logger {
   Logger();
   ~Logger();
 
+  // Non-copyable, movable (owns file handle)
+  Logger(const Logger&) = delete;
+  Logger& operator=(const Logger&) = delete;
+  Logger(Logger&&) noexcept = delete;
+  Logger& operator=(Logger&&) noexcept = delete;
+
   // Open a log file path. If append is true, appends; otherwise truncates.
   // Returns true on success, false otherwise.
   bool open(const std::string& path, bool append = false);
@@ -37,7 +43,7 @@ class Logger {
  private:
   // Null sink stream buffer that discards all output
   struct NullBuffer final : public std::streambuf {
-    int overflow(const int c) override { return traits_type::not_eof(c); }
+    int overflow(const int character) override { return traits_type::not_eof(character); }
   };
 
   // Null stream that uses NullBuffer
@@ -48,9 +54,9 @@ class Logger {
     NullBuffer buf_{};
   };
 
-  mutable std::ofstream ofs_{};
+  mutable std::ofstream ofs_;
   bool enabled_{false};
-  mutable NullStream null_{};
+  mutable NullStream null_;
 };
 
 }  // namespace logger

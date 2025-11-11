@@ -22,7 +22,6 @@ namespace gwbasic {
  *  - void
  */
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-namespace {
 /*
  * Function: tryHandleOptionPrintZones
  * Summary: Detect and apply OPTION PRINT ZONES statement.
@@ -32,7 +31,7 @@ namespace {
  * Returns:
  *  - bool: true if stmt was OPTION PRINT ZONES and handled; else false.
  */
-inline bool tryHandleOptionPrintZones(const Stmt* stmt, bool& printZones) {
+static inline bool tryHandleOptionPrintZones(const Stmt* stmt, bool& printZones) {
     if (const auto* const opz = dyn_cast<const OptionPrintZonesStmt>(stmt)) {
         printZones = opz->enabled;
         return true;
@@ -50,7 +49,7 @@ inline bool tryHandleOptionPrintZones(const Stmt* stmt, bool& printZones) {
  * Returns:
  *  - bool: true if stmt was DELETE and handled; else false.
  */
-inline bool tryHandleDelete(const Stmt* stmt, int lineNumber, int globalMin, int globalMax, // NOLINT(bugprone-easily-swappable-parameters)
+static inline bool tryHandleDelete(const Stmt* stmt, int lineNumber, int globalMin, int globalMax, // NOLINT(bugprone-easily-swappable-parameters)
                             std::vector<std::pair<int,int>>& deleteRanges) {
     if (const auto* const del = dyn_cast<const DeleteStmt>(stmt)) {
         int start = del->startLine.has_value() ? *del->startLine : globalMin;
@@ -62,7 +61,6 @@ inline bool tryHandleDelete(const Stmt* stmt, int lineNumber, int globalMin, int
     }
     return false;
 }
-} // namespace
 
 /*
  * Function: cdCollectDeleteAndOptions

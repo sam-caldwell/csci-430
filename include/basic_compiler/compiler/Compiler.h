@@ -1,22 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#pragma once
+#ifndef BASIC_COMPILER_COMPILER_COMPILER_H
+#define BASIC_COMPILER_COMPILER_COMPILER_H
 
 #include <string>
-#include <cstdio>
-#include <sstream>
-#include <functional>
-#include "basic_compiler/Lexer.h"
-#include "basic_compiler/Parser.h"
-#include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/semantics/SemanticAnalyzer.h"
-#include "basic_compiler/compiler/Metrics.h"
-#include "basic_compiler/opt/AstOptimizer.h"
-// For AST scanning to adjust strict control-flow for ON GOTO/GOSUB-heavy programs
-#include "basic_compiler/ast/IfBlockStmt.h"
-#include "basic_compiler/ast/ForStmt.h"
-#include "basic_compiler/ast/WhileStmt.h"
-#include "basic_compiler/ast/OnGotoStmt.h"
-#include "basic_compiler/ast/OnGosubStmt.h"
 
 namespace gwbasic {
 
@@ -40,55 +26,7 @@ public:
      *  - Tokenizes and parses the source, runs semantics, and generates IR
      *    with a default target triple header when missing.
      */
-    static std::string compileString(const std::string& source) {
-        Lexer lex(source);
-        auto tokens = lex.tokenize();
-        Parser parser(std::move(tokens));
-        auto program = parser.parseProgram();
-        if (gMetrics) {
-            gMetrics->recordParsedSnapshot(program);
-            // Collect semantics-optimization metrics via analysis-only optimization
-            gMetrics->setAnalyzeOnly(true);
-            gwbasic::AstOptimizer::optimize(program);
-            gMetrics->setAnalyzeOnly(false);
-            gMetrics->recordAfterSemanticsSnapshot(program);
-        }
-        CodeGenerator gen;
-        // Provide semantic info to avoid duplicate collection
-        SemanticAnalyzer sema;
-        // Heuristic: Integration programs frequently exercise ON GOTO/GOSUB
-        // across IF/ELSE bodies and other blocks. Keep unit semantics strict,
-        // but relax control-flow strictness when ON-dispatch is present so IR
-        // patterns can be validated without early semantic termination.
-        auto hasOnDispatch = [&]() -> bool {
-            std::function<bool(const Stmt*)> check = [&](const Stmt* s)->bool{
-                if (!s) return false;
-                if (dyn_cast<const OnGotoStmt>(s) || dyn_cast<const OnGosubStmt>(s)) return true;
-                if (auto ib = dyn_cast<const IfBlockStmt>(s)) {
-                    for (const auto& t : ib->thenBody) if (check(t.get())) return true;
-                    for (const auto& e : ib->elseBody) if (check(e.get())) return true;
-                }
-                if (auto fs = dyn_cast<const ForStmt>(s)) {
-                    for (const auto& b : fs->body) if (check(b.get())) return true;
-                }
-                if (auto wh = dyn_cast<const WhileStmt>(s)) {
-                    for (const auto& b : wh->body) if (check(b.get())) return true;
-                }
-                return false;
-            };
-            for (const auto& [ln, stmts] : program.lines) {
-                (void)ln;
-                for (const auto& st : stmts) if (check(st.get())) return true;
-            }
-            return false;
-        }();
-        if (hasOnDispatch) sema.setStrictControlFlow(false);
-        auto res = sema.analyze(program);
-        gen.setSemantics(res);
-        auto ir = gen.generate(program);
-        if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(ir));
-        return addDefaultTripleIfMissing(ir);
-    }
+    static std::string compileString(const std::string& source);
 
     /**
      * Function: Compiler::compileFile
@@ -191,29 +129,9 @@ private:
      *  - Runs 'clang -### -S -x ir - -o /dev/null' and parses the emitted
      *    -triple argument; if found, prepends a target triple header.
      */
-    static std::string addDefaultTripleIfMissing(const std::string& ir) {
-        // If IR already declares a target triple, keep it
-        if (ir.find("target triple =") != std::string::npos) return ir;
-        // Ask the system clang how it would invoke cc1 for IR and parse the -triple argument
-        std::string triple;
-        const auto cmd = "clang -### -S -x ir - -o /dev/null 2>&1";
-        if (FILE* pipe = popen(cmd, "r")) {
-            char buf[256];
-            std::string out;
-            while (const size_t n = fread(buf, 1, sizeof(buf), pipe)) out.append(buf, buf + n);
-            pclose(pipe);
-            if (const auto pos = out.find("\"-triple\""); pos != std::string::npos) {
-                if (const auto q1 = out.find('"', pos + 9); q1 != std::string::npos) {
-                    if (const auto q2 = out.find('"', q1 + 1); q2 != std::string::npos && q2 > q1 + 1)
-                        triple = out.substr(q1 + 1, q2 - (q1 + 1));
-                }
-            }
-        }
-        if (triple.empty()) return ir;
-        std::ostringstream out;
-        out << "target triple = \"" << triple << "\"\n\n" << ir;
-        return out.str();
-    }
+    static std::string addDefaultTripleIfMissing(const std::string& ir_text);
 };
 
 } // namespace gwbasic
+
+#endif // BASIC_COMPILER_COMPILER_COMPILER_H

@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <vector>
-#include <filesystem>
 
 namespace doccheck {
 
@@ -19,7 +19,7 @@ struct Issue {
 class DocstringChecker {
 public:
     // Add directories or files to check. Directories are scanned recursively.
-    void addPath(const std::filesystem::path& p);
+    void addPath(const std::filesystem::path& path);
 
     // Run the checker over all added paths. Returns a list of issues.
     std::vector<Issue> run() const;
@@ -29,12 +29,12 @@ public:
                                     const std::filesystem::path& path) const;
 
     // Utility: lowercase a string (exposed for helpers)
-    static std::string toLower(std::string s);
+    static std::string toLower(std::string str);
 
 private:
-    std::vector<std::filesystem::path> paths_{};
+    std::vector<std::filesystem::path> paths_;
 
-    static bool isSourceFile(const std::filesystem::path& p);
+    static bool isSourceFile(const std::filesystem::path& path);
 };
 
 } // namespace doccheck

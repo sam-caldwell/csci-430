@@ -19,7 +19,7 @@ namespace gwbasic {
  */
 struct DataItem {
     bool isString{false};
-    std::string text{};
+    std::string text;
 };
 
 } // namespace gwbasic

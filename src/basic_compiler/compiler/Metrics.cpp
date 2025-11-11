@@ -220,7 +220,7 @@ static void printSep(std::ostream& os, std::size_t w1, std::size_t w2) {
     os << "+-" << std::string(w1, '-') << "-+-" << std::string(w2, '-') << "-+\n";
 }
 
-void Metrics::print(std::ostream& os) const {
+void Metrics::print(std::ostream& out) const {
     // Collect rows
     std::vector<std::pair<std::string, std::string>> rows;
     auto add = [&](std::string k, std::string v) { rows.emplace_back(std::move(k), std::move(v)); };
@@ -281,11 +281,11 @@ void Metrics::print(std::ostream& os) const {
     // Determine column widths
     std::size_t w1 = 0, w2 = 0;
     for (const auto& [k, v] : rows) { w1 = std::max(w1, k.size()); w2 = std::max(w2, v.size()); }
-    printSep(os, w1, w2);
-    printRow(os, "Metric", "Value", w1, w2);
-    printSep(os, w1, w2);
-    for (const auto& [k, v] : rows) printRow(os, k, v, w1, w2);
-    printSep(os, w1, w2);
+    printSep(out, w1, w2);
+    printRow(out, "Metric", "Value", w1, w2);
+    printSep(out, w1, w2);
+    for (const auto& [k, v] : rows) printRow(out, k, v, w1, w2);
+    printSep(out, w1, w2);
 }
 
 void Metrics::print() const { print(std::cout); }

@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include <vector>
 
 namespace gwbasic {
 
@@ -12,12 +13,12 @@ namespace gwbasic {
  *  - void
  */
 void CodeGenerator::cdScanRndAndStop(const std::vector<int>& lines) {
-    for (int ln : lines) {
-        const auto* lptr = lineMap_[ln];
-        if (!lptr) continue;
-        for (const auto& st : lptr->statements) {
-            scanStmtForRnd(st.get());
-            scanStmtForStop(st.get());
+    for (const int lineNum : lines) {
+        const auto* lptr = lineMap_[lineNum];
+        if (lptr == nullptr) { continue; }
+        for (const auto& stmtNode : lptr->statements) {
+            scanStmtForRnd(stmtNode.get());
+            scanStmtForStop(stmtNode.get());
         }
     }
 }

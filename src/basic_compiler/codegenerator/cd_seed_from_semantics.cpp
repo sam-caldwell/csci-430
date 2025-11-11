@@ -12,13 +12,15 @@ namespace gwbasic {
  *  - void
  */
 void CodeGenerator::cdSeedFromSemantics() {
-    if (!semProvided_) return;
+    if (!semProvided_) { return; }
     variables_ = semVariables_;
     commonVariables_ = semCommonVariables_;
     strLiteralId_.clear(); strCounter_ = 0;
-    for (const auto& s : semStrings_)
-        if (!strLiteralId_.contains(s))
-            strLiteralId_[s] = strCounter_++;
+    for (const auto& strLit : semStrings_) {
+        if (!strLiteralId_.contains(strLit)) {
+            strLiteralId_[strLit] = strCounter_++;
+        }
+    }
 }
 
 } // namespace gwbasic
