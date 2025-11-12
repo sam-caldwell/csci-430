@@ -1,8 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #define private public
 #include <gtest/gtest.h>
-#include "basic_compiler/Lexer.h"
-#include "basic_compiler/Parser.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "../../../../include/basic_compiler/parser/Parser.h"
 
 using namespace gwbasic;
 

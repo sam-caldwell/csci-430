@@ -3,6 +3,7 @@
 
 #include "clang-tidy-one-func/OneFuncChecker.h"
 
+#include <cstddef>
 #include <exception>
 #include <iostream>
 #include <span>
@@ -17,11 +18,10 @@ static void printUsage(const char* argv0) {
 }
 
 struct ShowHelp final : public std::exception { };
-static std::string gProgramName = "onefunc";
 
 static std::vector<std::string> gatherInputs(int argc, char** argv) {
     std::vector<std::string> inputs;
-    std::span<char* const> args{argv, static_cast<std::size_t>(argc)};
+    const std::span<char* const> args{argv, static_cast<std::size_t>(argc)};
     if (args.size() == 1) {
         inputs.emplace_back("src/basic_compiler");
         return inputs;
@@ -43,15 +43,15 @@ static std::vector<std::string> gatherInputs(int argc, char** argv) {
     return inputs;
 }
 
-int main(int argc, char** argv) try {
+int main(int argc, char** argv) {
+  try {
     using namespace onefunc;
     OneFuncChecker checker;
     const std::vector<std::string> inputs = gatherInputs(argc, argv);
-    {
-        std::span<char* const> args{argv, static_cast<std::size_t>(argc)};
-        if (!args.empty() && args.front() != nullptr) {
-            gProgramName = args.front();
-        }
+    std::string programName = "onefunc";
+    const std::span<char* const> args{argv, static_cast<std::size_t>(argc)};
+    if (!args.empty() && args.front() != nullptr) {
+        programName = args.front();
     }
     for (const auto &path : inputs) {
         checker.addPath(path);
@@ -67,13 +67,17 @@ int main(int argc, char** argv) try {
     }
     std::cerr << "One-function-per-file check failed with " << issues.size() << " issue(s).\n";
     return 1;
-} catch (const ShowHelp&) {
-    printUsage(gProgramName.c_str());
+  } catch (const ShowHelp&) {
+    // Determine program name for usage display
+    const std::span<char* const> args{argv, static_cast<std::size_t>(argc)};
+    const char* prog = (!args.empty() && args.front() != nullptr) ? args.front() : "onefunc";
+    printUsage(prog);
     return 0;
-} catch (const std::exception& ex) {
+  } catch (const std::exception& ex) {
     std::cerr << "error: " << ex.what() << "\n";
     return 2;
-} catch (...) {
+  } catch (...) {
     std::cerr << "error: unknown exception\n";
     return 2;
+  }
 }

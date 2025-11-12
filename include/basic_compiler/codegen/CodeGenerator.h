@@ -467,6 +467,125 @@ namespace gwbasic {
         /** Emit IR for a single BASIC line block and branch/fallthrough. */
         void emitLineBlock(std::ostringstream &out, const Line &line, int lineIndex, int lastIndex);
 
+        /**
+         * Function: emitLineStatement
+         * Purpose:
+         *  - Lower a single statement in the main line context. Returns true
+         *    if the statement terminates control flow for the current line.
+         * Inputs:
+         *  - stmt: statement pointer
+         *  - currLineLabel: label prefix for unique sublabels
+         *  - localCounter: per-line counter for uniqueness (increment as needed)
+         *  - nextLabel: fallthrough destination label for this line
+         *  - stmtIndex: 1-based index of the statement in the source line
+         * Outputs:
+         *  - bool: true when the statement terminates the line, else false
+         */
+        bool emitLineStatement(std::ostringstream &out,
+                               const Stmt *stmt,
+                               const std::string &currLineLabel,
+                               int &localCounter,
+                               const std::string &nextLabel,
+                               int stmtIndex);
+
+        // Line-context per-kind handlers (extracted to reduce complexity)
+        void emitLineHandleAssign(std::ostringstream &out, const AssignStmt *asg);
+
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+        void emitLineHandleMidAssign(std::ostringstream &out,
+                                     const MidAssignStmt *mid,
+                                     const std::string &currLineLabel,
+                                     int &localCounter,
+                                     int stmtIndex,
+                                     int lineNumber);
+
+        void emitLineHandlePrint(std::ostringstream &out,
+                                 const PrintStmt *print_stmt,
+                                 const std::string &currLineLabel,
+                                 int &localCounter);
+
+        void emitLineHandleInput(std::ostringstream &out,
+                                 const InputStmt *ins,
+                                 const std::string &currLineLabel,
+                                 int &localCounter);
+
+        // Line-context dispatcher helper groups (one-function-per-file)
+        // These grouped handlers dyn_cast on stmt kinds and emit inline IR as needed.
+        // They return true when they emit a terminal transfer of control for this line.
+
+        // Branching and simple flow: IF (one-line), GOTO, GOSUB, RETURN, END, STOP, SYSTEM
+        bool emitLineHandleBranching(std::ostringstream &out,
+                                     const Stmt *stmt,
+                                     const std::string &currLineLabel,
+                                     int &localCounter);
+
+        // ON GOTO / ON GOSUB multi-target dispatchers
+        void emitLineHandleOnDispatch(std::ostringstream &out,
+                                      const Stmt *stmt,
+                                      const std::string &currLineLabel,
+                                      int &localCounter);
+
+        // RUN / CHAIN / MERGE program controls
+        bool emitLineHandleRunChainMerge(std::ostringstream &out, const Stmt *stmt);
+
+        // Error-related: ON ERROR GOTO, ERROR n, RESUME, RESUME NEXT, RESUME line
+        bool emitLineHandleErrorHandlers(std::ostringstream &out,
+                                         const Stmt *stmt,
+                                         int stmtIndex);
+
+        // OPEN / CLOSE / WIDTH
+        void emitLineHandleOpenCloseWidth(std::ostringstream &out,
+                                          const Stmt *stmt,
+                                          const std::string &currLineLabel,
+                                          int &localCounter);
+
+        // FILE INPUT and LINE INPUT variants
+        void emitLineHandleFileLineInput(std::ostringstream &out,
+                                         const Stmt *stmt,
+                                         const std::string &currLineLabel,
+                                         int &localCounter);
+
+        // READ / RESTORE / DATA
+        void emitLineHandleReadRestoreData(std::ostringstream &out,
+                                           const Stmt *stmt,
+                                           int stmtIndex,
+                                           const std::string &currLineLabel,
+                                           int &localCounter);
+
+        // WRITE
+        void emitLineHandleWrite(std::ostringstream &out,
+                                 const Stmt *stmt,
+                                 const std::string &currLineLabel,
+                                 int &localCounter);
+
+        // FS / OS / ENV / console group: CLS, LOCATE, LIST, FILES, MKDIR, RMDIR, KILL, NAME,
+        // SHELL, ENVIRON, BEEP, CHDIR, CLEAR, COLOR, SCREEN, CIRCLE
+        void emitLineHandleFsOsEnvConsole(std::ostringstream &out,
+                                          const Stmt *stmt,
+                                          const std::string &currLineLabel,
+                                          int &localCounter,
+                                          const std::string &nextLabel);
+
+        // Array element assignment A(i,...) = ...
+        void emitLineHandleArrayAssign(std::ostringstream &out,
+                                       const Stmt *stmt,
+                                       int stmtIndex,
+                                       const std::string &currLineLabel,
+                                       int &localCounter);
+
+        // SWAP
+        void emitLineHandleSwap(std::ostringstream &out,
+                                const Stmt *stmt,
+                                int stmtIndex,
+                                const std::string &currLineLabel,
+                                int &localCounter);
+
+        // RANDOMIZE
+        void emitLineHandleRandomize(std::ostringstream &out, const Stmt *stmt);
+
+        // No-op statements and compatibility stubs (DELETE, DIM, OPTION, DEF*, UNSUPPORTED, COMMON, DATA)
+        void emitLineHandleMiscNoops(std::ostringstream &out, const Stmt *stmt);
+
         /** Emit a FOR...NEXT loop body/control. */
         void emitFor(std::ostringstream &out, const ForStmt *for_stmt, const std::string &currLineLabel,
                      int &localCounter);
@@ -714,6 +833,11 @@ namespace gwbasic {
         void emitForPrintDynamicAuto(std::ostringstream &out, const PrintStmt *print_stmt, const std::string &val,
                                      bool addNL, bool nextStartsWithSpace,
                                      std::string_view currLineLabel, int &localCounter);
+
+        // Local helpers for emitForHandlePrint to reduce complexity
+        void emitForHandlePrintEmitEmpty(std::ostringstream &out, const PrintStmt *print_stmt);
+
+        void emitForHandlePrintFlushNewline(std::ostringstream &out, const PrintStmt *print_stmt);
 
         /** Emit common error-path stores and handler dispatch switch. */
         void emitErrorDispatch(std::ostringstream &out, int errCode, int lineNo, int stmtIndex);

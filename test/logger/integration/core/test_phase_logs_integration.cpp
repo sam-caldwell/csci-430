@@ -4,9 +4,12 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <string>
 
 #include "basic_compiler/compiler/Compiler.h"
+
+// NOLINTBEGIN(readability-function-cognitive-complexity)
 
 using namespace gwbasic;
 
@@ -28,31 +31,32 @@ TEST(LoggerIntegration, CompilerPhaseLogsProduceContent) {
   const fs::path lex = outdir / "lex.log";
   const fs::path syn = outdir / "syntax.log";
   const fs::path sem = outdir / "semantic.log";
-  const fs::path cg  = outdir / "codegen.log";
+  const fs::path codegen = outdir / "codegen.log";
 
-  std::string ir = Compiler::compileStringWithPhaseLogs(
+  const std::string irText = Compiler::compileStringWithPhaseLogs(
       src,
       lex.string(),
       syn.string(),
       sem.string(),
-      cg.string()
+      codegen.string()
   );
-  EXPECT_NE(ir.find("define i32 @main()"), std::string::npos);
+  EXPECT_NE(irText.find("define i32 @main()"), std::string::npos);
 
-  auto slurp = [](const fs::path& p) {
-    std::ifstream in(p); return std::string(
-        std::istreambuf_iterator<char>(in),
+  auto slurp = [](const fs::path& path) {
+    std::ifstream input(path); return std::string(
+        std::istreambuf_iterator<char>(input),
         std::istreambuf_iterator<char>()
     );
   };
   ASSERT_TRUE(fs::exists(lex));
   ASSERT_TRUE(fs::exists(syn));
   ASSERT_TRUE(fs::exists(sem));
-  ASSERT_TRUE(fs::exists(cg));
+  ASSERT_TRUE(fs::exists(codegen));
 
   EXPECT_NE(slurp(lex).find("token"), std::string::npos);
   EXPECT_NE(slurp(syn).find("line"), std::string::npos);
   EXPECT_NE(slurp(sem).find("VarDecl"), std::string::npos);
-  EXPECT_NE(slurp(cg).find("entry ->"), std::string::npos);
+  EXPECT_NE(slurp(codegen).find("entry ->"), std::string::npos);
 }
 
+// NOLINTEND(readability-function-cognitive-complexity)

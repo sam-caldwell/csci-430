@@ -11,14 +11,15 @@
 namespace fs = std::filesystem;
 using logger::Logger;
 
-static std::string read_file(const fs::path& p) {
-  std::ifstream in(p);
-  std::string s, line;
-  while (std::getline(in, line)) {
-    s += line;
-    s.push_back('\n');
+static std::string read_file(const fs::path& path) {
+  std::ifstream input(path);
+  std::string buffer;
+  std::string line;
+  while (std::getline(input, line)) {
+    buffer += line;
+    buffer.push_back('\n');
   }
-  return s;
+  return buffer;
 }
 
 /***
@@ -35,14 +36,14 @@ TEST(Logger, EnabledWritesContent) {
   log.setEnabled(true);
   log() << "line one" << '\n';
   log().flush();
-  log() << "line two: " << 42 << '\n';
+  constexpr int kAnswer = 42;
+  log() << "line two: " << kAnswer << '\n';
   log.close();
 
   ASSERT_TRUE(fs::exists(file));
-  std::string contents = read_file(file);
+  const std::string contents = read_file(file);
   EXPECT_EQ(contents, std::string("line one\nline two: 42\n"));
 
   // Cleanup
   fs::remove(file);
 }
-

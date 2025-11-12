@@ -3,7 +3,10 @@
 
 #include "clang-tidy-docstring/DocstringChecker.h"
 
+#include <cstddef>
+#include <exception>
 #include <iostream>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -14,7 +17,7 @@ static void printUsage(const char* argv0) {
               << "with fields: Function:, Parameters:, Returns: (or Outputs:).\n";
 }
 
-int main(const int argc, char** argv) {
+int main(const int argc, char** argv) try { // NOLINT(readability-function-cognitive-complexity,readability-function-size)
     using namespace doccheck;
     DocstringChecker checker;
     std::vector<std::string> inputs;
@@ -24,30 +27,44 @@ int main(const int argc, char** argv) {
         inputs.emplace_back("include");
         inputs.emplace_back("src");
     } else {
+        const std::span<char*> args(argv, static_cast<size_t>(argc));
         for (int i = 1; i < argc; ++i) {
-            std::string arg = argv[i];
-            if (arg == "-h" || arg == "--help") { printUsage(argv[0]); return 0; }
+            const std::string arg = args[static_cast<size_t>(i)];
+            if (arg == "-h" || arg == "--help") {
+                printUsage(args[0]);
+                return 0;
+            }
             if (arg == "-d" && i + 1 < argc) {
-                inputs.emplace_back(argv[++i]);
+                inputs.emplace_back(args[static_cast<size_t>(++i)]);
             } else {
                 std::cerr << "Unknown argument: " << arg << "\n";
-                printUsage(argv[0]);
+                printUsage(args[0]);
                 return 2;
             }
         }
-        if (inputs.empty()) { inputs = {"include", "src"}; }
+        if (inputs.empty()) {
+            inputs = {"include", "src"};
+        }
     }
 
-    for (const auto &p : inputs) checker.addPath(p);
+    for (const auto &inputPath : inputs) {
+        checker.addPath(inputPath);
+    }
     auto issues = checker.run();
     if (issues.empty()) {
         std::cout << "Docstring check: OK\n";
         return 0;
     }
-    for (const auto &is : issues) {
-        std::cerr << is.file << ":" << is.line << ": error: " << is.message
+    for (const auto &issue : issues) {
+        std::cerr << issue.file << ":" << issue.line << ": error: " << issue.message
                   << " [clang-tidy-docstring]" << "\n";
     }
     std::cerr << "Docstring check failed with " << issues.size() << " issue(s).\n";
     return 1;
+} catch (const std::exception& ex) {
+    std::cerr << "fatal: unhandled exception: " << ex.what() << "\n";
+    return 2;
+} catch (...) {
+    std::cerr << "fatal: unknown exception\n";
+    return 2;
 }

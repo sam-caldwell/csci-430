@@ -3,7 +3,6 @@
 
 #include <gtest/gtest.h>
 #include <filesystem>
-#include <fstream>
 
 #include "logger/Logger.h"
 
@@ -32,4 +31,3 @@ TEST(Logger, CreatesParentDirectories) {
   // Cleanup: remove only our subdirectory to avoid races with other tests
   fs::remove_all(base.parent_path()); // removes .../logger_tests/deep
 }
-

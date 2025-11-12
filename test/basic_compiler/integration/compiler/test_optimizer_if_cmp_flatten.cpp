@@ -3,8 +3,8 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <algorithm>
-#include "basic_compiler/Lexer.h"
-#include "basic_compiler/Parser.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "../../../../include/basic_compiler/parser/Parser.h"
 #include "basic_compiler/opt/AstOptimizer.h"
 #include "basic_compiler/compiler/Metrics.h"
 #include "basic_compiler/ast/Program.h"

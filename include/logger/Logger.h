@@ -13,7 +13,7 @@ namespace logger {
 class Logger {
  public:
   Logger();
-  ~Logger();
+  ~Logger() noexcept;
 
   // Non-copyable, movable (owns file handle)
   Logger(const Logger&) = delete;
@@ -26,7 +26,7 @@ class Logger {
   bool open(const std::string& path, bool append = false);
 
   // Close the log file if open.
-  void close();
+  void close() noexcept;
 
   // Enable/disable logging. When disabled or not open, stream() and operator() return a null sink.
   void setEnabled(const bool enabled) { enabled_ = enabled; }

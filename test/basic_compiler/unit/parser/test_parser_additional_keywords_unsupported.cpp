@@ -3,8 +3,8 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
-#include "basic_compiler/Lexer.h"
-#include "basic_compiler/Parser.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "../../../../include/basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/UnsupportedStmt.h"

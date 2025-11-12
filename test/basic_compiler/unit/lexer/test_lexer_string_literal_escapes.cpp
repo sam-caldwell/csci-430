@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 #define private public
-#include "basic_compiler/Lexer.h"
+#include "basic_compiler/lexer/Lexer.h"
 #undef private
 
 using namespace gwbasic;

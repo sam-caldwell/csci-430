@@ -2,8 +2,8 @@
 
 #include <gtest/gtest.h>
 #include <string>
-#include "basic_compiler/Lexer.h"
-#include "basic_compiler/LexError.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "../../../../include/basic_compiler/lexer/LexError.h"
 
 using namespace gwbasic;
 /***

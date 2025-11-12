@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <string>
 
 #include "logger/Logger.h"
@@ -30,16 +31,16 @@ TEST(Logger, DisabledDoesNotWrite) {
 
   ASSERT_TRUE(log.open(file.string(), /*append=*/false));
   // Default is disabled; writes go to null sink
-  log() << "hello" << '\n' << 123 << '\n';
+  constexpr int kTestNumber = 123;
+  log() << "hello" << '\n' << kTestNumber << '\n';
   log.close();
 
   ASSERT_TRUE(fs::exists(file));
   // File should be empty because all writes were discarded
-  std::ifstream in(file);
-  std::string contents((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+  std::ifstream input(file);
+  const std::string contents((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
   EXPECT_TRUE(contents.empty());
 
   // Cleanup
   fs::remove(file);
 }
-

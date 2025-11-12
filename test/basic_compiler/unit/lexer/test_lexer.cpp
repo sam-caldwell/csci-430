@@ -1,7 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include <gtest/gtest.h>
 #include <sstream>
-#include "basic_compiler/Lexer.h"
+#include "basic_compiler/lexer/Lexer.h"
 
 using namespace gwbasic;
 /***

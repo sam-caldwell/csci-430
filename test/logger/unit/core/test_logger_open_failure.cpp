@@ -3,7 +3,6 @@
 
 #include <gtest/gtest.h>
 #include <filesystem>
-#include <fstream>
 
 #include "logger/Logger.h"
 
@@ -19,11 +18,10 @@ TEST(Logger, OpenFailureReturnsFalse) {
   logger::Logger log;
   // Attempt to open a directory path as a file (should fail)
   const fs::path dir = fs::current_path();
-  bool ok = log.open(dir.string());
-  EXPECT_FALSE(ok);
+  const bool opened = log.open(dir.string());
+  EXPECT_FALSE(opened);
 
   // Even if enabled, stream should sink when not open
   log.setEnabled(true);
   log() << "this should be discarded" << '\n';
 }
-

@@ -19,8 +19,6 @@
 
 namespace onefunc {
 
-namespace {
-
 const std::array<const char*, 8> kExts = {
     ".c", ".cpp", ".cc", ".cxx", ".h", ".hpp", ".hh", ".hxx"
 };
@@ -32,11 +30,11 @@ struct FunctionDef {
     int line = 1; // line where signature starts (1-based)
 };
 
-inline bool isWordChar(char chr) {
+static inline bool isWordChar(char chr) {
     return (std::isalnum(static_cast<unsigned char>(chr)) != 0) || chr == '_';
 }
 
-std::string trim(const std::string& str) {
+static std::string trim(const std::string& str) {
     size_t startIndex = 0;
     size_t endIndex = str.size();
     while (startIndex < endIndex && std::isspace(static_cast<unsigned char>(str[startIndex])) != 0) {
@@ -48,12 +46,12 @@ std::string trim(const std::string& str) {
     return str.substr(startIndex, endIndex - startIndex);
 }
 
-std::string stripLineComment(const std::string& line) {
+static std::string stripLineComment(const std::string& line) {
     const size_t pos = line.find("//");
     return (pos == std::string::npos) ? line : line.substr(0, pos);
 }
 
-std::string normalizeSpaces(const std::string& src) {
+static std::string normalizeSpaces(const std::string& src) {
     // Replace all runs of whitespace with a single space, then trim.
     static const std::regex whitespacePattern("\\s+");
     std::string out = std::regex_replace(src, whitespacePattern, " ");
@@ -66,7 +64,7 @@ std::string normalizeSpaces(const std::string& src) {
     return out;
 }
 
-bool isControlLike(const std::string& text) {
+static bool isControlLike(const std::string& text) {
     static const std::vector<std::string> words = {
         "if", "for", "while", "switch", "catch", "return", "sizeof", "alignof", "decltype", "static_assert"
     };
@@ -77,13 +75,13 @@ bool isControlLike(const std::string& text) {
     return found;
 }
 
-bool containsControlAnywhere(const std::string& sig) {
+static bool containsControlAnywhere(const std::string& sig) {
     static const std::regex ctrlPattern(R"((^|[^A-Za-z0-9_])(if|for|while|switch|catch|else)\s*\()",
                                         std::regex::ECMAScript);
     return std::regex_search(sig, ctrlPattern);
 }
 
-std::string extractFunctionName(const std::string& maybeSig) {
+static std::string extractFunctionName(const std::string& maybeSig) {
     std::string sig = normalizeSpaces(maybeSig);
     const size_t leftParenPos = sig.rfind('(');
     if (leftParenPos == std::string::npos) { return {}; }
@@ -102,7 +100,7 @@ std::string extractFunctionName(const std::string& maybeSig) {
     return token;
 }
 
-int updateBraceDepth(int current, const std::string& raw) {
+static int updateBraceDepth(int current, const std::string& raw) {
     int depth = current;
     for (const char chr : raw) {
         if (chr == '{') {
@@ -114,7 +112,7 @@ int updateBraceDepth(int current, const std::string& raw) {
     return depth;
 }
 
-bool isLikelySignatureLine(const std::string& trimmed, int braceDepth) {
+static bool isLikelySignatureLine(const std::string& trimmed, int braceDepth) {
     if (trimmed.empty()) {
         return false;
     }
@@ -138,12 +136,12 @@ bool isLikelySignatureLine(const std::string& trimmed, int braceDepth) {
     return rparen != std::string::npos;
 }
 
-bool isForbiddenName(const std::string& name) {
+static bool isForbiddenName(const std::string& name) {
     return name == "if" || name == "for" || name == "while" ||
            name == "switch" || name == "catch" || name == "else";
 }
 
-std::vector<bool> computeBlockCommentMask(const std::string& content, std::size_t lineCount) {
+static std::vector<bool> computeBlockCommentMask(const std::string& content, std::size_t lineCount) {
     std::vector<bool> inBlock(lineCount, false);
     bool block = false;
     std::size_t lineIndex = 0;
@@ -170,7 +168,7 @@ std::vector<bool> computeBlockCommentMask(const std::string& content, std::size_
     return inBlock;
 }
 
-bool hasSourceExtension(const std::filesystem::path& path) {
+static bool hasSourceExtension(const std::filesystem::path& path) {
     const std::string lowerExt = [&]() {
         auto ext = path.extension().string();
         std::string lower;
@@ -185,7 +183,7 @@ bool hasSourceExtension(const std::filesystem::path& path) {
     });
 }
 
-std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>& lines,
+static std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>& lines,
                                           const std::vector<bool>& inBlockComment) {
     std::vector<FunctionDef> out;
     const int lineCount = static_cast<int>(lines.size());
@@ -209,7 +207,7 @@ std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>& lines,
     return out;
 }
 
-} // namespace
+// end of internal helpers
 
 bool OneFuncChecker::isSourceFile(const std::filesystem::path& pathIn) {
     auto ext = pathIn.extension().string();
@@ -229,7 +227,7 @@ void OneFuncChecker::addPath(const std::filesystem::path& path) {
 
 // Helpers to collect issues from filesystem inputs. Kept internal to reduce
 // complexity of the public API implementations.
-void collectFromFile(const std::filesystem::path& filePath, std::vector<Issue>& out) {
+static void collectFromFile(const std::filesystem::path& filePath, std::vector<Issue>& out) {
     std::ifstream input(filePath);
     if (!input) {
         return;
@@ -239,7 +237,7 @@ void collectFromFile(const std::filesystem::path& filePath, std::vector<Issue>& 
     out.insert(out.end(), issues.begin(), issues.end());
 }
 
-void collectFromDirectory(const std::filesystem::path& root, std::vector<Issue>& out) {
+static void collectFromDirectory(const std::filesystem::path& root, std::vector<Issue>& out) {
     std::error_code errorCode;
     for (auto entryIt = std::filesystem::recursive_directory_iterator(root, errorCode);
          entryIt != std::filesystem::recursive_directory_iterator(); ++entryIt) {

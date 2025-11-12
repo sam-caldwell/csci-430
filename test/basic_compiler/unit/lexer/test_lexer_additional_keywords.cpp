@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <sstream>
 #include <vector>
-#include "basic_compiler/Lexer.h"
+#include "basic_compiler/lexer/Lexer.h"
 #include "basic_compiler/token/TokenType.h"
 
 using namespace gwbasic;

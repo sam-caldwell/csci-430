@@ -6,11 +6,12 @@
  * Expected Behavior: Enabled writes are persisted; disabled writes are discarded.
  */
 
+#include "logger/Logger.h"
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <string>
-#include "logger/Logger.h"
 
 namespace fs = std::filesystem;
 using logger::Logger;
@@ -37,10 +38,10 @@ TEST(Logger, ConstStreamOverloads) {
   clog2() << "discard" << '\n';
   log.close();
 
-  std::ifstream in(file);
-  std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-  EXPECT_NE(s.find("via const\n"), std::string::npos);
-  EXPECT_EQ(s.find("discard\n"), std::string::npos);
+  std::ifstream input(file);
+  const std::string contents((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+  EXPECT_NE(contents.find("via const\n"), std::string::npos);
+  EXPECT_EQ(contents.find("discard\n"), std::string::npos);
 
   fs::remove(file);
 }

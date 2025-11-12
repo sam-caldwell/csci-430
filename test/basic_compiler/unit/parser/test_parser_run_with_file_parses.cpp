@@ -3,8 +3,8 @@
 #include <gtest/gtest.h>
 #include <sstream>
 #include <string>
-#include "basic_compiler/Lexer.h"
-#include "basic_compiler/Parser.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "../../../../include/basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/RunStmt.h"
 
 using namespace gwbasic;

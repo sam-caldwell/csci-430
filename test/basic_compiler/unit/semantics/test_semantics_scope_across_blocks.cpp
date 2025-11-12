@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include "basic_compiler/Lexer.h"
-#include "basic_compiler/Parser.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "../../../../include/basic_compiler/parser/Parser.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 
 using namespace gwbasic;

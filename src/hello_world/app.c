@@ -2,8 +2,8 @@
 // (c) 2025 Sam Caldwell.  All Rights Reserved.
 // Purpose: Minimal hello_world executable to verify toolchain.
 
-#include <stdio.h>
 #include "hello_world/hello_world.h"
+#include <stdio.h>
 
 /*
  * Function: main
@@ -19,4 +19,3 @@ int main(int argc, char** argv) {
     puts(get_hello_world());
     return 0;
 }
-

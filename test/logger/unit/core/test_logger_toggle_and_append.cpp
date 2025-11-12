@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <string>
 
 #include "logger/Logger.h"
@@ -11,9 +12,9 @@
 namespace fs = std::filesystem;
 using logger::Logger;
 
-static std::string read_all(const fs::path& p) {
-  std::ifstream in(p);
-  return {(std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>()};
+static std::string read_all(const fs::path& path) {
+  std::ifstream input(path);
+  return {(std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>()};
 }
 
 /*
@@ -41,9 +42,8 @@ TEST(Logger, ToggleEnabledState) {
   log.close();
 
   ASSERT_TRUE(fs::exists(file));
-  std::string contents = read_all(file);
+  const std::string contents = read_all(file);
   EXPECT_EQ(contents, std::string("keep this\n"));
 
   fs::remove(file);
 }
-

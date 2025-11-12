@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <algorithm>
-#include "basic_compiler/LexerAccessorForTests.h"
+#include "basic_compiler/lexer/LexerAccessorForTests.h"
 
 using namespace gwbasic;
 

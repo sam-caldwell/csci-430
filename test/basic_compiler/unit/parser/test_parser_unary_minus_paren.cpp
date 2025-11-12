@@ -3,8 +3,8 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <sstream>
-#include "basic_compiler/Lexer.h"
-#include "basic_compiler/Parser.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "../../../../include/basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/ast/BinaryExpr.h"
 #include "basic_compiler/ast/UnaryExpr.h"

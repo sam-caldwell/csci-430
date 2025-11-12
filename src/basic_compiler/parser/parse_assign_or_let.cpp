@@ -1,5 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "basic_compiler/Parser.h"
+#include "../../../include/basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/ArrayAssignStmt.h"
 #include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/ast/Expr.h"

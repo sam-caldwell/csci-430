@@ -27,7 +27,7 @@ add_custom_target(validate_docstrings
   COMMAND $<TARGET_FILE:clang_tidy_docstring>
           -d ${PROJECT_SOURCE_DIR}/src/basic_compiler/lexer
           -d ${PROJECT_SOURCE_DIR}/src/basic_compiler/parser
-          -d ${PROJECT_SOURCE_DIR}/src/basic_compiler/codegenerator
+          -d ${PROJECT_SOURCE_DIR}/src/basic_compiler/codegen
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   COMMENT "Validating docstrings for functions/methods (clang-tidy-docstring)"
   USES_TERMINAL

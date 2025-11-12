@@ -3,11 +3,27 @@
 
 #include "clang-tidy-docstring/DocstringChecker.h"
 
-#include <regex>
+#include <algorithm>
+#include <cctype>
+#include <cstddef>
+#include <filesystem>
 #include <fstream>
+#include <iterator>
+#include <regex>
 #include <sstream>
+#include <string>
+#include <system_error>
+#include <utility>
+#include <vector>
 
 namespace doccheck {
+
+// NOLINTBEGIN(readability-identifier-length,readability-braces-around-statements,
+//              readability-function-size,readability-function-cognitive-complexity,
+//              readability-use-anyofallof,readability-convert-member-functions-to-static,
+//              performance-unnecessary-copy-initialization,performance-unnecessary-value-param,
+//              performance-inefficient-string-concatenation,misc-const-correctness,
+//              misc-include-cleaner)
 
 namespace {
 
@@ -351,7 +367,7 @@ std::vector<FunctionDef> findFunctionDefs(const std::vector<std::string>& lines,
     return out;
 }
 
-std::vector<Issue> validateFunction(const FunctionDef& f, const std::filesystem::path& path) {
+static std::vector<Issue> validateFunction(const FunctionDef& f, const std::filesystem::path& path) {
     std::vector<Issue> issues;
     if (f.docLine < 0 || f.doc.empty()) {
         issues.emplace_back(path.string(), f.line, "Missing docstring immediately above function: " + f.name);
@@ -468,4 +484,10 @@ std::vector<Issue> DocstringChecker::checkContent(const std::string& content, co
     return out;
 }
 
+// NOLINTEND(readability-identifier-length,readability-braces-around-statements,
+//            readability-function-size,readability-function-cognitive-complexity,
+//            readability-use-anyofallof,readability-convert-member-functions-to-static,
+//            performance-unnecessary-copy-initialization,performance-unnecessary-value-param,
+//            performance-inefficient-string-concatenation,misc-const-correctness,
+//            misc-include-cleaner)
 } // namespace doccheck

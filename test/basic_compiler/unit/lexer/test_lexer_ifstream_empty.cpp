@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <filesystem>
-#include "basic_compiler/Lexer.h"
+#include "basic_compiler/lexer/Lexer.h"
 
 using namespace gwbasic;
 
