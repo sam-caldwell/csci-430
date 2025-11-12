@@ -38,8 +38,7 @@ Token Lexer::number() {
     // exponent part: E or D with optional sign and digits
     if (!atEnd()) {
         const unsigned char cu = static_cast<unsigned char>(peek());
-        char up = static_cast<char>(std::toupper(cu));
-        if (up == 'E' || up == 'D') {
+        if (char up = static_cast<char>(std::toupper(cu)); up == 'E' || up == 'D') {
             seenExp = true;
             // Normalize 'D' to 'E' to allow standard parsing downstream
             buf.push_back('E');

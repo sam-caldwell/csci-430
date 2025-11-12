@@ -23,7 +23,11 @@ namespace gwbasic {
 void CodeGenerator::emitSubHandleGosub(std::ostringstream& out, const GosubStmt* gosubStmt, std::string_view entryLabel, int& localCounter) {
     const std::string cont = std::format("{}_gosub_cont{}", entryLabel, ++localCounter);
     const std::string ent = std::format("{}_gosub_entry{}", entryLabel, localCounter);
-    { const std::string irLine = std::format("  br label %{}", ent); out << irLine << Symbols::LF; log() << "line " << currentLine_ << " GosubStmt -> " << irLine << Symbols::LF; }
+    {
+        const std::string irLine = std::format("  br label %{}", ent);
+        out << irLine << Symbols::LF;
+        log() << "line " << currentLine_ << " GosubStmt -> " << irLine << Symbols::LF;
+    }
     emitSubroutineInline(out, gosubStmt->targetLine, ent, cont);
     out << cont << ":" << Symbols::LF;
 }
