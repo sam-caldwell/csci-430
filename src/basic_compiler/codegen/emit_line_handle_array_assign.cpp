@@ -4,6 +4,7 @@
 #include "basic_compiler/ast/ArrayAssignStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <algorithm>
 #include <cstddef>
 #include <format>
 #include <sstream>
@@ -20,9 +21,16 @@ void CodeGenerator::emitLineHandleArrayAssign(std::ostringstream &out,
                                               const std::string &currLineLabel,
                                               int &localCounter) {
     const auto *aaset = dyn_cast<ArrayAssignStmt>(stmt);
-    if (!aaset) { return; }
+    if (aaset == nullptr) {
+        return;
+    }
     const auto &dims = arrayDims_[aaset->name];
-    long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+    long long total = 1;
+    for (const int upperBound : dims) {
+        long long extent = static_cast<long long>(upperBound) - optionBase_ + 1;
+        extent = std::max(0LL, extent);
+        total *= extent;
+    }
     std::vector<std::string> idxI64s; idxI64s.reserve(aaset->indices.size());
     std::vector<std::string> bads; bads.reserve(aaset->indices.size());
     for (size_t di = 0; di < aaset->indices.size(); ++di) {
@@ -63,15 +71,17 @@ void CodeGenerator::emitLineHandleArrayAssign(std::ostringstream &out,
     std::vector<long long> extents; extents.reserve(dims.size());
     for (size_t di = 0; di < dims.size(); ++di) {
         long long extent = static_cast<long long>(dims[di]) - optionBase_ + 1;
-        if (extent < 0) {
-            extent = 0;
-        }
+        extent = std::max(0LL, extent);
         extents.push_back(extent);
     }
     std::vector<long long> strides(dims.size(), 1);
     for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
     std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
-    for (const auto &ii : idxI64s) { const std::string a = nextTemp(); out << std::format("  {} = sub i64 {}, {}", a, ii, optionBase_) << Symbols::LF; adjs.push_back(a); }
+    for (const auto &idxI64 : idxI64s) {
+        const std::string adj = nextTemp();
+        out << std::format("  {} = sub i64 {}, {}", adj, idxI64, optionBase_) << Symbols::LF;
+        adjs.push_back(adj);
+    }
     std::string lin = nextTemp(); out << std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]) << Symbols::LF;
     for (size_t di = 1; di < adjs.size(); ++di) {
         const std::string tmpProd = nextTemp();

@@ -1,10 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/Symbols.h"
-#include "basic_compiler/ast/OnErrorGotoStmt.h"
 #include "basic_compiler/ast/ErrorStmt.h"
-#include "basic_compiler/ast/ResumeStmt.h"
+#include "basic_compiler/ast/OnErrorGotoStmt.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/ResumeStmt.h"
+#include "basic_compiler/ast/Stmt.h"
 #include <format>
 #include <sstream>
 #include <string>
@@ -18,15 +19,15 @@ bool CodeGenerator::emitLineHandleErrorHandlers(std::ostringstream &out,
                                                 const Stmt *stmt,
                                                 int stmtIndex) {
     if (const auto *oeg = dyn_cast<OnErrorGotoStmt>(stmt)) {
-        const std::string ir = std::format("  store i32 {}, ptr @gwb_err_trap_line", oeg->targetLine);
-        out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " OnErrorGoto trap -> " << ir << Symbols::LF;
+        const std::string branchIr = std::format("  store i32 {}, ptr @gwb_err_trap_line", oeg->targetLine);
+        out << branchIr << Symbols::LF;
+        log() << "line " << currentLine_ << " OnErrorGoto trap -> " << branchIr << Symbols::LF;
         return false;
     }
     if (const auto *ers = dyn_cast<ErrorStmt>(stmt)) {
-        const std::string dv = emitExpr(out, ers->code.get(), "");
+        const std::string doubleVal = emitExpr(out, ers->code.get(), "");
         const std::string i32v = nextTemp();
-        out << std::format("  {} = fptosi double {} to i32", i32v, dv) << Symbols::LF;
+        out << std::format("  {} = fptosi double {} to i32", i32v, doubleVal) << Symbols::LF;
         out << std::format("  store i32 {}, ptr @gwb_err_code", i32v) << Symbols::LF;
         out << std::format("  store i32 {}, ptr @gwb_err_line", currentLine_) << Symbols::LF;
         out << std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_) << Symbols::LF;
@@ -41,23 +42,23 @@ bool CodeGenerator::emitLineHandleErrorHandlers(std::ostringstream &out,
         out << "  ]" << Symbols::LF;
         return true;
     }
-    if (const auto *rs = dyn_cast<ResumeStmt>(stmt)) {
-        if (rs->kind == ResumeStmt::Kind::Line) {
-            const std::string ir = std::format("  br label %{}", lineLabelName(rs->line));
-            out << ir << Symbols::LF;
-            log() << "line " << currentLine_ << " Resume line -> " << ir << Symbols::LF;
+    if (const auto *resumeStmt = dyn_cast<ResumeStmt>(stmt)) {
+        if (resumeStmt->kind == ResumeStmt::Kind::Line) {
+            const std::string branchIr = std::format("  br label %{}", lineLabelName(resumeStmt->line));
+            out << branchIr << Symbols::LF;
+            log() << "line " << currentLine_ << " Resume line -> " << branchIr << Symbols::LF;
             return true;
         }
-        if (rs->kind == ResumeStmt::Kind::Reexecute) {
-            const std::string ir = std::format("  br label %{}", resumeLabelName(currentLine_, stmtIndex));
-            out << ir << Symbols::LF;
-            log() << "line " << currentLine_ << " Resume reexec -> " << ir << Symbols::LF;
+        if (resumeStmt->kind == ResumeStmt::Kind::Reexecute) {
+            const std::string branchIr = std::format("  br label %{}", resumeLabelName(currentLine_, stmtIndex));
+            out << branchIr << Symbols::LF;
+            log() << "line " << currentLine_ << " Resume reexec -> " << branchIr << Symbols::LF;
             return true;
         }
         // Resume next
-        const std::string ir = std::format("  br label %{}", resumeNextLabelName(currentLine_, stmtIndex));
-        out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " Resume next -> " << ir << Symbols::LF;
+        const std::string branchIr = std::format("  br label %{}", resumeNextLabelName(currentLine_, stmtIndex));
+        out << branchIr << Symbols::LF;
+        log() << "line " << currentLine_ << " Resume next -> " << branchIr << Symbols::LF;
         return true;
     }
     (void)stmtIndex; // unused in some code paths

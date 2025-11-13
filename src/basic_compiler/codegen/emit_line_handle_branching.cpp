@@ -1,16 +1,18 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/Symbols.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/BinaryOp.h"
+#include "basic_compiler/ast/EndStmt.h"
+#include "basic_compiler/ast/GosubStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
 #include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/RTTI.h"
-#include "basic_compiler/codegen/CodeGenError.h"
-#include "basic_compiler/ast/BinaryExpr.h"
-#include "basic_compiler/ast/GotoStmt.h"
-#include "basic_compiler/ast/GosubStmt.h"
 #include "basic_compiler/ast/ReturnStmt.h"
-#include "basic_compiler/ast/EndStmt.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/StopStmt.h"
 #include "basic_compiler/ast/SystemStmt.h"
+#include "basic_compiler/codegen/CodeGenError.h"
 #include <format>
 #include <sstream>
 #include <string>
@@ -23,44 +25,44 @@ bool CodeGenerator::emitLineHandleBranching(std::ostringstream &out,
                                             const Stmt *stmt,
                                             const std::string &currLineLabel,
                                             int &localCounter) {
-    if (const auto *gt = dyn_cast<GotoStmt>(stmt)) {
-        const std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine));
-        out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " GotoStmt -> " << ir << Symbols::LF;
+    if (const auto *gotoStmt = dyn_cast<GotoStmt>(stmt)) {
+        const std::string branchIr = std::format("  br label %{}", lineLabelName(gotoStmt->targetLine));
+        out << branchIr << Symbols::LF;
+        log() << "line " << currentLine_ << " GotoStmt -> " << branchIr << Symbols::LF;
         return true;
     }
-    if (const auto *gs = dyn_cast<GosubStmt>(stmt)) {
+    if (const auto *gosubStmt = dyn_cast<GosubStmt>(stmt)) {
         const std::string contLbl = std::format("{}_cont{}", currLineLabel, ++localCounter);
         const std::string entryLbl = std::format("{}_gosub_entry{}", currLineLabel, localCounter);
         out << std::format("  br label %{}", entryLbl) << Symbols::LF;
-        emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
+        emitSubroutineInline(out, gosubStmt->targetLine, entryLbl, contLbl);
         out << contLbl << ":" << Symbols::LF;
         return false;
     }
-    if (const auto *is = dyn_cast<IfStmt>(stmt)) {
-        const auto *be = dyn_cast<BinaryExpr>(is->cond.get());
-        if (!be || (be->op != BinaryOp::Eq && be->op != BinaryOp::Ne && be->op != BinaryOp::Lt &&
-                    be->op != BinaryOp::Le && be->op != BinaryOp::Gt && be->op != BinaryOp::Ge)) {
+    if (const auto *ifStmt = dyn_cast<IfStmt>(stmt)) {
+        const auto *binExpr = dyn_cast<BinaryExpr>(ifStmt->cond.get());
+        if (binExpr == nullptr || (binExpr->op != BinaryOp::Eq && binExpr->op != BinaryOp::Ne && binExpr->op != BinaryOp::Lt &&
+                                   binExpr->op != BinaryOp::Le && binExpr->op != BinaryOp::Gt && binExpr->op != BinaryOp::Ge)) {
             throw CodeGenError("IF condition must be a comparison");
         }
-        const std::string cond = emitComparison(out, be);
+        const std::string cond = emitComparison(out, binExpr);
         const std::string contLbl = std::format("{}_cont{}", currLineLabel, ++localCounter);
-        const std::string ir = std::format("  br i1 {}, label %{}, label %{}", cond, lineLabelName(is->targetLine), contLbl);
-        out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " IfStmt -> " << ir << Symbols::LF;
+        const std::string branchIr = std::format("  br i1 {}, label %{}, label %{}", cond, lineLabelName(ifStmt->targetLine), contLbl);
+        out << branchIr << Symbols::LF;
+        log() << "line " << currentLine_ << " IfStmt -> " << branchIr << Symbols::LF;
         out << contLbl << ":" << Symbols::LF;
         return false;
     }
     if (isa<ReturnStmt>(stmt)) {
-        const std::string ir = std::format("  br label %exit");
-        out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " ReturnStmt -> " << ir << Symbols::LF;
+        const std::string branchIr = std::format("  br label %exit");
+        out << branchIr << Symbols::LF;
+        log() << "line " << currentLine_ << " ReturnStmt -> " << branchIr << Symbols::LF;
         return true;
     }
     if (isa<EndStmt>(stmt)) {
-        const std::string ir = std::format("  br label %exit");
-        out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " EndStmt -> " << ir << Symbols::LF;
+        const std::string branchIr = std::format("  br label %exit");
+        out << branchIr << Symbols::LF;
+        log() << "line " << currentLine_ << " EndStmt -> " << branchIr << Symbols::LF;
         return true;
     }
     if (isa<StopStmt>(stmt)) {
@@ -73,9 +75,9 @@ bool CodeGenerator::emitLineHandleBranching(std::ostringstream &out,
         return true;
     }
     if (isa<SystemStmt>(stmt)) {
-        const std::string ir = std::format("  br label %exit");
-        out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " SystemStmt -> " << ir << Symbols::LF;
+        const std::string branchIr = std::format("  br label %exit");
+        out << branchIr << Symbols::LF;
+        log() << "line " << currentLine_ << " SystemStmt -> " << branchIr << Symbols::LF;
         return true;
     }
     (void)currLineLabel; (void)localCounter; // silence unused for some builds

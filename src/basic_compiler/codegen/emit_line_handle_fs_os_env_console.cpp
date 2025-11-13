@@ -1,4 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-include-order,misc-include-cleaner,readability-identifier-length,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/Symbols.h"
 #include "basic_compiler/ast/ClsStmt.h"
@@ -23,6 +24,12 @@
 #include "basic_compiler/ast/BsaveStmt.h"
 #include "basic_compiler/ast/CallAbsStmt.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/Expr.h"
+#include <algorithm>
+#include <functional>
+#include <memory>
+#include <set>
 #include <format>
 #include <sstream>
 #include <string>
@@ -314,7 +321,12 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         for (const auto &an : aset) {
             auto itLen = arrayDims_.find(an);
             if (itLen == arrayDims_.end()) { continue; }
-            long long len = 1; for (int ub : itLen->second) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; len *= ext; }
+            long long len = 1;
+            for (const int upperBound : itLen->second) {
+                long long extent = static_cast<long long>(upperBound) - optionBase_ + 1;
+                extent = std::max(0LL, extent);
+                len *= extent;
+            }
             if (isStringArrayNameCG(an)) {
                 ensureStringArrayAllocated(out, an, static_cast<int>(len));
                 const std::string base = arrayAllocaName_[an];
@@ -409,3 +421,4 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
 }
 
 } // namespace gwbasic
+// NOLINTEND(llvm-include-order,misc-include-cleaner,readability-identifier-length,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)

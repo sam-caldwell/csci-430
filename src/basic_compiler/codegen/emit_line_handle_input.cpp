@@ -2,10 +2,9 @@
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/Symbols.h"
 #include "basic_compiler/ast/InputStmt.h"
+#include <format>
 #include <sstream>
 #include <string>
-#include <format>
-#include "basic_compiler/ast/RTTI.h"
 
 namespace gwbasic {
 
