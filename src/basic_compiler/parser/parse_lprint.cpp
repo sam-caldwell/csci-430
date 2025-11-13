@@ -1,7 +1,13 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
-#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/Parser.h"
+#include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <utility>
+#include <vector>
 
 namespace gwbasic {
 
@@ -14,15 +20,15 @@ namespace gwbasic {
  * Returns:
  *  - std::unique_ptr<Stmt>: PrintStmt targeting printer channel 1
  */
-std::unique_ptr<Stmt> Parser::parseLprint() {
-    const int l = peek().line;
-    const int c = peek().col;
+std::unique_ptr<Stmt> Parser::parseLprint() { // NOLINT(readability-function-size,readability-function-cognitive-complexity)
+    const int lineNum = peek().line;
+    const int colNum = peek().col;
     constexpr int channel = 1; // Implicit printer channel maps to @gwb_files[0]
 
     auto makePrintNode = [&](std::vector<std::unique_ptr<Expr>> items,
                              PrintStmt::Terminator trail,
                              std::unique_ptr<Expr> fmtPtr) -> std::unique_ptr<PrintStmt> {
-        auto node = make_node<PrintStmt>({l, c}, std::move(items));
+        auto node = make_node<PrintStmt>({lineNum, colNum}, std::move(items));
         node->channel = channel;
         node->format = std::move(fmtPtr);
         node->trail = trail;
@@ -101,7 +107,7 @@ std::unique_ptr<Stmt> Parser::parseLprint() {
         done = true;
     }
 
-    auto node = make_node<PrintStmt>({l, c}, std::move(items));
+    auto node = make_node<PrintStmt>({lineNum, colNum}, std::move(items));
     node->seps = std::move(seps);
     node->channel = channel;
     node->format = std::move(fmt);

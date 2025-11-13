@@ -1,7 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/lexer/Lexer.h"
-#include "../../../include/basic_compiler/lexer/LexError.h"
 #include "basic_compiler/Symbols.h"
+#include "basic_compiler/lexer/LexError.h"
+#include "basic_compiler/token/Token.h"
+#include "basic_compiler/token/TokenType.h"
 #include <sstream>
 #include <string>
 
@@ -16,14 +18,14 @@ namespace gwbasic {
  * Returns:
  *  - Token: String token with unescaped contents and location
  */
-Token Lexer::stringLiteral() {
+Token Lexer::stringLiteral() { // NOLINT(readability-function-size,readability-function-cognitive-complexity)
     const int startLine = line_;
     const int startCol = col_;
     std::string buf;
     advance(); // opening quote
     while (!atEnd()) {
-        const char c = advance();
-        if (c == Symbols::DOUBLE_QUOTE.first()) {
+        const char chr = advance();
+        if (chr == Symbols::DOUBLE_QUOTE.first()) {
             // If next char is also a double quote, this encodes a literal quote
             if (!atEnd() && peek() == Symbols::DOUBLE_QUOTE.first()) {
                 advance(); // consume the second quote
@@ -34,10 +36,12 @@ Token Lexer::stringLiteral() {
             return Token{TokenType::String, buf, startLine, startCol};
         }
         // No escape processing: backslashes are just characters
-        buf.push_back(c);
+        buf.push_back(chr);
     }
     {
-        std::ostringstream m; m << "Unterminated string literal at line " << startLine; throw LexError(m.str());
+        std::ostringstream msg;
+        msg << "Unterminated string literal at line " << startLine;
+        throw LexError(msg.str());
     }
 }
 

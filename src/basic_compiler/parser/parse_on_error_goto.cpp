@@ -1,7 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
-#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/OnErrorGotoStmt.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/ParseError.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <string>
 
 namespace gwbasic {
 
@@ -17,11 +22,12 @@ namespace gwbasic {
 std::unique_ptr<Stmt> Parser::parseOnErrorGoto() {
     consume(TokenType::KwError, "ERROR");
     consume(TokenType::KwGoto, "GOTO");
-    if (!check(TokenType::Integer)) throw ParseError("Expected 0 or line number after ON ERROR GOTO");
-    int ln = std::stoi(peek().lexeme);
+    if (!check(TokenType::Integer)) {
+        throw ParseError("Expected 0 or line number after ON ERROR GOTO");
+    }
+    const int lineValue = std::stoi(peek().lexeme);
     advance();
-    return make_node<OnErrorGotoStmt>({0,0}, ln);
+    return make_node<OnErrorGotoStmt>({0,0}, lineValue);
 }
 
 } // namespace gwbasic
-

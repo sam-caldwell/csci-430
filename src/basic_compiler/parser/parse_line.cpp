@@ -1,7 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
+#include "basic_compiler/parser/Parser.h"
+#include "basic_compiler/ast/Line.h"
 #include "basic_compiler/parser/ParseError.h"
+#include "basic_compiler/token/TokenType.h"
 #include <sstream>
+#include <string>
+#include <utility>
 
 namespace gwbasic {
 
@@ -25,13 +29,17 @@ Line Parser::parseLine() {
     advance();
 
     while (!atEnd() && !check(TokenType::NewLine)) {
-        auto st = parseStatement();
-        line.statements.push_back(std::move(st));
+        auto stmt = parseStatement();
+        line.statements.push_back(std::move(stmt));
         const auto& last = line.statements.back();
         syntax() << "line " << line.number << ' ' << nodeName(last.get())
                  << " @ " << last->pos.line << ':' << last->pos.col << '\n';
-        if (match(TokenType::Colon)) continue;
-        if (check(TokenType::NewLine)) break;
+        if (match(TokenType::Colon)) {
+            continue;
+        }
+        if (check(TokenType::NewLine)) {
+            break;
+        }
     }
     match(TokenType::NewLine);
     return line;

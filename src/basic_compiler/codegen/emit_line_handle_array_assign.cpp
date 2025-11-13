@@ -35,7 +35,11 @@ void CodeGenerator::emitLineHandleArrayAssign(std::ostringstream &out,
         bads.push_back(bad);
     }
     std::string anyBad = bads[0];
-    for (size_t i = 1; i < bads.size(); ++i) { const std::string nb = nextTemp(); out << std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]) << Symbols::LF; anyBad = nb; }
+    for (size_t i = 1; i < bads.size(); ++i) {
+        const std::string newBad = nextTemp();
+        out << std::format("  {} = or i1 {}, {}", newBad, anyBad, bads[i]) << Symbols::LF;
+        anyBad = newBad;
+    }
     const std::string doLbl = std::format("{}_arr_ok_{}", currLineLabel, ++localCounter);
     const std::string errLbl = std::format("{}_arr_err_{}", currLineLabel, localCounter);
     out << std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl) << Symbols::LF;
@@ -57,13 +61,25 @@ void CodeGenerator::emitLineHandleArrayAssign(std::ostringstream &out,
     }
     out << doLbl << ":" << Symbols::LF;
     std::vector<long long> extents; extents.reserve(dims.size());
-    for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+    for (size_t di = 0; di < dims.size(); ++di) {
+        long long extent = static_cast<long long>(dims[di]) - optionBase_ + 1;
+        if (extent < 0) {
+            extent = 0;
+        }
+        extents.push_back(extent);
+    }
     std::vector<long long> strides(dims.size(), 1);
     for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
     std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
     for (const auto &ii : idxI64s) { const std::string a = nextTemp(); out << std::format("  {} = sub i64 {}, {}", a, ii, optionBase_) << Symbols::LF; adjs.push_back(a); }
     std::string lin = nextTemp(); out << std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]) << Symbols::LF;
-    for (size_t di = 1; di < adjs.size(); ++di) { const std::string t = nextTemp(); out << std::format("  {} = mul i64 {}, {}", t, adjs[di], strides[di]) << Symbols::LF; const std::string s = nextTemp(); out << std::format("  {} = add i64 {}, {}", s, lin, t) << Symbols::LF; lin = s; }
+    for (size_t di = 1; di < adjs.size(); ++di) {
+        const std::string tmpProd = nextTemp();
+        out << std::format("  {} = mul i64 {}, {}", tmpProd, adjs[di], strides[di]) << Symbols::LF;
+        const std::string sumTmp = nextTemp();
+        out << std::format("  {} = add i64 {}, {}", sumTmp, lin, tmpProd) << Symbols::LF;
+        lin = sumTmp;
+    }
     if (isStringArrayNameCG(aaset->name)) {
         ensureStringArrayAllocated(out, aaset->name, static_cast<int>(total));
         const std::string base = arrayAllocaName_[aaset->name];

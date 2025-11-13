@@ -1,12 +1,19 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
-#include "basic_compiler/token/ToString.h"
-#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/Parser.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/NumberExpr.h"
 #include "basic_compiler/ast/StringExpr.h"
-#include "basic_compiler/ast/CallExpr.h"
 #include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/ParseError.h"
+#include "basic_compiler/token/ToString.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
 #include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace gwbasic {
 
@@ -19,35 +26,40 @@ namespace gwbasic {
  * Returns:
  *  - std::unique_ptr<Expr>: Number, String, Var, Call, or grouped expression
  */
-std::unique_ptr<Expr> Parser::parsePrimary() {
+std::unique_ptr<Expr> Parser::parsePrimary() { // NOLINT(readability-function-size,readability-function-cognitive-complexity)
     if (check(TokenType::Integer) || check(TokenType::Float)) {
-        int l = peek().line, c = peek().col;
-        double v = std::stod(peek().lexeme);
+        const int lineNum = peek().line;
+        const int colNum = peek().col;
+        const double value = std::stod(peek().lexeme);
         advance();
-        return make_node<NumberExpr>({l, c}, v);
+        return make_node<NumberExpr>({lineNum, colNum}, value);
     }
     if (check(TokenType::String)) {
-        int l = peek().line, c = peek().col;
-        std::string s = peek().lexeme;
+        const int lineNum = peek().line;
+        const int colNum = peek().col;
+        const std::string str = peek().lexeme;
         advance();
-        return make_node<StringExpr>({l, c}, s);
+        return make_node<StringExpr>({lineNum, colNum}, str);
     }
     if (check(TokenType::Identifier)) {
-        int l = peek().line, c = peek().col;
-        std::string name = peek().lexeme;
+        const int lineNum = peek().line;
+        const int colNum = peek().col;
+        const std::string name = peek().lexeme;
         advance();
         // Function call if immediately followed by '('
         if (match(TokenType::LParen)) {
             std::vector<std::unique_ptr<Expr>> args;
             if (!check(TokenType::RParen)) {
-                do {
+                // Parse arglist separated by commas
+                args.push_back(parseExpression());
+                while (match(TokenType::Comma)) {
                     args.push_back(parseExpression());
-                } while (match(TokenType::Comma));
+                }
             }
             consume(TokenType::RParen, ")");
-            return make_node<CallExpr>({l, c}, name, std::move(args));
+            return make_node<CallExpr>({lineNum, colNum}, name, std::move(args));
         }
-        return make_node<VarExpr>({l, c}, name);
+        return make_node<VarExpr>({lineNum, colNum}, name);
     }
     if (match(TokenType::LParen)) {
         auto expr = parseExpression();

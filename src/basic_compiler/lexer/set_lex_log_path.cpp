@@ -1,7 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/lexer/Lexer.h"
 #include "logger/Logger.h"
-#include <fstream>
+#include <string>
 
 namespace gwbasic {
 

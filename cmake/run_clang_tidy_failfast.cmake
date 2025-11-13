@@ -37,10 +37,10 @@ if(APPLE)
 endif()
 
 # Collect candidate files (headers and C++ sources)
-file(GLOB_RECURSE _hdrs CONFIGURE_DEPENDS
+file(GLOB_RECURSE _hdrs
      "${ROOT_DIR}/include/*.h"
      "${ROOT_DIR}/src/*.h")
-file(GLOB_RECURSE _cpps CONFIGURE_DEPENDS
+file(GLOB_RECURSE _cpps
      "${ROOT_DIR}/src/*.cpp")
 set(LINT_FILES ${_hdrs} ${_cpps})
 list(REMOVE_DUPLICATES LINT_FILES)
@@ -79,7 +79,9 @@ set(_EXTRA_ARGS
   -warnings-as-errors=*
 )
 if(NOT "${_LINT_SYSROOT}" STREQUAL "")
-  list(APPEND _EXTRA_ARGS --extra-arg=-isysroot --extra-arg="${_LINT_SYSROOT}")
+  # Pass sysroot without embedded quotes to avoid literal quote characters
+  # reaching the compiler driver via clang-tidy.
+  list(APPEND _EXTRA_ARGS --extra-arg=-isysroot --extra-arg=${_LINT_SYSROOT})
 endif()
 
 foreach(f IN LISTS LINT_FILES)
@@ -96,4 +98,3 @@ foreach(f IN LISTS LINT_FILES)
     message(FATAL_ERROR "clang-tidy failed for: ${f}")
   endif()
 endforeach()
-

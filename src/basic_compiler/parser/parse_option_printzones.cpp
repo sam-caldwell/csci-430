@@ -1,6 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/OptionPrintZonesStmt.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/parser/ParseError.h"
+#include "basic_compiler/token/TokenType.h"
+#include <cctype>
+#include <memory>
+#include <string>
 
 namespace gwbasic {
 
@@ -15,18 +21,36 @@ namespace gwbasic {
  */
 std::unique_ptr<Stmt> Parser::parseOptionPrintZones() {
     // Expect identifier PRINTZONES
-    if (peek().type != TokenType::Identifier) throw ParseError("Expected PRINTZONES after OPTION");
-    std::string up = peek().lexeme; for (auto &ch : up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch))); advance();
-    if (up != "PRINTZONES") throw ParseError("Expected PRINTZONES after OPTION");
+    if (peek().type != TokenType::Identifier) {
+        throw ParseError("Expected PRINTZONES after OPTION");
+    }
+    std::string upper = peek().lexeme;
+    for (auto &chr : upper) {
+        chr = static_cast<char>(std::toupper(static_cast<unsigned char>(chr)));
+    }
+    advance();
+    if (upper != "PRINTZONES") {
+        throw ParseError("Expected PRINTZONES after OPTION");
+    }
     // Expect ON or OFF
     bool enable = false;
     if (match(TokenType::KwOn)) {
         enable = true;
     } else {
         // OFF may be lexed as Identifier
-        if (peek().type != TokenType::Identifier) throw ParseError("Expected ON or OFF after PRINTZONES");
-        std::string u2 = peek().lexeme; for (auto &ch : u2) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch))); advance();
-        if (u2 == "OFF") enable = false; else throw ParseError("Expected ON or OFF after PRINTZONES");
+        if (peek().type != TokenType::Identifier) {
+            throw ParseError("Expected ON or OFF after PRINTZONES");
+        }
+        std::string upper2 = peek().lexeme;
+        for (auto &chr : upper2) {
+            chr = static_cast<char>(std::toupper(static_cast<unsigned char>(chr)));
+        }
+        advance();
+        if (upper2 == "OFF") {
+            enable = false;
+        } else {
+            throw ParseError("Expected ON or OFF after PRINTZONES");
+        }
     }
     return std::make_unique<OptionPrintZonesStmt>(enable);
 }

@@ -130,7 +130,7 @@ namespace gwbasic {
             if (stmtTerminates) { terminated = true; }
             // Legacy chain removed: dispatcher handles all statements now.
             continue;
-#if 0
+#ifdef GW_BASIC_KEEP_LEGACY
             if (auto aaset = dyn_cast<ArrayAssignStmt>(st.get())) {
                 // A(i[,j...]) = expr (numeric or string)
                 const auto &dims = arrayDims_[aaset->name];

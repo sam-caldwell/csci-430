@@ -1,8 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/lexer/Lexer.h"
 #include "basic_compiler/Symbols.h"
-#include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/ToString.h"
+#include "basic_compiler/token/Token.h"
+#include "basic_compiler/token/TokenType.h"
+#include <string>
 
 namespace gwbasic {
 
@@ -11,25 +13,25 @@ namespace gwbasic {
  * Summary:
  *  Log a single token to the lex log if logging is enabled.
  * Parameters:
- *  - t: Token to render into the log
+ *  - token: Token to render into the log
  * Returns:
  *  - void
  */
-void Lexer::logToken(const Token& t) {
+void Lexer::logToken(const Token& token) {
     // Use a chained logging pattern: single stream chain for the whole line
-    auto& L = log();
-    L << "token" << Symbols::SPACE.first() << to_string(t.type) << Symbols::SPACE.first() << "@" << Symbols::SPACE.first() << t.line << ":" << t.col;
-    switch (t.type) {
+    auto& logger = log();
+    logger << "token" << Symbols::SPACE.first() << to_string(token.type) << Symbols::SPACE.first() << "@" << Symbols::SPACE.first() << token.line << ":" << token.col;
+    switch (token.type) {
         case TokenType::EndOfFile:
         case TokenType::NewLine:
             break;
         default: {
-            const std::string esc = escapeForLog(t.lexeme);
-            L << Symbols::SPACE.first() << Symbols::DOUBLE_QUOTE << esc << Symbols::DOUBLE_QUOTE;
+            const std::string escaped = escapeForLog(token.lexeme);
+            logger << Symbols::SPACE.first() << Symbols::DOUBLE_QUOTE << escaped << Symbols::DOUBLE_QUOTE;
             break;
         }
     }
-    L << Symbols::LF;
+    logger << Symbols::LF;
 }
 
 } // namespace gwbasic

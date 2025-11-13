@@ -1,5 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/ArrayAssignStmt.h"
 #include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/ast/Expr.h"
@@ -26,7 +26,7 @@ namespace gwbasic {
  * Returns:
  *  - std::unique_ptr<Stmt>: AssignStmt, ArrayAssignStmt, or MidAssignStmt
  */
-std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
+std::unique_ptr<Stmt> Parser::parseAssignOrLet() { // NOLINT(readability-function-size,readability-function-cognitive-complexity)
     if (match(TokenType::KwLet)) {
         if (check(TokenType::Identifier)) {
             if (auto mid = parseMidAssignInLet(peek())) {
@@ -60,7 +60,7 @@ std::unique_ptr<Stmt> Parser::parseAssignOrLet() {
  * Returns:
  *  - std::unique_ptr<Stmt>: MidAssignStmt if matched; nullptr otherwise.
  */
-std::unique_ptr<Stmt> Parser::parseMidAssignInLet(const Token& startTok) {
+std::unique_ptr<Stmt> Parser::parseMidAssignInLet(const Token& startTok) { // NOLINT(readability-function-size,readability-function-cognitive-complexity)
     std::string upperName = peek().lexeme;
     for (auto &chChar : upperName) {
         chChar = static_cast<char>(std::toupper(static_cast<unsigned char>(chChar)));

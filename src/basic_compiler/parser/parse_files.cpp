@@ -1,7 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
+#include "basic_compiler/parser/Parser.h"
+#include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/FilesStmt.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <utility>
 
 namespace gwbasic {
 
@@ -15,10 +20,11 @@ namespace gwbasic {
  *  - std::unique_ptr<Stmt>: FilesStmt with optional device and pattern
  */
 std::unique_ptr<Stmt> Parser::parseFiles() {
-    const int l = peek().line, c = peek().col;
+    const int lineNum = peek().line;
+    const int colNum = peek().col;
     // End of statement: no args
     if (check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile)) {
-        return make_node<FilesStmt>({l, c}, nullptr, nullptr);
+        return make_node<FilesStmt>({lineNum, colNum}, nullptr, nullptr);
     }
     auto first = parseExpression();
     std::unique_ptr<Expr> device;
@@ -32,7 +38,7 @@ std::unique_ptr<Stmt> Parser::parseFiles() {
     } else {
         pattern = std::move(first);
     }
-    return make_node<FilesStmt>({l, c}, std::move(device), std::move(pattern));
+    return make_node<FilesStmt>({lineNum, colNum}, std::move(device), std::move(pattern));
 }
 
 } // namespace gwbasic

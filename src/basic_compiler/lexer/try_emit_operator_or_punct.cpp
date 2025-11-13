@@ -1,6 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "basic_compiler/lexer/Lexer.h"
 #include "basic_compiler/Symbols.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "basic_compiler/token/Token.h"
+#include "basic_compiler/token/TokenType.h"
+#include <array>
+#include <string_view>
+#include <vector>
 
 namespace gwbasic {
 

@@ -1,7 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/EnvironStmt.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/make_node.h"
+#include <memory>
+#include <utility>
 
 namespace gwbasic {
 
@@ -15,8 +18,8 @@ namespace gwbasic {
  *  - std::unique_ptr<Stmt>: EnvironStmt with string expression
  */
 std::unique_ptr<Stmt> Parser::parseEnviron() {
-    auto s = parseExpression();
-    return make_node<EnvironStmt>({0,0}, std::move(s));
+    auto valueExpr = parseExpression();
+    return make_node<EnvironStmt>({0,0}, std::move(valueExpr));
 }
 
 } // namespace gwbasic

@@ -1,7 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/KillStmt.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/make_node.h"
+#include <memory>
+#include <utility>
 
 namespace gwbasic {
 
@@ -15,8 +18,8 @@ namespace gwbasic {
  *  - std::unique_ptr<Stmt>: KillStmt node with target expression
  */
 std::unique_ptr<Stmt> Parser::parseKill() {
-    auto f = parseExpression();
-    return make_node<KillStmt>({0,0}, std::move(f));
+    auto fileExpr = parseExpression();
+    return make_node<KillStmt>({0,0}, std::move(fileExpr));
 }
 
 } // namespace gwbasic

@@ -1,7 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/BinaryExpr.h"
 #include "basic_compiler/ast/BinaryOp.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <utility>
 
 namespace gwbasic {
 
@@ -29,7 +33,9 @@ std::unique_ptr<Expr> Parser::parseFactor() {
         } else if (match(TokenType::KwMod)) {
             auto right = parseUnary();
             left = std::make_unique<BinaryExpr>(BinaryOp::Mod, std::move(left), std::move(right));
-        } else break;
+        } else {
+            break;
+        }
     }
     return left;
 }

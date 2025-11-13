@@ -1,6 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
+#include "basic_compiler/parser/Parser.h"
+#include "basic_compiler/ast/DefTypeStmt.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/token/Token.h"
+#include "basic_compiler/token/TokenType.h"
 #include <cctype>
+#include <memory>
+#include <string>
 
 namespace gwbasic {
 
@@ -15,19 +21,50 @@ namespace gwbasic {
  */
 std::unique_ptr<Stmt> Parser::tryParseDefFamily(const Token& startTok) {
     // Handle compound DEF* forms first (DEFINT/DEFSNG/DEFDBL/DEFSTR)
-    if (match(TokenType::KwDefStr)) { auto n = parseDefType(DefTypeStmt::Kind::Str); n->pos = {startTok.line, startTok.col}; return n; }
-    if (match(TokenType::KwDefInt)) { auto n = parseDefType(DefTypeStmt::Kind::Int); n->pos = {startTok.line, startTok.col}; return n; }
-    if (match(TokenType::KwDefSng)) { auto n = parseDefType(DefTypeStmt::Kind::Sng); n->pos = {startTok.line, startTok.col}; return n; }
-    if (match(TokenType::KwDefDbl)) { auto n = parseDefType(DefTypeStmt::Kind::Dbl); n->pos = {startTok.line, startTok.col}; return n; }
-
-    if (!match(TokenType::KwDef)) return nullptr;
-    if (match(TokenType::KwSeg)) { auto n = parseDefSeg(); n->pos = {startTok.line, startTok.col}; return n; }
-    if (check(TokenType::Identifier)) {
-        const std::string id = peek().lexeme; std::string up = id;
-        for (auto &ch: up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
-        if (up.rfind("USR", 0) == 0) { auto n = parseDefUsr(); n->pos = {startTok.line, startTok.col}; return n; }
+    if (match(TokenType::KwDefStr)) {
+        auto node = parseDefType(DefTypeStmt::Kind::Str);
+        node->pos = {startTok.line, startTok.col};
+        return node;
     }
-    auto n = parseDefFn(); n->pos = {startTok.line, startTok.col}; return n;
+    if (match(TokenType::KwDefInt)) {
+        auto node = parseDefType(DefTypeStmt::Kind::Int);
+        node->pos = {startTok.line, startTok.col};
+        return node;
+    }
+    if (match(TokenType::KwDefSng)) {
+        auto node = parseDefType(DefTypeStmt::Kind::Sng);
+        node->pos = {startTok.line, startTok.col};
+        return node;
+    }
+    if (match(TokenType::KwDefDbl)) {
+        auto node = parseDefType(DefTypeStmt::Kind::Dbl);
+        node->pos = {startTok.line, startTok.col};
+        return node;
+    }
+
+    if (!match(TokenType::KwDef)) {
+        return nullptr;
+    }
+    if (match(TokenType::KwSeg)) {
+        auto node = parseDefSeg();
+        node->pos = {startTok.line, startTok.col};
+        return node;
+    }
+    if (check(TokenType::Identifier)) {
+        const std::string ident = peek().lexeme;
+        std::string upper = ident;
+        for (auto &chr: upper) {
+            chr = static_cast<char>(std::toupper(static_cast<unsigned char>(chr)));
+        }
+        if (upper.rfind("USR", 0) == 0) {
+            auto node = parseDefUsr();
+            node->pos = {startTok.line, startTok.col};
+            return node;
+        }
+    }
+    auto node = parseDefFn();
+    node->pos = {startTok.line, startTok.col};
+    return node;
 }
 
 } // namespace gwbasic

@@ -1,8 +1,15 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
-#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/Parser.h"
+#include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/PrintStmt.h"
-#include "basic_compiler/ast/StringExpr.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/make_node.h"
+#include "basic_compiler/parser/ParseError.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace gwbasic {
 
@@ -15,15 +22,20 @@ namespace gwbasic {
  * Returns:
  *  - std::unique_ptr<Stmt>: PrintStmt capturing items, seps, format, channel
  */
-std::unique_ptr<Stmt> Parser::parsePrint() {
-    const int l = peek().line;
-    const int c = peek().col;
+std::unique_ptr<Stmt> Parser::parsePrint() { // NOLINT(readability-function-size,readability-function-cognitive-complexity)
+    const int lineNum = peek().line;
+    const int colNum = peek().col;
     int channel = -1;
     // Optional: PRINT # n ,
     if (match(TokenType::Hash)) {
-        if (!check(TokenType::Integer)) throw ParseError("Expected channel number after '#'");
-        channel = std::stoi(peek().lexeme); advance();
-        if (match(TokenType::Comma)) {}
+        if (!check(TokenType::Integer)) {
+            throw ParseError("Expected channel number after '#'");
+        }
+        channel = std::stoi(peek().lexeme);
+        advance();
+        if (match(TokenType::Comma)) {
+            // ok
+        }
     }
     // Optional: USING formatExpr ; or , (leading)
     std::unique_ptr<Expr> fmt;
@@ -31,22 +43,18 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
         fmt = parseExpression();
         // Historically PRINT USING requires ';' before the value list, but
         // we accept either ';' or ',' for compatibility.
-        if (match(TokenType::Semicolon)) {
-            // ok
-        } else if (match(TokenType::Comma)) {
-            // ok
-        }
+        (void)(match(TokenType::Semicolon) || match(TokenType::Comma));
     }
     // Support degenerate forms: PRINT ; / PRINT , (no items)
     if (match(TokenType::Semicolon)) {
-        auto node = make_node<PrintStmt>({l, c}, std::vector<std::unique_ptr<Expr>>{});
+        auto node = make_node<PrintStmt>({lineNum, colNum}, std::vector<std::unique_ptr<Expr>>{});
         node->channel = channel;
         node->format = std::move(fmt);
         node->trail = PrintStmt::Terminator::Semicolon;
         return node;
     }
     if (match(TokenType::Comma)) {
-        auto node = make_node<PrintStmt>({l, c}, std::vector<std::unique_ptr<Expr>>{});
+        auto node = make_node<PrintStmt>({lineNum, colNum}, std::vector<std::unique_ptr<Expr>>{});
         node->channel = channel;
         node->format = std::move(fmt);
         node->trail = PrintStmt::Terminator::Comma;
@@ -64,13 +72,14 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
             advance();
             fmt = parseExpression();
             // Optional separator after USING; ignore for item emission
-            if (match(TokenType::Semicolon)) {}
-            else if (match(TokenType::Comma)) {}
+            (void)(match(TokenType::Semicolon) || match(TokenType::Comma));
             // Continue to accept next item or another USING
             continue;
         }
         // If the next token begins an expression, parse it; otherwise, break
-        if (check(TokenType::String) || check(TokenType::Integer) || check(TokenType::Float) || check(TokenType::Identifier) || check(TokenType::LParen) || check(TokenType::Plus) || check(TokenType::Minus) || check(TokenType::KwNot)) {
+        if (check(TokenType::String) || check(TokenType::Integer) || check(TokenType::Float) ||
+            check(TokenType::Identifier) || check(TokenType::LParen) || check(TokenType::Plus) ||
+            check(TokenType::Minus) || check(TokenType::KwNot)) {
             items.push_back(parseExpression());
         } else {
             break;
@@ -78,18 +87,24 @@ std::unique_ptr<Stmt> Parser::parsePrint() {
         // After an item, capture a separator if present and loop for the next
         if (match(TokenType::Comma)) {
             // If end-of-list follows, treat as trailing terminator
-            if (check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile)) { trail = PrintStmt::Terminator::Comma; break; }
+            if (check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile)) {
+                trail = PrintStmt::Terminator::Comma;
+                break;
+            }
             seps.push_back(PrintStmt::Sep::Comma);
             continue;
         }
         if (match(TokenType::Semicolon)) {
-            if (check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile)) { trail = PrintStmt::Terminator::Semicolon; break; }
+            if (check(TokenType::NewLine) || check(TokenType::Colon) || check(TokenType::EndOfFile)) {
+                trail = PrintStmt::Terminator::Semicolon;
+                break;
+            }
             seps.push_back(PrintStmt::Sep::Semicolon);
             continue;
         }
         break;
     }
-    auto node = make_node<PrintStmt>({l, c}, std::move(items));
+    auto node = make_node<PrintStmt>({lineNum, colNum}, std::move(items));
     node->seps = std::move(seps);
     node->channel = channel;
     node->format = std::move(fmt);

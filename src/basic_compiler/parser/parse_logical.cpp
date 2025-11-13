@@ -1,7 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
-#include "../../../include/basic_compiler/parser/Parser.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/BinaryExpr.h"
 #include "basic_compiler/ast/BinaryOp.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
+#include <utility>
 
 namespace gwbasic {
 

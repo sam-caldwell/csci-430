@@ -14,16 +14,18 @@ namespace gwbasic {
  *  - char: the character consumed, or '\0' at end-of-input
  */
 char Lexer::advance() {
-    if (atEnd()) return Symbols::NUL.first();
-    const char c = src_[pos_++];
-    if (c == Symbols::LF.first()) {
+    if (atEnd()) {
+        return Symbols::NUL.first();
+    }
+    const char chr = src_[pos_++];
+    if (chr == Symbols::LF.first()) {
         line_++;
         col_ = 1;
         bol_ = true;
     } else {
         col_++;
     }
-    return c;
+    return chr;
 }
 
 } // namespace gwbasic

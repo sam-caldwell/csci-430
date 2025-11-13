@@ -3,6 +3,7 @@
 #include "logger/Logger.h"
 #include <memory>
 #include <string>
+#include <utility>
 
 namespace gwbasic {
 
@@ -15,6 +16,7 @@ namespace gwbasic {
  * Returns:
  *  - none
  */
-Lexer::Lexer(std::string source) : src_(source), lexLogger_(std::make_unique<logger::Logger>()) {}
+Lexer::Lexer(std::string source)
+    : src_(std::move(source)), lexLogger_(std::make_unique<logger::Logger>()) {}
 
 } // namespace gwbasic

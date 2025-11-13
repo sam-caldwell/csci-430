@@ -1,7 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "../../../include/basic_compiler/parser/Parser.h"
-#include "basic_compiler/ast/UnaryExpr.h"
 #include "basic_compiler/Symbols.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+#include "basic_compiler/token/TokenType.h"
+#include <memory>
 
 namespace gwbasic {
 
@@ -15,9 +18,15 @@ namespace gwbasic {
  *  - std::unique_ptr<Expr>: Unary expression or next precedence level
  */
 std::unique_ptr<Expr> Parser::parseUnary() {
-    if (match(TokenType::Plus)) return std::make_unique<UnaryExpr>(Symbols::PLUS.first(), parseUnary());
-    if (match(TokenType::Minus)) return std::make_unique<UnaryExpr>(Symbols::MINUS.first(), parseUnary());
-    if (match(TokenType::KwNot)) return std::make_unique<UnaryExpr>(Symbols::EXCLAMATION.first(), parseUnary());
+    if (match(TokenType::Plus)) {
+        return std::make_unique<UnaryExpr>(Symbols::PLUS.first(), parseUnary());
+    }
+    if (match(TokenType::Minus)) {
+        return std::make_unique<UnaryExpr>(Symbols::MINUS.first(), parseUnary());
+    }
+    if (match(TokenType::KwNot)) {
+        return std::make_unique<UnaryExpr>(Symbols::EXCLAMATION.first(), parseUnary());
+    }
     return parsePower();
 }
 

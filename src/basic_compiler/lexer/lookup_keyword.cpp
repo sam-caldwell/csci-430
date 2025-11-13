@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/lexer/Lexer.h"
+#include "basic_compiler/token/TokenType.h"
 #include <string_view>
 
 namespace gwbasic {
@@ -14,11 +15,11 @@ namespace gwbasic {
  *  - TokenType: Matching keyword type, or Identifier if not matched
  */
 TokenType Lexer::lookupKeyword(const std::string_view upper) {
-    for (const auto& kv : kKeywords_) {
-        const auto& kw = kv.first;
-        const auto tt = kv.second;
-        if (kw == upper) {
-            return tt;
+    for (const auto& entry : kKeywords_) {
+        const auto& keyword = entry.first;
+        const auto tokenType = entry.second;
+        if (keyword == upper) {
+            return tokenType;
         }
     }
     return TokenType::Identifier;
