@@ -1,20 +1,43 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-include-order,misc-include-cleaner)
 #include "basic_compiler/codegen/CodeGenerator.h"
+
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/ast/ArrayAssignStmt.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/BinaryOp.h"
 #include "basic_compiler/ast/ColorStmt.h"
-#include "basic_compiler/ast/OnGotoStmt.h"
-#include "basic_compiler/ast/OnGosubStmt.h"
-#include "basic_compiler/ast/ReturnStmt.h"
 #include "basic_compiler/ast/EndStmt.h"
-#include "basic_compiler/codegen/CodeGenError.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/ForStmt.h"
+#include "basic_compiler/ast/GosubStmt.h"
+#include "basic_compiler/ast/GotoStmt.h"
+#include "basic_compiler/ast/IfBlockStmt.h"
+#include "basic_compiler/ast/InputStmt.h"
+#include "basic_compiler/ast/NumberExpr.h"
+#include "basic_compiler/ast/OnGosubStmt.h"
+#include "basic_compiler/ast/OnGotoStmt.h"
+#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/ReturnStmt.h"
 #include "basic_compiler/ast/StopStmt.h"
 #include "basic_compiler/ast/SystemStmt.h"
 #include "basic_compiler/ast/MidAssignStmt.h"
+#include "basic_compiler/ast/StringExpr.h"
+#include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/Symbols.h"
-#include <sstream>
-#include <format>
+#include "basic_compiler/codegen/CodeGenError.h"
+
 #include <cmath>
+#include <algorithm>
+#include <format>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <cstddef>
+#include <vector>
+// NOLINTEND(llvm-include-order,misc-include-cleaner)
 
 namespace gwbasic {
 
@@ -23,7 +46,7 @@ namespace gwbasic {
  * Summary: Emit IR for a WHILE loop statement.
  * Parameters:
  *  - out: IR output stream to append to.
- *  - ws: Parsed WhileStmt node.
+ *  - while_stmt: Parsed WhileStmt node.
  *  - currLineLabel: Base label for naming emitted blocks.
  *  - localCounter: Per-line counter to uniquify labels.
  * Returns:
@@ -32,8 +55,8 @@ namespace gwbasic {
  *  - Emit a loop with condition, body, and back-edge, merging at an end
  *    label. The condition may be comparison or general expression.
  */
-// NOLINTBEGIN(readability-function-cognitive-complexity,readability-function-size,readability-identifier-length,readability-avoid-nested-conditional-operator,readability-braces-around-statements)
-void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, const std::string& currLineLabel, int& localCounter) {
+// NOLINTBEGIN(readability-function-cognitive-complexity,readability-function-size,readability-identifier-length,readability-avoid-nested-conditional-operator,readability-braces-around-statements,misc-const-correctness)
+void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_stmt, const std::string& currLineLabel, int& localCounter) {
     std::string id = std::to_string(++localCounter);
     std::string condLbl = currLineLabel; condLbl += "_while_cond"; condLbl += id;
     std::string bodyLbl = currLineLabel; bodyLbl += "_while_body"; bodyLbl += id;
@@ -46,11 +69,11 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
     // Condition
     out << condLbl << ":" << Symbols::LF;
     std::string cond;
-    if (auto be = dyn_cast<const BinaryExpr>(ws->cond.get());
-        be && (be->op == BinaryOp::Eq || be->op == BinaryOp::Ne || be->op == BinaryOp::Lt || be->op == BinaryOp::Le || be->op == BinaryOp::Gt || be->op == BinaryOp::Ge)) {
+    if (const auto* be = dyn_cast<const BinaryExpr>(while_stmt->cond.get());
+        be != nullptr && (be->op == BinaryOp::Eq || be->op == BinaryOp::Ne || be->op == BinaryOp::Lt || be->op == BinaryOp::Le || be->op == BinaryOp::Gt || be->op == BinaryOp::Ge)) {
         cond = emitComparison(out, be);
     } else {
-        std::string val = emitExpr(out, ws->cond.get(), "");
+        std::string val = emitExpr(out, while_stmt->cond.get(), "");
         cond = nextTemp();
         out << std::format("  {} = fcmp one double {}, 0.0", cond, val) << Symbols::LF;
     }
@@ -59,8 +82,8 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
 
     // Body
     out << bodyLbl << ":" << Symbols::LF;
-    for (const auto& s : ws->body) {
-        if (auto asg = dyn_cast<AssignStmt>(s.get())) {
+    for (const auto& s : while_stmt->body) {
+        if (const auto* asg = dyn_cast<AssignStmt>(s.get())) {
             std::string val = emitExpr(out, asg->value.get(), currLineLabel);
             if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
                 std::string ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
@@ -68,12 +91,12 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             } else {
                 storeNumberToVar(out, asg->name, val);
             }
-        } else if (auto mid = dyn_cast<MidAssignStmt>(s.get())) {
+        } else if (const auto* mid = dyn_cast<MidAssignStmt>(s.get())) {
             std::string dest;
             std::string storePtr;
             if (!mid->indices.empty()) {
                 const auto &dims = arrayDims_[mid->name];
-                long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+                long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); ext = std::max<long long>(ext, 0); total *= ext; }
                 ensureStringArrayAllocated(out, mid->name, static_cast<int>(total));
                 std::string base = arrayAllocaName_[mid->name];
                 std::vector<std::string> idxI64s; idxI64s.reserve(mid->indices.size());
@@ -111,7 +134,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
                 }
                 out << doLbl << ":" << Symbols::LF;
                 std::vector<long long> extents; extents.reserve(dims.size());
-                for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+                for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; e = std::max<long long>(e, 0); extents.push_back(e); }
                 std::vector<long long> strides(dims.size(), 1);
                 for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
                 std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
@@ -158,15 +181,15 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             { std::string ir = std::format("  call ptr @strncpy(ptr {}, ptr {}, i64 {})", dst, src, m2); out << ir << Symbols::LF; }
             { std::string ir = std::format("  br label %{}", endLbl2); out << ir << Symbols::LF; }
             out << endLbl2 << ":" << Symbols::LF;
-        } else if (auto pr = dyn_cast<PrintStmt>(s.get())) {
+        } else if (const auto* pr = dyn_cast<PrintStmt>(s.get())) {
             std::vector<const Expr*> items; if (pr->value) items.push_back(pr->value.get()); for (const auto& v : pr->more) items.push_back(v.get());
             for (size_t pi = 0; pi < items.size(); ++pi) {
                 const bool last = (pi + 1 == items.size());
                 const Expr* v = items[pi];
                 auto isStr = [&](const Expr* e, const auto& self) -> bool {
                     if (isa<StringExpr>(e)) return true;
-                    if (auto vv = dyn_cast<VarExpr>(e)) return !vv->name.empty() && vv->name.back() == Symbols::DOLLARSIGN.first();
-                    if (auto bb = dyn_cast<BinaryExpr>(e)) return (bb->op == BinaryOp::Add) && (self(bb->lhs.get(), self) || self(bb->rhs.get(), self));
+                    if (const auto* vv = dyn_cast<VarExpr>(e)) return !vv->name.empty() && vv->name.back() == Symbols::DOLLARSIGN.first();
+                    if (const auto* bb = dyn_cast<BinaryExpr>(e)) return (bb->op == BinaryOp::Add) && (self(bb->lhs.get(), self) || self(bb->rhs.get(), self));
                     return false;
                 };
                 if (isStr(v, isStr)) {
@@ -175,7 +198,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
                     { std::string ir3 = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmt, sptr); out << ir3 << Symbols::LF; log() << "line " << currentLine_ << " While body Print -> " << ir3 << Symbols::LF; }
                 } else {
                     // Constant number? Avoid runtime fcmp in while prints as well
-                    if (const auto cnum = dyn_cast<const NumberExpr>(v)) {
+                    if (const auto* cnum = dyn_cast<const NumberExpr>(v)) {
                         const double cv = cnum->value;
                         const bool isIntegral = (std::floor(cv) == cv);
                         if (isIntegral) {
@@ -209,9 +232,9 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
                     }
                 }
             }
-        } else if (auto aaset = dyn_cast<ArrayAssignStmt>(s.get())) {
+        } else if (const auto* aaset = dyn_cast<ArrayAssignStmt>(s.get())) {
             const auto &dims = arrayDims_[aaset->name];
-            long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+            long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); ext = std::max<long long>(ext, 0); total *= ext; }
             std::vector<std::string> idxI64s; idxI64s.reserve(aaset->indices.size());
             std::vector<std::string> bads; bads.reserve(aaset->indices.size());
             for (size_t di = 0; di < aaset->indices.size(); ++di) {
@@ -229,7 +252,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             std::string errLbl = std::format("{}_while_arr_err_{}", currLineLabel, localCounter);
             { std::string ir = std::format("  br i1 {}, label %{}, label %{}", anyBad, errLbl, doLbl); out << ir << Symbols::LF; }
             out << errLbl << ":" << Symbols::LF;
-            emitErrorDispatch(out, 9, currentLine_, 0);
+            emitErrorDispatch(out, 9, currentLine_, 0); // NOLINT(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
             // Mirror into ERR/ERL variables for runtime bounds errors
             ensureVarAllocated(out, "ERR");
             ensureVarAllocated(out, "ERL");
@@ -238,7 +261,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             // Switch emitted above by helper
             out << doLbl << ":" << Symbols::LF;
             std::vector<long long> extents; extents.reserve(dims.size());
-            for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; if (e < 0) e = 0; extents.push_back(e); }
+            for (size_t di = 0; di < dims.size(); ++di) { long long e = static_cast<long long>(dims[di]) - optionBase_ + 1; e = std::max<long long>(e, 0); extents.push_back(e); }
             std::vector<long long> strides(dims.size(), 1);
             for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) { strides[di] = strides[di + 1] * extents[di + 1]; }
             std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
@@ -258,25 +281,25 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
                 std::string val = emitExpr(out, aaset->value.get(), currLineLabel);
                 storeNumberToArrayElem(out, aaset->name, elem, val);
             }
-        } else if (auto fs = dyn_cast<ForStmt>(s.get())) {
+        } else if (const auto* fs = dyn_cast<ForStmt>(s.get())) {
             emitFor(out, fs, currLineLabel, localCounter);
-        } else if (auto ib = dyn_cast<IfBlockStmt>(s.get())) {
+        } else if (const auto* ib = dyn_cast<IfBlockStmt>(s.get())) {
             emitIfBlock(out, ib, currLineLabel, localCounter);
-        } else if (auto ws2 = dyn_cast<WhileStmt>(s.get())) {
+        } else if (const auto* ws2 = dyn_cast<WhileStmt>(s.get())) {
             emitWhile(out, ws2, currLineLabel, localCounter);
         } else if (isa<ReturnStmt>(s.get())) {
             std::string ir = std::format("  br label %exit"); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body Return -> " << ir << Symbols::LF;
         } else if (isa<EndStmt>(s.get())) {
             std::string ir = std::format("  br label %exit"); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body End -> " << ir << Symbols::LF;
-        } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
+        } else if (const auto* gt = dyn_cast<GotoStmt>(s.get())) {
             std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine)); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body Goto -> " << ir << Symbols::LF;
-        } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
+        } else if (const auto* gs = dyn_cast<GosubStmt>(s.get())) {
             std::string contLbl = std::format("{}_gosub_cont{}", currLineLabel, ++localCounter);
             std::string entryLbl = std::format("{}_gosub_entry{}", currLineLabel, localCounter);
             out << std::format("  br label %{}", entryLbl) << Symbols::LF;
             emitSubroutineInline(out, gs->targetLine, entryLbl, contLbl);
             out << std::format("{}:", contLbl) << Symbols::LF;
-        } else if (auto og = dyn_cast<OnGotoStmt>(s.get())) {
+        } else if (const auto* og = dyn_cast<OnGotoStmt>(s.get())) {
             std::string idx = emitExpr(out, og->index.get(), currLineLabel);
             std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body OnGoto fptosi -> " << ir << Symbols::LF; }
             std::string contLbl = std::format("{}_on_cont_{}", currLineLabel, ++localCounter);
@@ -284,7 +307,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             for (size_t i = 0; i < og->targets.size(); ++i) out << std::format("    i32 {}, label %{}", i+1, lineLabelName(og->targets[i])) << Symbols::LF;
             out << "  ]" << Symbols::LF;
             out << std::format("{}:", contLbl) << Symbols::LF;
-        } else if (auto ogs = dyn_cast<OnGosubStmt>(s.get())) {
+        } else if (const auto* ogs = dyn_cast<OnGosubStmt>(s.get())) {
             std::string idx = emitExpr(out, ogs->index.get(), currLineLabel);
             std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body OnGosub fptosi -> " << ir << Symbols::LF; }
             std::string contLbl = std::format("{}_on_gs_cont_{}", currLineLabel, ++localCounter);
@@ -301,7 +324,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
             out << std::format("  br label %{}", endLbl) << Symbols::LF;
         } else if (isa<SystemStmt>(s.get())) {
             out << std::format("  br label %{}", endLbl) << Symbols::LF;
-        } else if (auto ins = dyn_cast<InputStmt>(s.get())) {
+        } else if (const auto* ins = dyn_cast<InputStmt>(s.get())) {
             if (ins->promptLiteral || ins->promptVar) {
                 std::string pstr;
                 if (ins->promptLiteral) {
@@ -327,7 +350,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
                 std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
                 storeNumberToVar(out, vname, dv);
             }
-        } else if (auto col = dyn_cast<ColorStmt>(s.get())) {
+        } else if (auto* col = dyn_cast<ColorStmt>(s.get())) {
             auto emitColor = [&](const std::unique_ptr<Expr>& e, bool isFg){
                 if (!e) return;
                 std::string val = emitExpr(out, e.get(), "");
@@ -351,5 +374,5 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* ws, cons
     out << endLbl << ":" << Symbols::LF;
 }
 
-// NOLINTEND(readability-function-cognitive-complexity,readability-function-size,readability-identifier-length,readability-avoid-nested-conditional-operator,readability-braces-around-statements)
+// NOLINTEND(readability-function-cognitive-complexity,readability-function-size,readability-identifier-length,readability-avoid-nested-conditional-operator,readability-braces-around-statements,misc-const-correctness)
 } // namespace gwbasic

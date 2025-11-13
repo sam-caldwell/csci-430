@@ -4,11 +4,12 @@
  * Purpose: Implement CodeGenerator::emitVarExpr (VarExpr lowering).
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/VarExpr.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/Symbols.h"
+#include "basic_compiler/ast/VarExpr.h"
 #include <cctype>
 #include <format>
+#include <sstream>
+#include <string>
 
 using namespace gwbasic;
 
@@ -21,83 +22,85 @@ using namespace gwbasic;
  * Returns:
  *  - std::string: SSA register name or bound name holding the value.
  */
-std::string CodeGenerator::emitVarExpr(std::ostringstream& out, const VarExpr* v) {
-    if (std::string bound; lookupBinding(v->name, bound)) return bound;
+// NOLINTNEXTLINE(readability-function-size,readability-function-cognitive-complexity)
+std::string CodeGenerator::emitVarExpr(std::ostringstream& out, const VarExpr* var_expr) {
+    if (std::string bound; lookupBinding(var_expr->name, bound)) { return bound; }
     {
-        std::string up = v->name; for (auto &ch : up) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
-        if (up == "INKEY$") {
-            std::string p = nextTemp();
-            { std::string ir = std::format("  {} = getelementptr inbounds [1 x i8], ptr @.str_empty, i64 0, i64 0", p); out << ir << Symbols::LF; }
+        std::string upperName = var_expr->name;
+        for (auto &ch1 : upperName) { ch1 = static_cast<char>(std::toupper(static_cast<unsigned char>(ch1))); }
+        if (upperName == "INKEY$") {
+            const std::string emptyPtr = nextTemp();
+            out << std::format("  {} = getelementptr inbounds [1 x i8], ptr @.str_empty, i64 0, i64 0", emptyPtr) << Symbols::LF;
             log() << "line " << currentLine_ << " VarExpr(INKEY$) -> empty string" << Symbols::LF;
-            return p;
+            return emptyPtr;
         }
-        if (up == "DATE$") {
-            std::string t = nextTemp(); { std::string ir = std::format("  {} = call i64 @time(ptr null)", t); out << ir << Symbols::LF; }
-            std::string tp = nextTemp(); { std::string ir = std::format("  {} = alloca i64", tp); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store i64 {}, ptr {}", t, tp); out << ir << Symbols::LF; }
-            std::string tm = nextTemp(); { std::string ir = std::format("  {} = call ptr @localtime(ptr {})", tm, tp); out << ir << Symbols::LF; }
-            std::string sbuf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << ir << Symbols::LF; }
-            std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_date, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
-            std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, tm); out << ir << Symbols::LF; }
-            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }
-            std::string mem = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << ir << Symbols::LF; }
+        if (upperName == "DATE$") {
+            const std::string timeVal = nextTemp(); out << std::format("  {} = call i64 @time(ptr null)", timeVal) << Symbols::LF;
+            const std::string timePtr = nextTemp(); out << std::format("  {} = alloca i64", timePtr) << Symbols::LF;
+            out << std::format("  store i64 {}, ptr {}", timeVal, timePtr) << Symbols::LF;
+            const std::string tmPtr = nextTemp(); out << std::format("  {} = call ptr @localtime(ptr {})", tmPtr, timePtr) << Symbols::LF;
+            const std::string sbufPtr = nextTemp(); out << std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbufPtr) << Symbols::LF;
+            const std::string dateFmt = nextTemp(); out << std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_date, i64 0, i64 0", dateFmt) << Symbols::LF;
+            const std::string written = nextTemp(); out << std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", written, sbufPtr, dateFmt, tmPtr) << Symbols::LF;
+            const std::string allocSize = nextTemp(); out << std::format("  {} = add i64 {}, 1", allocSize, written) << Symbols::LF;
+            const std::string memPtr = nextTemp(); out << std::format("  {} = call ptr @malloc(i64 {})", memPtr, allocSize) << Symbols::LF;
+            out << std::format("  call ptr @strcpy(ptr {}, ptr {})", memPtr, sbufPtr) << Symbols::LF;
             log() << "line " << currentLine_ << " VarExpr(DATE$) -> strftime" << Symbols::LF;
-            return mem;
+            return memPtr;
         }
-        if (up == "TIME$") {
-            std::string t = nextTemp(); { std::string ir = std::format("  {} = call i64 @time(ptr null)", t); out << ir << Symbols::LF; }
-            std::string tp = nextTemp(); { std::string ir = std::format("  {} = alloca i64", tp); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  store i64 {}, ptr {}", t, tp); out << ir << Symbols::LF; }
-            std::string tm = nextTemp(); { std::string ir = std::format("  {} = call ptr @localtime(ptr {})", tm, tp); out << ir << Symbols::LF; }
-            std::string sbuf = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << ir << Symbols::LF; }
-            std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_time, i64 0, i64 0", fmt); out << ir << Symbols::LF; }
-            std::string n = nextTemp(); { std::string ir = std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, tm); out << ir << Symbols::LF; }
-            std::string size = nextTemp(); { std::string ir = std::format("  {} = add i64 {}, 1", size, n); out << ir << Symbols::LF; }
-            std::string mem = nextTemp(); { std::string ir = std::format("  {} = call ptr @malloc(i64 {})", mem, size); out << ir << Symbols::LF; }
-            { std::string ir = std::format("  call ptr @strcpy(ptr {}, ptr {})", mem, sbuf); out << ir << Symbols::LF; }
+        if (upperName == "TIME$") {
+            const std::string timeVal = nextTemp(); out << std::format("  {} = call i64 @time(ptr null)", timeVal) << Symbols::LF;
+            const std::string timePtr = nextTemp(); out << std::format("  {} = alloca i64", timePtr) << Symbols::LF;
+            out << std::format("  store i64 {}, ptr {}", timeVal, timePtr) << Symbols::LF;
+            const std::string tmPtr = nextTemp(); out << std::format("  {} = call ptr @localtime(ptr {})", tmPtr, timePtr) << Symbols::LF;
+            const std::string sbufPtr = nextTemp(); out << std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbufPtr) << Symbols::LF;
+            const std::string timeFmt = nextTemp(); out << std::format("  {} = getelementptr inbounds [9 x i8], ptr @.fmt_time, i64 0, i64 0", timeFmt) << Symbols::LF;
+            const std::string written = nextTemp(); out << std::format("  {} = call i64 @strftime(ptr {}, i64 256, ptr {}, ptr {})", written, sbufPtr, timeFmt, tmPtr) << Symbols::LF;
+            const std::string allocSize = nextTemp(); out << std::format("  {} = add i64 {}, 1", allocSize, written) << Symbols::LF;
+            const std::string memPtr = nextTemp(); out << std::format("  {} = call ptr @malloc(i64 {})", memPtr, allocSize) << Symbols::LF;
+            out << std::format("  call ptr @strcpy(ptr {}, ptr {})", memPtr, sbufPtr) << Symbols::LF;
             log() << "line " << currentLine_ << " VarExpr(TIME$) -> strftime" << Symbols::LF;
-            return mem;
+            return memPtr;
         }
     }
-    ensureVarAllocated(out, v->name);
-    std::string a = varAllocaName_[v->name];
-    std::string r = nextTemp();
+    ensureVarAllocated(out, var_expr->name);
+    std::string allocaPtr = varAllocaName_[var_expr->name];
+    std::string result = nextTemp();
 
-    if (isStringVarNameCG(v->name)) {
-        std::string ld = std::format("  {} = load ptr, ptr {}", r, a);
-        out << ld << Symbols::LF;
+    if (isStringVarNameCG(var_expr->name)) {
+        const std::string loadPtrLine = std::format("  {} = load ptr, ptr {}", result, allocaPtr);
+        out << loadPtrLine << Symbols::LF;
         std::string safe = nextTemp();
-        { std::string ir = std::format("  {} = call ptr @gwb_safe_str(ptr {})", safe, r); out << ir << Symbols::LF; }
-        r = safe;
+        { const std::string irLine = std::format("  {} = call ptr @gwb_safe_str(ptr {})", safe, result); out << irLine << Symbols::LF; }
+        result = safe;
         log() << "line " << currentLine_ << " VarExpr$ -> load+safe" << Symbols::LF;
     } else {
-        switch (numKindOf(v->name)) {
+        switch (numKindOf(var_expr->name)) {
             case NumKind::Int16: {
-                std::string l = nextTemp();
-                { std::string ir = std::format("  {} = load i16, ptr {}", l, a); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  {} = sitofp i16 {} to double", r, l); out << ir << Symbols::LF; }
+                const std::string tmpVal = nextTemp();
+                { const std::string irLine = std::format("  {} = load i16, ptr {}", tmpVal, allocaPtr); out << irLine << Symbols::LF; }
+                { const std::string irLine = std::format("  {} = sitofp i16 {} to double", result, tmpVal); out << irLine << Symbols::LF; }
                 break;
             }
             case NumKind::Long32: {
-                std::string l = nextTemp();
-                { std::string ir = std::format("  {} = load i32, ptr {}", l, a); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  {} = sitofp i32 {} to double", r, l); out << ir << Symbols::LF; }
+                const std::string tmpVal = nextTemp();
+                { const std::string irLine = std::format("  {} = load i32, ptr {}", tmpVal, allocaPtr); out << irLine << Symbols::LF; }
+                { const std::string irLine = std::format("  {} = sitofp i32 {} to double", result, tmpVal); out << irLine << Symbols::LF; }
                 break;
             }
             case NumKind::Single: {
-                std::string l = nextTemp();
-                { std::string ir = std::format("  {} = load float, ptr {}", l, a); out << ir << Symbols::LF; }
-                { std::string ir = std::format("  {} = fpext float {} to double", r, l); out << ir << Symbols::LF; }
+                const std::string tmpVal = nextTemp();
+                { const std::string irLine = std::format("  {} = load float, ptr {}", tmpVal, allocaPtr); out << irLine << Symbols::LF; }
+                { const std::string irLine = std::format("  {} = fpext float {} to double", result, tmpVal); out << irLine << Symbols::LF; }
                 break;
             }
             case NumKind::Double: {
-                std::string ir = std::format("  {} = load double, ptr {}", r, a);
-                out << ir << Symbols::LF;
+                const std::string irLine = std::format("  {} = load double, ptr {}", result, allocaPtr);
+                out << irLine << Symbols::LF;
                 break;
             }
         }
         log() << "line " << currentLine_ << " VarExpr -> load/convert to double" << Symbols::LF;
     }
-    return r;
+    return result;
 }
