@@ -1,6 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/MidAssignStmt.h"
+#include <sstream>
+#include <string>
+#include <string_view>
 
 namespace gwbasic {
 
@@ -21,4 +24,3 @@ void CodeGenerator::emitSubHandleMidAssign(std::ostringstream& out, const MidAss
 }
 
 } // namespace gwbasic
-

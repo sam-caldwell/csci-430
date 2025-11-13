@@ -1,9 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/Symbols.h"
-#include <sstream>
+#include "basic_compiler/ast/AssignStmt.h"
 #include <format>
+#include <sstream>
+#include <string>
+#include <string_view>
 
 namespace gwbasic {
 
@@ -18,11 +20,11 @@ namespace gwbasic {
  *  - void
  */
 void CodeGenerator::emitSubHandleAssign(std::ostringstream& out, const AssignStmt* asg, std::string_view entryLabel) {
-    std::string val = emitExpr(out, asg->value.get(), std::string(entryLabel));
+    const std::string val = emitExpr(out, asg->value.get(), std::string(entryLabel));
     if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
-        std::string ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
-        out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " AssignStmt -> " << ir << Symbols::LF;
+        const std::string irLine = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
+        out << irLine << Symbols::LF;
+        log() << "line " << currentLine_ << " AssignStmt -> " << irLine << Symbols::LF;
         return;
     }
     storeNumberToVar(out, asg->name, val);

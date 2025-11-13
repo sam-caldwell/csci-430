@@ -20,6 +20,7 @@ using namespace gwbasic;
  * Returns:
  *  - std::string: Floating literal string (ensures decimal point or exponent).
  */
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 std::string CodeGenerator::emitNumberExpr(const std::ostringstream& out, const NumberExpr* num) {
     (void)out; // no IR emission needed for numeric literal
     // Use general floating format with 17 significant digits (like "%.17g").

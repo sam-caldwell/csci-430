@@ -1,8 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/Symbols.h"
-#include "basic_compiler/ast/SwapStmt.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/ReadTarget.h"
+#include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/SwapStmt.h"
+#include <algorithm>
+#include <cstddef>
 #include <format>
 #include <sstream>
 #include <string>
@@ -17,30 +21,36 @@ void CodeGenerator::emitLineHandleSwap(std::ostringstream &out,
                                        int stmtIndex,
                                        const std::string &currLineLabel,
                                        int &localCounter) {
-    const auto *sw = dyn_cast<SwapStmt>(stmt);
-    if (!sw) { return; }
+    const auto *swapStmt = dyn_cast<SwapStmt>(stmt);
+    if (swapStmt == nullptr) { return; }
     struct RefInfo {
         bool isString{false};
         bool isArray{false};
         std::string name;
         std::string ptr;  // ptr to storage (var alloca or array element)
         long long total{0};
-    } L, R;
-    auto computeRef = [&](const ReadTarget &t, RefInfo &outInfo) {
-        outInfo.name = t.name;
-        outInfo.isArray = !t.indices.empty();
-        outInfo.isString = isStringVarNameCG(t.name);
+    } lhs, rhs;
+    // NOLINTNEXTLINE(readability-function-cognitive-complexity)
+    auto computeRef = [&](const ReadTarget &targetRef, RefInfo &outInfo) {
+        outInfo.name = targetRef.name;
+        outInfo.isArray = !targetRef.indices.empty();
+        outInfo.isString = isStringVarNameCG(targetRef.name);
         if (!outInfo.isArray) {
-            ensureVarAllocated(out, t.name);
-            outInfo.ptr = varAllocaName_[t.name];
+            ensureVarAllocated(out, targetRef.name);
+            outInfo.ptr = varAllocaName_[targetRef.name];
         } else {
-            const auto &dims = arrayDims_[t.name];
-            long long total = 1; for (int ub : dims) { long long ext = (static_cast<long long>(ub) - optionBase_ + 1); if (ext < 0) ext = 0; total *= ext; }
+            const auto &dims = arrayDims_[targetRef.name];
+            long long total = 1;
+            for (const int upperBound : dims) {
+                long long ext = static_cast<long long>(upperBound) - optionBase_ + 1;
+                ext = std::max(0LL, ext);
+                total *= ext;
+            }
             outInfo.total = total;
-            std::vector<std::string> idxI64s; idxI64s.reserve(t.indices.size());
-            std::vector<std::string> bads; bads.reserve(t.indices.size());
-            for (size_t di = 0; di < t.indices.size(); ++di) {
-                const std::string idxD = emitExpr(out, t.indices[di].get(), "");
+            std::vector<std::string> idxI64s; idxI64s.reserve(targetRef.indices.size());
+            std::vector<std::string> bads; bads.reserve(targetRef.indices.size());
+            for (size_t di = 0; di < targetRef.indices.size(); ++di) {
+                const std::string idxD = emitExpr(out, targetRef.indices[di].get(), "");
                 const std::string idxI = nextTemp();
                 idxI64s.push_back(idxI);
                 const std::string ltBase = nextTemp();
@@ -54,9 +64,9 @@ void CodeGenerator::emitLineHandleSwap(std::ostringstream &out,
             }
             std::string anyBad = bads[0];
             for (size_t i = 1; i < bads.size(); ++i) {
-                const std::string nb = nextTemp();
-                out << std::format("  {} = or i1 {}, {}", nb, anyBad, bads[i]) << Symbols::LF;
-                anyBad = nb;
+                const std::string newBad = nextTemp();
+                out << std::format("  {} = or i1 {}, {}", newBad, anyBad, bads[i]) << Symbols::LF;
+                anyBad = newBad;
             }
             const std::string doLbl = std::format("{}_swap_ok_{}", currLineLabel, ++localCounter);
             const std::string errLbl = std::format("{}_swap_err_{}", currLineLabel, localCounter);
@@ -91,54 +101,53 @@ void CodeGenerator::emitLineHandleSwap(std::ostringstream &out,
             out << doLbl << ":" << Symbols::LF;
             std::vector<long long> extents; extents.reserve(dims.size());
             for (size_t di = 0; di < dims.size(); ++di) {
-                long long e = static_cast<long long>(dims[di]) - optionBase_ + 1;
-                if (e < 0)
-                    e = 0;
-                extents.push_back(e);
+                long long extent = static_cast<long long>(dims[di]) - optionBase_ + 1;
+                extent = std::max(0LL, extent);
+                extents.push_back(extent);
             }
             std::vector<long long> strides(dims.size(), 1);
             for (int di = static_cast<int>(dims.size()) - 2; di >= 0; --di) {
                 strides[di] = strides[di + 1] * extents[di + 1];
             }
             std::vector<std::string> adjs; adjs.reserve(idxI64s.size());
-            for (const auto &ii : idxI64s) {
-                const std::string a = nextTemp();
-                out << std::format("  {} = sub i64 {}, {}", a, ii, optionBase_) << Symbols::LF;
-                adjs.push_back(a);
+            for (const auto &idxI64 : idxI64s) {
+                const std::string adj = nextTemp();
+                out << std::format("  {} = sub i64 {}, {}", adj, idxI64, optionBase_) << Symbols::LF;
+                adjs.push_back(adj);
             }
             std::string lin = nextTemp();
             out << std::format("  {} = mul i64 {}, {}", lin, adjs[0], strides[0]) << Symbols::LF;
             for (size_t di = 1; di < adjs.size(); ++di) {
-                const std::string t2 = nextTemp();
-                const std::string s2 = nextTemp();
-                out << std::format("  {} = mul i64 {}, {}", t2, adjs[di], strides[di]) << Symbols::LF
-                    << std::format("  {} = add i64 {}, {}", s2, lin, t2) << Symbols::LF;
-                lin = s2;
+                const std::string tmpProd = nextTemp();
+                const std::string sumTmp = nextTemp();
+                out << std::format("  {} = mul i64 {}, {}", tmpProd, adjs[di], strides[di]) << Symbols::LF
+                    << std::format("  {} = add i64 {}, {}", sumTmp, lin, tmpProd) << Symbols::LF;
+                lin = sumTmp;
             }
-            if (isStringArrayNameCG(t.name)) {
-                ensureStringArrayAllocated(out, t.name, static_cast<int>(total));
-                const std::string base = arrayAllocaName_[t.name];
+            if (isStringArrayNameCG(targetRef.name)) {
+                ensureStringArrayAllocated(out, targetRef.name, static_cast<int>(total));
+                const std::string base = arrayAllocaName_[targetRef.name];
                 const std::string elem = nextTemp();
                 out << std::format("  {} = getelementptr inbounds [{} x ptr], ptr {}, i64 0, i64 {}", elem, total, base, lin) << Symbols::LF;
                 outInfo.ptr = elem;
             } else {
-                ensureArrayAllocated(out, t.name, static_cast<int>(total));
-                const std::string base = arrayAllocaName_[t.name];
+                ensureArrayAllocated(out, targetRef.name, static_cast<int>(total));
+                const std::string base = arrayAllocaName_[targetRef.name];
                 const std::string elem = nextTemp();
-                out << std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, total, arrayElemType(t.name), base, lin) << Symbols::LF;
+                out << std::format("  {} = getelementptr inbounds [{} x {}], ptr {}, i64 0, i64 {}", elem, total, arrayElemType(targetRef.name), base, lin) << Symbols::LF;
                 outInfo.ptr = elem;
             }
         }
     };
-    computeRef(sw->left, L);
-    computeRef(sw->right, R);
-    if (L.isString) {
+    computeRef(swapStmt->left, lhs);
+    computeRef(swapStmt->right, rhs);
+    if (lhs.isString) {
         const std::string leftValPtr = nextTemp();
-        out << std::format("  {} = load ptr, ptr {}", leftValPtr, L.ptr) << Symbols::LF;
+        out << std::format("  {} = load ptr, ptr {}", leftValPtr, lhs.ptr) << Symbols::LF;
         const std::string rightValPtr = nextTemp();
-        out << std::format("  {} = load ptr, ptr {}", rightValPtr, R.ptr) << Symbols::LF;
-        out << std::format("  store ptr {}, ptr {}", rightValPtr, L.ptr) << Symbols::LF;
-        out << std::format("  store ptr {}, ptr {}", leftValPtr, R.ptr) << Symbols::LF;
+        out << std::format("  {} = load ptr, ptr {}", rightValPtr, rhs.ptr) << Symbols::LF;
+        out << std::format("  store ptr {}, ptr {}", rightValPtr, lhs.ptr) << Symbols::LF;
+        out << std::format("  store ptr {}, ptr {}", leftValPtr, rhs.ptr) << Symbols::LF;
     } else {
         auto loadVarAsDouble = [&](const std::string &name, const std::string &ptr) -> std::string {
             switch (numKindOf(name)) {
@@ -160,16 +169,16 @@ void CodeGenerator::emitLineHandleSwap(std::ostringstream &out,
                 }
             }
         };
-        const std::string leftVal = loadVarAsDouble(L.name, L.ptr);
-        const std::string rightVal = loadVarAsDouble(R.name, R.ptr);
-        if (!L.isArray) {
-            storeNumberToVar(out, L.name, rightVal); }
+        const std::string leftVal = loadVarAsDouble(lhs.name, lhs.ptr);
+        const std::string rightVal = loadVarAsDouble(rhs.name, rhs.ptr);
+        if (!lhs.isArray) {
+            storeNumberToVar(out, lhs.name, rightVal); }
         else {
-            storeNumberToArrayElem(out, L.name, L.ptr, rightVal); }
-        if (!R.isArray) {
-            storeNumberToVar(out, R.name, leftVal); }
+            storeNumberToArrayElem(out, lhs.name, lhs.ptr, rightVal); }
+        if (!rhs.isArray) {
+            storeNumberToVar(out, rhs.name, leftVal); }
         else {
-            storeNumberToArrayElem(out, R.name, R.ptr, leftVal); }
+            storeNumberToArrayElem(out, rhs.name, rhs.ptr, leftVal); }
     }
 }
 

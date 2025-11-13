@@ -1,7 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/ForStmt.h"
 #include "basic_compiler/Symbols.h"
+#include "basic_compiler/ast/ForStmt.h"
+#include <sstream>
+#include <string>
+#include <string_view>
 
 namespace gwbasic {
 
@@ -16,10 +19,10 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-void CodeGenerator::emitSubHandleFor(std::ostringstream& out, const ForStmt* fs, std::string_view entryLabel, int& localCounter) {
+void CodeGenerator::emitSubHandleFor(std::ostringstream& out, const ForStmt* for_stmt, std::string_view entryLabel, int& localCounter) {
     // Mirror integration marker used in line/block emission
-    out << "  ;; For var=" << fs->var << Symbols::LF;
-    emitFor(out, fs, std::string(entryLabel), localCounter);
+    out << "  ;; For var=" << for_stmt->var << Symbols::LF;
+    emitFor(out, for_stmt, std::string(entryLabel), localCounter);
 }
 
 } // namespace gwbasic

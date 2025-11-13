@@ -1,4 +1,5 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-include-order,misc-include-cleaner)
 #include "basic_compiler/codegen/CodeGenerator.h"
 
 #include "basic_compiler/ast/AssignStmt.h"
@@ -62,6 +63,7 @@
 #include "basic_compiler/ast/CallAbsStmt.h"
 
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 #include <sstream>
 #include <string>
 
@@ -92,8 +94,8 @@ bool CodeGenerator::emitLineStatement(std::ostringstream &out,
         emitLineHandleArrayAssign(out, arr, stmtIndex, currLineLabel, localCounter);
         return false;
     }
-    if (const auto *pr = dyn_cast<PrintStmt>(stmt)) {
-        emitLineHandlePrint(out, pr, currLineLabel, localCounter);
+    if (const auto *printStmt = dyn_cast<PrintStmt>(stmt)) {
+        emitLineHandlePrint(out, printStmt, currLineLabel, localCounter);
         return false;
     }
     if (const auto *ins = dyn_cast<InputStmt>(stmt)) {
@@ -125,16 +127,16 @@ bool CodeGenerator::emitLineStatement(std::ostringstream &out,
     emitLineHandleMiscNoops(out, stmt);
 
     // Structured blocks retain their dedicated helpers
-    if (const auto *ib = dyn_cast<IfBlockStmt>(stmt)) {
-        emitIfBlock(out, ib, currLineLabel, localCounter);
+    if (const auto *ifBlock = dyn_cast<IfBlockStmt>(stmt)) {
+        emitIfBlock(out, ifBlock, currLineLabel, localCounter);
         return false;
     }
-    if (const auto *ws = dyn_cast<WhileStmt>(stmt)) {
-        emitWhile(out, ws, currLineLabel, localCounter);
+    if (const auto *whileStmt = dyn_cast<WhileStmt>(stmt)) {
+        emitWhile(out, whileStmt, currLineLabel, localCounter);
         return false;
     }
-    if (const auto *fs = dyn_cast<ForStmt>(stmt)) {
-        emitFor(out, fs, currLineLabel, localCounter);
+    if (const auto *forStmt = dyn_cast<ForStmt>(stmt)) {
+        emitFor(out, forStmt, currLineLabel, localCounter);
         return false;
     }
 
@@ -142,3 +144,4 @@ bool CodeGenerator::emitLineStatement(std::ostringstream &out,
 }
 
 } // namespace gwbasic
+// NOLINTEND(llvm-include-order,misc-include-cleaner)
