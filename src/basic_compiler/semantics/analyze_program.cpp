@@ -1,5 +1,8 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/ast/Program.h"
+#include "basic_compiler/semantics/SemanticError.h"
+
 #include <sstream>
 #include <unordered_set>
 
@@ -27,27 +30,29 @@ SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
         }
         lines_.insert(line.number);
     }
-    for (const auto& line : program.lines) analyzeLine(line);
-    Result r;
-    r.variables = vars_;
-    r.stringLiterals = strings_;
-    r.lineNumbers = lines_;
-    r.commonVariables = common_;
-    r.arrays = allArrays_;
-    r.userFunctions = userFunctions_;
-    r.optionBase = optionBase_;
-    r.printZones = printZones_;
+    for (const auto& line : program.lines) {
+        analyzeLine(line);
+    }
+    Result result;
+    result.variables = vars_;
+    result.stringLiterals = strings_;
+    result.lineNumbers = lines_;
+    result.commonVariables = common_;
+    result.arrays = allArrays_;
+    result.userFunctions = userFunctions_;
+    result.optionBase = optionBase_;
+    result.printZones = printZones_;
     // Determine which variables are strings by suffix or DEFSTR mapping
-    for (const auto& v : vars_) {
-        if (varNameIsString(v)) r.stringVariables.insert(v);
+    for (const auto& varName : vars_) {
+        if (varNameIsString(varName)) { result.stringVariables.insert(varName); }
     }
     // Determine numeric kinds for non-string variables
-    for (const auto& v : vars_) {
-        if (!r.stringVariables.contains(v)) {
-            r.numericKinds[v] = numericKindOf(v);
+    for (const auto& varName : vars_) {
+        if (!result.stringVariables.contains(varName)) {
+            result.numericKinds[varName] = numericKindOf(varName);
         }
     }
-    return r;
+    return result;
 }
 
 } // namespace gwbasic

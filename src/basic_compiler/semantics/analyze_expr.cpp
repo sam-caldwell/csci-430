@@ -1,16 +1,23 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-include-order,misc-include-cleaner)
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/semantics/SemanticError.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Expr.h"
 #include "basic_compiler/ast/VarExpr.h"
 #include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/DefFnStmt.h"
 #include "basic_compiler/ast/BinaryExpr.h"
 #include "basic_compiler/ast/UnaryExpr.h"
 #include "basic_compiler/ast/StringExpr.h"
-#include <sstream>
 #include <cctype>
+#include <sstream>
+#include <string>
+// NOLINTEND(llvm-include-order,misc-include-cleaner)
 
 namespace gwbasic {
 
+// NOLINTBEGIN(readability-function-cognitive-complexity,readability-function-size,readability-identifier-length,readability-braces-around-statements,readability-qualified-auto,llvm-qualified-auto,readability-implicit-bool-conversion,readability-simplify-boolean-expr)
 void SemanticAnalyzer::analyzeExpr(const Expr* e) {
     if (!e) return;
     if (auto v = dyn_cast<const VarExpr>(e)) { reference(v->name, v->pos); return; }
@@ -56,7 +63,7 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
             if (fn == "MID$") {
                 if (!(call->args.size() == 2 || call->args.size() == 3)) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects 2 or 3 args @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             } else {
-                int exp = expectedArity(fn);
+                const int exp = expectedArity(fn);
                 if (static_cast<int>(call->args.size()) != exp) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects " << exp << " arg(s) @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             }
             // Type validation per intrinsic
@@ -101,7 +108,7 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
             } else if (fn == "INSTR") {
                 if (!(call->args.size() == 2 || call->args.size() == 3)) { std::ostringstream m; m << "ArityError: function 'INSTR' expects 2 or 3 args @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             } else {
-                int exp = expectedArity(fn);
+                const int exp = expectedArity(fn);
                 if (static_cast<int>(call->args.size()) != exp) { std::ostringstream m; m << "ArityError: function '" << call->callee << "' expects " << exp << " arg(s) @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
             }
         } else {
@@ -122,7 +129,7 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
                 std::ostringstream m; m << "DomainError: " << fn << " argument cannot be a comparison @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n';
                 throw SemanticError(m.str());
             }
-            double cval;
+            double cval = 0.0;
             if (isBuiltinNum && constEval(a0, cval)) {
                 if ((fn == "SQR" || fn == "SQRT") && cval < 0.0) {
                     std::ostringstream m; m << "DomainError: SQR requires argument >= 0 @ " << call->pos.line << ':' << call->pos.col; log() << m.str() << '\n';
@@ -215,5 +222,7 @@ void SemanticAnalyzer::analyzeExpr(const Expr* e) {
     if (auto u = dyn_cast<const UnaryExpr>(e)) { analyzeExpr(u->inner.get()); return; }
     if (auto s = dyn_cast<const StringExpr>(e)) { strings_.insert(s->value); log() << "StringLiteral @ " << s->pos.line << ':' << s->pos.col << '\n'; return; }
 }
+
+// NOLINTEND(readability-function-cognitive-complexity,readability-function-size,readability-identifier-length,readability-braces-around-statements,readability-qualified-auto,llvm-qualified-auto,readability-implicit-bool-conversion,readability-simplify-boolean-expr)
 
 } // namespace gwbasic

@@ -16,6 +16,7 @@ namespace gwbasic {
  * Outputs:
  *  - bool: true if a constant value was produced
  */
+// NOLINTBEGIN(readability-function-cognitive-complexity,readability-function-size,readability-implicit-bool-conversion,readability-braces-around-statements,readability-identifier-length)
 bool SemanticAnalyzer::constEvalBinary(const BinaryExpr& b, double& out) {
     double L = 0.0;
     double R = 0.0;
@@ -68,5 +69,6 @@ bool SemanticAnalyzer::constEvalBinary(const BinaryExpr& b, double& out) {
     }
 }
 
-}  // namespace gwbasic
+// NOLINTEND(readability-function-cognitive-complexity,readability-function-size,readability-implicit-bool-conversion,readability-braces-around-statements,readability-identifier-length)
 
+}  // namespace gwbasic

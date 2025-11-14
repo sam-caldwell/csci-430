@@ -1,6 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
+// NOLINTBEGIN(llvm-include-order,misc-include-cleaner)
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/semantics/SemanticError.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/PrintStmt.h"
 #include "basic_compiler/ast/AssignStmt.h"
 #include "basic_compiler/ast/IfStmt.h"
@@ -58,6 +61,9 @@
 #include "basic_compiler/ast/EnvironStmt.h"
 #include "basic_compiler/ast/BeepStmt.h"
 #include <sstream>
+#include <string>
+// NOLINTEND(llvm-include-order,misc-include-cleaner)
+// NOLINTBEGIN(readability-function-cognitive-complexity,readability-function-size,readability-identifier-length,readability-braces-around-statements,readability-qualified-auto,llvm-qualified-auto,readability-implicit-bool-conversion,readability-simplify-boolean-expr,llvm-prefer-isa-or-dyn-cast-in-conditionals,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
 namespace gwbasic {
 
@@ -72,13 +78,14 @@ namespace gwbasic {
  *    validation, scope handling, and logs relevant events.
  */
 void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
+    constexpr int kMaxChannel = 16; // NOLINT(readability-magic-numbers)
     if (auto us = dyn_cast<const UnsupportedStmt>(s)) {
         // For now, unsupported statements are accepted but logged as no-ops.
         std::ostringstream m; m << "Unsupported: " << us->keyword << " @ " << us->pos.line << ':' << us->pos.col;
         log() << m.str() << '\n';
         return;
     }
-    if (dyn_cast<const ClsStmt>(s)) { log() << "CLS" << '\n'; return; }
+    if (isa<const ClsStmt>(s)) { log() << "CLS" << '\n'; return; }
     if (auto lc = dyn_cast<const LocateStmt>(s)) {
         if (typeOf(lc->row.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: LOCATE row must be numeric @ " << lc->pos.line << ':' << lc->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(lc->row.get());
@@ -255,9 +262,8 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             if (strictControlFlow_) {
                 std::ostringstream err; err << "ControlFlowError: missing IF target line " << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log() << err.str() << '\n';
                 throw SemanticError(err.str());
-            } else {
-                std::ostringstream w; w << "Warning: IF missing target line " << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log() << w.str() << '\n';
             }
+            std::ostringstream w; w << "Warning: IF missing target line " << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log() << w.str() << '\n';
         }
         std::ostringstream m; m << "IfThen target=" << i->targetLine << " @ " << i->pos.line << ':' << i->pos.col; log() << m.str() << '\n';
         return;
@@ -265,13 +271,16 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     if (auto d = dyn_cast<const DimStmt>(s)) {
         declare(d->name);
         if (d->upperBounds.empty()) { std::ostringstream m; m << "TypeError: DIM requires at least one bound @ " << d->pos.line << ':' << d->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
-        for (int ub : d->upperBounds) {
+        for (const int ub : d->upperBounds) {
             if (ub < 0) { std::ostringstream m; m << "TypeError: DIM bounds must be non-negative @ " << d->pos.line << ':' << d->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         }
         arrays_[d->name] = d->upperBounds;
         allArrays_[d->name] = d->upperBounds; // record for codegen regardless of later ERASE
         std::ostringstream m; m << "Dim " << d->name << "(";
-        for (size_t i = 0; i < d->upperBounds.size(); ++i) { if (i) m << ','; m << d->upperBounds[i]; }
+        for (size_t i = 0; i < d->upperBounds.size(); ++i) { // NOLINT(misc-include-cleaner)
+            if (i != 0U) { m << ','; }
+            m << d->upperBounds[i];
+        }
         m << ")"; log() << m.str() << '\n';
         return;
     }
@@ -294,12 +303,13 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     }
     if (auto op = dyn_cast<const OpenStmt>(s)) {
         // Minimal validation of channel
-        if (op->channel < 1 || op->channel > 16) { std::ostringstream m; m << "IOError: channel out of range @ " << op->pos.line << ':' << op->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        constexpr int kMaxChannel = 16; // NOLINT(readability-magic-numbers,cppcoreguidelines-avoid-magic-numbers)
+        if (op->channel < 1 || op->channel > kMaxChannel) { std::ostringstream m; m << "IOError: channel out of range @ " << op->pos.line << ':' << op->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(op->filename.get());
         return;
     }
     if (auto cl = dyn_cast<const CloseStmt>(s)) {
-        if (cl->channel < 1 || cl->channel > 16) { std::ostringstream m; m << "IOError: channel out of range @ " << cl->pos.line << ':' << cl->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
+        if (cl->channel < 1 || cl->channel > kMaxChannel) { std::ostringstream m; m << "IOError: channel out of range @ " << cl->pos.line << ':' << cl->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         return;
     }
     if (auto d = dyn_cast<const DataStmt>(s)) {
@@ -323,16 +333,16 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         return;
     }
     if (dyn_cast<const RestoreStmt>(s)) { log() << "Restore" << '\n'; return; }
-    if (auto wr = dyn_cast<const WriteStmt>(s)) { for (const auto& e : wr->items) analyzeExpr(e.get()); return; }
+    if (auto wr = dyn_cast<const WriteStmt>(s)) { for (const auto& e : wr->items) { analyzeExpr(e.get()); } return; }
     if (auto ib = dyn_cast<const IfBlockStmt>(s)) {
         if (typeOf(ib->cond.get()) == ValueType::String) { std::ostringstream m; m << "TypeError: IF condition cannot be string @ " << ib->pos.line << ':' << ib->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
         analyzeExpr(ib->cond.get());
         enterScope();
-        for (const auto& st : ib->thenBody) analyzeStmt(st.get());
+        for (const auto& st : ib->thenBody) { analyzeStmt(st.get()); }
         exitScope();
         if (!ib->elseBody.empty()) {
             enterScope();
-            for (const auto& st : ib->elseBody) analyzeStmt(st.get());
+            for (const auto& st : ib->elseBody) { analyzeStmt(st.get()); }
             exitScope();
         }
         return;
@@ -347,7 +357,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         analyzeExpr(f->end.get());
         analyzeExpr(f->step.get());
         enterScope();
-        for (const auto& bs : f->body) analyzeStmt(bs.get());
+        for (const auto& bs : f->body) { analyzeStmt(bs.get()); }
         exitScope();
         return;
     }
@@ -368,13 +378,13 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     if (auto dt = dyn_cast<const DefTypeStmt>(s)) {
         for (const auto& [a,b] : dt->ranges) {
             for (char ch = a; ch <= b; ++ch) {
-                int idx = (std::toupper(static_cast<unsigned char>(ch)) - 'A');
+                const int idx = (std::toupper(static_cast<unsigned char>(ch)) - 'A'); // NOLINT(misc-include-cleaner)
                 if (idx >= 0 && idx < 26) {
                     switch (dt->kind) {
-                        case DefTypeStmt::Kind::Int: defaultKinds_[idx] = DefaultKind::Int; break;
-                        case DefTypeStmt::Kind::Sng: defaultKinds_[idx] = DefaultKind::Sng; break;
-                        case DefTypeStmt::Kind::Dbl: defaultKinds_[idx] = DefaultKind::Dbl; break;
-                        case DefTypeStmt::Kind::Str: defaultKinds_[idx] = DefaultKind::Str; break;
+                        case DefTypeStmt::Kind::Int: defaultKinds_.at(idx) = DefaultKind::Int; break; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+                        case DefTypeStmt::Kind::Sng: defaultKinds_.at(idx) = DefaultKind::Sng; break;
+                        case DefTypeStmt::Kind::Dbl: defaultKinds_.at(idx) = DefaultKind::Dbl; break;
+                        case DefTypeStmt::Kind::Str: defaultKinds_.at(idx) = DefaultKind::Str; break;
                     }
                 }
             }
@@ -421,7 +431,8 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
                 isString = varNameIsString(t.name);
             }
         };
-        bool lstr = false, rstr = false;
+        bool lstr = false;
+        bool rstr = false;
         checkRef(sw->left, lstr);
         checkRef(sw->right, rstr);
         if (lstr != rstr) { std::ostringstream m; m << "TypeError: SWAP operands must be both numeric or both string @ " << sw->pos.line << ':' << sw->pos.col; log() << m.str() << '\n'; throw SemanticError(m.str()); }
@@ -532,7 +543,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         currentFnParam_ = df->paramName;
         // Validate return type vs. body type
         const bool retIsString = (!df->fnName.empty() && df->fnName.back() == '$');
-        ValueType bt = typeOf(df->body.get());
+        const ValueType bt = typeOf(df->body.get());
         if (retIsString && bt != ValueType::String) {
             std::ostringstream m; m << "TypeError: DEF " << df->fnName << " must return string; got numeric @ " << df->pos.line << ':' << df->pos.col; log() << m.str() << '\n';
             throw SemanticError(m.str());
@@ -562,7 +573,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         std::ostringstream m; m << "Goto target=" << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << m.str() << '\n';
         if (!lines_.contains(g->targetLine)) {
             if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing GOTO target line " << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
-            else { std::ostringstream w; w << "Warning: GOTO missing target line " << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << w.str() << '\n'; }
+            std::ostringstream w; w << "Warning: GOTO missing target line " << g->targetLine << " @ " << g->pos.line << ':' << g->pos.col; log() << w.str() << '\n';
         }
         return;
     }
@@ -570,12 +581,12 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         std::ostringstream m; m << "Gosub target=" << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log() << m.str() << '\n';
         if (!lines_.contains(gs->targetLine)) {
             if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing GOSUB target line " << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
-            else { std::ostringstream w; w << "Warning: GOSUB missing target line " << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log() << w.str() << '\n'; }
+            std::ostringstream w; w << "Warning: GOSUB missing target line " << gs->targetLine << " @ " << gs->pos.line << ':' << gs->pos.col; log() << w.str() << '\n';
         }
         return;
     }
-    if (dyn_cast<const ReturnStmt>(s)) { log() << "Return" << '\n'; return; }
-    if (dyn_cast<const EndStmt>(s)) { log() << "End" << '\n'; return; }
+    if (isa<const ReturnStmt>(s)) { log() << "Return" << '\n'; return; }
+    if (isa<const EndStmt>(s)) { log() << "End" << '\n'; return; }
     if (auto rz = dyn_cast<const RandomizeStmt>(s)) {
         log() << "Randomize" << '\n';
         if (rz->seed) {
@@ -590,10 +601,10 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             throw SemanticError(m.str());
         }
         analyzeExpr(og->index.get());
-        for (int ln : og->targets) {
+        for (const int ln : og->targets) {
             if (!lines_.contains(ln)) {
                 if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing ON GOTO target line " << ln << " @ " << og->pos.line << ':' << og->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
-                else { std::ostringstream w; w << "Warning: ON GOTO missing target line " << ln << " @ " << og->pos.line << ':' << og->pos.col; log() << w.str() << '\n'; }
+                std::ostringstream w; w << "Warning: ON GOTO missing target line " << ln << " @ " << og->pos.line << ':' << og->pos.col; log() << w.str() << '\n';
             }
         }
         return;
@@ -604,10 +615,10 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             throw SemanticError(m.str());
         }
         analyzeExpr(ogs->index.get());
-        for (int ln : ogs->targets) {
+        for (const int ln : ogs->targets) {
             if (!lines_.contains(ln)) {
                 if (strictControlFlow_) { std::ostringstream err; err << "ControlFlowError: missing ON GOSUB target line " << ln << " @ " << ogs->pos.line << ':' << ogs->pos.col; log() << err.str() << '\n'; throw SemanticError(err.str()); }
-                else { std::ostringstream w; w << "Warning: ON GOSUB missing target line " << ln << " @ " << ogs->pos.line << ':' << ogs->pos.col; log() << w.str() << '\n'; }
+                std::ostringstream w; w << "Warning: ON GOSUB missing target line " << ln << " @ " << ogs->pos.line << ':' << ogs->pos.col; log() << w.str() << '\n';
             }
         }
         return;
@@ -636,13 +647,15 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
             if (strictControlFlow_) {
                 std::ostringstream err; err << "ControlFlowError: missing CHAIN target line " << *ch->targetLine << " @ " << ch->pos.line << ':' << ch->pos.col; log() << err.str() << '\n';
                 throw SemanticError(err.str());
-            } else {
-                std::ostringstream w; w << "Warning: CHAIN missing target line " << *ch->targetLine << " @ " << ch->pos.line << ':' << ch->pos.col; log() << w.str() << '\n';
             }
+            std::ostringstream w; w << "Warning: CHAIN missing target line " << *ch->targetLine << " @ " << ch->pos.line << ':' << ch->pos.col; log() << w.str() << '\n';
         }
         log() << "Chain" << '\n';
         return;
     }
 }
+
+
+// NOLINTEND(readability-function-cognitive-complexity,readability-function-size,readability-identifier-length,readability-braces-around-statements,readability-qualified-auto,llvm-qualified-auto,readability-implicit-bool-conversion,readability-simplify-boolean-expr,llvm-prefer-isa-or-dyn-cast-in-conditionals,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
 } // namespace gwbasic
