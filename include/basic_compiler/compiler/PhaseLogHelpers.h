@@ -165,6 +165,7 @@ void renumberProgram(gwbasic::Program& prog, int base, int& outMinLine);
  * Outputs:
  *  - std::string: LLVM IR text
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string generateIRWithLogs(const gwbasic::Program& program,
                                const std::string& semanticLogPath,
                                const std::string& codegenLogPath);

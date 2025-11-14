@@ -1,6 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/TargetUtils.h"
 
+#include <cctype>
+#include <string>
+
 /*
  * Function: isSupportedTargetTriple
  * Inputs:
@@ -12,15 +15,15 @@
  *    compatibility with the toolchain.
  */
 bool isSupportedTargetTriple(const std::string& triple) {
-    std::string t = triple;
-    for (auto& c : t) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    std::string lowerTriple = triple;
+    for (auto& chr : lowerTriple) { chr = static_cast<char>(std::tolower(static_cast<unsigned char>(chr))); }
     // Arch: x86_64 or arm64/aarch64 only
-    const bool archOK = (t.find("x86_64") != std::string::npos) ||
-                        (t.find("arm64") != std::string::npos) ||
-                        (t.find("aarch64") != std::string::npos);
+    const bool archOK = (lowerTriple.find("x86_64") != std::string::npos) ||
+                        (lowerTriple.find("arm64") != std::string::npos) ||
+                        (lowerTriple.find("aarch64") != std::string::npos);
     // OS: linux, darwin, macos/macosx
-    const bool osOK = (t.find("linux") != std::string::npos) ||
-                      (t.find("darwin") != std::string::npos) ||
-                      (t.find("macos") != std::string::npos);
+    const bool osOK = (lowerTriple.find("linux") != std::string::npos) ||
+                      (lowerTriple.find("darwin") != std::string::npos) ||
+                      (lowerTriple.find("macos") != std::string::npos);
     return archOK && osOK;
 }

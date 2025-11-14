@@ -1,5 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
+#include "basic_compiler/ast/Program.h"
+
+#include <algorithm>
+#include <climits>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -13,15 +17,14 @@ namespace gwbasic::phase_log_helpers {
  * Outputs:
  *  - outMinLine: Minimum original line number (0 when empty)
  */
-void renumberProgram(gwbasic::Program& prog, const int base, int& outMinLine) {
+void renumberProgram(gwbasic::Program& program, const int base, int& outMinLine) {
     int minImported = INT_MAX;
-    for (auto& [number, statements] : prog.lines) {
+    for (auto& [number, statements] : program.lines) {
         (void)statements;
-        if (number < minImported) minImported = number;
+        minImported = std::min(number, minImported);
         number += base;
     }
     outMinLine = (minImported == INT_MAX ? 0 : minImported);
 }
 
 } // namespace gwbasic::phase_log_helpers
-

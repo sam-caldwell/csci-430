@@ -85,7 +85,7 @@ void Lexer::emitAmpLiteral(std::vector<Token>& out, const int line, const int co
                 break;
             }
         }
-        val = val * static_cast<unsigned long long>(base) + static_cast<unsigned long long>(value);
+        val = (val * static_cast<unsigned long long>(base)) + static_cast<unsigned long long>(value);
         advance();
         ++digits;
     }

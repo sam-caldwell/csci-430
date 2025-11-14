@@ -1,13 +1,15 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
-#include "basic_compiler/lexer/Lexer.h"
-#include "../../../include/basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/Program.h"
+#include "basic_compiler/compiler/FileOpenError.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "basic_compiler/parser/Parser.h"
+
+#include <algorithm>
+#include <climits>
 #include <fstream>
 #include <string>
 #include <utility>
-#include <climits>
-#include "basic_compiler/compiler/FileOpenError.h"
 
 namespace gwbasic::phase_log_helpers {
 
@@ -44,9 +46,8 @@ gwbasic::Program tokenizeRootWithLogs(const std::string& path,
     outCanon = canonicalPath(path);
     int minRoot = INT_MAX;
     for (const auto& [number, statements] : prog.lines) {
-        if (number < minRoot) {
-            minRoot = number;
-        }
+        (void)statements;
+        minRoot = std::min(number, minRoot);
     }
     outMinLine = (minRoot == INT_MAX ? 0 : minRoot);
     return prog;

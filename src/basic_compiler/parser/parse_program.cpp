@@ -142,7 +142,7 @@ Program Parser::parseProgram() {
                 continue;
             }
 
-            if (const bool inAnyBlock = !stack.empty()) {
+            if (!stack.empty()) {
                 // Append to the innermost open block's body
                 if (const auto&[kind, f, ib, w, ifInElse] = stack.back(); kind == BlockEntry::Kind::ForK) {
                     if (isa<ForStmt>(stmtNode.get())) {

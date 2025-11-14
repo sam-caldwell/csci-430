@@ -1,7 +1,10 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
-#include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/ast/Program.h"
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
+
+#include <string>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -16,17 +19,17 @@ namespace gwbasic::phase_log_helpers {
  * Outputs:
  *  - std::string: LLVM IR text body (may need target triple prefixing by caller)
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string generateIRWithLogs(const gwbasic::Program& program,
-                               const std::string& semanticLogPath,
+                               const std::string& semanticLogPath, // NOLINT(bugprone-easily-swappable-parameters)
                                const std::string& codegenLogPath) {
     SemanticAnalyzer sema;
     sema.setLogPath(semanticLogPath);
     const auto semRes = sema.analyze(program);
     CodeGenerator gen;
-    if (!codegenLogPath.empty()) gen.setLogPath(codegenLogPath);
+    if (!codegenLogPath.empty()) { gen.setLogPath(codegenLogPath); }
     gen.setSemantics(semRes);
     return gen.generate(program);
 }
 
 } // namespace gwbasic::phase_log_helpers
-

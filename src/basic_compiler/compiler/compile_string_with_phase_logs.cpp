@@ -1,5 +1,14 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/Compiler.h"
+#include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/compiler/Metrics.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/parser/Parser.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
+
+#include <string>
+#include <utility>
 
 namespace gwbasic {
 
@@ -17,6 +26,7 @@ namespace gwbasic {
  *  - Executes the pipeline while enabling detailed logs at the parser and
  *    code generator stages to correlate source to structure and emitted IR.
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
                                                  const std::string& lexLogPath,
                                                  const std::string& syntaxLogPath,
@@ -28,7 +38,7 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     Parser parser(std::move(tokens));
     parser.setSyntaxLogPath(syntaxLogPath);
     auto program = parser.parseProgram();
-    if (gMetrics) {
+    if (gMetrics != nullptr) {
         gMetrics->recordParsedSnapshot(program);
         gMetrics->setAnalyzeOnly(true);
         gwbasic::AstOptimizer::optimize(program);
@@ -40,11 +50,11 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     sema.setLogPath(semanticLogPath);
     const auto semRes = sema.analyze(program);
     CodeGenerator gen;
-    if (!codegenLogPath.empty()) gen.setLogPath(codegenLogPath);
+    if (!codegenLogPath.empty()) { gen.setLogPath(codegenLogPath); }
     gen.setSemantics(semRes);
-    auto ir = gen.generate(program);
-    if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(ir));
-    return Compiler::addDefaultTripleIfMissing(ir);
+    auto irText = gen.generate(program);
+    if (gMetrics != nullptr) { gMetrics->setIrInstructionCount(Metrics::countIrInstructions(irText)); }
+    return Compiler::addDefaultTripleIfMissing(irText);
 }
 
 } // namespace gwbasic

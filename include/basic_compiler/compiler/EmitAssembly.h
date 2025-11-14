@@ -19,11 +19,12 @@
  * Outputs:
  *  - int: Process exit code (0 on success).
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 int emitAssembly(const std::filesystem::path &llTmp,
                  const std::string &asmOut,
                  const std::string &triple,
                  const std::string &input,
-                 const std::string& clangPath);
+                 const std::string &clangPath);
 
 #endif // BASIC_COMPILER_EMITASSEMBLY_H
 // NOLINTEND(llvm-header-guard)

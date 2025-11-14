@@ -1,8 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/Compiler.h"
 
-#include "basic_compiler/lexer/Lexer.h"
-#include "../../../include/basic_compiler/parser/Parser.h"
 #include "basic_compiler/ast/ForStmt.h"
 #include "basic_compiler/ast/IfBlockStmt.h"
 #include "basic_compiler/ast/OnGosubStmt.h"
@@ -12,9 +10,12 @@
 #include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/compiler/Metrics.h"
+#include "basic_compiler/lexer/Lexer.h"
 #include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include <functional>
+#include <string>
 #include <utility>
 
 namespace gwbasic {
@@ -34,7 +35,7 @@ std::string Compiler::compileString(const std::string& source) {
     }
     CodeGenerator gen;
     SemanticAnalyzer sema;
-    auto hasOnDispatch = [&]() -> bool {
+    auto hasOnDispatch = [&]() -> bool { // NOLINT(readability-function-cognitive-complexity)
         // NOLINTNEXTLINE(readability-function-cognitive-complexity)
         std::function<bool(const Stmt*)> check = [&](const Stmt* stmt_ptr) -> bool {
             if (stmt_ptr == nullptr) {
@@ -44,7 +45,7 @@ std::string Compiler::compileString(const std::string& source) {
                 dyn_cast<const OnGosubStmt>(stmt_ptr) != nullptr) {
                 return true;
             }
-            if (const auto if_block = dyn_cast<const IfBlockStmt>(stmt_ptr)) {
+            if (const auto* const if_block = dyn_cast<const IfBlockStmt>(stmt_ptr)) {
                 for (const auto& then_stmt : if_block->thenBody) {
                     if (check(then_stmt.get())) {
                         return true;
@@ -56,14 +57,14 @@ std::string Compiler::compileString(const std::string& source) {
                     }
                 }
             }
-            if (const auto for_stmt = dyn_cast<const ForStmt>(stmt_ptr)) {
+            if (const auto* const for_stmt = dyn_cast<const ForStmt>(stmt_ptr)) {
                 for (const auto& body_stmt : for_stmt->body) {
                     if (check(body_stmt.get())) {
                         return true;
                     }
                 }
             }
-            if (const auto while_stmt = dyn_cast<const WhileStmt>(stmt_ptr)) {
+            if (const auto* const while_stmt = dyn_cast<const WhileStmt>(stmt_ptr)) {
                 for (const auto& body_stmt : while_stmt->body) {
                     if (check(body_stmt.get())) {
                         return true;
@@ -95,4 +96,3 @@ std::string Compiler::compileString(const std::string& source) {
 }
 
 } // namespace gwbasic
-

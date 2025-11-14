@@ -2,8 +2,10 @@
 #include "basic_compiler/compiler/Compiler.h"
 
 #include <array>
+#include <cstddef>
 #include <cstdio>
 #include <sstream>
+#include <stdio.h>
 #include <string>
 
 namespace gwbasic {
@@ -15,13 +17,14 @@ std::string Compiler::addDefaultTripleIfMissing(const std::string& ir_text) {
     }
     std::string triple;
     const auto* const cmd = "clang -### -S -x ir - -o /dev/null 2>&1";
-    if (FILE* pipe_file = popen(cmd, "r")) {
-        std::array<char, 256> buf{}; // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+    if (FILE* pipe_file = popen(cmd, "r")) { // NOLINT(misc-include-cleaner)
+        constexpr std::size_t kBufSize = 256; // POSIX popen buffer size
+        std::array<char, kBufSize> buf{};
         std::string out;
         while (const size_t read_count = fread(buf.data(), 1, buf.size(), pipe_file)) {
             out.append(buf.data(), read_count);
         }
-        pclose(pipe_file);
+        pclose(pipe_file); // NOLINT(misc-include-cleaner)
         if (const auto pos = out.find("\"-triple\""); pos != std::string::npos) {
             if (const auto first_quote = out.find('"', pos + 9); first_quote != std::string::npos) {
                 if (const auto second_quote = out.find('"', first_quote + 1);
@@ -40,4 +43,3 @@ std::string Compiler::addDefaultTripleIfMissing(const std::string& ir_text) {
 }
 
 } // namespace gwbasic
-

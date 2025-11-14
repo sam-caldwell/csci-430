@@ -1,6 +1,12 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/Compiler.h"
+#include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+
+#include <string>
+#include <utility>
 
 namespace gwbasic {
 
@@ -16,6 +22,7 @@ namespace gwbasic {
  *    generator is configured to emit a detailed log correlating emitted
  *    IR with source lines and AST nodes to the provided logPath.
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string Compiler::compileStringWithLog(const std::string& source, const std::string& logPath) {
     Lexer lex(source);
     auto tokens = lex.tokenize();

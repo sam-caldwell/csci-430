@@ -1,8 +1,14 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/Compiler.h"
-#include "basic_compiler/opt/AstOptimizer.h"
-#include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/compiler/Metrics.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/parser/Parser.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
+
+#include <string>
+#include <utility>
 
 namespace gwbasic {
 
@@ -24,11 +30,11 @@ std::string Compiler::compileStringOptimized(const std::string& source) {
     Parser parser(std::move(tokens));
     auto program = parser.parseProgram();
     
-    if (gMetrics) gMetrics->recordParsedSnapshot(program);
+    if (gMetrics != nullptr) { gMetrics->recordParsedSnapshot(program); }
     
     gwbasic::AstOptimizer::optimize(program);
     
-    if (gMetrics) gMetrics->recordOptimizedSnapshot(program);
+    if (gMetrics != nullptr) { gMetrics->recordOptimizedSnapshot(program); }
     CodeGenerator gen;
     SemanticAnalyzer sema;
     sema.setStrictControlFlow(false);
@@ -36,11 +42,11 @@ std::string Compiler::compileStringOptimized(const std::string& source) {
     auto res = sema.analyze(program);
     gen.setSemantics(res);
     
-    auto ir = gen.generate(program);
+    auto irText = gen.generate(program);
     
-    if (gMetrics) gMetrics->setIrInstructionCount(Metrics::countIrInstructions(ir));
+    if (gMetrics != nullptr) { gMetrics->setIrInstructionCount(Metrics::countIrInstructions(irText)); }
     
-    return Compiler::addDefaultTripleIfMissing(ir);
+    return Compiler::addDefaultTripleIfMissing(irText);
 }
 
 } // namespace gwbasic

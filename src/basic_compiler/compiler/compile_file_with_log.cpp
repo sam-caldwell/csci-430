@@ -1,8 +1,14 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/Compiler.h"
-#include <fstream>
-#include <sstream>
+#include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/compiler/FileOpenError.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "basic_compiler/parser/Parser.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
+
+#include <fstream>
+#include <string>
+#include <utility>
 
 namespace gwbasic {
 /*
@@ -17,10 +23,11 @@ namespace gwbasic {
  *    compileStringWithLog() so the same lex/parse/codegen pipeline and
  *    logging behavior are used for both file and string inputs.
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string Compiler::compileFileWithLog(const std::string& path, const std::string& logPath) {
-    std::ifstream in(path);
-    if (!in) throw gwbasic::FileOpenError(path);
-    Lexer lex(in);
+    std::ifstream inputFile(path);
+    if (!inputFile) { throw gwbasic::FileOpenError(path); }
+    Lexer lex(inputFile);
     auto tokens = lex.tokenize();
     Parser parser(std::move(tokens));
     parser.setSourcePath(path);

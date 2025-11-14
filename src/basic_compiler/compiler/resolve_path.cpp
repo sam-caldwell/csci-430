@@ -1,6 +1,7 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
 #include <filesystem>
+#include <string>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -15,12 +16,12 @@ namespace gwbasic::phase_log_helpers {
  * Outputs:
  *  - std::string: Resolved absolute path (weakly canonical).
  */
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string resolvePath(const std::string& baseFile, const std::string& rel) {
-    const std::filesystem::path p(rel);
-    if (p.is_absolute()) return canonicalPath(p.string());
-    const std::filesystem::path b(baseFile);
-    return canonicalPath((b.parent_path() / p).string());
+    const std::filesystem::path relPath(rel);
+    if (relPath.is_absolute()) { return canonicalPath(relPath.string()); }
+    const std::filesystem::path basePath(baseFile);
+    return canonicalPath((basePath.parent_path() / relPath).string());
 }
 
 } // namespace gwbasic::phase_log_helpers
-

@@ -1,5 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/compiler/PhaseLogHelpers.h"
+#include "basic_compiler/ast/Program.h"
+
+#include <string>
+#include <utility>
 
 namespace gwbasic::phase_log_helpers {
 
@@ -19,4 +23,3 @@ void processMerge(const std::string& incPath, gwbasic::Program& program) {
 }
 
 } // namespace gwbasic::phase_log_helpers
-
