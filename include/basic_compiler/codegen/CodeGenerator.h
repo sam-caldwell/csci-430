@@ -678,9 +678,10 @@ namespace gwbasic {
         std::string arrayElemType(const std::string &name) const;
 
         // Emit a typed store into a numeric array element given the RHS as double
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         void storeNumberToArrayElem(std::ostringstream &out,
                                     const std::string &arrayName,
-                                    const std::string &elemPtrSSA,
+                                    std::string_view elemPtrSSA,
                                     const std::string &doubleValSSA);
 
         // Load a numeric array element as a double SSA value

@@ -3,6 +3,8 @@
 #include "basic_compiler/Symbols.h"
 #include <format>
 #include <sstream>
+#include <string>
+#include <string_view>
 
 namespace gwbasic {
 
@@ -19,7 +21,7 @@ namespace gwbasic {
  */
 void CodeGenerator::storeNumberToArrayElem(std::ostringstream& out,
                                            const std::string& arrayName,
-                                           const std::string& elemPtrSSA,
+                                           std::string_view elemPtrSSA,
                                            const std::string& doubleValSSA) {
 
     switch (numKindOf(arrayName)) {
