@@ -3,4 +3,5 @@
 #pragma once
 
 #include "basic_compiler/compiler/Compiler.h"
-
+#include "basic_compiler/codegen/CodeGenError.h"
+#include "basic_compiler/semantics/SemanticError.h"

@@ -31,6 +31,7 @@
 #include "basic_compiler/ast/VarExpr.h"
 #include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include "basic_compiler/codegen/CodeGenError.h"
 #include "logger/Logger.h"
 #include <cstdint>
 #include <functional>
