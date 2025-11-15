@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/WhileStmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,19 +23,19 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleWhileBeforeLine(const Stmt *s,
-                                          std::set<std::string, std::less<>> &vars,
-                                          std::set<std::string, std::less<>> &arrays) {
-
-    const auto ws = dyn_cast<const WhileStmt>(s);
-
-    if (!ws)
+bool CodeGenerator::handleWhileBeforeLine(const Stmt* stmt,
+                                          std::set<std::string, std::less<>>& vars,
+                                          std::set<std::string, std::less<>>& arrays) {
+    const auto* const whileStmt = dyn_cast<const WhileStmt>(stmt);
+    if (whileStmt == nullptr) {
         return false;
+    }
 
-    collectVarsForBeforeLineFromExpr(ws->cond.get(), vars, arrays);
+    collectVarsForBeforeLineFromExpr(whileStmt->cond.get(), vars, arrays);
 
-    for (const auto &st: ws->body)
-        collectVarsForBeforeLineFromStmt(st.get(), vars, arrays);
+    for (const auto& stmtItem : whileStmt->body) {
+        collectVarsForBeforeLineFromStmt(stmtItem.get(), vars, arrays);
+    }
 
     return true;
 }

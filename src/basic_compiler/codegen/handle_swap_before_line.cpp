@@ -5,9 +5,9 @@
  */
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/ReadTarget.h"
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/SwapStmt.h"
-#include "basic_compiler/ast/ReadTarget.h"
 #include <functional>
 #include <set>
 #include <string>
@@ -33,13 +33,13 @@ bool CodeGenerator::handleSwapBeforeLine(const Stmt* stmt,
     }
 
     auto handle = [&](const ReadTarget& target) {
-        if (!target.indices.empty()) {
-            arrays.insert(target.name);
-            for (const auto& indexExpr : target.indices) {
-                collectVarsForBeforeLineFromExpr(indexExpr.get(), vars, arrays);
-            }
-        } else {
+        if (target.indices.empty()) {
             vars.insert(target.name);
+            return;
+        }
+        arrays.insert(target.name);
+        for (const auto& indexExpr : target.indices) {
+            collectVarsForBeforeLineFromExpr(indexExpr.get(), vars, arrays);
         }
     };
 
