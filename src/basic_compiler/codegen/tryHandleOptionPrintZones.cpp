@@ -1,4 +1,3 @@
-#include "basic_compiler/ast/DeleteStmt.h"
 #include "basic_compiler/ast/OptionPrintZonesStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"

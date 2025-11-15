@@ -66,12 +66,12 @@ namespace gwbasic {
      * Returns:
      *  - bool: true if stmt was DELETE and handled; else false.
      */
-    // NOLINT(bugprone-easily-swappable-parameters)
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
     bool tryHandleDelete(const Stmt *stmt,
                          int lineNumber,
+                         std::vector<std::pair<int, int> > &deleteRanges,
                          int globalMin,
-                         int globalMax,
-                         std::vector<std::pair<int, int> > &deleteRanges);
+                         int globalMax);
 
     /**
      * Class: CodeGenerator

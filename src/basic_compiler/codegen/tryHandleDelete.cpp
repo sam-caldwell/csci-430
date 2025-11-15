@@ -1,5 +1,4 @@
 #include "basic_compiler/ast/DeleteStmt.h"
-#include "basic_compiler/ast/OptionPrintZonesStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
 #include <utility>
@@ -17,11 +16,12 @@ namespace gwbasic {
      * Returns:
      *  - bool: true if stmt was DELETE and handled; else false.
      */
+    // NOLINTBEGIN(bugprone-easily-swappable-parameters)
     bool tryHandleDelete(const Stmt* stmt,
-                                int lineNumber,
-                                int globalMin,
-                                int globalMax, // NOLINT(bugprone-easily-swappable-parameters)
-                                std::vector<std::pair<int,int>>& deleteRanges) {
+                         int lineNumber,
+                         std::vector<std::pair<int,int>>& deleteRanges,
+                         int globalMin,
+                         int globalMax) {
 
         if (const auto* const del = dyn_cast<const DeleteStmt>(stmt)) {
             int start = del->startLine.has_value() ? *del->startLine : globalMin;
@@ -33,4 +33,5 @@ namespace gwbasic {
         }
         return false;
     }
-} // namespace gwbasic::tryHandleDelete
+    // NOLINTEND(bugprone-easily-swappable-parameters)
+} // namespace gwbasic
