@@ -22,6 +22,7 @@
 
 
 #include "basic_compiler/Symbol.h"
+#include "basic_compiler/lexer/LexError.h"
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/TokenType.h"
 namespace logger { class Logger; }
@@ -51,6 +52,10 @@ public:
      *  - in: std::istream providing source characters (ifstream, stringstream, etc.)
      */
     explicit Lexer(std::istream& inputStream);
+
+    // Explicit out-of-line destructor to ensure
+    // complete type for logger::Logger at destruction time.
+    ~Lexer();
 
     /**
      * Tokenize: Produce the complete list of tokens for the source.
@@ -296,7 +301,7 @@ private:
     template <TokenType Single, TokenType Pair, char Next>
 
     void emitPairOrSingle(std::vector<Token>& out,
-                          std::array<std::string_view, 2> lexemes,
+                          const std::array<std::string_view, 2>& lexemes,
                           const int line, const int col) {
 
         if (peek() == Next) {

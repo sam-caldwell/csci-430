@@ -320,13 +320,15 @@ namespace gwbasic {
             std::set<std::string, std::less<> > &accumVars,
             std::set<std::string, std::less<> > &accumArrays);
 
+        // Aggregate min/max line bounds to avoid adjacent-int parameters.
+        struct LineBounds { int min{0}; int max{0}; };
+
         void cdGatherLinesAndDeletes(const Program &program,
                                      std::vector<int> &linesOut,
                                      std::map<int, const Line *> &lineMapOut,
                                      bool &printZones,
                                      std::vector<std::pair<int, int> > &deleteRanges,
-                                     int &globalMin,
-                                     int &globalMax);
+                                     LineBounds &bounds);
 
         void cdFilterDeletedLines(std::vector<int> &lines,
                                   const std::vector<std::pair<int, int> > &deleteRanges);
@@ -688,24 +690,21 @@ namespace gwbasic {
         // Load a numeric array element as a double SSA value
 
         std::string loadArrayElemAsDouble(std::ostringstream &out,
-                                          const std::string &arrayName,
-                                          std::string_view elemPtrSSA);
+                                          const char *elemPtrSSA,
+                                          const std::string &arrayName);
 
         // cdGatherLinesAndDeletes split helpers
 
         static void cdCollectLinesAndBounds(const Program &program,
                                             std::vector<int> &linesOut,
                                             std::map<int, const Line *> &lineMapOut,
-                                            int &globalMin,
-                                            int &globalMax);
+                                            LineBounds &bounds);
 
         static void cdCollectDeleteAndOptions(const Program &program,
                                               bool &printZones,
                                               std::vector<std::pair<int, int> > &deleteRanges,
-                                              int globalMin,
-                                              int globalMax); // NOLINT(bugprone-easily-swappable-parameters)
-        static void cdNormalizeBoundsAndRanges(int &globalMin,
-                                               int &globalMax,
+                                              const LineBounds &bounds);
+        static void cdNormalizeBoundsAndRanges(LineBounds &bounds,
                                                std::vector<std::pair<int, int> > &deleteRanges);
 
         // Logging utilities

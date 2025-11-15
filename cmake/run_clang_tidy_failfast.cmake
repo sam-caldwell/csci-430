@@ -36,13 +36,10 @@ if(APPLE)
     ERROR_QUIET)
 endif()
 
-# Collect candidate files (headers and C++ sources)
-file(GLOB_RECURSE _hdrs
-     "${ROOT_DIR}/include/*.h"
-     "${ROOT_DIR}/src/*.h")
-file(GLOB_RECURSE _cpps
-     "${ROOT_DIR}/src/*.cpp")
-set(LINT_FILES ${_hdrs} ${_cpps})
+# Collect candidate files: analyze only C++ translation units (.cpp).
+# Headers are linted in context when included by TUs.
+file(GLOB_RECURSE _cpps "${ROOT_DIR}/src/*.cpp")
+set(LINT_FILES ${_cpps})
 list(REMOVE_DUPLICATES LINT_FILES)
 list(SORT LINT_FILES)
 

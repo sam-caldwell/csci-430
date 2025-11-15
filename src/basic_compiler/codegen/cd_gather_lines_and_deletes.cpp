@@ -23,24 +23,21 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-// NOLINTBEGIN(bugprone-easily-swappable-parameters)
 void CodeGenerator::cdGatherLinesAndDeletes(const Program& program, // NOLINT(readability-convert-member-functions-to-static,readability-function-size)
                                             std::vector<int>& linesOut,
                                             std::map<int, const Line*>& lineMapOut,
                                             bool& printZones,
                                             std::vector<std::pair<int,int>>& deleteRanges,
-                                            int& globalMin,
-                                            int& globalMax) {
+                                            LineBounds& bounds) {
     // Pass 1: collect lines, map, and min/max bounds
-    cdCollectLinesAndBounds(program, linesOut, lineMapOut, globalMin, globalMax);
+    cdCollectLinesAndBounds(program, linesOut, lineMapOut, bounds);
     std::ranges::sort(linesOut);
     linesOut.erase(std::ranges::unique(linesOut).begin(), linesOut.end());
     // Pass 2: collect delete ranges and options
-    cdCollectDeleteAndOptions(program, printZones, deleteRanges, globalMin, globalMax);
+    cdCollectDeleteAndOptions(program, printZones, deleteRanges, bounds);
     // Final normalization of bounds and ranges
-    cdNormalizeBoundsAndRanges(globalMin, globalMax, deleteRanges);
+    cdNormalizeBoundsAndRanges(bounds, deleteRanges);
 }
 
-// NOLINTEND(bugprone-easily-swappable-parameters)
 
 } // namespace gwbasic

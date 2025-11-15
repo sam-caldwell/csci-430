@@ -23,11 +23,10 @@ void CodeGenerator::collectDecls(const Program& program) {
     // Phase A: gather and filter lines
     std::vector<std::pair<int,int>> delRanges;
 
-    int gmin = 0;
-    int gmax = 0;
+    LineBounds bounds{0, 0};
     cdGatherLinesAndDeletes(
         program, lineNumbers_, lineMap_, printZones_,
-        delRanges, gmin, gmax
+        delRanges, bounds
     );
 
     if (lineNumbers_.empty()) { return; }

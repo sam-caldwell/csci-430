@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
                                                 : std::filesystem::path(*outASM).replace_extension(".ll");
             if (!outLL) writeTextFile(llTmp, irWithTriple);
             const std::string triple = targetTriple.value_or(detectDefaultTriple(CLANG_PATH));
-            if (int ec = emitAssembly(llTmp, *outASM, triple, input, CLANG_PATH); ec != 0) {
+            if (int ec = emitAssembly(llTmp, std::filesystem::path(*outASM), triple, std::filesystem::path(input), CLANG_PATH); ec != 0) {
                 std::cerr << "clang failed generating assembly\n";
                 return 1;
             }

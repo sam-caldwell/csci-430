@@ -13,6 +13,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <string_view>
 
 /*
  * Function: emitAssembly
@@ -29,11 +30,11 @@
  *    source and target information tailored to the assembler dialect.
  */
 int emitAssembly(const std::filesystem::path &llTmp,
-                 const std::string &asmOut,
-                 const std::string &triple, // NOLINT(bugprone-easily-swappable-parameters)
-                 const std::string &input,
-                 const std::string &clangPath) {
-    if (!isSupportedTargetTriple(triple)) {
+                 const std::filesystem::path &asmOut,
+                 const std::string_view triple,
+                 const std::filesystem::path &input,
+                 const std::string_view clangPath) {
+    if (!isSupportedTargetTriple(std::string(triple))) {
         std::cerr << "Error: unsupported target triple for assembly: " << triple
                   << " (supported: x86_64 or arm64/aarch64 on Linux/macOS)\n";
         return 2;
@@ -48,11 +49,11 @@ int emitAssembly(const std::filesystem::path &llTmp,
     try {
         const auto srcName = std::filesystem::path(input).filename().string();
         std::string osName = "unknown";
-        std::string arch = triple;
+        std::string arch = std::string(triple);
         if (auto dash = triple.find(gwbasic::Symbols::MINUS.first()); dash != std::string::npos) {
             arch = triple.substr(0, dash);
         }
-        std::string lowerTriple = triple;
+        std::string lowerTriple = std::string(triple);
         for (auto &chr : lowerTriple) {
             chr = static_cast<char>(std::tolower(static_cast<unsigned char>(chr)));
         }
@@ -61,7 +62,7 @@ int emitAssembly(const std::filesystem::path &llTmp,
         } else if (lowerTriple.find("macos") != std::string::npos || lowerTriple.find("darwin") != std::string::npos) {
             osName = "macos";
         }
-        const std::string commentLeader = asmCommentLeaderForTriple(triple);
+        const std::string commentLeader = asmCommentLeaderForTriple(std::string(triple));
         std::ifstream inAsm(asmOut);
         const std::string body((std::istreambuf_iterator<char>(inAsm)), std::istreambuf_iterator<char>());
         inAsm.close();

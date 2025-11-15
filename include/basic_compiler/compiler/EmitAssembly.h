@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <string>
+#include <string_view>
 
 /**
  * Function: emitAssembly
@@ -20,10 +21,10 @@
  *  - int: Process exit code (0 on success).
  */
 int emitAssembly(const std::filesystem::path &llTmp,
-                 const std::string &asmOut,
-                 const std::string &triple,
-                 const std::string &input,
-                 const std::string &clangPath);
+                 const std::filesystem::path &asmOut,
+                 std::string_view triple,
+                 const std::filesystem::path &input,
+                 std::string_view clangPath);
 
 #endif // BASIC_COMPILER_EMITASSEMBLY_H
 // NOLINTEND(llvm-header-guard)

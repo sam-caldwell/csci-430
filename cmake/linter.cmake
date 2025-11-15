@@ -22,13 +22,11 @@ if(APPLE)
     ERROR_QUIET)
 endif()
 
-# Collect lintable sources: headers and C++ source files only, per request
-file(GLOB_RECURSE LINT_HEADERS CONFIGURE_DEPENDS
-     ${PROJECT_SOURCE_DIR}/include/*.h
-     ${PROJECT_SOURCE_DIR}/src/*.h)
+# Collect lintable sources: compile TUs only (.cpp).
+# Headers are analyzed through their inclusion in translation units.
 file(GLOB_RECURSE LINT_CPPS CONFIGURE_DEPENDS
      ${PROJECT_SOURCE_DIR}/src/*.cpp)
-set(LINT_FILES ${LINT_HEADERS} ${LINT_CPPS})
+set(LINT_FILES ${LINT_CPPS})
 list(REMOVE_DUPLICATES LINT_FILES)
 list(SORT LINT_FILES)
 

@@ -20,8 +20,8 @@ namespace gwbasic {
  */
 std::string CodeGenerator::loadArrayElemAsDouble(
     std::ostringstream& out,
-    const std::string& arrayName,
-    std::string_view elemPtrSSA) { // NOLINT(bugprone-easily-swappable-parameters)
+    const char* elemPtrSSA,
+    const std::string& arrayName) {
     switch (numKindOf(arrayName)) {
         case NumKind::Int16: {
             std::string valReg = nextTemp();

@@ -20,23 +20,20 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-// NOLINTBEGIN(bugprone-easily-swappable-parameters)
 void CodeGenerator::cdCollectLinesAndBounds(const Program& program,
                                             std::vector<int>& linesOut,
                                             std::map<int, const Line*>& lineMapOut,
-                                            int& globalMin,
-                                            int& globalMax) {
-    globalMin = std::numeric_limits<int>::max();
-    globalMax = std::numeric_limits<int>::min();
+                                            LineBounds& bounds) {
+    bounds.min = std::numeric_limits<int>::max();
+    bounds.max = std::numeric_limits<int>::min();
     linesOut.clear();
     lineMapOut.clear();
     for (const auto& line : program.lines) {
         linesOut.push_back(line.number);
         lineMapOut[line.number] = &line;
-        globalMin = std::min(line.number, globalMin);
-        globalMax = std::max(line.number, globalMax);
+        bounds.min = std::min(line.number, bounds.min);
+        bounds.max = std::max(line.number, bounds.max);
     }
 }
-// NOLINTEND(bugprone-easily-swappable-parameters)
 
 } // namespace gwbasic

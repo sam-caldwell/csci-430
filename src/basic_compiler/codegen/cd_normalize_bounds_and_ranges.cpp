@@ -16,15 +16,14 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-void CodeGenerator::cdNormalizeBoundsAndRanges(int& globalMin,
-                                               int& globalMax,
+void CodeGenerator::cdNormalizeBoundsAndRanges(LineBounds& bounds,
                                                std::vector<std::pair<int,int>>& deleteRanges) {
-    if (globalMin == std::numeric_limits<int>::max()) { globalMin = 0; }
-    if (globalMax == std::numeric_limits<int>::min()) { globalMax = 0; }
+    if (bounds.min == std::numeric_limits<int>::max()) { bounds.min = 0; }
+    if (bounds.max == std::numeric_limits<int>::min()) { bounds.max = 0; }
     for (auto&[fst, snd] : deleteRanges) {
-        fst = std::max(fst, globalMin);
+        fst = std::max(fst, bounds.min);
         snd = std::max(snd, fst);
-        snd = std::min(snd, globalMax);
+        snd = std::min(snd, bounds.max);
     }
 }
 

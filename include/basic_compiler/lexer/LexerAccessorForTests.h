@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "basic_compiler/lexer/Lexer.h"
+#include "basic_compiler/lexer/LexError.h" // for EXPECT_THROW in tests
 #include "basic_compiler/token/Token.h"
 
 namespace gwbasic {

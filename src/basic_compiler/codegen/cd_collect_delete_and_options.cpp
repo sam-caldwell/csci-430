@@ -19,8 +19,7 @@ namespace gwbasic {
 void CodeGenerator::cdCollectDeleteAndOptions(const Program& program, // NOLINT(readability-function-size)
                                               bool& printZones,
                                               std::vector<std::pair<int,int>>& deleteRanges,
-                                              const int globalMin,
-                                              const int globalMax) {
+                                              const LineBounds& bounds) {
 
     deleteRanges.clear();
 
@@ -31,7 +30,7 @@ void CodeGenerator::cdCollectDeleteAndOptions(const Program& program, // NOLINT(
             if (tryHandleOptionPrintZones(stmtNode.get(), printZones)) {
                 continue;
             }
-            if (tryHandleDelete(stmtNode.get(), number, deleteRanges, globalMin, globalMax)) {
+            if (tryHandleDelete(stmtNode.get(), number, deleteRanges, bounds.min, bounds.max)) {
                 continue;
             }
         }
