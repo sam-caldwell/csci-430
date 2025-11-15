@@ -71,8 +71,7 @@ namespace gwbasic {
     bool tryHandleDelete(const Stmt *stmt,
                          int lineNumber,
                          std::vector<std::pair<int, int> > &deleteRanges,
-                         int globalMin,
-                         int globalMax);
+                         std::pair<int,int> globalMinMax);
 
     /**
      * Class: CodeGenerator
@@ -314,11 +313,15 @@ namespace gwbasic {
         // collectDecls() helpers (one per file) to reduce nesting
         void collectDecls(const Program &program);
 
-        void cdAccumulateFromStatement( // NOLINT(bugprone-easily-swappable-parameters)
+        struct AccumRefs {
+            std::set<std::string, std::less<> >& common;
+            std::set<std::string, std::less<> >& vars;
+            std::set<std::string, std::less<> >& arrays;
+        };
+
+        void cdAccumulateFromStatement(
             const Stmt *stmt,
-            std::set<std::string, std::less<> > &accumCommon,
-            std::set<std::string, std::less<> > &accumVars,
-            std::set<std::string, std::less<> > &accumArrays);
+            AccumRefs acc);
 
         // Aggregate min/max line bounds to avoid adjacent-int parameters.
         struct LineBounds { int min{0}; int max{0}; };
