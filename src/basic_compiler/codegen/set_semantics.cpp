@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/semantics/SemanticAnalyzer.h"
 
 namespace gwbasic {
 
@@ -11,26 +12,26 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-void CodeGenerator::setSemantics(const SemanticAnalyzer::Result& r) {
+void CodeGenerator::setSemantics(const SemanticAnalyzer::Result& result) {
     semProvided_ = true;
     semVariables_.clear();
-    semVariables_.insert(r.variables.begin(), r.variables.end());
+    semVariables_.insert(result.variables.begin(), result.variables.end());
     semStrings_.clear();
-    semStrings_.insert(r.stringLiterals.begin(), r.stringLiterals.end());
-    semLineNumbers_ = r.lineNumbers;
+    semStrings_.insert(result.stringLiterals.begin(), result.stringLiterals.end());
+    semLineNumbers_ = result.lineNumbers;
     semCommonVariables_.clear();
-    semCommonVariables_.insert(r.commonVariables.begin(), r.commonVariables.end());
+    semCommonVariables_.insert(result.commonVariables.begin(), result.commonVariables.end());
     arrayDims_.clear();
-    arrayDims_.insert(r.arrays.begin(), r.arrays.end());
-    optionBase_ = r.optionBase;
-    printZones_ = r.printZones;
+    arrayDims_.insert(result.arrays.begin(), result.arrays.end());
+    optionBase_ = result.optionBase;
+    printZones_ = result.printZones;
     userFunctions_.clear();
-    userFunctions_.insert(r.userFunctions.begin(), r.userFunctions.end());
+    userFunctions_.insert(result.userFunctions.begin(), result.userFunctions.end());
     semStringVariables_.clear();
-    semStringVariables_.insert(r.stringVariables.begin(), r.stringVariables.end());
+    semStringVariables_.insert(result.stringVariables.begin(), result.stringVariables.end());
     // Map numeric kinds from semantics into codegen's representation
     semNumericKinds_.clear();
-    for (const auto& [name, kind] : r.numericKinds) {
+    for (const auto& [name, kind] : result.numericKinds) {
         switch (kind) {
             case SemanticAnalyzer::Result::NumericKind::Int16: semNumericKinds_[name] = NumKind::Int16; break;
             case SemanticAnalyzer::Result::NumericKind::Long32: semNumericKinds_[name] = NumKind::Long32; break;
