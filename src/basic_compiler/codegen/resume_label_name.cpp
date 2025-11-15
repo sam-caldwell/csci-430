@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include <format>
 #include <string>
 
 namespace gwbasic {
@@ -13,8 +14,9 @@ namespace gwbasic {
  * Returns:
  *  - std::string: Label like "resume_l<ln>_<stmtIndex>".
  */
-std::string CodeGenerator::resumeLabelName(int ln, int stmtIndex) {
-    return std::format("resume_l{}_{}", ln, stmtIndex);
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+std::string CodeGenerator::resumeLabelName(int line_num, int stmt_index) {
+    return std::format("resume_l{}_{}", line_num, stmt_index);
 }
 
 } // namespace gwbasic

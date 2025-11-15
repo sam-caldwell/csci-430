@@ -298,9 +298,11 @@ namespace gwbasic {
         static std::string lineLabelName(int line_num);
 
         /** Label for re-executing a specific statement index within a line. 1-based index. */
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         static std::string resumeLabelName(int line_num, int stmt_index);
 
         /** Label for resuming at the statement after a given index within a line. 1-based index. */
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         static std::string resumeNextLabelName(int line_num, int stmt_index);
 
         // Byte escaping helper for IR string literals (one-function-per-file)
@@ -682,9 +684,10 @@ namespace gwbasic {
                                     const std::string &doubleValSSA);
 
         // Load a numeric array element as a double SSA value
+        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
         std::string loadArrayElemAsDouble(std::ostringstream &out,
                                           const std::string &arrayName,
-                                          const std::string &elemPtrSSA);
+                                          std::string_view elemPtrSSA);
 
         // cdGatherLinesAndDeletes split helpers
         // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)

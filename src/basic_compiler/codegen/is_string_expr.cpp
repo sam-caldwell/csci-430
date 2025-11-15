@@ -1,11 +1,16 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/Symbols.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/BinaryOp.h"
 #include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/DefFnStmt.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/StringExpr.h"
 #include "basic_compiler/ast/VarExpr.h"
-#include "basic_compiler/ast/BinaryExpr.h"
-#include "basic_compiler/ast/DefFnStmt.h"
+#include <cctype>
+#include <string>
 
 namespace gwbasic {
     /*
@@ -16,44 +21,43 @@ namespace gwbasic {
      * Returns:
      *  - bool: True if expression is known to be string.
      */
-    // NOLINTBEGIN(readability-identifier-length)
-    bool CodeGenerator::isStringExpr(const Expr *e) const {
-        if (!e) return false;
+    // NOLINTNEXTLINE(readability-function-cognitive-complexity)
+    bool CodeGenerator::isStringExpr(const Expr* expr) const {
+        if (expr == nullptr) {
+            return false;
+        }
 
-        if (isa<StringExpr>(e)) return true;
+        if (isa<StringExpr>(expr)) {
+            return true;
+        }
 
-        if (const auto v = dyn_cast<const VarExpr>(e))
-            return (
-                       !v->name.empty() &&
-                       v->name.back() == Symbols::DOLLARSIGN.first()
-                   ) || semStringVariables_.contains(v->name);
+        if (const auto* var = dyn_cast<const VarExpr>(expr)) {
+            return (!var->name.empty() &&
+                    var->name.back() == Symbols::DOLLARSIGN.first()) ||
+                   semStringVariables_.contains(var->name);
+        }
 
-        if (const auto b = dyn_cast<const BinaryExpr>(e))
-            return (
-                       b->op == BinaryOp::Add
-                   ) &&
-                   (
-                       isStringExpr(b->lhs.get()) ||
-                       isStringExpr(b->rhs.get())
-                   );
+        if (const auto* bin = dyn_cast<const BinaryExpr>(expr)) {
+            return (bin->op == BinaryOp::Add) &&
+                   (isStringExpr(bin->lhs.get()) || isStringExpr(bin->rhs.get()));
+        }
 
-        if (const auto c = dyn_cast<const CallExpr>(e)) {
+        if (const auto* call = dyn_cast<const CallExpr>(expr)) {
             // Built-in or user function with '$' suffix returns string
-            if (!c->callee.empty() && c->callee.back() == Symbols::DOLLARSIGN.first())
+            if (!call->callee.empty() && call->callee.back() == Symbols::DOLLARSIGN.first()) {
                 return true;
-            std::string fn = c->callee;
-            for (auto &ch: fn)
-                ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
-            if (const auto it = userFunctions_.find(fn); it != userFunctions_.end()) {
-                const DefFnStmt *def = it->second;
-                return (
-                    !def->fnName.empty() &&
-                    def->fnName.back() == Symbols::DOLLARSIGN.first()
-                );
+            }
+            std::string funcNameUpper = call->callee;
+            for (auto& chr : funcNameUpper) {
+                chr = static_cast<char>(std::toupper(static_cast<unsigned char>(chr)));
+            }
+            if (const auto iter = userFunctions_.find(funcNameUpper); iter != userFunctions_.end()) {
+                const DefFnStmt *def = iter->second;
+                return (!def->fnName.empty() &&
+                        def->fnName.back() == Symbols::DOLLARSIGN.first());
             }
             return false;
         }
         return false;
     }
-    // NOLINTEND(readability-identifier-length)
 } // namespace gwbasic

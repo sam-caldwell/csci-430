@@ -1,8 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
 #include "basic_compiler/Symbols.h"
-#include <sstream>
 #include <format>
+#include <sstream>
+#include <string>
 
 namespace gwbasic {
 
