@@ -32,7 +32,7 @@ void CodeGenerator::cdBuildBeforeLineSnapshots(const std::vector<int>& lines) {
         }
 
         for (const auto& stmtNode : linePtr->statements) { // level 2
-            CodeGenerator::cdAccumulateFromStatement(stmtNode.get(), accumCommon, accumVars, accumArrays);
+            CodeGenerator::cdAccumulateFromStatement(stmtNode.get(), AccumRefs{accumCommon, accumVars, accumArrays});
         }
     }
 }

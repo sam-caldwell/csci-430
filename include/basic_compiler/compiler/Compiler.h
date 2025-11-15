@@ -14,6 +14,7 @@ namespace gwbasic {
  */
 class Compiler {
 public:
+    struct PhaseLogs { std::string lex; std::string syntax; std::string semantic; std::string codegen; };
     /**
      * Function: Compiler::compileString
      * Purpose:
@@ -102,10 +103,7 @@ public:
      */
 
     static std::string compileFileWithPhaseLogs(const std::string& path,
-                                                const std::string& lexLogPath,
-                                                const std::string& syntaxLogPath,
-                                                const std::string& semanticLogPath,
-                                                const std::string& codegenLogPath);
+                                                const PhaseLogs& logs);
 
     /**
      * Function: Compiler::compileStringOptimized

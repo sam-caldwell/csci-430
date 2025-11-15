@@ -3,6 +3,8 @@
 #pragma once
 
 #include "basic_compiler/compiler/Compiler.h"
+#include "basic_compiler/lexer/Lexer.h"
+#include "basic_compiler/parser/Parser.h"
 #include "basic_compiler/codegen/CodeGenError.h"
 #include "basic_compiler/semantics/SemanticError.h"
 #include <fstream> // for std::ofstream in tests including this umbrella

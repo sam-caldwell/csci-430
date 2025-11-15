@@ -129,10 +129,7 @@ int main(int argc, char **argv) {
         if (!noLogs) {
             ir = gwbasic::Compiler::compileFileWithPhaseLogs(
                 input,
-                *lexLogPath,
-                *syntaxLogPath,
-                *semanticLogPath,
-                *logPath);
+                gwbasic::Compiler::PhaseLogs{*lexLogPath, *syntaxLogPath, *semanticLogPath, *logPath});
         } else {
             ir = gwbasic::Compiler::compileFile(input);
         }

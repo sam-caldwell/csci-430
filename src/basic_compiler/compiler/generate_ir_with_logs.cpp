@@ -20,13 +20,12 @@ namespace gwbasic::phase_log_helpers {
  *  - std::string: LLVM IR text body (may need target triple prefixing by caller)
  */
 std::string generateIRWithLogs(const gwbasic::Program& program,
-                               const std::string& semanticLogPath, // NOLINT(bugprone-easily-swappable-parameters)
-                               const std::string& codegenLogPath) {
+                               const LogPaths& logs) {
     SemanticAnalyzer sema;
-    sema.setLogPath(semanticLogPath);
+    sema.setLogPath(logs.semantic);
     const auto semRes = sema.analyze(program);
     CodeGenerator gen;
-    if (!codegenLogPath.empty()) { gen.setLogPath(codegenLogPath); }
+    if (!logs.codegen.empty()) { gen.setLogPath(logs.codegen); }
     gen.setSemantics(semRes);
     return gen.generate(program);
 }

@@ -82,39 +82,12 @@ namespace gwbasic {
      */
     // NOLINTBEGIN(readability-function-cognitive-complexity,readability-function-size,readability-braces-around-statements,readability-identifier-length,readability-implicit-bool-conversion,readability-use-std-min-max,misc-const-correctness,bugprone-branch-clone,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-qualified-auto,readability-qualified-auto)
     void CodeGenerator::emitLineBlock(std::ostringstream &out, const Line &line, int lineIndex, int lastIndex) {
-        currentLine_ = line.number;
-        out << lineLabelName(line.number) << ":" << Symbols::LF;
-        { std::ostringstream m; m << "begin line " << currentLine_; log() << m.str() << Symbols::LF; }
+        emitLinePrologue(out, line);
         int localContCounter = 0;
-        auto nextLabel = (lineIndex < lastIndex) ? lineLabelName(lineNumbers_[lineIndex + 1]) : std::string("exit");
+        std::string nextLabel = nextLineLabelForIndex(lineIndex, lastIndex);
         bool terminated = false;
-        // If this line is the active error handler line and we're not currently
-        // in a handler context, skip over the handler region (to the first
-        // non-handler line after the first RESUME). This prevents normal
-        // fallthrough from entering the handler code.
-        {
-            auto itSkip = handlerSkipAfter_.find(line.number);
-            if (itSkip != handlerSkipAfter_.end()) {
-                std::string tl = nextTemp(); out << std::format("  {} = load i32, ptr @gwb_err_trap_line", tl) << Symbols::LF;
-                std::string isThis = nextTemp(); out << std::format("  {} = icmp eq i32 {}, {}", isThis, tl, line.number) << Symbols::LF;
-                std::string contLbl = std::format("{}_hdlr_cont_{}", lineLabelName(line.number), ++localContCounter);
-                std::string chkLbl = std::format("{}_hdlr_chk_{}", lineLabelName(line.number), localContCounter);
-                out << std::format("  br i1 {}, label %{}, label %{}", isThis, chkLbl, contLbl) << Symbols::LF;
-                out << chkLbl << ":" << Symbols::LF;
-                std::string ih = nextTemp(); out << std::format("  {} = load i1, ptr @gwb_in_handler", ih) << Symbols::LF;
-                std::string notIH = nextTemp(); out << std::format("  {} = icmp eq i1 {}, false", notIH, ih) << Symbols::LF;
-                std::string skipLbl = std::format("{}_hdlr_skip_{}", lineLabelName(line.number), localContCounter);
-                out << std::format("  br i1 {}, label %{}, label %{}", notIH, skipLbl, contLbl) << Symbols::LF;
-                out << skipLbl << ":" << Symbols::LF;
-                // Skip to after-handler destination or exit
-                if (itSkip->second >= 0) {
-                    out << std::format("  br label %{}", lineLabelName(itSkip->second)) << Symbols::LF;
-                } else {
-                    out << std::format("  br label %exit") << Symbols::LF;
-                }
-                out << contLbl << ":" << Symbols::LF;
-            }
-        }
+        // Skip error handler region for normal flow when appropriate
+        emitLineErrorHandlerSkip(out, line, localContCounter);
         for (size_t i = 0; i < line.statements.size(); ++i) {
             if (terminated) { continue; }
             const auto &st = line.statements[i];
@@ -1636,11 +1609,7 @@ namespace gwbasic {
 #endif
             if (stmtTerminates) { terminated = true; }
         }
-        if (!terminated) {
-            const std::string irInstr = std::format("  br label %{}", nextLabel);
-            out << irInstr << Symbols::LF;
-            { std::ostringstream m; m << "line " << currentLine_ << " fallthrough -> " << irInstr; log() << m.str() << Symbols::LF; }
-        }
+        if (!terminated) { emitLineFallthrough(out, nextLabel); }
     }
     // NOLINTEND(readability-function-cognitive-complexity,readability-function-size,readability-braces-around-statements,readability-identifier-length,readability-implicit-bool-conversion,readability-use-std-min-max,misc-const-correctness,bugprone-branch-clone,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-qualified-auto,readability-qualified-auto)
 } // namespace gwbasic

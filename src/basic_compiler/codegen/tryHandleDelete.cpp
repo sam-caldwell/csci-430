@@ -16,16 +16,14 @@ namespace gwbasic {
      * Returns:
      *  - bool: true if stmt was DELETE and handled; else false.
      */
-    // NOLINTBEGIN(bugprone-easily-swappable-parameters)
     bool tryHandleDelete(const Stmt* stmt,
                          int lineNumber,
                          std::vector<std::pair<int,int>>& deleteRanges,
-                         int globalMin,
-                         int globalMax) {
+                         std::pair<int,int> globalMinMax) {
 
         if (const auto* const del = dyn_cast<const DeleteStmt>(stmt)) {
-            int start = del->startLine.has_value() ? *del->startLine : globalMin;
-            int end   = del->endLine.has_value()   ? *del->endLine   : globalMax;
+            int start = del->startLine.has_value() ? *del->startLine : globalMinMax.first;
+            int end   = del->endLine.has_value()   ? *del->endLine   : globalMinMax.second;
             if (del->startIsDot) { start = lineNumber; }
             if (del->endIsDot)   { end   = lineNumber; }
             deleteRanges.emplace_back(start, end);
@@ -33,5 +31,4 @@ namespace gwbasic {
         }
         return false;
     }
-    // NOLINTEND(bugprone-easily-swappable-parameters)
 } // namespace gwbasic

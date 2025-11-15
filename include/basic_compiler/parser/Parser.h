@@ -15,8 +15,10 @@
 #include "basic_compiler/ast/Line.h"
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/Stmt.h"
+#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/TokenType.h"
+#include "basic_compiler/parser/ParseError.h"
 #include "logger/Logger.h"
 
 namespace gwbasic {

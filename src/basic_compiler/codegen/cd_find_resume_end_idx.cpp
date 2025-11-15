@@ -15,7 +15,7 @@ namespace gwbasic {
  * Returns:
  *  - int: Index of the first line containing RESUME, or -1 if none.
  */
-// NOLINTNEXTLINE(readability-function-size,readability-convert-member-functions-to-static,bugprone-easily-swappable-parameters)
+// NOLINTNEXTLINE(readability-function-size,readability-convert-member-functions-to-static)
 int CodeGenerator::cdFindResumeEndIdx(const std::vector<int>& lines, const int startIdx) const {
     for (int j = startIdx; j < static_cast<int>(lines.size()); ++j) {
         const auto* const linePtr = lineMap_.at(lines[j]);

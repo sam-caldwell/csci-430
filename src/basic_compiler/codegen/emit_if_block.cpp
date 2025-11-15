@@ -49,32 +49,9 @@ namespace gwbasic {
         std::string endLbl = std::format("{}_if_end{}", currLineLabel, ifId);
 
         // Emit condition: accept either a comparison or a general truthy numeric expression
-        std::string cond;
-        if (const auto *be = dyn_cast<const BinaryExpr>(if_block_stmt->cond.get());
-            be != nullptr && (
-                be->op == BinaryOp::Eq ||
-                be->op == BinaryOp::Ne ||
-                be->op == BinaryOp::Lt ||
-                be->op == BinaryOp::Le ||
-                be->op == BinaryOp::Gt ||
-                be->op == BinaryOp::Ge)
-        ) {
-            cond = emitComparison(out, be);
-        } else {
-            // General boolean: treat non-zero as true
-            const std::string val = emitExpr(out, if_block_stmt->cond.get(), "");
-            cond = nextTemp();
-            out << std::format("  {} = fcmp one double {}, 0.0", cond, val) << Symbols::LF;
-        }
-        if (!if_block_stmt->elseBody.empty()) {
-            const std::string br = std::format("  br i1 {}, label %{}, label %{}", cond, thenLbl, elseLbl);
-            out << br << Symbols::LF;
-            log() << "line " << currentLine_ << " IfBlock -> " << br << Symbols::LF;
-        } else {
-            const std::string br = std::format("  br i1 {}, label %{}, label %{}", cond, thenLbl, endLbl);
-            out << br << Symbols::LF;
-            log() << "line " << currentLine_ << " IfBlock -> " << br << Symbols::LF;
-        }
+        const std::string cond = emitIfCond(out, if_block_stmt->cond.get());
+        emitIfBranchHeader(out, cond, thenLbl,
+                           if_block_stmt->elseBody.empty() ? endLbl : elseLbl);
 
         // THEN body
         out << thenLbl << ":" << Symbols::LF;

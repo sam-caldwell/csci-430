@@ -30,7 +30,7 @@ void CodeGenerator::cdCollectDeleteAndOptions(const Program& program, // NOLINT(
             if (tryHandleOptionPrintZones(stmtNode.get(), printZones)) {
                 continue;
             }
-            if (tryHandleDelete(stmtNode.get(), number, deleteRanges, bounds.min, bounds.max)) {
+            if (tryHandleDelete(stmtNode.get(), number, deleteRanges, {bounds.min, bounds.max})) {
                 continue;
             }
         }

@@ -75,12 +75,7 @@ void CodeGenerator::emitForHandleMidAssign(std::ostringstream& out, const MidAss
     }
     const std::string off = nextTemp(); out << std::format("  {} = fptosi double {} to i64", off, emitExpr(out, mid->start.get(), currLineLabel)) << Symbols::LF;
     const std::string dlen = nextTemp(); out << std::format("  {} = call i64 @strlen(ptr {})", dlen, dest) << Symbols::LF;
-    const std::string len_i64 = nextTemp();
-    if (mid->len) {
-        out << std::format("  {} = fptosi double {} to i64", len_i64, emitExpr(out, mid->len.get(), currLineLabel)) << Symbols::LF; // NOLINT(bugprone-branch-clone)
-    } else {
-        out << std::format("  {} = call i64 @strlen(ptr {})", len_i64, emitExpr(out, mid->value.get(), currLineLabel)) << Symbols::LF; // NOLINT(bugprone-branch-clone)
-    }
+    const std::string len_i64 = computeMidLenI64(out, mid, currLineLabel);
     const std::string src = nextTemp();
     const std::string negOff = nextTemp();
     const std::string geLen = nextTemp();

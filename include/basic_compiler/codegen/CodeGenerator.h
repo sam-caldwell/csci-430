@@ -476,6 +476,26 @@ namespace gwbasic {
         void emitLineBlock(std::ostringstream &out, const Line &line, int lineIndex, int lastIndex);
 
         /**
+         * Function: emitLineErrorHandlerSkip
+         * Purpose:
+         *  - If the current line is the active error handler and we are not
+         *    already in a handler, emit a branch to skip to the first
+         *    non-handler line after the handler region.
+         * Notes:
+         *  - Updates localCounter to ensure unique labels.
+         */
+        void emitLineErrorHandlerSkip(std::ostringstream &out,
+                                      const Line &line,
+                                      int &localCounter);
+
+        // Prologue/branch helpers for line emission
+        void emitLinePrologue(std::ostringstream &out, const Line &line);
+
+        std::string nextLineLabelForIndex(int lineIndex, int lastIndex) const;
+
+        void emitLineFallthrough(std::ostringstream &out, const std::string &nextLabel);
+
+        /**
          * Function: emitLineStatement
          * Purpose:
          *  - Lower a single statement in the main line context. Returns true
@@ -601,6 +621,14 @@ namespace gwbasic {
         /** Emit an IF...THEN[/ELSE] structured block. */
         void emitIfBlock(std::ostringstream &out, const IfBlockStmt *if_block_stmt, const std::string &currLineLabel,
                          int &localCounter);
+
+        // Helpers to reduce emitIfBlock size
+        std::string emitIfCond(std::ostringstream &out, const Expr *condExpr);
+
+        void emitIfBranchHeader(std::ostringstream &out,
+                                const std::string &condReg,
+                                const std::string &thenLbl,
+                                const std::string &elseOrEndLbl);
 
         /** Emit a WHILE...WEND loop block. */
         void emitWhile(std::ostringstream &out, const WhileStmt *while_stmt, const std::string &currLineLabel,
@@ -760,6 +788,11 @@ namespace gwbasic {
                                    const std::string &curVal,
                                    const std::string &endReg,
                                    const std::string &stepReg);
+
+        // Helper for MID$ handling inside FOR: compute replacement length in i64.
+        std::string computeMidLenI64(std::ostringstream &out,
+                                     const MidAssignStmt *mid,
+                                     const std::string &currLineLabel);
 
         /** Emit step increment and branch back to cond label. */
         void emitForIncrement(std::ostringstream &out,

@@ -20,21 +20,17 @@ namespace gwbasic {
      * Returns:
      *  - void
      */
-    // NOLINTBEGIN(bugprone-easily-swappable-parameters)
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     void CodeGenerator::cdAccumulateFromStatement(
         const Stmt* stmt,
-        std::set<std::string, std::less<>>& accumCommon,
-        std::set<std::string, std::less<>>& accumVars,
-        std::set<std::string, std::less<>>& accumArrays){
+        AccumRefs acc){
 
         if (const auto* const commonStmt = dyn_cast<const CommonStmt>(stmt)) { // level 1
             for (const auto& name : commonStmt->names) {                        // level 2
-                accumCommon.insert(name);
+                acc.common.insert(name);
             }
         }
         // Delegated extraction; may update both vars and arrays.
-        collectVarsForBeforeLineFromStmt(stmt, accumVars, accumArrays);
+        collectVarsForBeforeLineFromStmt(stmt, acc.vars, acc.arrays);
     }
-    // NOLINTEND(bugprone-easily-swappable-parameters)
 } // namespace gwbasic

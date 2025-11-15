@@ -28,12 +28,8 @@ namespace gwbasic {
  *  - Reads file contents and forwards to compileStringWithPhaseLogs, so
  *    string- and file-based flows share identical behavior and logging.
  */
-// NOLINTBEGIN(bugprone-easily-swappable-parameters)
 std::string Compiler::compileFileWithPhaseLogs(const std::string& path, // NOLINT(readability-function-size)
-                                               const std::string& lexLogPath,
-                                               const std::string& syntaxLogPath,
-                                               const std::string& semanticLogPath,
-                                               const std::string& codegenLogPath) {
+                                               const PhaseLogs& logs) {
 
     // Helper: processing frame for depth-first import resolution (local)
     struct Frame { std::string path; gwbasic::Program prog; size_t idx{0}; bool mergeMode{false}; };
@@ -41,7 +37,7 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path, // NOLIN
     // Root: tokenize with logs and initialize import table
     std::string rootCanon; int minRoot = 0;
 
-    gwbasic::Program rootProg = phase_log_helpers::tokenizeRootWithLogs(path, lexLogPath, syntaxLogPath, rootCanon, minRoot);
+    gwbasic::Program rootProg = phase_log_helpers::tokenizeRootWithLogs(path, logs.lex, logs.syntax, rootCanon, minRoot);
 
     std::unordered_map<std::string, std::pair<int,int>, gwbasic::TransparentSVHasher, std::equal_to<>> imported;
 
@@ -87,10 +83,9 @@ std::string Compiler::compileFileWithPhaseLogs(const std::string& path, // NOLIN
         gMetrics->setAnalyzeOnly(false);
         gMetrics->recordAfterSemanticsSnapshot(program);
     }
-    auto irBody = phase_log_helpers::generateIRWithLogs(program, semanticLogPath, codegenLogPath);
+    auto irBody = phase_log_helpers::generateIRWithLogs(program, phase_log_helpers::LogPaths{logs.semantic, logs.codegen});
     if (gMetrics != nullptr) { gMetrics->setIrInstructionCount(Metrics::countIrInstructions(irBody)); }
     return Compiler::addDefaultTripleIfMissing(irBody);
 }
-// NOLINTEND(bugprone-easily-swappable-parameters)
 
 } // namespace gwbasic

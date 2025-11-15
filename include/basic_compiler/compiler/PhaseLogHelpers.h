@@ -154,19 +154,18 @@ int assignBase(const std::string& canon,
 void renumberProgram(gwbasic::Program& prog, int base, int& outMinLine);
 
 /**
+ * Struct: LogPaths
+ * Purpose: Hold semantic/codegen log destinations to avoid swappable params.
+ */
+struct LogPaths { std::string semantic; std::string codegen; };
+
+/**
  * Function: generateIRWithLogs
  * Purpose:
  *  - Run semantics and codegen with optional logs and return LLVM IR.
- * Inputs:
- *  - program: Parsed/combined Program AST
- *  - semanticLogPath: Destination for semantic log
- *  - codegenLogPath: Destination for codegen log (optional)
- * Outputs:
- *  - std::string: LLVM IR text
  */
 std::string generateIRWithLogs(const gwbasic::Program& program,
-                               const std::string& semanticLogPath,
-                               const std::string& codegenLogPath);
+                               const LogPaths& logs);
 
 /**
  * Struct: ImportedProg
