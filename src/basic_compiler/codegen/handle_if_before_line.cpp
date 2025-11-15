@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,11 +23,13 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleIfBeforeLine(const Stmt *s,
-                                       std::set<std::string, std::less<>> &vars,
-                                       std::set<std::string, std::less<>> &arrays) {
-    const auto is = dyn_cast<const IfStmt>(s);
-    if (!is) return false;
-    collectVarsForBeforeLineFromExpr(is->cond.get(), vars, arrays);
+bool CodeGenerator::handleIfBeforeLine(const Stmt* stmt,
+                                       std::set<std::string, std::less<>>& vars,
+                                       std::set<std::string, std::less<>>& arrays) {
+    const auto* const ifStmt = dyn_cast<const IfStmt>(stmt);
+    if (ifStmt == nullptr) {
+        return false;
+    }
+    collectVarsForBeforeLineFromExpr(ifStmt->cond.get(), vars, arrays);
     return true;
 }

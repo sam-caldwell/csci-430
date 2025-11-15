@@ -388,13 +388,13 @@ namespace gwbasic {
         bool handlePrintBeforeLine(const Stmt *stmt, std::set<std::string, std::less<> > &vars,
                                    std::set<std::string, std::less<> > &arrays);
 
-        auto handleInputBeforeLine(const Stmt *stmt, std::set<std::string, std::less<> > &vars,
-                                   const std::set<std::string, std::less<> > *arrays) -> bool;
+        static auto handleInputBeforeLine(const Stmt *stmt, std::set<std::string, std::less<> > &vars,
+                                          const std::set<std::string, std::less<> > *arrays) -> bool;
 
         bool handleReadBeforeLine(const Stmt *stmt, std::set<std::string, std::less<> > &vars,
                                   std::set<std::string, std::less<> > &arrays);
 
-        bool handleDimBeforeLine(const Stmt *stmt, std::set<std::string, std::less<> > &arrays);
+        static bool handleDimBeforeLine(const Stmt *stmt, std::set<std::string, std::less<> > &arrays);
 
         bool handleSwapBeforeLine(const Stmt *stmt, std::set<std::string, std::less<> > &vars,
                                   std::set<std::string, std::less<> > &arrays);

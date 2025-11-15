@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/ArrayAssignStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,14 +23,17 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleArrayAssignBeforeLine(const Stmt *s,
-                                                std::set<std::string, std::less<>> &vars,
-                                                std::set<std::string, std::less<>> &arrays) {
-    const auto aa = dyn_cast<const ArrayAssignStmt>(s);
-    if (!aa) return false;
-    arrays.insert(aa->name);
-    for (const auto &ix: aa->indices)
-        collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays);
-    collectVarsForBeforeLineFromExpr(aa->value.get(), vars, arrays);
+bool CodeGenerator::handleArrayAssignBeforeLine(const Stmt* stmt,
+                                                std::set<std::string, std::less<>>& vars,
+                                                std::set<std::string, std::less<>>& arrays) {
+    const auto* const assign = dyn_cast<const ArrayAssignStmt>(stmt);
+    if (assign == nullptr) {
+        return false;
+    }
+    arrays.insert(assign->name);
+    for (const auto& indexExpr : assign->indices) {
+        collectVarsForBeforeLineFromExpr(indexExpr.get(), vars, arrays);
+    }
+    collectVarsForBeforeLineFromExpr(assign->value.get(), vars, arrays);
     return true;
 }

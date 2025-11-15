@@ -7,6 +7,10 @@
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/ast/SwapStmt.h"
+#include "basic_compiler/ast/ReadTarget.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,30 +24,27 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleSwapBeforeLine(const Stmt *s,
-                                         std::set<std::string, std::less<>> &vars,
-                                         std::set<std::string, std::less<>> &arrays) {
-
-    const auto sw = dyn_cast<const SwapStmt>(s);
-
-    if (!sw)
+bool CodeGenerator::handleSwapBeforeLine(const Stmt* stmt,
+                                         std::set<std::string, std::less<>>& vars,
+                                         std::set<std::string, std::less<>>& arrays) {
+    const auto* const swapStmt = dyn_cast<const SwapStmt>(stmt);
+    if (swapStmt == nullptr) {
         return false;
+    }
 
-    auto handle = [&](const ReadTarget &t) {
-
-        if (!t.indices.empty()) {
-            arrays.insert(t.name);
-            for (const auto &ix: t.indices)
-                collectVarsForBeforeLineFromExpr(ix.get(), vars, arrays);
+    auto handle = [&](const ReadTarget& target) {
+        if (!target.indices.empty()) {
+            arrays.insert(target.name);
+            for (const auto& indexExpr : target.indices) {
+                collectVarsForBeforeLineFromExpr(indexExpr.get(), vars, arrays);
+            }
         } else {
-            vars.insert(t.name);
+            vars.insert(target.name);
         }
-
     };
 
-    handle(sw->left);
-
-    handle(sw->right);
+    handle(swapStmt->left);
+    handle(swapStmt->right);
 
     return true;
 }

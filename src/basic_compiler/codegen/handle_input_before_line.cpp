@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/InputStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,12 +23,16 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-auto CodeGenerator::handleInputBeforeLine(const Stmt *s,
-                                          std::set<std::string, std::less<>> &vars,
-                                          const std::set<std::string, std::less<>> *arrays) -> bool {
-    const auto in = dyn_cast<const InputStmt>(s);
-    if (!in) return false;
+auto CodeGenerator::handleInputBeforeLine(const Stmt* stmt,
+                                          std::set<std::string, std::less<>>& vars,
+                                          const std::set<std::string, std::less<>>* arrays) -> bool {
+    const auto* const inputStmt = dyn_cast<const InputStmt>(stmt);
+    if (inputStmt == nullptr) {
+        return false;
+    }
     (void)arrays; // unused here
-    for (const auto &v: in->variables) vars.insert(v);
+    for (const auto& varName : inputStmt->variables) {
+        vars.insert(varName);
+    }
     return true;
 }

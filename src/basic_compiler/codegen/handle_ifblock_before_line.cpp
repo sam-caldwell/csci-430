@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/IfBlockStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,13 +23,19 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleIfBlockBeforeLine(const Stmt *s,
-                                            std::set<std::string, std::less<>> &vars,
-                                            std::set<std::string, std::less<>> &arrays) {
-    const auto ib = dyn_cast<const IfBlockStmt>(s);
-    if (!ib) return false;
-    collectVarsForBeforeLineFromExpr(ib->cond.get(), vars, arrays);
-    for (const auto &st: ib->thenBody) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays);
-    for (const auto &st: ib->elseBody) collectVarsForBeforeLineFromStmt(st.get(), vars, arrays);
+bool CodeGenerator::handleIfBlockBeforeLine(const Stmt* stmt,
+                                            std::set<std::string, std::less<>>& vars,
+                                            std::set<std::string, std::less<>>& arrays) {
+    const auto* const ifBlock = dyn_cast<const IfBlockStmt>(stmt);
+    if (ifBlock == nullptr) {
+        return false;
+    }
+    collectVarsForBeforeLineFromExpr(ifBlock->cond.get(), vars, arrays);
+    for (const auto& subStmt : ifBlock->thenBody) {
+        collectVarsForBeforeLineFromStmt(subStmt.get(), vars, arrays);
+    }
+    for (const auto& subStmt : ifBlock->elseBody) {
+        collectVarsForBeforeLineFromStmt(subStmt.get(), vars, arrays);
+    }
     return true;
 }

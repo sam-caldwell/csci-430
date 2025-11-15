@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/DimStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -19,10 +22,12 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleDimBeforeLine(const Stmt *s,
-                                        std::set<std::string, std::less<>> &arrays) {
-    const auto ds = dyn_cast<const DimStmt>(s);
-    if (!ds) return false;
-    arrays.insert(ds->name);
+bool CodeGenerator::handleDimBeforeLine(const Stmt* stmt,
+                                        std::set<std::string, std::less<>>& arrays) {
+    const auto* const dim = dyn_cast<const DimStmt>(stmt);
+    if (dim == nullptr) {
+        return false;
+    }
+    arrays.insert(dim->name);
     return true;
 }

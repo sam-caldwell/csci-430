@@ -7,6 +7,9 @@
 #include "basic_compiler/ast/OnGotoStmt.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/Stmt.h"
+#include <functional>
+#include <set>
+#include <string>
 
 using namespace gwbasic;
 
@@ -20,13 +23,13 @@ using namespace gwbasic;
  * Returns:
  *  - bool: True if the statement was handled.
  */
-bool CodeGenerator::handleOnGotoBeforeLine(const Stmt *s,
-                                           std::set<std::string, std::less<>> &vars,
-                                           std::set<std::string, std::less<>> &arrays) {
-
-    const auto og = dyn_cast<const OnGotoStmt>(s);
-    if (!og)
+bool CodeGenerator::handleOnGotoBeforeLine(const Stmt* stmt,
+                                           std::set<std::string, std::less<>>& vars,
+                                           std::set<std::string, std::less<>>& arrays) {
+    const auto* const onGoto = dyn_cast<const OnGotoStmt>(stmt);
+    if (onGoto == nullptr) {
         return false;
-    collectVarsForBeforeLineFromExpr(og->index.get(), vars, arrays);
+    }
+    collectVarsForBeforeLineFromExpr(onGoto->index.get(), vars, arrays);
     return true;
 }

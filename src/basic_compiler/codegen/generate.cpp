@@ -1,8 +1,11 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
+#include "basic_compiler/ast/Line.h"
+#include "basic_compiler/ast/Program.h"
 #include "basic_compiler/codegen/CodeGenError.h"
 #include <map>
 #include <sstream>
+#include <string>
 
 namespace gwbasic {
 
@@ -24,19 +27,23 @@ std::string CodeGenerator::generate(const Program& program) {
     emitHeader(out);
     emitGlobals(out);
     emitMainPrologue(out);
-    if (!lineNumbers_.empty()) {
-
-        const int lastIdx = static_cast<int>(lineNumbers_.size() - 1);
-        std::map<int, const Line*> lm;
-        for (const auto& l : program.lines) lm[l.number] = &l;
-        for (int i = 0; i <= lastIdx; ++i) {
-            int ln = lineNumbers_[i];
-            auto it = lm.find(ln);
-            if (it == lm.end()) throw CodeGenError("Internal: missing line AST");
-            emitLineBlock(out, *it->second, i, lastIdx);
-        }
-        emitMainEpilogue(out);
+    if (lineNumbers_.empty()) {
+        return out.str();
     }
+    const int lastIdx = static_cast<int>(lineNumbers_.size() - 1);
+    std::map<int, const Line*> lineMap;
+    for (const auto& line : program.lines) {
+        lineMap[line.number] = &line;
+    }
+    for (int i = 0; i <= lastIdx; ++i) {
+        const int lineNumber = lineNumbers_[i];
+        const auto iter = lineMap.find(lineNumber);
+        if (iter == lineMap.end()) {
+            throw CodeGenError("Internal: missing line AST");
+        }
+        emitLineBlock(out, *iter->second, i, lastIdx);
+    }
+    emitMainEpilogue(out);
     return out.str();
 }
 

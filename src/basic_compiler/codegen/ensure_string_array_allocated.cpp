@@ -1,8 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/codegen/CodeGenerator.h"
-#include <sstream>
-#include <format>
 #include "basic_compiler/Symbols.h"
+#include <format>
+#include <sstream>
+#include <string>
 
 namespace gwbasic {
 
@@ -17,12 +18,14 @@ namespace gwbasic {
  *  - void
  */
 void CodeGenerator::ensureStringArrayAllocated(std::ostringstream& out, const std::string& name, int length) {
-    if (auto it = arrayAllocaName_.find(name); it != arrayAllocaName_.end() && !it->second.empty()) return;
-    std::string a = sanitizeLocal(std::format("{}_arr", name));
-    arrayAllocaName_[name] = a;
-    std::string ir = std::format("  {} = alloca [{} x ptr]", a, length);
-    out << ir << Symbols::LF;
-    log() << "line " << currentLine_ << " StringArrayAlloc(" << name << ") -> " << ir << Symbols::LF;
+    if (auto iter = arrayAllocaName_.find(name); iter != arrayAllocaName_.end() && !iter->second.empty()) {
+        return;
+    }
+    std::string localName = sanitizeLocal(std::format("{}_arr", name));
+    arrayAllocaName_[name] = localName;
+    const std::string allocIr = std::format("  {} = alloca [{} x ptr]", localName, length);
+    out << allocIr << Symbols::LF;
+    log() << "line " << currentLine_ << " StringArrayAlloc(" << name << ") -> " << allocIr << Symbols::LF;
 }
 
 } // namespace gwbasic
