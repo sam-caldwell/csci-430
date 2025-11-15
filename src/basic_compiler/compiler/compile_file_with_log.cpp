@@ -23,7 +23,6 @@ namespace gwbasic {
  *    compileStringWithLog() so the same lex/parse/codegen pipeline and
  *    logging behavior are used for both file and string inputs.
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string Compiler::compileFileWithLog(const std::string& path, const std::string& logPath) {
     std::ifstream inputFile(path);
     if (!inputFile) { throw gwbasic::FileOpenError(path); }

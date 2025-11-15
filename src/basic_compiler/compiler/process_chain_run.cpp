@@ -26,7 +26,6 @@ namespace gwbasic::phase_log_helpers {
  *  - out: Populated when a new import is parsed and renumbered
  *  - bool: true if a new import occurred; false otherwise
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 bool processChainRun(const std::string& curPath,
                      const std::string& incPath,
                      const bool isChain,

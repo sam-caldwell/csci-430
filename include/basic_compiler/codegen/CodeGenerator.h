@@ -66,7 +66,7 @@ namespace gwbasic {
      * Returns:
      *  - bool: true if stmt was DELETE and handled; else false.
      */
-    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
     bool tryHandleDelete(const Stmt *stmt,
                          int lineNumber,
                          std::vector<std::pair<int, int> > &deleteRanges,
@@ -298,11 +298,11 @@ namespace gwbasic {
         static std::string lineLabelName(int line_num);
 
         /** Label for re-executing a specific statement index within a line. 1-based index. */
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
         static std::string resumeLabelName(int line_num, int stmt_index);
 
         /** Label for resuming at the statement after a given index within a line. 1-based index. */
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
         static std::string resumeNextLabelName(int line_num, int stmt_index);
 
         // Byte escaping helper for IR string literals (one-function-per-file)
@@ -493,7 +493,7 @@ namespace gwbasic {
         // Line-context per-kind handlers (extracted to reduce complexity)
         void emitLineHandleAssign(std::ostringstream &out, const AssignStmt *asg);
 
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
         void emitLineHandleMidAssign(std::ostringstream &out,
                                      const MidAssignStmt *mid,
                                      const std::string &currLineLabel,
@@ -678,20 +678,20 @@ namespace gwbasic {
         std::string arrayElemType(const std::string &name) const;
 
         // Emit a typed store into a numeric array element given the RHS as double
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
         void storeNumberToArrayElem(std::ostringstream &out,
                                     const std::string &arrayName,
                                     std::string_view elemPtrSSA,
                                     const std::string &doubleValSSA);
 
         // Load a numeric array element as a double SSA value
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
         std::string loadArrayElemAsDouble(std::ostringstream &out,
                                           const std::string &arrayName,
                                           std::string_view elemPtrSSA);
 
         // cdGatherLinesAndDeletes split helpers
-        // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
         static void cdCollectLinesAndBounds(const Program &program,
                                             std::vector<int> &linesOut,
                                             std::map<int, const Line *> &lineMapOut,

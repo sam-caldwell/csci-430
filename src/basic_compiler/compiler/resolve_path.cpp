@@ -16,7 +16,6 @@ namespace gwbasic::phase_log_helpers {
  * Outputs:
  *  - std::string: Resolved absolute path (weakly canonical).
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string resolvePath(const std::string& baseFile, const std::string& rel) {
     const std::filesystem::path relPath(rel);
     if (relPath.is_absolute()) { return canonicalPath(relPath.string()); }

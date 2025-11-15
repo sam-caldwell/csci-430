@@ -14,7 +14,6 @@ namespace gwbasic {
  * Returns:
  *  - std::string: Label like "resume_next_l<ln>_<stmtIndex>".
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string CodeGenerator::resumeNextLabelName(const int line_num, const int stmt_index) {
     return std::format("resume_next_{}_{}", line_num, stmt_index);
 }

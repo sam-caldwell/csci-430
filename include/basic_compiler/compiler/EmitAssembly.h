@@ -19,7 +19,6 @@
  * Outputs:
  *  - int: Process exit code (0 on success).
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 int emitAssembly(const std::filesystem::path &llTmp,
                  const std::string &asmOut,
                  const std::string &triple,

@@ -19,7 +19,6 @@ namespace gwbasic::phase_log_helpers {
  * Outputs:
  *  - std::string: LLVM IR text body (may need target triple prefixing by caller)
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string generateIRWithLogs(const gwbasic::Program& program,
                                const std::string& semanticLogPath, // NOLINT(bugprone-easily-swappable-parameters)
                                const std::string& codegenLogPath) {

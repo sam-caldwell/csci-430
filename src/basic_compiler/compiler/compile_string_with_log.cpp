@@ -22,7 +22,6 @@ namespace gwbasic {
  *    generator is configured to emit a detailed log correlating emitted
  *    IR with source lines and AST nodes to the provided logPath.
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string Compiler::compileStringWithLog(const std::string& source, const std::string& logPath) {
     Lexer lex(source);
     auto tokens = lex.tokenize();

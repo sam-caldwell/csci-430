@@ -28,7 +28,6 @@
  *  - Calls clang to generate assembly and then prepends a header comment with
  *    source and target information tailored to the assembler dialect.
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 int emitAssembly(const std::filesystem::path &llTmp,
                  const std::string &asmOut,
                  const std::string &triple, // NOLINT(bugprone-easily-swappable-parameters)

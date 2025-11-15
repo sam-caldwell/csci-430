@@ -99,7 +99,6 @@ gwbasic::Program parseFileNoLogs(const std::string& fpath);
  *  - outCanon: Canonical path to the root file
  *  - outMinLine: Minimum line number in the root program (or 0 if none)
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 gwbasic::Program tokenizeRootWithLogs(const std::string& path,
                                       const std::string& lexLogPath,
                                       const std::string& syntaxLogPath,
@@ -165,7 +164,6 @@ void renumberProgram(gwbasic::Program& prog, int base, int& outMinLine);
  * Outputs:
  *  - std::string: LLVM IR text
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string generateIRWithLogs(const gwbasic::Program& program,
                                const std::string& semanticLogPath,
                                const std::string& codegenLogPath);

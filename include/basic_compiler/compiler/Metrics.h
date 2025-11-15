@@ -120,7 +120,7 @@ public:
                                 const double avg_expr_depth) {
         metrics.ast_after_opt_ = {lines, statements, expressions, max_expr_depth, avg_expr_depth};
     }
-    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
     static void setSemanticsBasic(Metrics& metrics, const std::size_t const_folds,
                                   const std::size_t fold_add, const std::size_t fold_mul,
                                   const std::size_t unary_elim_plus, const std::size_t id_add_zero) {

@@ -27,7 +27,7 @@ struct Token {
     int col{1};
 
     Token() = default;
-    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
     Token(const TokenType typeVal, std::string lexemeStr, int lineNum, int colNum)
         : type(typeVal), lexeme(std::move(lexemeStr)), line(lineNum), col(colNum) {}
 };

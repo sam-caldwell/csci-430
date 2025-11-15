@@ -19,7 +19,6 @@ namespace gwbasic::phase_log_helpers {
  *  - outCanon: Canonical path to the root file
  *  - outMinLine: Minimum line number or 0 if program is empty
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 gwbasic::Program tokenizeRootNoLogs(const std::string& path,
                                     std::string& outCanon,
                                     int& outMinLine) {

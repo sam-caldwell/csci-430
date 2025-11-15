@@ -17,7 +17,6 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 void CodeGenerator::storeNumberToVar(std::ostringstream& out, const std::string& name, const std::string& doubleValSSA) {
     const std::string& dst = varAllocaName_[name];
     switch (numKindOf(name)) {

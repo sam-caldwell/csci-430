@@ -19,7 +19,6 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 void CodeGenerator::emitForIncrement(std::ostringstream& out,
                                      const std::string& varName,
                                      std::string_view stepReg,

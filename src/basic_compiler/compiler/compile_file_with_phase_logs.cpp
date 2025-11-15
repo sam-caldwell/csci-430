@@ -28,7 +28,6 @@ namespace gwbasic {
  *  - Reads file contents and forwards to compileStringWithPhaseLogs, so
  *    string- and file-based flows share identical behavior and logging.
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 // NOLINTBEGIN(bugprone-easily-swappable-parameters)
 std::string Compiler::compileFileWithPhaseLogs(const std::string& path, // NOLINT(readability-function-size)
                                                const std::string& lexLogPath,

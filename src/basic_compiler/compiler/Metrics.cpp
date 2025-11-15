@@ -160,7 +160,6 @@ std::size_t Metrics::countIrInstructions(std::string_view ir_text) {
     return count;
 }
 
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 static std::string writeTempFile(const std::string& prefix, const std::string& content, const char* ext) {
     namespace fs = std::filesystem;
     const fs::path tempDir = fs::temp_directory_path();
@@ -178,7 +177,6 @@ static std::string writeTempFile(const std::string& prefix, const std::string& c
 }
 
 std::vector<std::pair<std::string, std::size_t>>
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 Metrics::optimizedIrInstructionCounts(const std::string& ir_text,
                                       const std::string& clang_path,
                                       const std::vector<std::string>& phases) {

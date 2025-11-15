@@ -27,7 +27,6 @@ namespace gwbasic::phase_log_helpers {
  * Throws:
  *  - gwbasic::FileOpenError when the root file cannot be opened.
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 gwbasic::Program tokenizeRootWithLogs(const std::string& path,
                                       const std::string& lexLogPath,
                                       const std::string& syntaxLogPath,

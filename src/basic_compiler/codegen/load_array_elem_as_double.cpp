@@ -18,7 +18,6 @@ namespace gwbasic {
  * Returns:
  *  - std::string: SSA register name holding the double value.
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string CodeGenerator::loadArrayElemAsDouble(
     std::ostringstream& out,
     const std::string& arrayName,

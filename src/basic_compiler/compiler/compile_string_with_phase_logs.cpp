@@ -26,7 +26,6 @@ namespace gwbasic {
  *  - Executes the pipeline while enabling detailed logs at the parser and
  *    code generator stages to correlate source to structure and emitted IR.
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
                                                  const std::string& lexLogPath,
                                                  const std::string& syntaxLogPath,

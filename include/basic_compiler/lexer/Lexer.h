@@ -294,7 +294,7 @@ private:
      *  - Assumes caller already consumed the first character with advance().
      */
     template <TokenType Single, TokenType Pair, char Next>
-    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
     void emitPairOrSingle(std::vector<Token>& out,
                           std::array<std::string_view, 2> lexemes,
                           const int line, const int col) {
@@ -493,7 +493,7 @@ private:
     // Friend accessor for tests (defined in its own header to keep one class per file)
     friend class LexerAccessorForTests;
 };
- 
+
 } // namespace gwbasic
 
 #endif // BASIC_COMPILER_LEXER_H

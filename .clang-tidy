@@ -12,6 +12,7 @@
 #
 Checks: >
     bugprone-*,
+    -bugprone-easily-swappable-parameters,
     concurrency-*,
     cppcoreguidelines-*,
     -darwin-avoid-spinlock,

@@ -49,7 +49,7 @@ public:
      * Outputs:
      *  - std::string: LLVM IR text (.ll)
      */
-    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
     static std::string compileStringWithLog(const std::string& source, const std::string& logPath);
 
     /**
@@ -62,7 +62,7 @@ public:
      * Outputs:
      *  - std::string: LLVM IR text (.ll)
      */
-    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
     static std::string compileFileWithLog(const std::string& path, const std::string& logPath);
 
     /**
@@ -79,7 +79,7 @@ public:
      * Outputs:
      *  - std::string: LLVM IR text (.ll)
      */
-    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
     static std::string compileStringWithPhaseLogs(const std::string& source,
                                                   const std::string& lexLogPath,
                                                   const std::string& syntaxLogPath,
@@ -100,7 +100,7 @@ public:
      * Outputs:
      *  - std::string: LLVM IR text (.ll)
      */
-    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+
     static std::string compileFileWithPhaseLogs(const std::string& path,
                                                 const std::string& lexLogPath,
                                                 const std::string& syntaxLogPath,

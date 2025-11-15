@@ -16,7 +16,6 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 void CodeGenerator::cdNormalizeBoundsAndRanges(int& globalMin,
                                                int& globalMax,
                                                std::vector<std::pair<int,int>>& deleteRanges) {
