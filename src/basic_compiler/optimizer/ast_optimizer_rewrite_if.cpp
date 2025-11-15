@@ -4,41 +4,50 @@
  * Purpose: Implement AstOptimizer::rewriteIf (constant IF folding).
  */
 #include "basic_compiler/opt/AstOptimizer.h"
-#include "basic_compiler/ast/RTTI.h"
-#include "basic_compiler/ast/IfStmt.h"
 #include "basic_compiler/ast/GotoStmt.h"
+#include "basic_compiler/ast/IfStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
 #include "basic_compiler/compiler/Metrics.h"
+#include <memory>
+#include <utility>
+#include <vector>
 
 using namespace gwbasic;
 
-auto AstOptimizer::rewriteIf(std::unique_ptr<Stmt>& st,
+// NOLINTBEGIN(readability-function-cognitive-complexity,readability-function-size)
+auto AstOptimizer::rewriteIf(std::unique_ptr<Stmt>& statement,
                              std::vector<std::unique_ptr<Stmt>>& out) -> void {
-    auto* is = dyn_cast<IfStmt>(st.get());
-    if (!is) {
-        out.emplace_back(std::move(st));
+    auto* ifStmt = dyn_cast<IfStmt>(statement.get());
+    if (ifStmt == nullptr) {
+        out.emplace_back(std::move(statement));
         return;
     }
-    is->cond = optExpr(std::move(is->cond));
-    if (double v = 0.0; asNumber(is->cond.get(), v)) {
-        if (v != 0.0) {
-            if (gMetrics) gMetrics->incIfConstTrueToGoto();
-            if (gMetrics && gMetrics->isAnalyzeOnly()) {
-                out.emplace_back(std::move(st));
+    ifStmt->cond = optExpr(std::move(ifStmt->cond));
+    if (double value = 0.0; asNumber(ifStmt->cond.get(), value)) {
+        if (value != 0.0) {
+            if (gMetrics != nullptr) {
+                gMetrics->incIfConstTrueToGoto();
+            }
+            if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                out.emplace_back(std::move(statement));
             } else {
-                auto g = std::make_unique<GotoStmt>(is->targetLine);
-                g->pos = is->pos;
-                out.emplace_back(std::move(g));
+                auto gotoStmt = std::make_unique<GotoStmt>(ifStmt->targetLine);
+                gotoStmt->pos = ifStmt->pos;
+                out.emplace_back(std::move(gotoStmt));
             }
         } else {
-            if (gMetrics) gMetrics->incIfConstFalseRemoved();
-            if (gMetrics && gMetrics->isAnalyzeOnly()) {
-                out.emplace_back(std::move(st));
+            if (gMetrics != nullptr) {
+                gMetrics->incIfConstFalseRemoved();
+            }
+            if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                out.emplace_back(std::move(statement));
             } else {
                 // Removed: append nothing
             }
         }
         return;
     }
-    out.emplace_back(std::move(st));
+    out.emplace_back(std::move(statement));
 }
-
+// NOLINTEND(readability-function-cognitive-complexity,readability-function-size)

@@ -13,9 +13,9 @@
 
 using namespace gwbasic;
 
-auto AstOptimizer::optimizePrintStmt(std::unique_ptr<Stmt>& stmt,
+auto AstOptimizer::optimizePrintStmt(std::unique_ptr<Stmt>& statement,
                                      std::vector<std::unique_ptr<Stmt>>& out) -> bool {
-    auto* const printStmt = dyn_cast<PrintStmt>(stmt.get());
+    auto* const printStmt = dyn_cast<PrintStmt>(statement.get());
     if (printStmt == nullptr) {
         return false;
     }
@@ -25,6 +25,6 @@ auto AstOptimizer::optimizePrintStmt(std::unique_ptr<Stmt>& stmt,
     for (auto& expr : printStmt->more) {
         expr = optExpr(std::move(expr));
     }
-    out.emplace_back(std::move(stmt));
+    out.emplace_back(std::move(statement));
     return true;
 }

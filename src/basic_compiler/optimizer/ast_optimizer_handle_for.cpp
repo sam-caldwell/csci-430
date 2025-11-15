@@ -14,9 +14,9 @@
 
 using namespace gwbasic;
 
-auto AstOptimizer::optimizeForStmt(std::unique_ptr<Stmt>& stmt,
+auto AstOptimizer::optimizeForStmt(std::unique_ptr<Stmt>& statement,
                                    std::vector<std::unique_ptr<Stmt>>& out) -> bool {
-    auto* const forStmt = dyn_cast<ForStmt>(stmt.get());
+    auto* const forStmt = dyn_cast<ForStmt>(statement.get());
     if (forStmt == nullptr) {
         return false;
     }
@@ -34,6 +34,6 @@ auto AstOptimizer::optimizeForStmt(std::unique_ptr<Stmt>& stmt,
         }
     }
     optimizeForBody(*forStmt);
-    out.emplace_back(std::move(stmt));
+    out.emplace_back(std::move(statement));
     return true;
 }

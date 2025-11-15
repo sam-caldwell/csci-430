@@ -13,13 +13,13 @@
 
 using namespace gwbasic;
 
-auto AstOptimizer::optimizeAssignStmt(std::unique_ptr<Stmt>& stmt,
+auto AstOptimizer::optimizeAssignStmt(std::unique_ptr<Stmt>& statement,
                                       std::vector<std::unique_ptr<Stmt>>& out) -> bool {
-    AssignStmt* asg = dyn_cast<AssignStmt>(stmt.get());
+    AssignStmt* asg = dyn_cast<AssignStmt>(statement.get());
     if (asg == nullptr) {
         return false;
     }
     asg->value = optExpr(std::move(asg->value));
-    out.emplace_back(std::move(stmt));
+    out.emplace_back(std::move(statement));
     return true;
 }

@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include <string>
 #include <unordered_map>
 
 namespace gwbasic {
@@ -59,8 +60,10 @@ int SemanticAnalyzer::expectedArity(const std::string& upperName) {
         {"MID$",   2},
     };
 
-    auto it = kArity.find(upperName);
-    if (it != kArity.end()) return it->second;
+    const auto iter = kArity.find(upperName);
+    if (iter != kArity.end()) {
+        return iter->second;
+    }
     // Default assumption for unlisted intrinsics is unary
     return 1;
 }

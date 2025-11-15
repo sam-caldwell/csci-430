@@ -1,14 +1,20 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
-#include "basic_compiler/ast/RTTI.h"
-#include "basic_compiler/ast/NumberExpr.h"
-#include "basic_compiler/ast/StringExpr.h"
-#include "basic_compiler/ast/CallExpr.h"
-#include "basic_compiler/ast/VarExpr.h"
-#include "basic_compiler/ast/UnaryExpr.h"
 #include "basic_compiler/ast/BinaryExpr.h"
 #include "basic_compiler/ast/BinaryOp.h"
+#include "basic_compiler/ast/CallExpr.h"
+#include "basic_compiler/ast/DefFnStmt.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NumberExpr.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/StringExpr.h"
+#include "basic_compiler/ast/UnaryExpr.h"
+#include "basic_compiler/ast/VarExpr.h"
+#include "basic_compiler/semantics/SemanticError.h"
+#include <cctype>
+#include <cstddef>
 #include <sstream>
+#include <string>
 
 namespace gwbasic {
 
@@ -23,60 +29,96 @@ namespace gwbasic {
  *    and binary operators, and throws on invalid string arithmetic or mixed
  *    string/number comparisons.
  */
-SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
-    if (!e) return ValueType::Number;
-    if (dyn_cast<const NumberExpr>(e)) return ValueType::Number;
-    if (dyn_cast<const StringExpr>(e)) return ValueType::String;
-    if (auto c = dyn_cast<const CallExpr>(e)) {
+// NOLINTBEGIN(readability-function-cognitive-complexity,readability-function-size)
+SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* expr) {
+    if (expr == nullptr) {
+        return ValueType::Number;
+    }
+    if (isa<NumberExpr>(expr)) {
+        return ValueType::Number;
+    }
+    if (isa<StringExpr>(expr)) {
+        return ValueType::String;
+    }
+    if (const auto* call = dyn_cast<const CallExpr>(expr)) {
         // Array element reference has form A(i)
-        if (arrays_.contains(c->callee)) {
-            if (varNameIsString(c->callee)) return ValueType::String;
+        if (arrays_.contains(call->callee)) {
+            if (varNameIsString(call->callee)) {
+                return ValueType::String;
+            }
             return ValueType::Number;
         }
         // Built-in intrinsics: CHR$ returns string; ASC returns number.
-        std::string fn = c->callee; for (auto &ch: fn) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
-        if (fn == "CHR$") return ValueType::String;
-        if (isKnownNumericFunction(fn)) return ValueType::Number;
-        if (isKnownStringFunction(fn)) return ValueType::String;
-        if (userFunctions_.contains(fn)) {
-            const DefFnStmt* def = userFunctions_.at(fn);
-            if (!def->fnName.empty() && def->fnName.back() == '$') return ValueType::String;
+        std::string funcNameUpper = call->callee;
+        for (auto& chr : funcNameUpper) {
+            chr = static_cast<char>(std::toupper(static_cast<unsigned char>(chr)));
+        }
+        if (funcNameUpper == "CHR$") {
+            return ValueType::String;
+        }
+        if (isKnownNumericFunction(funcNameUpper)) {
+            return ValueType::Number;
+        }
+        if (isKnownStringFunction(funcNameUpper)) {
+            return ValueType::String;
+        }
+        if (userFunctions_.contains(funcNameUpper)) {
+            const DefFnStmt* def = userFunctions_.at(funcNameUpper);
+            if (!def->fnName.empty() && def->fnName.back() == '$') {
+                return ValueType::String;
+            }
             return ValueType::Number;
         }
         // If function name ends with '$', treat as string (covers built-ins like CHR$)
-        if (!c->callee.empty() && c->callee.back() == '$') return ValueType::String;
-        return ValueType::Number;
-    }
-    if (auto v = dyn_cast<const VarExpr>(e)) {
-        // String if name has '$' suffix or falls under DEFSTR
-        auto isStrName = [&](const std::string& nm) -> bool {
-            if (!nm.empty() && nm.back() == '$') return true;
-            if (nm.empty()) return false;
-            char c0 = static_cast<char>(std::toupper(static_cast<unsigned char>(nm[0])));
-            if (c0 < 'A' || c0 > 'Z') return false;
-            DefaultKind dk = defaultKinds_[c0 - 'A'];
-            return dk == DefaultKind::Str;
-        };
-        if (isStrName(v->name)) return ValueType::String;
-        return ValueType::Number;
-    }
-    if (auto u = dyn_cast<const UnaryExpr>(e)) {
-        auto t = typeOf(u->inner.get());
-        if (t == ValueType::String) {
-            std::ostringstream m; m << "TypeError: unary '" << u->op << "' not applicable to string @ " << u->pos.line << ':' << u->pos.col; log() << m.str() << '\n';
-            throw SemanticError(m.str());
+        if (!call->callee.empty() && call->callee.back() == '$') {
+            return ValueType::String;
         }
         return ValueType::Number;
     }
-    if (auto b = dyn_cast<const BinaryExpr>(e)) {
-        auto lt = typeOf(b->lhs.get());
-        auto rt = typeOf(b->rhs.get());
-        switch (b->op) {
+    if (const auto* var = dyn_cast<const VarExpr>(expr)) {
+        // String if name has '$' suffix or falls under DEFSTR
+        auto isStrName = [&](const std::string& name) -> bool {
+            if (!name.empty() && name.back() == '$') {
+                return true;
+            }
+            if (name.empty()) {
+                return false;
+            }
+            const char firstChar = static_cast<char>(std::toupper(static_cast<unsigned char>(name[0])));
+            if (firstChar < 'A' || firstChar > 'Z') {
+                return false;
+            }
+            const DefaultKind defaultKind = defaultKinds_.at(static_cast<std::size_t>(firstChar - 'A'));
+            return defaultKind == DefaultKind::Str;
+        };
+        if (isStrName(var->name)) {
+            return ValueType::String;
+        }
+        return ValueType::Number;
+    }
+    if (const auto* unaryExpr = dyn_cast<const UnaryExpr>(expr)) {
+        auto innerType = typeOf(unaryExpr->inner.get());
+        if (innerType == ValueType::String) {
+            std::ostringstream msg;
+            msg << "TypeError: unary '" << unaryExpr->op
+                << "' not applicable to string @ " << unaryExpr->pos.line << ':' << unaryExpr->pos.col;
+            log() << msg.str() << '\n';
+            throw SemanticError(msg.str());
+        }
+        return ValueType::Number;
+    }
+    if (const auto* bin = dyn_cast<const BinaryExpr>(expr)) {
+        auto leftType = typeOf(bin->lhs.get());
+        auto rightType = typeOf(bin->rhs.get());
+        switch (bin->op) {
             case BinaryOp::Add:
-                if (lt == ValueType::String || rt == ValueType::String) {
-                    if (lt != ValueType::String || rt != ValueType::String) {
-                        std::ostringstream m; m << "TypeError: cannot concatenate string with number @ " << e->pos.line << ':' << e->pos.col; log() << m.str() << '\n';
-                        throw SemanticError(m.str());
+                if (leftType == ValueType::String || rightType == ValueType::String) {
+                    if (leftType != ValueType::String || rightType != ValueType::String) {
+                        std::ostringstream msg;
+                        msg << "TypeError: cannot concatenate string with number @ "
+                            << expr->pos.line << ':' << expr->pos.col;
+                        log() << msg.str() << '\n';
+                        throw SemanticError(msg.str());
                     }
                     return ValueType::String;
                 }
@@ -89,9 +131,12 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
             case BinaryOp::Pow:
             case BinaryOp::And:
             case BinaryOp::Or:
-                if (lt == ValueType::String || rt == ValueType::String) {
-                    std::ostringstream m; m << "TypeError: arithmetic on string @ " << e->pos.line << ':' << e->pos.col; log() << m.str() << '\n';
-                    throw SemanticError(m.str());
+                if (leftType == ValueType::String || rightType == ValueType::String) {
+                    std::ostringstream msg;
+                    msg << "TypeError: arithmetic on string @ "
+                        << expr->pos.line << ':' << expr->pos.col;
+                    log() << msg.str() << '\n';
+                    throw SemanticError(msg.str());
                 }
                 return ValueType::Number;
             case BinaryOp::Eq:
@@ -100,10 +145,13 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
             case BinaryOp::Le:
             case BinaryOp::Gt:
             case BinaryOp::Ge:
-                if (lt == ValueType::String || rt == ValueType::String) {
-                    if (lt != rt) {
-                        std::ostringstream m; m << "TypeError: cannot compare string with number @ " << e->pos.line << ':' << e->pos.col; log() << m.str() << '\n';
-                        throw SemanticError(m.str());
+                if (leftType == ValueType::String || rightType == ValueType::String) {
+                    if (leftType != rightType) {
+                        std::ostringstream msg;
+                        msg << "TypeError: cannot compare string with number @ "
+                            << expr->pos.line << ':' << expr->pos.col;
+                        log() << msg.str() << '\n';
+                        throw SemanticError(msg.str());
                     }
                     return ValueType::Number;
                 }
@@ -114,5 +162,6 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* e) {
     }
     return ValueType::Number;
 }
+// NOLINTEND(readability-function-cognitive-complexity,readability-function-size)
 
 } // namespace gwbasic

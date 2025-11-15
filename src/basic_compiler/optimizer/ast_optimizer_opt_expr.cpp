@@ -7,12 +7,16 @@
  *    identities.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/Symbols.h"
+#include "basic_compiler/ast/BinaryExpr.h"
+#include "basic_compiler/ast/BinaryOp.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/NumberExpr.h"
 #include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/UnaryExpr.h"
-#include "basic_compiler/ast/BinaryExpr.h"
-#include "basic_compiler/ast/NumberExpr.h"
-#include "basic_compiler/Symbols.h"
 #include "basic_compiler/compiler/Metrics.h"
+#include <memory>
+#include <utility>
 
 namespace gwbasic {
 
@@ -30,142 +34,223 @@ namespace gwbasic {
  *  - BinaryExpr: folds arithmetic/comparisons; applies identities
  *    (x+0, x*1, x*0, x/1, etc.).
  */
-std::unique_ptr<Expr> AstOptimizer::optExpr(std::unique_ptr<Expr> e) {
-    if (!e) return e;
-    if (const auto u = dyn_cast<UnaryExpr>(e.get())) {
-        u->inner = optExpr(std::move(u->inner));
-        if (u->op == Symbols::PLUS.first()) {
-            if (gMetrics) gMetrics->incUnaryElimPlus();
-            if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-            return std::move(u->inner);
-        }
-        if (u->op == Symbols::MINUS.first()) {
-            if (double v; asNumber(u->inner.get(), v)) {
-                if (gMetrics) gMetrics->incUnaryConstMinus();
-                if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                return std::make_unique<NumberExpr>(-v);
-            }
-            return e;
-        }
-        return e;
+// NOLINTBEGIN(readability-function-cognitive-complexity,readability-function-size)
+std::unique_ptr<Expr> AstOptimizer::optExpr(std::unique_ptr<Expr> expr) {
+    if (expr == nullptr) {
+        return expr;
     }
-    if (const auto b = dyn_cast<BinaryExpr>(e.get())) {
-        b->lhs = optExpr(std::move(b->lhs));
-        b->rhs = optExpr(std::move(b->rhs));
-        double L, R;
-        const bool lN = asNumber(b->lhs.get(), L);
-        const bool rN = asNumber(b->rhs.get(), R);
+    if (auto* unary = dyn_cast<UnaryExpr>(expr.get())) {
+        unary->inner = optExpr(std::move(unary->inner));
+        if (unary->op == Symbols::PLUS.first()) {
+            if (gMetrics != nullptr) {
+                gMetrics->incUnaryElimPlus();
+            }
+            if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                return expr;
+            }
+            return std::move(unary->inner);
+        }
+        if (unary->op == Symbols::MINUS.first()) {
+            if (double value = 0.0; asNumber(unary->inner.get(), value)) {
+                if (gMetrics != nullptr) {
+                    gMetrics->incUnaryConstMinus();
+                }
+                if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                    return expr;
+                }
+                return std::make_unique<NumberExpr>(-value);
+            }
+            return expr;
+        }
+        return expr;
+    }
+    if (auto* binary = dyn_cast<BinaryExpr>(expr.get())) {
+        binary->lhs = optExpr(std::move(binary->lhs));
+        binary->rhs = optExpr(std::move(binary->rhs));
+        double left = 0.0;
+        double right = 0.0;
+        const bool leftIsNumber = asNumber(binary->lhs.get(), left);
+        const bool rightIsNumber = asNumber(binary->rhs.get(), right);
 
-        switch (b->op) {
+        switch (binary->op) {
             case BinaryOp::Add:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldAdd();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L + R);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldAdd();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left + right);
                 }
-                if (isZero(b->lhs.get())) {
-                    if (gMetrics) gMetrics->incIdAddZero();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::move(b->rhs);
+                if (isZero(binary->lhs.get())) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incIdAddZero();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::move(binary->rhs);
                 }
-                if (isZero(b->rhs.get())) {
-                    if (gMetrics) gMetrics->incIdAddZero();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::move(b->lhs);
+                if (isZero(binary->rhs.get())) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incIdAddZero();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::move(binary->lhs);
                 }
-                return e;
+                return expr;
             case BinaryOp::Sub:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldSub();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L - R);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldSub();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left - right);
                 }
-                if (isZero(b->rhs.get())) {
-                    if (gMetrics) gMetrics->incIdSubZero();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::move(b->lhs);
+                if (isZero(binary->rhs.get())) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incIdSubZero();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::move(binary->lhs);
                 }
-                return e;
+                return expr;
             case BinaryOp::Mul:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldMul();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L * R);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldMul();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left * right);
                 }
-                if (isZero(b->lhs.get()) || isZero(b->rhs.get())) {
-                    if (gMetrics) gMetrics->incIdMulZero();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
+                if (isZero(binary->lhs.get()) || isZero(binary->rhs.get())) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incIdMulZero();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
                     return std::make_unique<NumberExpr>(0.0);
                 }
-                if (isOne(b->lhs.get())) {
-                    if (gMetrics) gMetrics->incIdMulOne();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::move(b->rhs);
+                if (isOne(binary->lhs.get())) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incIdMulOne();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::move(binary->rhs);
                 }
-                if (isOne(b->rhs.get())) {
-                    if (gMetrics) gMetrics->incIdMulOne();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::move(b->lhs);
+                if (isOne(binary->rhs.get())) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incIdMulOne();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::move(binary->lhs);
                 }
-                return e;
+                return expr;
             case BinaryOp::Div:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldDiv();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L / R);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldDiv();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left / right);
                 }
-                if (isOne(b->rhs.get())) {
-                    if (gMetrics) gMetrics->incIdDivOne();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::move(b->lhs);
+                if (isOne(binary->rhs.get())) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incIdDivOne();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::move(binary->lhs);
                 }
-                return e;
+                return expr;
             case BinaryOp::Eq:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldCmp();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L == R ? 1.0 : 0.0);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldCmp();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left == right ? 1.0 : 0.0);
                 }
-                return e;
+                return expr;
             case BinaryOp::Ne:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldCmp();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L != R ? 1.0 : 0.0);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldCmp();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left != right ? 1.0 : 0.0);
                 }
-                return e;
+                return expr;
             case BinaryOp::Lt:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldCmp();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L < R ? 1.0 : 0.0);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldCmp();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left < right ? 1.0 : 0.0);
                 }
-                return e;
+                return expr;
             case BinaryOp::Le:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldCmp();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L <= R ? 1.0 : 0.0);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldCmp();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left <= right ? 1.0 : 0.0);
                 }
-                return e;
+                return expr;
             case BinaryOp::Gt:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldCmp();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L > R ? 1.0 : 0.0);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldCmp();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left > right ? 1.0 : 0.0);
                 }
-                return e;
+                return expr;
             case BinaryOp::Ge:
-                if (lN && rN) {
-                    if (gMetrics) gMetrics->incConstFoldCmp();
-                    if (gMetrics && gMetrics->isAnalyzeOnly()) return e;
-                    return std::make_unique<NumberExpr>(L >= R ? 1.0 : 0.0);
+                if (leftIsNumber && rightIsNumber) {
+                    if (gMetrics != nullptr) {
+                        gMetrics->incConstFoldCmp();
+                    }
+                    if (gMetrics != nullptr && gMetrics->isAnalyzeOnly()) {
+                        return expr;
+                    }
+                    return std::make_unique<NumberExpr>(left >= right ? 1.0 : 0.0);
                 }
-                return e;
-            default: return e;
+                return expr;
+            default: return expr;
         }
     }
-    return e;
+    return expr;
 }
+// NOLINTEND(readability-function-cognitive-complexity,readability-function-size)
 
 } // namespace gwbasic

@@ -5,6 +5,7 @@
  *  - Define `AstOptimizer::isOne`, a helper to detect literal 1.0.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
+#include "basic_compiler/ast/Expr.h"
 
 namespace gwbasic {
 
@@ -17,9 +18,9 @@ namespace gwbasic {
  * Outputs:
  *  - true if `e` is a `NumberExpr` equal to 1.0; false otherwise.
  */
-bool AstOptimizer::isOne(const Expr* e) {
-    double v; return asNumber(e, v) && v == 1.0;
+bool AstOptimizer::isOne(const Expr* expr) {
+    double value = 0.0;
+    return asNumber(expr, value) && value == 1.0;
 }
 
 } // namespace gwbasic
-

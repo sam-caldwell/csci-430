@@ -4,30 +4,39 @@
  * Purpose: Implement AstOptimizer::optimizeForBody to simplify FOR bodies.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
-#include "basic_compiler/ast/RTTI.h"
-#include "basic_compiler/ast/ForStmt.h"
 #include "basic_compiler/ast/AssignStmt.h"
+#include "basic_compiler/ast/ForStmt.h"
 #include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/RTTI.h"
+#include "basic_compiler/ast/Stmt.h"
+#include <memory>
+#include <utility>
+#include <vector>
 
 using namespace gwbasic;
 
-void AstOptimizer::optimizeForBody(ForStmt &fs) {
+// NOLINTBEGIN(readability-function-size)
+void AstOptimizer::optimizeForBody(ForStmt& forStmt) {
     std::vector<std::unique_ptr<Stmt>> body;
-    body.reserve(fs.body.size());
-    for (auto& bs : fs.body) {
-        if (const auto basg = dyn_cast<AssignStmt>(bs.get())) {
-            basg->value = optExpr(std::move(basg->value));
-            body.emplace_back(std::move(bs));
+    body.reserve(forStmt.body.size());
+    for (auto& stmt : forStmt.body) {
+        if (auto* const assign = dyn_cast<AssignStmt>(stmt.get())) {
+            assign->value = optExpr(std::move(assign->value));
+            body.emplace_back(std::move(stmt));
             continue;
         }
-        if (const auto bpr = dyn_cast<PrintStmt>(bs.get())) {
-            if (bpr->value) bpr->value = optExpr(std::move(bpr->value));
-            for (auto& v : bpr->more) v = optExpr(std::move(v));
-            body.emplace_back(std::move(bs));
+        if (auto* const printStmt = dyn_cast<PrintStmt>(stmt.get())) {
+            if (printStmt->value) {
+                printStmt->value = optExpr(std::move(printStmt->value));
+            }
+            for (auto& exprItem : printStmt->more) {
+                exprItem = optExpr(std::move(exprItem));
+            }
+            body.emplace_back(std::move(stmt));
             continue;
         }
-        body.emplace_back(std::move(bs));
+        body.emplace_back(std::move(stmt));
     }
-    fs.body = std::move(body);
+    forStmt.body = std::move(body);
 }
-
+// NOLINTEND(readability-function-size)

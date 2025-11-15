@@ -9,7 +9,7 @@
  *    expression simplification to `optExpr`.
  */
 #include "basic_compiler/opt/AstOptimizer.h"
-#include "basic_compiler/ast/PrintStmt.h"
+#include "basic_compiler/ast/Program.h"
 
 namespace gwbasic {
 

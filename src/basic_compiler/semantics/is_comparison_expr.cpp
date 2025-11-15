@@ -1,8 +1,9 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
-#include "basic_compiler/ast/RTTI.h"
 #include "basic_compiler/ast/BinaryExpr.h"
 #include "basic_compiler/ast/BinaryOp.h"
+#include "basic_compiler/ast/Expr.h"
+#include "basic_compiler/ast/RTTI.h"
 
 namespace gwbasic {
 
@@ -15,9 +16,9 @@ namespace gwbasic {
  * Theory of operation:
  *  - Checks for BinaryExpr and matches against Eq/Ne/Lt/Le/Gt/Ge ops.
  */
-bool SemanticAnalyzer::isComparisonExpr(const Expr* e) {
-    if (auto b = dyn_cast<const BinaryExpr>(e)) {
-        switch (b->op) {
+bool SemanticAnalyzer::isComparisonExpr(const Expr* expr) {
+    if (const auto* bin = dyn_cast<const BinaryExpr>(expr)) {
+        switch (bin->op) {
             case BinaryOp::Eq:
             case BinaryOp::Ne:
             case BinaryOp::Lt:

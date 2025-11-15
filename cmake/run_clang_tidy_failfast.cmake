@@ -88,6 +88,7 @@ foreach(f IN LISTS LINT_FILES)
   message(STATUS "clang-tidy: ${f}")
   execute_process(
     COMMAND "${CLANG_TIDY_EXE}" ${_EXTRA_ARGS} "${f}"
+    TIMEOUT 300
     RESULT_VARIABLE rv
     OUTPUT_VARIABLE out
     ERROR_VARIABLE err

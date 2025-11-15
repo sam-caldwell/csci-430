@@ -1,5 +1,6 @@
 // (c) 2025 Sam Caldwell. All Rights Reserved.
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
+#include <string>
 
 namespace gwbasic {
 
@@ -13,8 +14,10 @@ namespace gwbasic {
  *  - Iterates scopes from innermost to outermost looking for the symbol.
  */
 bool SemanticAnalyzer::isDeclared(const std::string& name) const {
-    for (auto it = scopes_.rbegin(); it != scopes_.rend(); ++it) {
-        if (it->contains(name)) return true;
+    for (auto iter = scopes_.rbegin(); iter != scopes_.rend(); ++iter) {
+        if (iter->contains(name)) {
+            return true;
+        }
     }
     return false;
 }
