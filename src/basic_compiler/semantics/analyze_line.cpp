@@ -15,7 +15,7 @@ namespace gwbasic {
  */
 void SemanticAnalyzer::analyzeLine(const Line& line) {
     currentLine_ = line.number;
-    log() << "Line " << currentLine_ << '\n';
+    
     for (const auto& stmtPtr : line.statements) {
         analyzeStmt(stmtPtr.get());
     }

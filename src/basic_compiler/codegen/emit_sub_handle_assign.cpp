@@ -24,7 +24,7 @@ void CodeGenerator::emitSubHandleAssign(std::ostringstream& out, const AssignStm
     if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
         const std::string irLine = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
         out << irLine << Symbols::LF;
-        log() << "line " << currentLine_ << " AssignStmt -> " << irLine << Symbols::LF;
+        
         return;
     }
     storeNumberToVar(out, asg->name, val);

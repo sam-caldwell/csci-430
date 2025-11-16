@@ -66,9 +66,7 @@ namespace gwbasic {
             out << globalStringName(literal_id)
                     << " = private unnamed_addr constant [" << char_count << " x i8] c\""
                     << esc << R"(\00")" << Symbols::LF;
-            // Log discovery of string literals by streaming directly
-            log() << "emitGlobals: literal " << globalStringName(literal_id) << " from StringExpr \"" << lit << "\"" <<
-                    Symbols::LF;
+            
         }
         out << Symbols::LF;
         // SGR printf format for COLOR statement: "%c[%dm\0"; emit as bytes

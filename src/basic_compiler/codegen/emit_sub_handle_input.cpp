@@ -68,7 +68,7 @@ void CodeGenerator::emitSubHandleInput(std::ostringstream& out, const InputStmt*
         }
         const std::string irScanf = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp);
         out << irScanf << Symbols::LF;
-        log() << "line " << currentLine_ << " InputStmt -> " << irScanf << Symbols::LF;
+        
         std::string doubleVal = nextTemp();
         {
             const std::string irLoad = std::format("  {} = load double, ptr {}", doubleVal, tmp);

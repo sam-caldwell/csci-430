@@ -28,7 +28,6 @@ bool CodeGenerator::emitLineHandleBranching(std::ostringstream &out,
     if (const auto *gotoStmt = dyn_cast<GotoStmt>(stmt)) {
         const std::string branchIr = std::format("  br label %{}", lineLabelName(gotoStmt->targetLine));
         out << branchIr << Symbols::LF;
-        log() << "line " << currentLine_ << " GotoStmt -> " << branchIr << Symbols::LF;
         return true;
     }
     if (const auto *gosubStmt = dyn_cast<GosubStmt>(stmt)) {
@@ -49,20 +48,17 @@ bool CodeGenerator::emitLineHandleBranching(std::ostringstream &out,
         const std::string contLbl = std::format("{}_cont{}", currLineLabel, ++localCounter);
         const std::string branchIr = std::format("  br i1 {}, label %{}, label %{}", cond, lineLabelName(ifStmt->targetLine), contLbl);
         out << branchIr << Symbols::LF;
-        log() << "line " << currentLine_ << " IfStmt -> " << branchIr << Symbols::LF;
         out << contLbl << ":" << Symbols::LF;
         return false;
     }
     if (isa<ReturnStmt>(stmt)) {
         const std::string branchIr = std::format("  br label %exit");
         out << branchIr << Symbols::LF;
-        log() << "line " << currentLine_ << " ReturnStmt -> " << branchIr << Symbols::LF;
         return true;
     }
     if (isa<EndStmt>(stmt)) {
         const std::string branchIr = std::format("  br label %exit");
         out << branchIr << Symbols::LF;
-        log() << "line " << currentLine_ << " EndStmt -> " << branchIr << Symbols::LF;
         return true;
     }
     if (isa<StopStmt>(stmt)) {
@@ -71,13 +67,11 @@ bool CodeGenerator::emitLineHandleBranching(std::ostringstream &out,
         out << std::format("  {} = getelementptr inbounds i8, ptr @.msg_break, i64 0", fmt) << Symbols::LF;
         out << std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 {})", fmt, currentLine_) << Symbols::LF;
         out << "  br label %exit" << Symbols::LF;
-        log() << "line " << currentLine_ << " StopStmt -> break+exit" << Symbols::LF;
         return true;
     }
     if (isa<SystemStmt>(stmt)) {
         const std::string branchIr = std::format("  br label %exit");
         out << branchIr << Symbols::LF;
-        log() << "line " << currentLine_ << " SystemStmt -> " << branchIr << Symbols::LF;
         return true;
     }
     (void)currLineLabel; (void)localCounter; // silence unused for some builds

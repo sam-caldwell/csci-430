@@ -23,8 +23,7 @@ void CodeGenerator::csvHandleFor(const ForStmt* for_stmt) {
     for (const auto& bodyStmt : for_stmt->body) {
         collectStmtVars(bodyStmt.get());
     }
-    logSem() << "For var=" << for_stmt->var << " @ "
-             << for_stmt->pos.line << ':' << for_stmt->pos.col << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

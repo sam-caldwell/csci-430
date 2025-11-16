@@ -31,7 +31,7 @@ std::string CodeGenerator::emitVarExpr(std::ostringstream& out, const VarExpr* v
         if (upperName == "INKEY$") {
             const std::string emptyPtr = nextTemp();
             out << std::format("  {} = getelementptr inbounds [1 x i8], ptr @.str_empty, i64 0, i64 0", emptyPtr) << Symbols::LF;
-            log() << "line " << currentLine_ << " VarExpr(INKEY$) -> empty string" << Symbols::LF;
+            
             return emptyPtr;
         }
         if (upperName == "DATE$") {
@@ -45,7 +45,7 @@ std::string CodeGenerator::emitVarExpr(std::ostringstream& out, const VarExpr* v
             const std::string allocSize = nextTemp(); out << std::format("  {} = add i64 {}, 1", allocSize, written) << Symbols::LF;
             const std::string memPtr = nextTemp(); out << std::format("  {} = call ptr @malloc(i64 {})", memPtr, allocSize) << Symbols::LF;
             out << std::format("  call ptr @strcpy(ptr {}, ptr {})", memPtr, sbufPtr) << Symbols::LF;
-            log() << "line " << currentLine_ << " VarExpr(DATE$) -> strftime" << Symbols::LF;
+            
             return memPtr;
         }
         if (upperName == "TIME$") {
@@ -59,7 +59,7 @@ std::string CodeGenerator::emitVarExpr(std::ostringstream& out, const VarExpr* v
             const std::string allocSize = nextTemp(); out << std::format("  {} = add i64 {}, 1", allocSize, written) << Symbols::LF;
             const std::string memPtr = nextTemp(); out << std::format("  {} = call ptr @malloc(i64 {})", memPtr, allocSize) << Symbols::LF;
             out << std::format("  call ptr @strcpy(ptr {}, ptr {})", memPtr, sbufPtr) << Symbols::LF;
-            log() << "line " << currentLine_ << " VarExpr(TIME$) -> strftime" << Symbols::LF;
+            
             return memPtr;
         }
     }
@@ -73,7 +73,7 @@ std::string CodeGenerator::emitVarExpr(std::ostringstream& out, const VarExpr* v
         std::string safe = nextTemp();
         { const std::string irLine = std::format("  {} = call ptr @gwb_safe_str(ptr {})", safe, result); out << irLine << Symbols::LF; }
         result = safe;
-        log() << "line " << currentLine_ << " VarExpr$ -> load+safe" << Symbols::LF;
+        
     } else {
         switch (numKindOf(var_expr->name)) {
             case NumKind::Int16: {
@@ -100,7 +100,7 @@ std::string CodeGenerator::emitVarExpr(std::ostringstream& out, const VarExpr* v
                 break;
             }
         }
-        log() << "line " << currentLine_ << " VarExpr -> load/convert to double" << Symbols::LF;
+        
     }
     return result;
 }

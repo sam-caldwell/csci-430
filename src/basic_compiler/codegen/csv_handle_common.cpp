@@ -17,7 +17,7 @@ void CodeGenerator::csvHandleCommon(const CommonStmt* commonStmt) {
     for (const auto& name : commonStmt->names) {
         variables_.insert(name);
         commonVariables_.insert(name);
-        logSem() << "Common " << name << " @ " << commonStmt->pos.line << ':' << commonStmt->pos.col << Symbols::LF;
+        
     }
 }
 

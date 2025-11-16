@@ -61,7 +61,6 @@ bool CodeGenerator::emitSubroutineInlineStatement(std::ostringstream& out,
     if (const auto* gotoStmt = dyn_cast<GotoStmt>(stmt)) {
         const std::string irLine = std::format("  br label %{}", lineLabelName(gotoStmt->targetLine));
         out << irLine << Symbols::LF;
-        log() << "line " << currentLine_ << " GotoStmt -> " << irLine << Symbols::LF;
         return true;
     }
     if (const auto* gosubStmt = dyn_cast<GosubStmt>(stmt)) {
@@ -75,13 +74,11 @@ bool CodeGenerator::emitSubroutineInlineStatement(std::ostringstream& out,
     if (isa<ReturnStmt>(stmt)) {
         const std::string irLine = std::format("  br label %{}", returnLabel);
         out << irLine << Symbols::LF;
-        log() << "line " << currentLine_ << " ReturnStmt -> " << irLine << Symbols::LF;
         return true;
     }
     if (isa<EndStmt>(stmt)) {
         const std::string irLine = std::format("  br label %exit");
         out << irLine << Symbols::LF;
-        log() << "line " << currentLine_ << " EndStmt -> " << irLine << Symbols::LF;
         return true;
     }
     throw CodeGenError("Unsupported statement in GOSUB body");

@@ -25,7 +25,6 @@ void CodeGenerator::ensureStringArrayAllocated(std::ostringstream& out, const st
     arrayAllocaName_[name] = localName;
     const std::string allocIr = std::format("  {} = alloca [{} x ptr]", localName, length);
     out << allocIr << Symbols::LF;
-    log() << "line " << currentLine_ << " StringArrayAlloc(" << name << ") -> " << allocIr << Symbols::LF;
 }
 
 } // namespace gwbasic

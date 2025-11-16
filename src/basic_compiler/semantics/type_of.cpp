@@ -102,7 +102,7 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* expr) {
             std::ostringstream msg;
             msg << "TypeError: unary '" << unaryExpr->op
                 << "' not applicable to string @ " << unaryExpr->pos.line << ':' << unaryExpr->pos.col;
-            log() << msg.str() << '\n';
+            
             throw SemanticError(msg.str());
         }
         return ValueType::Number;
@@ -117,7 +117,7 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* expr) {
                         std::ostringstream msg;
                         msg << "TypeError: cannot concatenate string with number @ "
                             << expr->pos.line << ':' << expr->pos.col;
-                        log() << msg.str() << '\n';
+                        
                         throw SemanticError(msg.str());
                     }
                     return ValueType::String;
@@ -135,7 +135,7 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* expr) {
                     std::ostringstream msg;
                     msg << "TypeError: arithmetic on string @ "
                         << expr->pos.line << ':' << expr->pos.col;
-                    log() << msg.str() << '\n';
+                    
                     throw SemanticError(msg.str());
                 }
                 return ValueType::Number;
@@ -150,7 +150,7 @@ SemanticAnalyzer::ValueType SemanticAnalyzer::typeOf(const Expr* expr) {
                         std::ostringstream msg;
                         msg << "TypeError: cannot compare string with number @ "
                             << expr->pos.line << ':' << expr->pos.col;
-                        log() << msg.str() << '\n';
+                        
                         throw SemanticError(msg.str());
                     }
                     return ValueType::Number;

@@ -23,8 +23,7 @@ void CodeGenerator::csvHandleInput(const InputStmt* input_stmt) {
         strLiteralId_[*input_stmt->promptLiteral] = strCounter_++;
     }
 
-    logSem() << "Input vars=" << input_stmt->variables.size() << " @ "
-             << input_stmt->pos.line << ':' << input_stmt->pos.col << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

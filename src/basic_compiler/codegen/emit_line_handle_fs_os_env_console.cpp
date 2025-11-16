@@ -52,7 +52,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         } else {
             out << "  store i32 0, ptr @gwb_seg" << Symbols::LF;
         }
-        log() << "line " << currentLine_ << " DefSegStmt -> set gwb_seg" << Symbols::LF;
+        
         return;
     }
     if (const auto *pk = dyn_cast<PokeStmt>(stmt)) {
@@ -110,14 +110,14 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         const std::string seg64 = nextTemp(); out << std::format("  {} = sext i32 {} to i64", seg64, seg16) << Symbols::LF;
         const std::string addr = nextTemp(); out << std::format("  {} = add i64 {}, {}", addr, seg64, off64) << Symbols::LF;
         out << std::format("  call void @gwb_call(i64 {})", addr) << Symbols::LF;
-        log() << "line " << currentLine_ << " CALL invoke" << Symbols::LF;
+        
         return;
     }
     if (isa<ClsStmt>(stmt)) {
         out << std::format("  call ptr @memset(ptr @gwb_screen, i32 0, i64 2000)") << Symbols::LF;
         out << std::format("  store i32 0, ptr @gwb_cur_row") << Symbols::LF;
         out << std::format("  store i32 0, ptr @gwb_cur_col") << Symbols::LF;
-        log() << "line " << currentLine_ << " ClsStmt -> clear screen and reset cursor" << Symbols::LF;
+        
         return;
     }
     if (const auto *lc = dyn_cast<LocateStmt>(stmt)) {
@@ -142,7 +142,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
             const std::string cz = nextTemp(); out << std::format("  {} = sub i32 {}, 1", cz, cc) << Symbols::LF;
             out << std::format("  store i32 {}, ptr @gwb_cur_col", cz) << Symbols::LF;
         }
-        log() << "line " << currentLine_ << " LocateStmt -> set row/col" << Symbols::LF;
+        
         return;
     }
     if (const auto *ls = dyn_cast<ListStmt>(stmt)) {
@@ -188,14 +188,14 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
             out << std::format("  br label %{}", contLbl) << Symbols::LF;
             out << contLbl << ":" << Symbols::LF;
         }
-        log() << "line " << currentLine_ << " ListStmt -> emit listing" << Symbols::LF;
+        
         return;
     }
     if (const auto *fl = dyn_cast<FilesStmt>(stmt)) {
         const std::string dev = (fl->device ? emitExpr(out, fl->device.get(), "") : std::string("null"));
         const std::string pat = (fl->pattern ? emitExpr(out, fl->pattern.get(), "") : std::string("null"));
         out << std::format("  call void @gwb_list_files(ptr {}, ptr {})", dev, pat) << Symbols::LF;
-        log() << "line " << currentLine_ << " FilesStmt -> gwb_list_files()" << Symbols::LF;
+        
         return;
     }
     if (const auto *mk = dyn_cast<MkdirStmt>(stmt)) {
@@ -208,7 +208,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         out << errLbl << ":" << Symbols::LF;
         emitErrorDispatch(out, 75, currentLine_, 0);
         out << okLbl << ":" << Symbols::LF;
-        log() << "line " << currentLine_ << " Mkdir -> mkdir()" << Symbols::LF;
+        
         return;
     }
     if (const auto *rd = dyn_cast<RmdirStmt>(stmt)) {
@@ -221,7 +221,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         out << errLbl << ":" << Symbols::LF;
         emitErrorDispatch(out, 75, currentLine_, 0);
         out << okLbl << ":" << Symbols::LF;
-        log() << "line " << currentLine_ << " Rmdir -> rmdir()" << Symbols::LF;
+        
         return;
     }
     if (const auto *kl = dyn_cast<KillStmt>(stmt)) {
@@ -234,7 +234,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         out << errLbl << ":" << Symbols::LF;
         emitErrorDispatch(out, 75, currentLine_, 0);
         out << okLbl << ":" << Symbols::LF;
-        log() << "line " << currentLine_ << " Kill -> remove()" << Symbols::LF;
+        
         return;
     }
     if (const auto *nm = dyn_cast<NameStmt>(stmt)) {
@@ -248,7 +248,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         out << errLbl << ":" << Symbols::LF;
         emitErrorDispatch(out, 75, currentLine_, 0);
         out << okLbl << ":" << Symbols::LF;
-        log() << "line " << currentLine_ << " Name -> rename()" << Symbols::LF;
+        
         return;
     }
     if (const auto *sh = dyn_cast<ShellStmt>(stmt)) {
@@ -256,7 +256,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
             const std::string cmd = emitExpr(out, sh->command.get(), "");
             out << std::format("  call i32 @system(ptr {})", cmd) << Symbols::LF;
         } else {
-            log() << "line " << currentLine_ << " Shell(no-arg) (no-op)" << Symbols::LF;
+            
         }
         return;
     }
@@ -290,7 +290,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         out << std::format("  br label %{}", nextLabel) << Symbols::LF; // terminates this path
         out << doSet << ":" << Symbols::LF;
         out << std::format("  call i32 @setenv(ptr {}, ptr {}, i32 1)", nbuf, valp) << Symbols::LF;
-        log() << "line " << currentLine_ << " Environ -> setenv/unsetenv" << Symbols::LF;
+        
         return;
     }
     if (isa<BeepStmt>(stmt)) {
@@ -303,7 +303,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         const std::string p = emitExpr(out, cd->path.get(), "");
         const std::string ir = std::format("  call i32 @chdir(ptr {})", p);
         out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " ChdirStmt chdir -> " << ir << Symbols::LF;
+        
         return;
     }
     if (isa<ClearStmt>(stmt)) {
@@ -364,7 +364,7 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
             out << std::format("  br label %{}", contLbl) << Symbols::LF;
             out << contLbl << ":" << Symbols::LF;
         }
-        log() << "line " << currentLine_ << " ClearStmt reset state" << Symbols::LF;
+        
         return;
     }
     if (const auto *col = dyn_cast<ColorStmt>(stmt)) {
@@ -392,7 +392,6 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         }
         const std::string ir = std::format("  call void @gwb_graphics_init(i32 {})", modei32);
         out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " Screen init -> " << ir << Symbols::LF;
         return;
     }
     if (const auto *ci = dyn_cast<CircleStmt>(stmt)) {
@@ -412,7 +411,6 @@ void CodeGenerator::emitLineHandleFsOsEnvConsole(std::ostringstream &out,
         const std::string stepv = ci->step ? "true" : "false";
         const std::string ir = std::format("  call void @gwb_gfx_circle(double {}, double {}, double {}, i32 {}, double {}, double {}, double {}, i1 {})", xv, yv, rv, colori32, sv, ev, av, stepv);
         out << ir << Symbols::LF;
-        log() << "line " << currentLine_ << " Circle call -> " << ir << Symbols::LF;
         out << std::format("  br label %{}", contLbl) << Symbols::LF;
         out << contLbl << ":" << Symbols::LF;
         return;

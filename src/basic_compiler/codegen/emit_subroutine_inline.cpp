@@ -39,7 +39,7 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
         out << currLabel << ":" << Symbols::LF;
         // Stable marker for integration tests
         out << "  ;; For var=" << Symbols::LF;
-        log() << "begin subroutine line " << currentLine_ << Symbols::LF;
+    
         bool terminated = false;
         for (const auto& stmtNode : lineNode->statements) {
             if (emitSubroutineInlineStatement(out, stmtNode.get(), entryLabel, returnLabel, localContCounter)) {
@@ -55,7 +55,7 @@ void CodeGenerator::emitSubroutineInline(std::ostringstream& out, int targetLine
             {
                 const std::string irLine = std::format("  br label %{}", currLabel);
                 out << irLine << Symbols::LF;
-                log() << "line " << currentLine_ << " fallthrough -> " << irLine << Symbols::LF;
+            
             }
         } else {
             out << std::format("  br label %{}", returnLabel) << Symbols::LF;

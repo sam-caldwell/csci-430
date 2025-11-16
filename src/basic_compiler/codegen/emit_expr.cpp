@@ -54,7 +54,7 @@ std::string CodeGenerator::emitExpr(std::ostringstream& out,
         const int strId = strLiteralId_[strExpr->value];
         std::string gep = nextTemp();
         out << std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", gep, globalStringName(strId)) << Symbols::LF;
-        log() << std::format("line {} StringExpr -> gep", currentLine_) << Symbols::LF;
+        
         return gep;
     }
 

@@ -21,7 +21,6 @@ bool CodeGenerator::emitLineHandleErrorHandlers(std::ostringstream &out,
     if (const auto *oeg = dyn_cast<OnErrorGotoStmt>(stmt)) {
         const std::string branchIr = std::format("  store i32 {}, ptr @gwb_err_trap_line", oeg->targetLine);
         out << branchIr << Symbols::LF;
-        logLine(std::string("OnErrorGoto trap -> ") + branchIr);
         return false;
     }
     if (const auto *ers = dyn_cast<ErrorStmt>(stmt)) {
@@ -46,19 +45,16 @@ bool CodeGenerator::emitLineHandleErrorHandlers(std::ostringstream &out,
         if (resumeStmt->kind == ResumeStmt::Kind::Line) {
             const std::string branchIr = std::format("  br label %{}", lineLabelName(resumeStmt->line));
             out << branchIr << Symbols::LF;
-            logLine(std::string("Resume line -> ") + branchIr);
             return true;
         }
         if (resumeStmt->kind == ResumeStmt::Kind::Reexecute) {
             const std::string branchIr = std::format("  br label %{}", resumeLabelName(currentLine_, stmtIndex));
             out << branchIr << Symbols::LF;
-            logLine(std::string("Resume reexec -> ") + branchIr);
             return true;
         }
         // Resume next
         const std::string branchIr = std::format("  br label %{}", resumeNextLabelName(currentLine_, stmtIndex));
         out << branchIr << Symbols::LF;
-        logLine(std::string("Resume next -> ") + branchIr);
         return true;
     }
     (void)stmtIndex; // unused in some code paths

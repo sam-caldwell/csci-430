@@ -50,7 +50,7 @@ void CodeGenerator::emitMainPrologue(std::ostringstream& out) {
     if (!lineNumbers_.empty()) {
         const std::string branchInstr = std::format("  br label %{}", lineLabelName(lineNumbers_.front()));
         out << branchInstr << Symbols::LF;
-        log() << "entry -> " << branchInstr << Symbols::LF;
+    
     } else {
         out << "  ret i32 0" << Symbols::LF;
         out << "}" << Symbols::LF;

@@ -16,9 +16,7 @@ namespace gwbasic {
 void CodeGenerator::csvHandleAssign(const AssignStmt* assign_stmt) {
     variables_.insert(assign_stmt->name);
     collectExprVars(assign_stmt->value.get());
-    logSem() << "Assign " << assign_stmt->name << " @ "
-             << assign_stmt->pos.line << ':' << assign_stmt->pos.col
-             << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

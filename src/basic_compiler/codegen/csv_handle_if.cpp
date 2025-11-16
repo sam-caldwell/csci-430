@@ -15,7 +15,7 @@ namespace gwbasic {
  */
 void CodeGenerator::csvHandleIf(const IfStmt* if_stmt) {
     collectExprVars(if_stmt->cond.get());
-    logSem() << "If @ " << if_stmt->pos.line << ':' << if_stmt->pos.col << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

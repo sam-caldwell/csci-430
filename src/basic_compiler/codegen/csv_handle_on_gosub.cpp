@@ -15,7 +15,7 @@ namespace gwbasic {
  */
 void CodeGenerator::csvHandleOnGosub(const OnGosubStmt* onGosubStmt) {
     collectExprVars(onGosubStmt->index.get());
-    logSem() << "OnGosub targets=" << onGosubStmt->targets.size() << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

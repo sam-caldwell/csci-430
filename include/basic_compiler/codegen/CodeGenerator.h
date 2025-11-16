@@ -743,8 +743,7 @@ namespace gwbasic {
         /** Stream accessor: syntax-phase logger (unused here; provided for interface parity). */
         std::ostream &syntax();
 
-        // Logging convenience: prefixes with current line number
-        void logLine(std::string_view message);
+        
 
         // Print buffer helper for screen mirroring
         struct PrintBuffer { std::string sbuf; std::string n64; };

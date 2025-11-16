@@ -248,7 +248,7 @@ void CodeGenerator::emitHeader(std::ostringstream& out) {
         << "}" << Symbols::LF << Symbols::LF;
     // stdin handle (external) for LINE INPUT from console
     out << "@stdin = external global ptr" << Symbols::LF << Symbols::LF;
-    log() << "emitHeader: declared stdio + globals" << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

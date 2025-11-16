@@ -37,7 +37,7 @@ void CodeGenerator::emitIfBranchHeader(std::ostringstream &out,
                                        const std::string &elseOrEndLbl) {
     const std::string br = std::format("  br i1 {}, label %{}, label %{}", condReg, thenLbl, elseOrEndLbl);
     out << br << Symbols::LF;
-    log() << "line " << currentLine_ << " IfBlock -> " << br << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

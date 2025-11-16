@@ -62,7 +62,7 @@ namespace gwbasic {
                 if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
                     std::string ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
                     out << ir << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock then Assign$ -> " << ir << Symbols::LF;
+                        
                 } else {
                     // Numeric assignment honors semantic numeric kind per variable
                     storeNumberToVar(out, asg->name, val);
@@ -995,8 +995,7 @@ namespace gwbasic {
                 std::string contLbl2 = std::format("{}_cont_{}", currLineLabel, ++localCounter);
                 std::string irb2 = std::format("  br i1 {}, label %{}, label %{}", cond2, lineLabelName(is->targetLine),
                                                contLbl2);
-                out << irb2 << Symbols::LF;
-                log() << "line " << currentLine_ << " IfStmt -> " << irb2 << Symbols::LF;
+                    out << irb2 << Symbols::LF;
                 out << contLbl2 << ":" << Symbols::LF;
             } else if (auto rz = dyn_cast<RandomizeStmt>(s.get())) {
                 if (rz->seed) {
@@ -1009,14 +1008,12 @@ namespace gwbasic {
                         ir += val;
                         ir += " to i64";
                         out << ir << Symbols::LF;
-                        log() << "line " << currentLine_ << " IfBlock then Randomize fptosi -> " << ir << Symbols::LF;
                     }
                     {
                         std::string ir = "  call void @srand48(i64 ";
                         ir += si;
                         ir += ")";
                         out << ir << Symbols::LF;
-                        log() << "line " << currentLine_ << " IfBlock then Randomize srand48 -> " << ir << Symbols::LF;
                     }
                 } else {
                     std::string t = nextTemp();
@@ -1025,15 +1022,12 @@ namespace gwbasic {
                         ir += t;
                         ir += " = call i64 @time(ptr null)";
                         out << ir << Symbols::LF;
-                        log() << "line " << currentLine_ << " IfBlock then Randomize time -> " << ir << Symbols::LF;
                     }
                     {
                         std::string ir = "  call void @srand48(i64 ";
                         ir += t;
                         ir += ")";
                         out << ir << Symbols::LF;
-                        log() << "line " << currentLine_ << " IfBlock then Randomize srand48(time) -> " << ir <<
-                                Symbols::LF;
                     }
                 }
             } else if (auto og = dyn_cast<OnGotoStmt>(s.get())) {
@@ -1046,7 +1040,6 @@ namespace gwbasic {
                     ir += idx;
                     ir += " to i32";
                     out << ir << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock then OnGoto fptosi -> " << ir << Symbols::LF;
                 }
                 std::string contLbl = std::format("{}_on_cont_{}", currLineLabel, ++localCounter);
                 {
@@ -1056,7 +1049,6 @@ namespace gwbasic {
                         ir << " i32 " << (i + 1) << ", label %" << lineLabelName(og->targets[i]);
                     ir << " ]";
                     out << ir.str() << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock then OnGoto switch -> " << ir.str() << Symbols::LF;
                 }
                 out << contLbl << ":" << Symbols::LF;
             } else if (auto ogs = dyn_cast<OnGosubStmt>(s.get())) {
@@ -1069,7 +1061,6 @@ namespace gwbasic {
                     ir += idx;
                     ir += " to i32";
                     out << ir << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock then OnGosub fptosi -> " << ir << Symbols::LF;
                 }
                 std::string contLbl = std::format("{}_on_gs_cont_{}", currLineLabel, ++localCounter);
                 std::vector<std::string> entryLbls;
@@ -1083,7 +1074,6 @@ namespace gwbasic {
                         ir << " i32 " << (i + 1) << ", label %" << entryLbls[i];
                     ir << " ]";
                     out << ir.str() << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock then OnGosub switch -> " << ir.str() << Symbols::LF;
                 }
                 for (size_t i = 0; i < ogs->targets.size(); ++i) emitSubroutineInline(
                     out, ogs->targets[i], entryLbls[i], contLbl);
@@ -1168,13 +1158,11 @@ namespace gwbasic {
             } else if (isa<ReturnStmt>(s.get())) {
                 std::string ir = "  br label %exit";
                 out << ir << Symbols::LF;
-                log() << "line " << currentLine_ << " IfBlock then Return -> " << ir << Symbols::LF;
                 thenTerminated = true;
                 break;
             } else if (isa<EndStmt>(s.get())) {
                 std::string ir = "  br label %exit";
                 out << ir << Symbols::LF;
-                log() << "line " << currentLine_ << " IfBlock then End -> " << ir << Symbols::LF;
                 thenTerminated = true;
                 break;
             } else if (isa<StopStmt>(s.get())) {
@@ -1183,19 +1171,16 @@ namespace gwbasic {
                 out << std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 {})", fmt, currentLine_) << Symbols::LF;
                 std::string ir = "  br label %exit";
                 out << ir << Symbols::LF;
-                log() << "line " << currentLine_ << " IfBlock then Stop -> break+exit" << Symbols::LF;
                 thenTerminated = true;
                 break;
             } else if (isa<SystemStmt>(s.get())) {
                 std::string ir = "  br label %exit";
                 out << ir << Symbols::LF;
-                log() << "line " << currentLine_ << " IfBlock then System -> " << ir << Symbols::LF;
                 thenTerminated = true;
                 break;
             } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
                 std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine));
                 out << ir << Symbols::LF;
-                log() << "line " << currentLine_ << " IfBlock then Goto -> " << ir << Symbols::LF;
             } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
                 std::string contLbl = std::format("{}_gosub_cont{}", currLineLabel, ++localCounter);
                 std::string entryLbl = std::format("{}_gosub_entry{}", currLineLabel, localCounter);
@@ -1410,7 +1395,6 @@ namespace gwbasic {
                         ir += ", ptr ";
                         ir += varAllocaName_[asg->name];
                         out << ir << Symbols::LF;
-                        log() << "line " << currentLine_ << " IfBlock else Assign$ -> " << ir << Symbols::LF;
                     } else {
                         // Numeric assignment honors semantic numeric kind per variable
                         storeNumberToVar(out, asg->name, val);
@@ -2199,7 +2183,6 @@ namespace gwbasic {
                     std::string irb2 = std::format("  br i1 {}, label %{}, label %{}", cond2,
                                                    lineLabelName(is->targetLine), contLbl2);
                     out << irb2 << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfStmt -> " << irb2 << Symbols::LF;
                     out << contLbl2 << ":" << Symbols::LF;
                 } else if (auto ws = dyn_cast<WhileStmt>(s.get())) {
                     emitWhile(out, ws, currLineLabel, localCounter);
@@ -2214,16 +2197,12 @@ namespace gwbasic {
                             ir += val;
                             ir += " to i64";
                             out << ir << Symbols::LF;
-                            log() << "line " << currentLine_ << " IfBlock else Randomize fptosi -> " << ir <<
-                                    Symbols::LF;
                         }
                         {
                             std::string ir = "  call void @srand48(i64 ";
                             ir += si;
                             ir += ")";
                             out << ir << Symbols::LF;
-                            log() << "line " << currentLine_ << " IfBlock else Randomize srand48 -> " << ir <<
-                                    Symbols::LF;
                         }
                     } else {
                         std::string t = nextTemp();
@@ -2232,15 +2211,12 @@ namespace gwbasic {
                             ir += t;
                             ir += " = call i64 @time(ptr null)";
                             out << ir << Symbols::LF;
-                            log() << "line " << currentLine_ << " IfBlock else Randomize time -> " << ir << Symbols::LF;
                         }
                         {
                             std::string ir = "  call void @srand48(i64 ";
                             ir += t;
                             ir += ")";
                             out << ir << Symbols::LF;
-                            log() << "line " << currentLine_ << " IfBlock else Randomize srand48(time) -> " << ir <<
-                                    Symbols::LF;
                         }
                     }
                 } else if (auto og = dyn_cast<OnGotoStmt>(s.get())) {
@@ -2253,7 +2229,6 @@ namespace gwbasic {
                         ir += idx;
                         ir += " to i32";
                         out << ir << Symbols::LF;
-                        log() << "line " << currentLine_ << " IfBlock else OnGoto fptosi -> " << ir << Symbols::LF;
                     }
                     std::string contLbl = std::format("{}_on_cont_{}", currLineLabel, ++localCounter);
                     {
@@ -2263,8 +2238,6 @@ namespace gwbasic {
                             ir << " i32 " << (i + 1) << ", label %" << lineLabelName(og->targets[i]);
                         ir << " ]";
                         out << ir.str() << Symbols::LF;
-                        log() << "line " << currentLine_ << " IfBlock else OnGoto switch -> " << ir.str() <<
-                                Symbols::LF;
                     }
                     out << contLbl << ":" << Symbols::LF;
                 } else if (auto ogs = dyn_cast<OnGosubStmt>(s.get())) {
@@ -2277,7 +2250,6 @@ namespace gwbasic {
                         ir += idx;
                         ir += " to i32";
                         out << ir << Symbols::LF;
-                        log() << "line " << currentLine_ << " IfBlock else OnGosub fptosi -> " << ir << Symbols::LF;
                     }
                     std::string contLbl = std::format("{}_on_gs_cont_{}", currLineLabel, ++localCounter);
                     std::vector<std::string> entryLbls;
@@ -2291,8 +2263,6 @@ namespace gwbasic {
                             ir << " i32 " << (i + 1) << ", label %" << entryLbls[i];
                         ir << " ]";
                         out << ir.str() << Symbols::LF;
-                        log() << "line " << currentLine_ << " IfBlock else OnGosub switch -> " << ir.str() <<
-                                Symbols::LF;
                     }
                     for (size_t i = 0; i < ogs->targets.size(); ++i) emitSubroutineInline(
                         out, ogs->targets[i], entryLbls[i], contLbl);
@@ -2377,11 +2347,9 @@ namespace gwbasic {
                 } else if (isa<ReturnStmt>(s.get())) {
                     std::string ir = "  br label %exit";
                     out << ir << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock else Return -> " << ir << Symbols::LF;
                 } else if (isa<EndStmt>(s.get())) {
                     std::string ir = "  br label %exit";
                     out << ir << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock else End -> " << ir << Symbols::LF;
                 } else if (isa<StopStmt>(s.get())) {
                     std::string fmt = nextTemp();
                     out << std::format("  {} = getelementptr inbounds i8, ptr @.msg_break, i64 0", fmt) << Symbols::LF;
@@ -2389,15 +2357,12 @@ namespace gwbasic {
                             Symbols::LF;
                     std::string ir = "  br label %exit";
                     out << ir << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock else Stop -> break+exit" << Symbols::LF;
                 } else if (isa<SystemStmt>(s.get())) {
                     std::string ir = "  br label %exit";
                     out << ir << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock else System -> " << ir << Symbols::LF;
                 } else if (auto gt = dyn_cast<GotoStmt>(s.get())) {
                     std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine));
                     out << ir << Symbols::LF;
-                    log() << "line " << currentLine_ << " IfBlock else Goto -> " << ir << Symbols::LF;
                 } else if (auto gs = dyn_cast<GosubStmt>(s.get())) {
                     std::string contLbl = std::format("{}_gosub_cont{}", currLineLabel, ++localCounter);
                     std::string entryLbl = std::format("{}_gosub_entry{}", currLineLabel, localCounter);
@@ -2452,7 +2417,6 @@ namespace gwbasic {
                         {
                             std::string irFmtIn = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt);
                             out << irFmtIn << Symbols::LF;
-                            log() << "line " << currentLine_ << " IfBlock else Input -> " << irFmtIn << Symbols::LF;
                         }
                         std::string tmp = nextTemp();
                         {
@@ -2462,7 +2426,6 @@ namespace gwbasic {
                         {
                             std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp);
                             out << ir2 << Symbols::LF;
-                            log() << "line " << currentLine_ << " IfBlock else Input -> " << ir2 << Symbols::LF;
                         }
                         std::string dv = nextTemp();
                         {

@@ -27,7 +27,7 @@ bool CodeGenerator::emitLineHandleRunChainMerge(std::ostringstream &out, const S
         const int dest = runStmt->targetLine.has_value() ? *runStmt->targetLine : fallback;
         const std::string branchIr = std::format("  br label %{}", lineLabelName(dest));
         out << branchIr << Symbols::LF;
-        log() << "line " << currentLine_ << " RunStmt branch -> " << branchIr << Symbols::LF;
+        
         return true;
     }
     if (const auto *chainStmt = dyn_cast<ChainStmt>(stmt)) {
@@ -87,14 +87,14 @@ bool CodeGenerator::emitLineHandleRunChainMerge(std::ostringstream &out, const S
         if (itRegion != regionDataStartIdx_.end()) { dataStart = itRegion->second; }
         const std::string ir1 = std::format("  store i32 {}, ptr @gwb_data_idx", dataStart);
         out << ir1 << Symbols::LF;
-        log() << "line " << currentLine_ << " ChainStmt data_idx -> " << ir1 << Symbols::LF;
+        
         const std::string ir2 = std::format("  br label %{}", lineLabelName(dest));
         out << ir2 << Symbols::LF;
-        log() << "line " << currentLine_ << " ChainStmt branch -> " << ir2 << Symbols::LF;
+        
         return true;
     }
     if (isa<MergeStmt>(stmt)) {
-        log() << "line " << currentLine_ << " MergeStmt (no-op)" << Symbols::LF;
+        
         return false;
     }
     return false;

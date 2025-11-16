@@ -17,8 +17,7 @@ void CodeGenerator::csvHandleRandomize(const RandomizeStmt* randomizeStmt) {
     if (randomizeStmt->seed) {
         collectExprVars(randomizeStmt->seed.get());
     }
-    logSem() << "Randomize @ " << randomizeStmt->pos.line << ':'
-             << randomizeStmt->pos.col << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

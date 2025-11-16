@@ -25,7 +25,7 @@ SemanticAnalyzer::Result SemanticAnalyzer::analyze(const Program& program) {
     std::unordered_set<int> seen;
     for (const auto& line : program.lines) {
         if (!seen.insert(line.number).second) {
-            std::ostringstream err; err << "ControlFlowError: duplicate line number " << line.number; log() << err.str() << '\n';
+            std::ostringstream err; err << "ControlFlowError: duplicate line number " << line.number;
             throw SemanticError(err.str());
         }
         lines_.insert(line.number);

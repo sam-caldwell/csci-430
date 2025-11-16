@@ -19,7 +19,7 @@ void CodeGenerator::csvHandleData(const DataStmt* dataStmt) {
         if (!strLiteralId_.contains(text)) { strLiteralId_[text] = strCounter_++; }
         dataLiteralIds_.push_back(strLiteralId_[text]);
     }
-    logSem() << "Data items=" << dataStmt->items.size() << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

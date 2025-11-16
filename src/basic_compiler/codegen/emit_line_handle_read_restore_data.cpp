@@ -22,14 +22,10 @@ void CodeGenerator::emitLineHandleReadRestoreData(std::ostringstream &out,
                                                   int stmtIndex,
                                                   const std::string &currLineLabel,
                                                   int &localCounter) {
-    if (isa<DataStmt>(stmt)) {
-        logLine("DataStmt (no-op)");
-        return;
-    }
+    if (isa<DataStmt>(stmt)) { return; }
     if (isa<RestoreStmt>(stmt)) {
         const std::string storeIr = std::format("  store i32 0, ptr @gwb_data_idx");
         out << storeIr << Symbols::LF;
-        logLine(std::string("RestoreStmt data_idx -> ") + storeIr);
         return;
     }
     const auto *readStmt = dyn_cast<ReadStmt>(stmt);

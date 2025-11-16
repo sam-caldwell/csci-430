@@ -11,7 +11,7 @@
 #include "basic_compiler/TargetUtils.h"
 #include "basic_compiler/DetectDefaultTriple.h"
 #include "basic_compiler/WithTripleHeader.h"
-#include "basic_compiler/DeriveDefaultLogPaths.h"
+ 
 #include "basic_compiler/WriteTextFile.h"
 #include "basic_compiler/AssembleBitcode.h"
 #include "../../include/basic_compiler/compiler/LinkBinary.h"
@@ -68,11 +68,11 @@ int main(int argc, char **argv) {
     std::optional<std::string> outBIN;
     std::optional<std::string> outASM;
     std::optional<std::string> targetTriple;
-    std::optional<std::string> logPath;
-    std::optional<std::string> lexLogPath;
-    std::optional<std::string> syntaxLogPath;
-    std::optional<std::string> semanticLogPath;
-    bool noLogs = false;
+    std::optional<std::string> logPath; // accepted but ignored
+    std::optional<std::string> lexLogPath; // accepted but ignored
+    std::optional<std::string> syntaxLogPath; // accepted but ignored
+    std::optional<std::string> semanticLogPath; // accepted but ignored
+    bool noLogs = false; // accepted but ignored
     bool wantMetrics = false;
     for (int i = 2; i < argc; ++i) {
         std::string a = argv[i];
@@ -84,10 +84,7 @@ int main(int argc, char **argv) {
         if (takeOptValue(a, "--asm", i, argc, argv, outASM)) continue; // Assembly (.asm: arm64? amd64?)
 
         // Custom flags
-        if (a == "--no-logs") {
-            noLogs = true;
-            continue;
-        }
+        if (a == "--no-logs") { noLogs = true; continue; }
         if (a == "--metrics") {
             wantMetrics = true;
             continue;
@@ -101,8 +98,7 @@ int main(int argc, char **argv) {
             std::cout << t << '\n';
             return 0;
         }
-        // ToDo: use Preprocessor directive to exclude log flags
-        //       ...need corresponding flags for the logging functionality.
+        // Accept legacy phase log flags (no-ops now)
         if (takeOptValue(a, "--log", i, argc, argv, logPath)) continue;
         if (takeOptValue(a, "--lex-log", i, argc, argv, lexLogPath)) continue;
         if (takeOptValue(a, "--syntax-log", i, argc, argv, syntaxLogPath)) continue;
@@ -124,15 +120,7 @@ int main(int argc, char **argv) {
         gwbasic::Metrics metrics;
         // ReSharper disable once CppDFALocalValueEscapesFunction
         if (wantMetrics) gwbasic::gMetrics = &metrics;
-        deriveDefaultLogPaths(input, noLogs, logPath, lexLogPath, syntaxLogPath, semanticLogPath);
-        std::string ir;
-        if (!noLogs) {
-            ir = gwbasic::Compiler::compileFileWithPhaseLogs(
-                input,
-                gwbasic::Compiler::PhaseLogs{*lexLogPath, *syntaxLogPath, *semanticLogPath, *logPath});
-        } else {
-            ir = gwbasic::Compiler::compileFile(input);
-        }
+        std::string ir = gwbasic::Compiler::compileFile(input);
         const std::string chosenTriple = targetTriple.value_or(detectDefaultTriple(CLANG_PATH));
         const std::string irWithTriple = withTripleHeader(ir, chosenTriple);
 
@@ -179,6 +167,8 @@ int main(int argc, char **argv) {
             metrics.print();
             gwbasic::gMetrics = nullptr; // clear
         }
+        // Silence unused variables for legacy flags
+        (void)logPath; (void)lexLogPath; (void)syntaxLogPath; (void)semanticLogPath; (void)noLogs;
         return 0;
     } catch (const std::exception &ex) {
         std::cerr << "Error: " << ex.what() << "\n";

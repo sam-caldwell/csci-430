@@ -35,7 +35,6 @@ void CodeGenerator::emitSubHandleIf(std::ostringstream& out, const IfStmt* ifStm
     out << irLine << Symbols::LF;
     // Also embed a comment line so integration tests can match the marker in IR
     out << "  ;; IfStmt -> " << irLine << Symbols::LF;
-    log() << "line " << currentLine_ << " IfStmt -> " << irLine << Symbols::LF;
     out << contLbl << ":" << Symbols::LF;
 }
 

@@ -91,7 +91,6 @@ void CodeGenerator::emitLineHandleOpenCloseWidth(std::ostringstream &out,
         out << std::format("  store i32 {}, ptr @gwb_cur_col", colClamped) << Symbols::LF;
         out << std::format("  br label %{}", afterLbl) << Symbols::LF;
         out << afterLbl << ":" << Symbols::LF;
-        log() << "line " << currentLine_ << " WidthStmt -> set width" << Symbols::LF;
         (void)currLineLabel; // used for label naming
     }
 }

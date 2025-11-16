@@ -31,9 +31,7 @@ Line Parser::parseLine() {
     while (!atEnd() && !check(TokenType::NewLine)) {
         auto stmt = parseStatement();
         line.statements.push_back(std::move(stmt));
-        const auto& last = line.statements.back();
-        syntax() << "line " << line.number << ' ' << nodeName(last.get())
-                 << " @ " << last->pos.line << ':' << last->pos.col << '\n';
+        
         if (match(TokenType::Colon)) {
             continue;
         }

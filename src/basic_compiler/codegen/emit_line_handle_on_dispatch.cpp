@@ -31,7 +31,6 @@ void CodeGenerator::emitLineHandleOnDispatch(std::ostringstream &out,
         }
         switchIr << " ]";
         out << switchIr.str() << Symbols::LF;
-        log() << "line " << currentLine_ << " OnGoto switch -> " << switchIr.str() << Symbols::LF;
         out << contLbl << ":" << Symbols::LF;
         return;
     }
@@ -51,7 +50,6 @@ void CodeGenerator::emitLineHandleOnDispatch(std::ostringstream &out,
         }
         switchIr << " ]";
         out << switchIr.str() << Symbols::LF;
-        log() << "line " << currentLine_ << " OnGosub switch -> " << switchIr.str() << Symbols::LF;
         for (size_t i = 0; i < onGosub->targets.size(); ++i) {
             emitSubroutineInline(out, onGosub->targets[i], entryLbls[i], contLbl);
         }

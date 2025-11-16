@@ -183,16 +183,16 @@ private:
     /**
      * Function: SemanticAnalyzer::enterScope
      * Purpose:
-     *  - Push a new lexical scope onto the stack and log the event.
+     *  - Push a new lexical scope onto the stack.
      */
-    void enterScope() { scopes_.emplace_back(); log() << "ScopeEnter" << '\n'; }
+    void enterScope() { scopes_.emplace_back(); }
 
     /**
      * Function: SemanticAnalyzer::exitScope
      * Purpose:
-     *  - Pop the current scope if not global and log the event.
+     *  - Pop the current scope if not global.
      */
-    void exitScope() { if (scopes_.size() > 1) { scopes_.pop_back(); } log() << "ScopeExit" << '\n'; }
+    void exitScope() { if (scopes_.size() > 1) { scopes_.pop_back(); } }
 
     /**
      * Function: SemanticAnalyzer::isDeclared

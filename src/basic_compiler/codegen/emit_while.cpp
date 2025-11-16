@@ -64,7 +64,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
 
     // Jump to condition
     out << std::format("  br label %{}", condLbl) << Symbols::LF;
-    log() << "line " << currentLine_ << " While -> br to cond" << Symbols::LF;
+    
 
     // Condition
     out << condLbl << ":" << Symbols::LF;
@@ -78,7 +78,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
         out << std::format("  {} = fcmp one double {}, 0.0", cond, val) << Symbols::LF;
     }
     out << std::format("  br i1 {}, label %{}, label %{}", cond, bodyLbl, endLbl) << Symbols::LF;
-    log() << "line " << currentLine_ << " While branch" << Symbols::LF;
+    
 
     // Body
     out << bodyLbl << ":" << Symbols::LF;
@@ -87,7 +87,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
             std::string val = emitExpr(out, asg->value.get(), currLineLabel);
             if (!asg->name.empty() && asg->name.back() == Symbols::DOLLARSIGN.first()) {
                 std::string ir = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
-                out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body Assign -> " << ir << Symbols::LF;
+                out << ir << Symbols::LF;
             } else {
                 storeNumberToVar(out, asg->name, val);
             }
@@ -194,8 +194,8 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
                 };
                 if (isStr(v, isStr)) {
                     auto sptr = emitExpr(out, v, currLineLabel);
-                    std::string fmt = nextTemp(); { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (last ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Print -> " << ir2 << Symbols::LF; }
-                    { std::string ir3 = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmt, sptr); out << ir3 << Symbols::LF; log() << "line " << currentLine_ << " While body Print -> " << ir3 << Symbols::LF; }
+                    std::string fmt = nextTemp(); { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (last ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << Symbols::LF; }
+                    { std::string ir3 = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmt, sptr); out << ir3 << Symbols::LF; }
                 } else {
                     // Determine formatting flags for numeric auto formats
                     const bool addNL = last;
@@ -212,10 +212,10 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
                         if (isIntegral) {
                             std::string fmtI = getFmtIntPtr(out, addNL, nextStartsWithSpace);
                             long long iv = static_cast<long long>(cv);
-                            { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmtI, iv); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Print int -> " << ir2 << Symbols::LF; }
+                            { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmtI, iv); out << ir2 << Symbols::LF; }
                         } else {
                             std::string fmtF = getFmtNumPtr(out, addNL, nextStartsWithSpace);
-                            { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {:.6f})", fmtF, cv); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Print flt -> " << ir2 << Symbols::LF; }
+                            { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {:.6f})", fmtF, cv); out << ir2 << Symbols::LF; }
                         }
                     } else {
                         auto val = emitExpr(out, v, currLineLabel);
@@ -231,10 +231,10 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
                         std::string contLbl = std::format("{}_wprint_cont_{}", currLineLabel, localCounter);
                         { std::string ir = std::format("  br i1 {}, label %{}, label %{}", isInt, intLbl, fltLbl); out << ir << Symbols::LF; }
                         out << intLbl << ":" << Symbols::LF;
-                        { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmtI, iv); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Print int -> " << ir2 << Symbols::LF; }
+                        { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmtI, iv); out << ir2 << Symbols::LF; }
                         { std::string ir = std::format("  br label %{}", contLbl); out << ir << Symbols::LF; }
                         out << fltLbl << ":" << Symbols::LF;
-                        { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", fmtF, val); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Print flt -> " << ir2 << Symbols::LF; }
+                        { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", fmtF, val); out << ir2 << Symbols::LF; }
                         { std::string ir = std::format("  br label %{}", contLbl); out << ir << Symbols::LF; }
                         out << contLbl << ":" << Symbols::LF;
                     }
@@ -296,11 +296,11 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
         } else if (const auto* ws2 = dyn_cast<WhileStmt>(s.get())) {
             emitWhile(out, ws2, currLineLabel, localCounter);
         } else if (isa<ReturnStmt>(s.get())) {
-            std::string ir = std::format("  br label %exit"); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body Return -> " << ir << Symbols::LF;
+            std::string ir = std::format("  br label %exit"); out << ir << Symbols::LF;
         } else if (isa<EndStmt>(s.get())) {
-            std::string ir = std::format("  br label %exit"); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body End -> " << ir << Symbols::LF;
+            std::string ir = std::format("  br label %exit"); out << ir << Symbols::LF;
         } else if (const auto* gt = dyn_cast<GotoStmt>(s.get())) {
-            std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine)); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body Goto -> " << ir << Symbols::LF;
+            std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine)); out << ir << Symbols::LF;
         } else if (const auto* gs = dyn_cast<GosubStmt>(s.get())) {
             std::string contLbl = std::format("{}_gosub_cont{}", currLineLabel, ++localCounter);
             std::string entryLbl = std::format("{}_gosub_entry{}", currLineLabel, localCounter);
@@ -309,7 +309,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
             out << std::format("{}:", contLbl) << Symbols::LF;
         } else if (const auto* og = dyn_cast<OnGotoStmt>(s.get())) {
             std::string idx = emitExpr(out, og->index.get(), currLineLabel);
-            std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body OnGoto fptosi -> " << ir << Symbols::LF; }
+            std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; }
             std::string contLbl = std::format("{}_on_cont_{}", currLineLabel, ++localCounter);
             out << std::format("  switch i32 {}, label %{} [", idxi32, contLbl) << Symbols::LF;
             for (size_t i = 0; i < og->targets.size(); ++i) out << std::format("    i32 {}, label %{}", i+1, lineLabelName(og->targets[i])) << Symbols::LF;
@@ -317,7 +317,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
             out << std::format("{}:", contLbl) << Symbols::LF;
         } else if (const auto* ogs = dyn_cast<OnGosubStmt>(s.get())) {
             std::string idx = emitExpr(out, ogs->index.get(), currLineLabel);
-            std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While body OnGosub fptosi -> " << ir << Symbols::LF; }
+            std::string idxi32 = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; }
             std::string contLbl = std::format("{}_on_gs_cont_{}", currLineLabel, ++localCounter);
             std::vector<std::string> entryLbls; entryLbls.reserve(ogs->targets.size());
             for (size_t i = 0; i < ogs->targets.size(); ++i) entryLbls.push_back(std::format("{}_on_gs_entry_{}_{}", currLineLabel, localCounter, i+1));
@@ -352,9 +352,9 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
             }
             for (const auto& vname : ins->variables) {
                 ensureVarAllocated(out, vname);
-                std::string fmt = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir1 << Symbols::LF; }
+                std::string fmt = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_in, i64 0", fmt); out << ir1 << Symbols::LF; }
                 std::string tmp = nextTemp(); { std::string ir = std::format("  {} = alloca double", tmp); out << ir << Symbols::LF; }
-                { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Input -> " << ir2 << Symbols::LF; }
+                { std::string ir2 = std::format("  call i32 (ptr, ...) @scanf(ptr {}, ptr {})", fmt, tmp); out << ir2 << Symbols::LF; }
                 std::string dv = nextTemp(); { std::string ir = std::format("  {} = load double, ptr {}", dv, tmp); out << ir << Symbols::LF; }
                 storeNumberToVar(out, vname, dv);
             }
@@ -377,7 +377,7 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
         }
     }
     // Jump back to condition
-    { std::string ir = std::format("  br label %{}", condLbl); out << ir << Symbols::LF; log() << "line " << currentLine_ << " While -> " << ir << Symbols::LF; }
+    { std::string ir = std::format("  br label %{}", condLbl); out << ir << Symbols::LF; }
     // End label
     out << endLbl << ":" << Symbols::LF;
 }

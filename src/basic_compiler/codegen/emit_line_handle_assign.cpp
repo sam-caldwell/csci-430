@@ -13,11 +13,7 @@ void CodeGenerator::emitLineHandleAssign(std::ostringstream &out, const AssignSt
     if (isStringVarNameCG(asg->name)) {
         const std::string irLine = std::format("  store ptr {}, ptr {}", val, varAllocaName_[asg->name]);
         out << irLine << Symbols::LF;
-        {
-            std::ostringstream msg;
-            msg << "line " << currentLine_ << ' ' << nodeName(asg) << " -> " << irLine;
-            log() << msg.str() << Symbols::LF;
-        }
+        
     } else {
         storeNumberToVar(out, asg->name, val);
     }

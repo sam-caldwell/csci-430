@@ -28,37 +28,37 @@ void CodeGenerator::ensureVarAllocated(std::ostringstream& out, const std::strin
     const bool isStr = isStringVarNameCG(name);
     if (isStr) {
         const std::string ir1 = std::format("  {} = alloca ptr", allocName);
-        out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " VarAllocStr(" << name << ") -> " << ir1 << Symbols::LF;
+        out << ir1 << Symbols::LF;
         const std::string ir2 = std::format("  store ptr null, ptr {}", allocName);
-        out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InitNullStr(" << name << ") -> " << ir2 << Symbols::LF;
+        out << ir2 << Symbols::LF;
     } else {
         switch (numKindOf(name)) {
             case NumKind::Int16: {
                 const std::string ir1 = std::format("  {} = alloca i16", allocName);
-                out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " VarAlloc(i16 " << name << ") -> " << ir1 << Symbols::LF;
+                out << ir1 << Symbols::LF;
                 const std::string ir2 = std::format("  store i16 0, ptr {}", allocName);
-                out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InitZero(i16 " << name << ") -> " << ir2 << Symbols::LF;
+                out << ir2 << Symbols::LF;
                 break;
             }
             case NumKind::Long32: {
                 const std::string ir1 = std::format("  {} = alloca i32", allocName);
-                out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " VarAlloc(i32 " << name << ") -> " << ir1 << Symbols::LF;
+                out << ir1 << Symbols::LF;
                 const std::string ir2 = std::format("  store i32 0, ptr {}", allocName);
-                out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InitZero(i32 " << name << ") -> " << ir2 << Symbols::LF;
+                out << ir2 << Symbols::LF;
                 break;
             }
             case NumKind::Single: {
                 const std::string ir1 = std::format("  {} = alloca float", allocName);
-                out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " VarAlloc(float " << name << ") -> " << ir1 << Symbols::LF;
+                out << ir1 << Symbols::LF;
                 const std::string ir2 = std::format("  store float 0.0, ptr {}", allocName);
-                out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InitZero(float " << name << ") -> " << ir2 << Symbols::LF;
+                out << ir2 << Symbols::LF;
                 break;
             }
             case NumKind::Double: {
                 const std::string ir1 = std::format("  {} = alloca double", allocName);
-                out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " VarAlloc(double " << name << ") -> " << ir1 << Symbols::LF;
+                out << ir1 << Symbols::LF;
                 const std::string ir2 = std::format("  store double 0.0, ptr {}", allocName);
-                out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " InitZero(double " << name << ") -> " << ir2 << Symbols::LF;
+                out << ir2 << Symbols::LF;
                 break;
             }
         }

@@ -32,7 +32,6 @@ namespace gwbasic {
             const std::string startReg = emitExpr(out, for_stmt->start.get(), currLineLabel);
             storeNumberToVar(out, for_stmt->var, startReg);
             out << std::format("  br label %{}", condLbl) << Symbols::LF;
-            log() << "line " << currentLine_ << " For -> br cond" << Symbols::LF;
         }
 
         // Condition block

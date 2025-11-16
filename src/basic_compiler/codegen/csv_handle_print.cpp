@@ -23,8 +23,7 @@ void CodeGenerator::csvHandlePrint(const PrintStmt* print_stmt) { // NOLINT(read
             if (!strLiteralId_.contains(stringExpr->value)) {
                 strLiteralId_[stringExpr->value] = strCounter_++;
             }
-            logSem() << "StringLiteral @ " << stringExpr->pos.line << ':'
-                     << stringExpr->pos.col << Symbols::LF;
+            
         }
     };
     if (print_stmt->value) {

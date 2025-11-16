@@ -43,7 +43,6 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
         const auto rhs_str = emitExpr(out, comp_expr->rhs.get(), "cmp");
         std::string call = nextTemp();
         out << std::format("  {} = call i32 @strcmp(ptr {}, ptr {})", call, lhs_str, rhs_str) << Symbols::LF;
-        log() << "line " << currentLine_ << " StrCmp -> call strcmp" << Symbols::LF;
         std::string res = nextTemp();
         const char* pred = nullptr;
         switch (comp_expr->op) {
@@ -56,7 +55,6 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
             default: throw CodeGenError("Invalid comparison operator");
         }
         out << std::format("  {} = icmp {} i32 {}, 0", res, pred, call) << Symbols::LF;
-        log() << "line " << currentLine_ << " StrCmp icmp" << Symbols::LF;
         return res;
     }
     const auto lhsReg = emitExpr(out, comp_expr->lhs.get(), "cmp");
@@ -73,7 +71,6 @@ std::string CodeGenerator::emitComparison(std::ostringstream& out, const BinaryE
         default: throw CodeGenError("Invalid comparison operator");
     }
     out << std::format("  {} = fcmp {} double {}, {}", res, pred, lhsReg, rhsReg) << Symbols::LF;
-    log() << "line " << currentLine_ << " Compare fcmp" << Symbols::LF;
     return res;
 }
 

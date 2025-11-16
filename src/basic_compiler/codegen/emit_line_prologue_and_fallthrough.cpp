@@ -10,9 +10,7 @@ namespace gwbasic {
 void CodeGenerator::emitLinePrologue(std::ostringstream &out, const Line &line) {
     currentLine_ = line.number;
     out << lineLabelName(line.number) << ":" << Symbols::LF;
-    std::ostringstream m;
-    m << "begin line " << currentLine_;
-    log() << m.str() << Symbols::LF;
+    
 }
 
 std::string CodeGenerator::nextLineLabelForIndex(const int lineIndex, const int lastIndex) const {
@@ -25,10 +23,7 @@ std::string CodeGenerator::nextLineLabelForIndex(const int lineIndex, const int 
 void CodeGenerator::emitLineFallthrough(std::ostringstream &out, const std::string &nextLabel) {
     const std::string irInstr = std::format("  br label %{}", nextLabel);
     out << irInstr << Symbols::LF;
-    std::ostringstream m;
-    m << "line " << currentLine_ << " fallthrough -> " << irInstr;
-    log() << m.str() << Symbols::LF;
+    
 }
 
 } // namespace gwbasic
-

@@ -23,8 +23,7 @@ void CodeGenerator::csvHandleMidAssign(const MidAssignStmt* mid_stmt) {
         collectExprVars(mid_stmt->len.get());
     }
     collectExprVars(mid_stmt->value.get());
-    logSem() << "MidAssign " << mid_stmt->name << " @ "
-             << mid_stmt->pos.line << ':' << mid_stmt->pos.col << Symbols::LF;
+    
 }
 
 } // namespace gwbasic

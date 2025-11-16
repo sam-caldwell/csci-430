@@ -29,6 +29,6 @@ std::string CodeGenerator::emitStringExpr(std::ostringstream& out, const StringE
     out << irLine << Symbols::LF;
     std::ostringstream msg;
     msg << "line " << currentLine_ << " StringExpr -> " << irLine;
-    log() << msg.str() << Symbols::LF;
+    
     return gep;
 }
