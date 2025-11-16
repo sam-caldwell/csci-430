@@ -19,7 +19,7 @@ TEST(CodeGenLineBlock, While_Gosub_ChannelPrint) {
         "10 X=0: WHILE X<1: PRINT #1, \"Z\": X=X+1: WEND: GOSUB 100\n"
         "20 END\n"
         "100 PRINT 1: RETURN\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // WHILE labels present
     EXPECT_NE(ir.find("line10_while_cond"), std::string::npos);
     EXPECT_NE(ir.find("line10_while_body"), std::string::npos);

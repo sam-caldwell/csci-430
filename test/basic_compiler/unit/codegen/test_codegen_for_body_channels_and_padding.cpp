@@ -27,7 +27,7 @@ TEST(CodeGenFor, Body_Pad_Channel_And_EmptyPrint) {
         "60 PRINT\n"
         "70 NEXT\n"
         "80 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Zone pad helper present
     EXPECT_NE(ir.find("@.fmt_pad"), std::string::npos);
     EXPECT_NE(ir.find("@.spaces_14"), std::string::npos);

@@ -18,7 +18,7 @@ TEST(CodeGenDefFn, ParamBinding_DoesNotLoadParamVar) {
         "20 PRINT FNSQ(3)\n"
         "30 DEF FNA$(S$) = S$ + \"!\"\n"
         "40 PRINT FNA$(\"ok\")\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     // Ensure parameter variable names are not allocated/loaded (bound via SSA)
     ASSERT_EQ(ir.find("%X"), std::string::npos);

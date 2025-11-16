@@ -18,6 +18,6 @@ TEST(Semantics, MiscPositive) {
         "30 COLOR 1, 2, 3\n"
         "40 SCREEN 0, 1, 0, 0\n"
         "50 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

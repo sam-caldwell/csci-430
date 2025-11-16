@@ -22,7 +22,7 @@ TEST(Integration, IfBlock_Print_TrailingTerms_IR) {
         "70   PRINT #1, \"D\";\n"       // no newline to channel
         "80 END IF\n"
         "90 CLOSE #1\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // stdout path should use gwb_screen_write
     EXPECT_NE(ir.find("@gwb_screen_write"), std::string::npos) << ir;
     // channel paths should use snprintf+fwrite

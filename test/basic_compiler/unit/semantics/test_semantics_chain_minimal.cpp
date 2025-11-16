@@ -15,6 +15,6 @@ TEST(Semantics, ChainMinimal) {
     const char* src =
         "10 CHAIN \"PROG\"\n"
         "20 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

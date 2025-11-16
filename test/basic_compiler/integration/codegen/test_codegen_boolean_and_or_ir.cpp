@@ -16,7 +16,7 @@ TEST(CodeGenBoolean, AndOr_UseI1PredicatesAndBitOps) {
     const char* src =
         "10 PRINT 1 AND 0\n"
         "20 PRINT 1 OR 0\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     // Spot check presence of boolean lowering and bitwise ops
     ASSERT_NE(ir.find("fcmp one double"), std::string::npos);

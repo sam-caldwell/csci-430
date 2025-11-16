@@ -28,7 +28,7 @@ TEST(CLI, BitcodeFlagProducesBCFile) {
     const fs::path bc  = tmp / "p.bc";
     { std::ofstream f(bas); f << "10 PRINT 1\n"; }
     const std::string cmd = '"' + cliBin_bc() + '"' + " \"" + bas.string() + "\" --bc \"" + bc.string() + "\" --no-logs 2>&1; echo EXIT:$?";
-    const const std::string out = runCommand(cmd);
+    const std::string out = runCommand(cmd);
     ASSERT_NE(out.find("EXIT:0"), std::string::npos) << out;
     ASSERT_TRUE(fs::exists(bc));
     ASSERT_GT(fs::file_size(bc), static_cast<uintmax_t>(0));

@@ -27,7 +27,7 @@ TEST(CodeGenErrors, IfConditionMustBeComparison) {
         "20 END\n";
     // Use Compiler facade to build AST via parser
     EXPECT_THROW({
-        const const std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         (void)ir;
     }, CodeGenError);
 }

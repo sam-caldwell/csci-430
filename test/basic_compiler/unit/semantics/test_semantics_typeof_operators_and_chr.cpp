@@ -20,6 +20,6 @@ TEST(SemanticsTypeOf, OperatorsAndCHR) {
         "50 LET E = 2 ^ 3\n"
         "60 PRINT CHR$(65)+\"X\"\n"
         "70 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

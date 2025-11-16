@@ -15,7 +15,7 @@ TEST(Integration, WIDTH_SCRN_Clamp_IR) {
     const char* src =
         "10 LOCATE 1,80\n"
         "20 WIDTH \"SCRN:\", 40\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@gwb_screen_cols"), std::string::npos) << ir;
     EXPECT_NE(ir.find("@gwb_cur_col"), std::string::npos) << ir;
     EXPECT_NE(ir.find("icmp sgt i32"), std::string::npos) << ir;

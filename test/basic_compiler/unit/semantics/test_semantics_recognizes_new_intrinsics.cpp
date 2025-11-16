@@ -24,6 +24,6 @@ TEST(SemanticsMathExt, RecognizesNewIntrinsics) {
         "30 PRINT CSNG(3.14)\n"
         "40 PRINT CDBL(5)\n"
         "50 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

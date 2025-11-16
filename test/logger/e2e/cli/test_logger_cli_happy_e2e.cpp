@@ -73,7 +73,7 @@ TEST(LoggerE2E, CLI_HappyPath_ProducesLogs) {
       << " --syntax-log \"" << syn.string() << "\""
       << " --semantic-log \"" << sem.string() << "\""
       << " --log \"" << codegen.string() << "\"";
-  const const std::string output = runCommand(cmd.str());
+  const std::string output = runCommand(cmd.str());
   ASSERT_NE(output.find("define i32 @main()"), std::string::npos);
 
   // Logging is disabled; skip file assertions.

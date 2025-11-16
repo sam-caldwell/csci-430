@@ -21,7 +21,7 @@ TEST(CodeGenChain, AllPreservesAllAndBranches) {
         "30 END\n"
         "100 PRINT A, B\n"
         "110 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     auto blk = irBlockSlice(ir, "line20");
     ASSERT_FALSE(blk.empty());
     // No resets for either variable (float typed by default)

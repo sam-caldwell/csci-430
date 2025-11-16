@@ -25,6 +25,6 @@ TEST(SemanticsDefType, NumericDefsParse) {
         "60 LET X = 4\n"
         "70 PRINT A + D + X\n"
         "80 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

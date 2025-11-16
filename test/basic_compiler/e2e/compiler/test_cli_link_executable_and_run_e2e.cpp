@@ -28,9 +28,9 @@ TEST(CLI, LinkExecutableAndRun) {
     const fs::path exe = tmp / "prog.out";
     { std::ofstream f(bas); f << "10 PRINT 9\n20 END\n"; }
     const std::string cmd = '"' + cliBin_link() + '"' + " \"" + bas.string() + "\" -o \"" + exe.string() + "\" --no-logs 2>&1; echo EXIT:$?";
-    const const std::string out = runCommand(cmd);
+    const std::string out = runCommand(cmd);
     ASSERT_NE(out.find("EXIT:0"), std::string::npos) << out;
     ASSERT_TRUE(fs::exists(exe));
-    const const std::string runOut = runCommand('"' + exe.string() + '"');
+    const std::string runOut = runCommand('"' + exe.string() + '"');
     ASSERT_NE(runOut.find("9\n"), std::string::npos);
 }

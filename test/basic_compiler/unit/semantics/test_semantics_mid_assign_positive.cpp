@@ -16,14 +16,14 @@ TEST(Semantics, MidAssignPositive) {
         const char* src =
             "10 A$=\"HELLO\"\n"
             "20 MID$(A$,2,1)=\"X\"\n";
-        const const std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         ASSERT_FALSE(ir.empty());
     }
     {
         const char* src =
             "10 DIM A$(3)\n"
             "20 MID$(A$(1),1)=\"Z\"\n";
-        const const std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         ASSERT_FALSE(ir.empty());
     }
 }

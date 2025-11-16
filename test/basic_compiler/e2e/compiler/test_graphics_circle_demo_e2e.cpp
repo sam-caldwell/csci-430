@@ -29,7 +29,7 @@ TEST(E2E, GraphicsCircleDemo_PrintsOk) {
     ASSERT_FALSE(ir.empty());
 
     // Write IR and compile with clang
-    const const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_gfx_circle_demo";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_gfx_circle_demo";
     std::filesystem::create_directories(tmp);
     const auto ll = tmp / "program.ll";
     const auto bin = tmp / "program.out";
@@ -38,11 +38,11 @@ TEST(E2E, GraphicsCircleDemo_PrintsOk) {
 #ifndef __APPLE__
     c1 << " -lm";
 #endif
-    const const int ec = std::system(c1.str().c_str());
+    const int ec = std::system(c1.str().c_str());
     ASSERT_EQ(ec, 0);
 
     // Run and capture output
-    const const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
 
     // Validate text line
     ASSERT_NE(out.find("GRAPHICS CIRCLE DEMO OK\n"), std::string::npos);

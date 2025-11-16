@@ -20,7 +20,7 @@ TEST(Integration, For_Print_Channel_IR) {
         "60   PRINT #1, I,\n"
         "70 NEXT I\n"
         "80 CLOSE #1\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Channel IR should contain at least one fprintf and @.fmt_pad for zone padding
     EXPECT_NE(ir.find("@fprintf"), std::string::npos) << ir;
     EXPECT_NE(ir.find("@.fmt_pad"), std::string::npos) << ir;

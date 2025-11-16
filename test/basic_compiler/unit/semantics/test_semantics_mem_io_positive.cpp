@@ -19,6 +19,6 @@ TEST(Semantics, MemIoPositive) {
         "40 POKE 100, 1\n"
         "50 CALL 4096\n"
         "60 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

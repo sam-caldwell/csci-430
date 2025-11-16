@@ -16,6 +16,6 @@ TEST(CodeGenBuiltins, ASC_LoadsFirstByte) {
     const char* src =
         "10 PRINT ASC(\"C\")\n"
         "20 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("load i8, ptr"), std::string::npos);
 }

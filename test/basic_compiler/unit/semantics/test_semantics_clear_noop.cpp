@@ -12,6 +12,6 @@ Code under test: SemanticAnalyzer::analyzeStmt(ClearStmt)
 Expected behavior: Program compiles
 */
 TEST(Semantics, ClearNoop) {
-    const const std::string ir = Compiler::compileString("10 CLEAR\n");
+    const std::string ir = Compiler::compileString("10 CLEAR\n");
     ASSERT_FALSE(ir.empty());
 }

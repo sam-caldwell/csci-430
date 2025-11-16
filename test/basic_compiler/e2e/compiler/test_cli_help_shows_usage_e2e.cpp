@@ -19,7 +19,7 @@ static std::string cliPath_help() { return e2e_helpers::sourceRoot() + "/build/b
 TEST(CLI, HelpShowsUsage) {
     namespace fs = std::filesystem;
     const std::string cmd = '"' + cliPath_help() + '"' + " --help 2>&1; echo EXIT:$?";
-    const const std::string out = runCommand(cmd);
+    const std::string out = runCommand(cmd);
     ASSERT_NE(out.find("Usage:"), std::string::npos);
     ASSERT_NE(out.find("EXIT:0"), std::string::npos);
 }

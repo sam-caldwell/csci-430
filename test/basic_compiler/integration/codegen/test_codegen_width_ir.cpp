@@ -12,7 +12,7 @@ using namespace gwbasic;
  */
 TEST(Integration, WIDTH_SCRN_IR) {
     const char* src = "10 WIDTH 40\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@gwb_screen_cols"), std::string::npos) << ir;
 }
 
@@ -22,7 +22,7 @@ TEST(Integration, WIDTH_SCRN_IR) {
  */
 TEST(Integration, WIDTH_LPT_IR) {
     const char* src = "10 WIDTH \"LPT1:\", 132\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@gwb_printer_cols"), std::string::npos) << ir;
 }
 

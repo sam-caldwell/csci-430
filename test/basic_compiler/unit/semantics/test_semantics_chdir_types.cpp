@@ -15,13 +15,13 @@ TEST(Semantics, CHDIR_TypeChecks) {
     // Happy: literal
     {
         const char* src = "10 CHDIR \"/tmp\"\n";
-        const const std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         ASSERT_FALSE(ir.empty());
     }
     // Happy: variable
     {
         const char* src = "10 P$=\"/tmp\"\n20 CHDIR P$\n";
-        const const std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         ASSERT_FALSE(ir.empty());
     }
     // Sad: numeric

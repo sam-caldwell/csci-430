@@ -21,7 +21,7 @@ TEST(CodeGenResume, ResumeLine_GeneratesTrampolineToTarget) {
         "30 PRINT 3\n"
         "100 PRINT \"H\"\n"
         "110 RESUME 30\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     // Expect a direct branch to %line30 with handler flag cleared
     ASSERT_NE(ir.find("store i1 false, ptr @gwb_in_handler"), std::string::npos);

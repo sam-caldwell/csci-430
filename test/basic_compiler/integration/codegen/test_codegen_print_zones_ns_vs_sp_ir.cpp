@@ -16,7 +16,7 @@ TEST(Integration, PrintZones_NumberFollowedByString_SpaceVsNoSpace) {
         const char* src =
             "10 OPTION PRINTZONES ON\n"
             "20 PRINT 1, \" X\"\n"; // next string starts with space
-        const const std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         EXPECT_NE(ir.find("@.fmt_num_ns"), std::string::npos) << ir;
         EXPECT_NE(ir.find("@.fmt_int_ns"), std::string::npos) << ir;
     }
@@ -25,7 +25,7 @@ TEST(Integration, PrintZones_NumberFollowedByString_SpaceVsNoSpace) {
         const char* src =
             "10 OPTION PRINTZONES ON\n"
             "20 PRINT 1, \"X\"\n";
-        const const std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         EXPECT_NE(ir.find("@.fmt_num_sp"), std::string::npos) << ir;
         EXPECT_NE(ir.find("@.fmt_int_sp"), std::string::npos) << ir;
     }

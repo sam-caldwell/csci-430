@@ -20,7 +20,7 @@ TEST(Integration, OnGotoGosub_IR_DefaultLabels) {
             "20 PRINT 0\n"
             "100 PRINT 1\n"
             "200 PRINT 2\n";
-        const const std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         auto blk = irBlockSlice(ir, "line10");
         ASSERT_NE(blk.find("switch i32"), std::string::npos);
         // default label points to continuation label under line10 prefix
@@ -37,7 +37,7 @@ TEST(Integration, OnGotoGosub_IR_DefaultLabels) {
             "20 PRINT 0\n"
             "100 PRINT 1: RETURN\n"
             "200 PRINT 2: RETURN\n";
-        const const std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         auto blk = irBlockSlice(ir, "line10");
         ASSERT_NE(blk.find("switch i32"), std::string::npos);
         // default label points to gs continuation label under line10 prefix

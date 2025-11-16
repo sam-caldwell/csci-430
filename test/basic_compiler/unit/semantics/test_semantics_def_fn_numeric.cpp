@@ -16,6 +16,6 @@ TEST(SemanticsDefFn, NumericFunctionCompiles) {
         "10 DEF FNSQ(X) = X*X\n"
         "20 PRINT FNSQ(3)\n"
         "30 END\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

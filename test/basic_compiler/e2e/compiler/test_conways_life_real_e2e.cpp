@@ -37,7 +37,7 @@ TEST(E2E, ConwaysLife_RealDemo_BuildsRunsAndPrints) {
     std::string ir = Compiler::compileFile(demo.c_str());
     ASSERT_FALSE(ir.empty());
 
-    const const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_conway_real";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_conway_real";
     std::filesystem::create_directories(tmp);
     const auto ll = tmp / "program.ll";
     const auto bin = tmp / "program.out";

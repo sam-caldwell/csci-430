@@ -17,7 +17,7 @@ TEST(Integration, IfBlock_Stop_System_IR) {
         "30 ELSE\n"
         "40   SYSTEM\n"
         "50 END IF\n";
-    const const std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@.msg_break"), std::string::npos) << ir;
     EXPECT_NE(ir.find("br label %exit"), std::string::npos) << ir;
 }

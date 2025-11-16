@@ -24,7 +24,7 @@ TEST(CLI, StdoutIRWhenNoOutputsRequested) {
     const fs::path bas = tmp / "c.bas";
     { std::ofstream f(bas); f << "10 PRINT 5\n"; }
     const std::string cmd = '"' + cliPath_stdout() + '"' + " \"" + bas.string() + "\" --no-logs 2>&1; echo EXIT:$?";
-    const const std::string out = runCommand(cmd);
+    const std::string out = runCommand(cmd);
     ASSERT_NE(out.find("define i32 @main()"), std::string::npos);
     ASSERT_NE(out.find("EXIT:0"), std::string::npos);
 }

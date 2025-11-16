@@ -30,7 +30,7 @@ TEST(E2E, ColorDemo_PrintsExpectedAnsiAndText) {
     ASSERT_FALSE(ir.empty());
 
     // Write IR and compile with clang
-    const const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_color_demo";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_color_demo";
     std::filesystem::create_directories(tmp);
     const auto ll = tmp / "program.ll";
     const auto bin = tmp / "program.out";
@@ -39,11 +39,11 @@ TEST(E2E, ColorDemo_PrintsExpectedAnsiAndText) {
 #ifndef __APPLE__
     c1 << " -lm";
 #endif
-    const const int ec = std::system(c1.str().c_str());
+    const int ec = std::system(c1.str().c_str());
     ASSERT_EQ(ec, 0);
 
     // Run and capture output
-    const const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
 
     // Validate text lines
     ASSERT_NE(out.find("Working with COLOR\n"), std::string::npos);
