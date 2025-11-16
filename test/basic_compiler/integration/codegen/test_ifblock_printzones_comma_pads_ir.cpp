@@ -18,7 +18,7 @@ TEST(Integration, IfBlock_PrintZones_CommaPads_IR) {
         "20 IF 1=1 THEN\n"
         "30   PRINT \"A\", 1\n"
         "40 END IF\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("@.fmt_pad"), std::string::npos);
     ASSERT_NE(ir.find("@.spaces_14"), std::string::npos);
 }

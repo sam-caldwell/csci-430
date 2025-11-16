@@ -17,7 +17,7 @@ TEST(CodeGen, IntDivAndMod_IR) {
         "10 PRINT 5 \\ 2\n"
         "20 PRINT 5 MOD 2\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Expect integer operations present
     ASSERT_NE(ir.find("sdiv i64"), std::string::npos);
     ASSERT_NE(ir.find("srem i64"), std::string::npos);

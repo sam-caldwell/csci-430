@@ -18,6 +18,6 @@ TEST(SemanticsDefFn, NumericAndStringFunctionsCompile) {
         "30 PRINT FNSQ(2)\n"
         "40 PRINT FNB$(\"ok\")\n"
         "50 END\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

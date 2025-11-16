@@ -29,7 +29,7 @@ TEST(CodeGenIfBlock, RichThenElseBodies) {
         "95 SYSTEM\n"
         "100 END IF\n"
         "110 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("_if_then"), std::string::npos);
     ASSERT_NE(ir.find("_if_else"), std::string::npos);
     // Format override path and channel printing

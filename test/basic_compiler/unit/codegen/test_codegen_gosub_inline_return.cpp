@@ -20,7 +20,7 @@ TEST(CodeGenFlow, GosubInlineAndReturn) {
         "30 END\n"
         "300 PRINT \"Sub\"\n"
         "310 RETURN\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("line10_gosub_entry1:"), std::string::npos);
     EXPECT_NE(ir.find("line10_gosub_cont1:"), std::string::npos);
     EXPECT_NE(ir.find("  br label %line10_gosub_cont1"), std::string::npos);

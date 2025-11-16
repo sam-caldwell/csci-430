@@ -20,7 +20,7 @@ TEST(CodeGenFor, ArrayBoundsErrors) {
         "50 S$(0,2,2)=\"X\"\n" // lower OOB on first dim (OPTION BASE 1)
         "60 NEXT I\n"
         "70 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("_for_arr_err_"), std::string::npos);
     ASSERT_NE(ir.find("@gwb_err_code"), std::string::npos);
 }

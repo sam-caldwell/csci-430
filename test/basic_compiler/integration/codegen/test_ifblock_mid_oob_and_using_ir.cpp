@@ -21,7 +21,7 @@ TEST(Integration, IfBlock_MidAssign_OOB_And_Using_IR) {
         "70   PRINT \"skip\"\n"
         "80 END IF\n"
         "90 CLOSE #1\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // MID$ OOB -> error dispatch code
     EXPECT_NE(ir.find("_mid_idx_err_"), std::string::npos) << ir;
     EXPECT_NE(ir.find("store i32 9, ptr @gwb_err_code"), std::string::npos) << ir;

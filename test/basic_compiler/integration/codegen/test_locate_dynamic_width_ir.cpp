@@ -14,7 +14,7 @@ TEST(Integration, LOCATE_Uses_Dynamic_Width_IR) {
     const char* src =
         "10 WIDTH 40\n"
         "20 LOCATE 1, 100\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("load i32, ptr @gwb_screen_cols"), std::string::npos) << ir;
 }
 

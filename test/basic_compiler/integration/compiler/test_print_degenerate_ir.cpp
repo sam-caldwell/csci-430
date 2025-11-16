@@ -17,7 +17,7 @@ TEST(Integration, PRINT_Degenerate_Separators_Compile) {
         "10 PRINT ;\n"
         "20 PRINT ,\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Should at least reference printf in the IR header or body
     ASSERT_NE(ir.find("@printf"), std::string::npos);
 }

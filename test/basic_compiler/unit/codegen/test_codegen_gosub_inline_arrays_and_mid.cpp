@@ -22,7 +22,7 @@ TEST(CodeGenGosub, InlineArraysAndMid) {
         "110 MID$(S$(2),1)=\"X\"\n"
         "120 RETURN\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Numeric array element store (gep on numeric array element type)
     ASSERT_NE(ir.find("getelementptr inbounds ["), std::string::npos);
     ASSERT_NE(ir.find("store"), std::string::npos);

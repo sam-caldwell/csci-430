@@ -18,7 +18,7 @@ TEST(CodeGenFor, NegativeStepAndPrints) {
         "20 PRINT I%, I%+0.5\n"
         "30 NEXT I%\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Basic FOR structure
     ASSERT_NE(ir.find("_for_cond"), std::string::npos);
     ASSERT_NE(ir.find("_for_body"), std::string::npos);

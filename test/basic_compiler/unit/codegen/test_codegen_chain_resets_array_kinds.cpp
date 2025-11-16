@@ -21,7 +21,7 @@ TEST(CodeGenChain, ResetsArrayElementKinds) {
         "30 END\n"
         "100 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for per-kind zero stores in the CHAIN block
     const auto pos = ir.find("line20:");
     ASSERT_NE(pos, std::string::npos);

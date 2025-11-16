@@ -20,8 +20,8 @@ TEST(E2E, LOCATE_SetsCursorForPrint) {
         "10 LOCATE 2,3\n"
         "20 PRINT \"X\"\n"
         "30 PRINT SCREEN(2,3)\n";
-    std::string ir = Compiler::compileString(src.c_str());
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_locate";
+    const std::string ir = Compiler::compileString(src.c_str());
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_locate";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "p.ll"; auto bin = tmp / "p.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
@@ -29,7 +29,7 @@ TEST(E2E, LOCATE_SetsCursorForPrint) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     // ASCII for 'X' is 88; expect to see 88 printed
     ASSERT_NE(out.find("88"), std::string::npos);
 }

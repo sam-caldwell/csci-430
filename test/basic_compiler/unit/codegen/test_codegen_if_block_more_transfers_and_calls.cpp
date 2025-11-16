@@ -25,7 +25,7 @@ TEST(CodeGenIfBlock, MoreTransfers_And_Calls) {
         "600 RETURN\n"
         "700 RETURN\n"
         "800 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for gosub scaffolding and randomize
     ASSERT_NE(ir.find("_gosub_entry"), std::string::npos);
     ASSERT_NE(ir.find("_gosub_cont"), std::string::npos);

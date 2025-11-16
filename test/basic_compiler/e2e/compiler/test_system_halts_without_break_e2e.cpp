@@ -25,8 +25,8 @@ TEST(E2E, SystemHaltsWithoutBreak) {
 20 SYSTEM
 30 PRINT 2
 )";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_system";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_system";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll";
     auto bin = tmp / "program.out";
@@ -37,7 +37,7 @@ TEST(E2E, SystemHaltsWithoutBreak) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::ostringstream run; run << '"' << bin.string() << '"';
-    std::string out = runCommand(run.str());
+    const std::string out = runCommand(run.str());
     // Expect only 1 and no Break message and no 2
     size_t p1 = out.find("1\n"); ASSERT_NE(p1, std::string::npos);
     ASSERT_EQ(out.find("Break in"), std::string::npos);

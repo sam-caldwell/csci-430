@@ -17,7 +17,7 @@ TEST(Integration, StringFuncs_IRContainsStrncpy) {
         "20 PRINT RIGHT$(\"HELLO\",3)\n"
         "30 PRINT MID$(\"HELLO\",2,2)\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);
 }

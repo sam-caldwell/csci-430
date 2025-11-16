@@ -29,8 +29,8 @@ TEST(E2E, READ_OutOfDataTriggersHandler) {
         "30 READ S$\n"
         "40 READ T$\n"
         "100 PRINT \"O\"\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_read_out_of_data";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_read_out_of_data";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll";
     auto bin = tmp / "program.out";
@@ -41,6 +41,6 @@ TEST(E2E, READ_OutOfDataTriggersHandler) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::ostringstream run; run << '"' << bin.string() << '"';
-    std::string out = runCommand(run.str());
+    const std::string out = runCommand(run.str());
     ASSERT_NE(out.find("O\n"), std::string::npos);
 }

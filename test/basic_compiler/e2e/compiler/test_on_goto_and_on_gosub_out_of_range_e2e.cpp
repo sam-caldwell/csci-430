@@ -24,8 +24,8 @@ TEST(E2E, OnGotoAndOnGosub_OutOfRange) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
     }
     auto buildAndRun = [](const std::string& name, const std::string& src) -> std::string {
-        std::string ir = Compiler::compileString(src);
-        std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / ("gwbasic_e2e_on_out_" + name);
+        const std::string ir = Compiler::compileString(src);
+        const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / ("gwbasic_e2e_on_out_" + name);
         std::filesystem::create_directories(tmp);
         auto ll = tmp / "program.ll";
         auto bin = tmp / "program.out";

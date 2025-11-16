@@ -19,7 +19,7 @@ TEST(Integration, IfBlock_Write_Channel_IR) {
         "50   WRITE #1, 3.14\n"
         "60 END IF\n"
         "70 CLOSE #1\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@fprintf"), std::string::npos) << ir;
 }
 

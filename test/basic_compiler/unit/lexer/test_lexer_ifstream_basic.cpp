@@ -16,9 +16,9 @@ using namespace gwbasic;
 TEST(Lexer, IfstreamReadsProgram) {
     // Arrange: ensure build/tmp exists and write a small BASIC program
     // Use ../tmp relative to the build dir so files land under build/tmp
-    std::filesystem::path tmpdir = std::filesystem::path("..") / "tmp" / "lexer_ifstream";
+    const std::filesystem::path tmpdir = std::filesystem::path("..") / "tmp" / "lexer_ifstream";
     std::filesystem::create_directories(tmpdir);
-    std::filesystem::path srcPath = tmpdir / "program.bas";
+    const std::filesystem::path srcPath = tmpdir / "program.bas";
 
     const std::string program =
         "10 LET A=1\r\n"

@@ -18,7 +18,7 @@ TEST(Integration, Codegen_DIM_MultiDim_Alloc_UsesProduct) {
         "10 DIM A(2,3)\n"
         "20 A(1,2)=5\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Default numeric kind is Single => float arrays
     ASSERT_NE(ir.find("alloca [12 x float]"), std::string::npos);
 }

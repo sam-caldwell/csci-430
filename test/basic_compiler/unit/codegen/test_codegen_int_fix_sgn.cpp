@@ -20,7 +20,7 @@ TEST(CodeGenMathMore, IntFixSgn) {
         "40 PRINT SGN(0)\n"
         "50 PRINT SGN(2)\n"
         "60 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // INT -> floor
     EXPECT_NE(ir.find("declare double @floor(double)"), std::string::npos);
     EXPECT_NE(ir.find("call double @floor(double"), std::string::npos);

@@ -21,7 +21,7 @@ TEST(CodeGenFor, PrintUsing_Breadth) {
         "50 PRINT #1, USING(\"%f\"), 2.5, \" Y\", J+0.1\n"
         "60 NEXT J\n"
         "100 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Using overrides and channel/stdio paths
     ASSERT_NE(ir.find("@fprintf"), std::string::npos);
     ASSERT_NE(ir.find("@printf"), std::string::npos);

@@ -27,9 +27,9 @@ TEST(E2E, SCREEN_ReturnsAsciiAfterPrint) {
         "10 PRINT \"ABC\"\n"
         "20 PRINT SCREEN(1,1), SCREEN(1,2), SCREEN(1,3)\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_screen";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_screen";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"program.ll";
     auto bin = tmp/"program.out";
@@ -38,9 +38,9 @@ TEST(E2E, SCREEN_ReturnsAsciiAfterPrint) {
 #ifndef __APPLE__
     c1 << " -lm";
 #endif
-    int ec = std::system(c1.str().c_str());
+    const int ec = std::system(c1.str().c_str());
     ASSERT_EQ(ec, 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     // Look for ASCII codes 65, 66, 67
     ASSERT_NE(out.find("65"), std::string::npos);
     ASSERT_NE(out.find("66"), std::string::npos);

@@ -18,7 +18,7 @@ TEST(CodeGenClear, EmitsVariableResets) {
         "10 A=5: B=9\n"
         "20 CLEAR\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_TRUE(irtest::irContainsAny(ir, {"fptrunc double 5.0 to float"}));
     ASSERT_TRUE(irtest::irContainsAny(ir, {"fptrunc double 9.0 to float"}));
     ASSERT_NE(ir.find("store float 0.0, ptr %A"), std::string::npos);

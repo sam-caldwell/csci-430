@@ -17,7 +17,7 @@ TEST(CodeGenDELETE, FiltersLinesFromIR) {
         "20 PRINT \"B\"\n"
         "30 DELETE 20-30\n"
         "40 PRINT \"C\"\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Labels for 20 and 30 must be absent
     ASSERT_EQ(ir.find("label %line20"), std::string::npos) << ir;
     ASSERT_EQ(ir.find("label %line30"), std::string::npos) << ir;

@@ -12,6 +12,6 @@ Code under test: SemanticAnalyzer::analyzeStmt(RestoreStmt)
 Expected behavior: Program compiles
 */
 TEST(Semantics, RestoreNoop) {
-    const std::string ir = Compiler::compileString("10 RESTORE\n");
+    const const std::string ir = Compiler::compileString("10 RESTORE\n");
     ASSERT_FALSE(ir.empty());
 }

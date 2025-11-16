@@ -29,12 +29,12 @@ TEST(E2E, CompileAndRun) {
 40 PRINT "Done"
 50 END
 )";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
 
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path ll = tmp / "program.ll";
-    std::filesystem::path bin = tmp / "program.out";
+    const std::filesystem::path ll = tmp / "program.ll";
+    const std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
 
     std::ostringstream c1; c1 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
@@ -42,10 +42,10 @@ TEST(E2E, CompileAndRun) {
     c1 << " -lm";
 #endif
     std::string cmd = c1.str();
-    int ec = std::system(cmd.c_str());
+    const int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0) << "Clang failed: " << cmd;
 
-    std::ostringstream r1; r1 << '"' << bin.string() << '"'; std::string out = runCommand(r1.str());
+    std::ostringstream r1; r1 << '"' << bin.string() << '"'; const std::string out = runCommand(r1.str());
     ASSERT_NE(out.find("7\n"), std::string::npos);
     ASSERT_NE(out.find("Done\n"), std::string::npos);
 }

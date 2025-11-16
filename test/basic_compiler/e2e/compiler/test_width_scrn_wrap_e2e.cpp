@@ -22,14 +22,14 @@ TEST(E2E, WIDTH_SCRN_WrapsAtWidth) {
         << "20 FOR I=1 TO 40: PRINT \"A\"; : NEXT I\n"
         << "30 PRINT \"B\";\n"
         << "40 PRINT SCREEN(2,1)\n";
-    std::string ir = Compiler::compileString(src.str());
-    std::filesystem::path ll = "e2e_width.ll"; std::filesystem::path bin = "e2e_width.out"; { std::ofstream f(ll); f << ir; }
+    const std::string ir = Compiler::compileString(src.str());
+    const std::filesystem::path ll = "e2e_width.ll"; const std::filesystem::path bin = "e2e_width.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("./") + bin.string());
+    const std::string out = runCommand(std::string("./") + bin.string());
     // Last line should be "66\n"
     ASSERT_NE(out.find("66\n"), std::string::npos) << out;
 }

@@ -33,8 +33,8 @@ TEST(E2E, SWAP_Numeric_And_String) {
         "23 PRINT A$\n"
         "24 PRINT B$\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_swap";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_swap";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"program.ll"; auto bin = tmp/"program.out";
     { std::ofstream f(ll); f << ir; }
@@ -43,7 +43,7 @@ TEST(E2E, SWAP_Numeric_And_String) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLines(out);
     ASSERT_FALSE(lines.empty());
     // First print line should contain "2 1"

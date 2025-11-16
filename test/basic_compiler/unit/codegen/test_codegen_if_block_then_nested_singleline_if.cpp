@@ -17,7 +17,7 @@ TEST(CodeGenIfBlock, Then_Nested_SingleLineIf) {
         "30 END IF\n"
         "40 END\n"
         "200 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("_if_then"), std::string::npos);
     ASSERT_NE(ir.find("line200"), std::string::npos);
     ASSERT_NE(ir.find("_cont_"), std::string::npos);

@@ -26,7 +26,7 @@ TEST(CodeGenIfBlock, Else_Input_And_On) {
         "300 END\n"
         "400 RETURN\n"
         "500 RETURN\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // ELSE label present
     ASSERT_NE(ir.find("_if_else"), std::string::npos);
     // INPUT lowering in ELSE

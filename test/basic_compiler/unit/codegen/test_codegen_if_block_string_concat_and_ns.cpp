@@ -23,7 +23,7 @@ TEST(CodeGenIfBlock, StringConcat_And_PrintSpacing) {
         "75 INPUT Z\n"
         "80 END IF\n"
         "90 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // String concatenation uses strcpy/strcat
     ASSERT_NE(ir.find("@strcpy"), std::string::npos);
     ASSERT_NE(ir.find("@strcat"), std::string::npos);

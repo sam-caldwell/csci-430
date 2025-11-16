@@ -17,7 +17,7 @@ TEST(Integration, LEN_Numeric_Var_IR_NoStrlen) {
         "10 A%=1\n"
         "20 PRINT LEN(A%)\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Ensure LEN(var) does not call strlen
     ASSERT_EQ(ir.find("call i64 @strlen(ptr"), std::string::npos);
     // Should embed a floating constant 2.0 for i16 sized variables

@@ -18,7 +18,7 @@ TEST(CodeGenStrings, EscapesCommonCharactersInGlobals) {
     // GW-BASIC style: backslashes are literal; quotes are doubled inside string
     // Include sequences: A\tB\nC"\D (where \t and \n are literal backslash+letter)
     const auto src = "10 PRINT \"A\\tB\\nC\"\"\\\\D\"\n20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Debug: write IR to a temp file for offline inspection during CI
     {
         std::ofstream f("ir_codegen_strings.ll");

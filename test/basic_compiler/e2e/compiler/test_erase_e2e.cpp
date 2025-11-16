@@ -31,8 +31,8 @@ TEST(E2E, ERASE_Redim_AllowsReuse) {
         "35 DIM A(3)\n"
         "36 DIM S$(2)\n"
         "60 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_erase";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_erase";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"program.ll"; auto bin = tmp/"program.out";
     { std::ofstream f(ll); f << ir; }
@@ -41,7 +41,7 @@ TEST(E2E, ERASE_Redim_AllowsReuse) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 0u);
 }

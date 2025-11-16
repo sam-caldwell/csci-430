@@ -14,7 +14,7 @@ TEST(CodeGenLIST, EmitsStdoutAndScreen) {
     const char* src =
         "10 PRINT \"X\"\n"
         "20 LIST\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("@printf"), std::string::npos);
     ASSERT_NE(ir.find("call void @gwb_screen_write"), std::string::npos);
 }

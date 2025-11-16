@@ -22,7 +22,7 @@ TEST(CodeGen, NumericPromotionAndStoreCasts) {
         "50 LET E# = A% + B& + C! + D#\n"
         "60 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
 
     // Allocations for scalar variables by kind
     ASSERT_NE(ir.find("alloca i16"), std::string::npos) << "expected i16 alloca for %";

@@ -15,7 +15,7 @@ using namespace gwbasic;
 TEST(CodeGenInput, PromptAndList_EmitsPrintfAndMultipleScanfs) {
     const auto src =
         "10 INPUT \"Vals:\"; A, B\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     ASSERT_NE(ir.find("@printf"), std::string::npos);
     // Expect at least two occurrences of scanf

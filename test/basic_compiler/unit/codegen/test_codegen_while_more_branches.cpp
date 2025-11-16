@@ -23,7 +23,7 @@ TEST(CodeGenWhile, MoreBranches) {
         "70 I=I+1\n"
         "80 WEND\n"
         "90 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Integer detection branches produce labels
     ASSERT_NE(ir.find("_wprint_int_"), std::string::npos);
     ASSERT_NE(ir.find("_wprint_flt_"), std::string::npos);

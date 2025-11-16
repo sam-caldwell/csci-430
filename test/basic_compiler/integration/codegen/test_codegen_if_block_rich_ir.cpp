@@ -44,7 +44,7 @@ TEST(Integration, IfBlock_Rich_IR_Coverage) {
         "500 PRINT \"GS2\"\n"
         "510 RETURN\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // IF block should have then/else labels and end
     EXPECT_NE(ir.find("_if_then"), std::string::npos);
     EXPECT_NE(ir.find("_if_else"), std::string::npos);

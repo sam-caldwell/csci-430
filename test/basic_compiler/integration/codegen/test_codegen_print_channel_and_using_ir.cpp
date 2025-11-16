@@ -17,7 +17,7 @@ TEST(CodeGenPrint, ChannelAndUsingIR) {
     const auto src =
         "10 PRINT #2, USING \"%d %0.2f\", 5, 3.14\n"
         "20 PRINT USING \"%f\", 7/2\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     // Expect fprintf path for channel (#2)
     EXPECT_TRUE(irtest::irContainsAny(ir, {"@fprintf(ptr"}));
     EXPECT_TRUE(ir.find("@gwb_files") != std::string::npos);

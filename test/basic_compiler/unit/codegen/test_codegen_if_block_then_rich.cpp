@@ -31,7 +31,7 @@ TEST(CodeGenIfBlock, Then_Rich_Features) {
         "300 END\n"
         "400 RETURN\n"
         "500 RETURN\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("_if_then"), std::string::npos);
     ASSERT_NE(ir.find("@scanf"), std::string::npos);
     ASSERT_NE(ir.find("_on_cont_"), std::string::npos);

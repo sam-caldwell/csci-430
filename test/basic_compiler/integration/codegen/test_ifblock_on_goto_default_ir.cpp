@@ -27,7 +27,7 @@ TEST(Integration, IfBlock_OnGoto_Default_IR) {
         "310 END\n"
         "400 PRINT \"D\"\n"
         "410 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Verify ON generates switch (even though index 0 goes to default)
     EXPECT_NE(ir.find("switch i32"), std::string::npos) << ir;
 }

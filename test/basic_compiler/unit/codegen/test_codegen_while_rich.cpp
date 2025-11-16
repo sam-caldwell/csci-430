@@ -48,7 +48,7 @@ TEST(CodeGenWhile, RichBodyExercisesBranches) {
         "920 PRINT \"GOSUB\"\n"
         "930 RETURN\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // While structure labels
     ASSERT_NE(ir.find("_while_cond"), std::string::npos);
     ASSERT_NE(ir.find("_while_body"), std::string::npos);

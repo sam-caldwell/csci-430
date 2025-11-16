@@ -15,7 +15,7 @@ using namespace gwbasic;
 TEST(CodeGenLLIST, EmitsPrinterOrStdoutFallback) {
     const char* src =
         "10 LLIST\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 0"), std::string::npos);
     // Must branch based on null printer handle
     ASSERT_NE(ir.find("icmp eq ptr"), std::string::npos);

@@ -17,7 +17,7 @@ TEST(Integration, IfBlock_Zones_Off_NoPad_IR) {
         "20 IF 1 THEN\n"
         "30   PRINT \"A\", 1\n"
         "40 END IF\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Assert stdout print path is present
     EXPECT_NE(ir.find("@gwb_screen_write"), std::string::npos) << ir;
 }

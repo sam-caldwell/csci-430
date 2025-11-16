@@ -22,7 +22,7 @@ TEST(CodeGenGosub, InlineBodyMidAndInput) {
         "110 MID$(T$(2),2,1)=\"A\"\n"
         "120 PRINT T$(2)\n"
         "130 RETURN\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Inline gosub emits entry and continuation labels
     ASSERT_NE(ir.find("_gosub_entry"), std::string::npos);
     ASSERT_NE(ir.find("_gosub_cont"), std::string::npos);

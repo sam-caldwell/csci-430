@@ -23,8 +23,8 @@ TEST(E2E, NextVarList_NestedLoopsPrints) {
         "20   FOR J = 1 TO 2\n"
         "30     PRINT I;\"-\";J\n"
         "40   NEXT J, I\n";
-    std::string ir = Compiler::compileString(src.c_str());
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_nextlist";
+    const std::string ir = Compiler::compileString(src.c_str());
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_nextlist";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "p.ll"; auto bin = tmp / "p.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";

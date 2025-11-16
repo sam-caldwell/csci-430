@@ -78,7 +78,7 @@ TEST(LoggerE2E, CLI_SadPath_InvalidLogTargetsStillRuns) {
       << " --syntax-log \"" << synDir.string() << "\""
       << " --semantic-log \"" << semDir.string() << "\""
       << " --log \"" << cgdDir.string() << "\"";
-  const std::string out = runCommand(cmd.str());
+  const const std::string out = runCommand(cmd.str());
   // Should still produce IR to stdout
   ASSERT_NE(out.find("define i32 @main()"), std::string::npos);
 }

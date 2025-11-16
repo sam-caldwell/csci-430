@@ -18,7 +18,7 @@ TEST(Integration, SWAP_Numeric_Array_Elements_IR) {
         "11 DIM B(2)\n"
         "20 SWAP A(1), B(1)\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("%A_arr"), std::string::npos);
     ASSERT_NE(ir.find("%B_arr"), std::string::npos);
     ASSERT_NE(ir.find("getelementptr inbounds [3 x float], ptr %A_arr, i64 0, i64"), std::string::npos);

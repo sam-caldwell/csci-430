@@ -21,7 +21,7 @@ TEST(CodeGenIfBlock, MidAssign_ArrayBoundsErrors) {
         "60 PRINT \"ALT\"\n"
         "70 END IF\n"
         "80 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("_mid_err2_"), std::string::npos);
     ASSERT_NE(ir.find("@gwb_err_code"), std::string::npos);
 }

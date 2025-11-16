@@ -17,6 +17,6 @@ TEST(SemanticsDefType, SuffixOverridesDEFSTR) {
         "20 LET C% = 3\n"
         "30 PRINT C%\n"
         "40 END\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

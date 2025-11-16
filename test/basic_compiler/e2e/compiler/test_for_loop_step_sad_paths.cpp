@@ -23,20 +23,20 @@ TEST(E2E, ForLoopSadPath_PositiveStepStartGreaterThanEnd) {
 30 NEXT I
 40 END
 )";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_for_sad_pos";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_for_sad_pos";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path ll = tmp / "program.ll";
-    std::filesystem::path bin = tmp / "program.out";
+    const std::filesystem::path ll = tmp / "program.ll";
+    const std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
     std::ostringstream c2; c2 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     c2 << " -lm";
 #endif
     std::string cmd = c2.str();
-    int ec = std::system(cmd.c_str());
+    const int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0);
-    std::ostringstream r2; r2 << '"' << bin.string() << '"'; std::string out = runCommand(r2.str());
+    std::ostringstream r2; r2 << '"' << bin.string() << '"'; const std::string out = runCommand(r2.str());
     ASSERT_EQ(out, "");
 }
 

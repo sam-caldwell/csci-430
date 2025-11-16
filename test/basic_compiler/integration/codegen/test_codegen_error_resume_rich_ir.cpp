@@ -20,7 +20,7 @@ TEST(Integration, ErrorResume_Rich_IR) {
         "100 RESUME NEXT\n"
         "110 RESUME 30\n"
         "120 RESUME\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Trap setup and error code handling present
     EXPECT_NE(ir.find("@gwb_err_trap_line"), std::string::npos);
     EXPECT_NE(ir.find("@gwb_err_code"), std::string::npos);

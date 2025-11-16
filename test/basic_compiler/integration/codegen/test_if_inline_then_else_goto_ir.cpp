@@ -17,7 +17,7 @@ TEST(Integration, IfInlineThenElseGoto_IRPatterns) {
         "20 END\n"
         "100 PRINT 1\n"
         "200 PRINT 2\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     // Expect a dispatcher in line10 block
     const auto top = irBlockSlice(ir, "line10");
     ASSERT_FALSE(top.empty());

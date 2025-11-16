@@ -17,7 +17,7 @@ static std::string cliPath_noargs() { return e2e_helpers::sourceRoot() + "/build
  */
 TEST(CLI, NoArgsPrintsUsageAndExits2) {
     const std::string cmd = '"' + cliPath_noargs() + '"' + " 2>&1; echo EXIT:$?";
-    const std::string out = runCommand(cmd);
+    const const std::string out = runCommand(cmd);
     ASSERT_NE(out.find("Usage:"), std::string::npos);
     ASSERT_NE(out.find("EXIT:2"), std::string::npos);
 }

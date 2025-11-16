@@ -18,7 +18,7 @@ TEST(Integration, SWAP_String_Vars_IR) {
         "11 B$=\"Y\"\n"
         "20 SWAP A$,B$\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("load ptr, ptr %A$"), std::string::npos);
     ASSERT_NE(ir.find("load ptr, ptr %B$"), std::string::npos);
     ASSERT_NE(ir.find("store ptr %"), std::string::npos);

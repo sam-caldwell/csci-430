@@ -17,7 +17,7 @@ TEST(Integration, SubroutineInline_MidAssign_IR) {
         "30 END\n"
         "100 MID$(B$(1),1)=\"X\"\n"
         "110 RETURN\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("_gosub_entry"), std::string::npos) << ir;
     EXPECT_NE(ir.find("@strncpy"), std::string::npos) << ir;
 }

@@ -14,7 +14,7 @@ TEST(CodeGenDefSeg, EmitsStoresToSeg) {
     const char* src =
         "10 DEF SEG = 64\n"
         "20 DEF SEG\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for store to @gwb_seg at least twice
     ASSERT_NE(ir.find("store i32"), std::string::npos);
     ASSERT_NE(ir.find("@gwb_seg"), std::string::npos);

@@ -13,7 +13,7 @@ TEST(Integration, CHDIR_IRContainsChdir) {
     const auto src =
         "10 CHDIR \"/tmp\"\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     ASSERT_NE(ir.find("@chdir"), std::string::npos);
 }

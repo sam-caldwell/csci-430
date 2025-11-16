@@ -29,8 +29,8 @@ TEST(E2E, IfInlineThenElseGoto_Branches) {
         src << "100 PRINT 1\n";
         src << "200 PRINT 2\n";
         const std::string s = src.str();
-        std::string ir = Compiler::compileString(s);
-        std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_if_inline_goto";
+        const std::string ir = Compiler::compileString(s);
+        const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_if_inline_goto";
         std::filesystem::create_directories(tmp);
         auto ll = tmp / (std::string("p_") + (a==1?"t":"f") + ".ll");
         auto bin = tmp / (std::string("p_") + (a==1?"t":"f") + ".out");

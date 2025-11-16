@@ -21,7 +21,7 @@ TEST(CodeGenMathMore, TrigLogExpCalls) {
         "50 PRINT LOG(1)\n"
         "60 PRINT EXP(1)\n"
         "70 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("declare double @sin(double)"), std::string::npos);
     EXPECT_NE(ir.find("call double @sin(double 0.0)"), std::string::npos);
     EXPECT_NE(ir.find("declare double @cos(double)"), std::string::npos);

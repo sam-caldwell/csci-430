@@ -24,8 +24,8 @@ TEST(E2E, OptionPrintZones_ProducesZoneSpacing) {
         "10 OPTION PRINTZONES ON\n"
         "20 PRINT \"A\", \"B\"\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_printzones";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_printzones";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"p.ll"; auto bin = tmp/"p.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
@@ -33,7 +33,7 @@ TEST(E2E, OptionPrintZones_ProducesZoneSpacing) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     // Expect multiple spaces between A and B (zone padding). Allow some tolerance.
     auto ai = out.find('A');
     auto bi = out.find('B');

@@ -24,8 +24,8 @@ TEST(E2E, LineInput_ReadsLineAndPrints) {
     auto src =
         "10 LINE INPUT A$\n"
         "20 PRINT A$\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_line_input";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_line_input";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll"; auto bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }

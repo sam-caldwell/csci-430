@@ -14,7 +14,7 @@ using namespace gwbasic;
 TEST(Integration, Codegen_Emits_Pow_Call) {
     std::string src = R"(10 PRINT 2 ^ 3
 )";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("declare double @pow(double, double)"), std::string::npos);
     ASSERT_NE(ir.find("call double @pow"), std::string::npos);
 }

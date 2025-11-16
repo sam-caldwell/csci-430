@@ -19,7 +19,7 @@ TEST(CodeGenIfBlock, Then_NumericNonUsing_Spacing) {
         "25 PRINT #1, 3\n"
         "30 END IF\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // THEN label present
     ASSERT_NE(ir.find("_if_then"), std::string::npos);
     // Integer/float split labels appear

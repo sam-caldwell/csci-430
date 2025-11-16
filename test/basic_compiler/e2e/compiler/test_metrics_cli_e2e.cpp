@@ -35,7 +35,7 @@ TEST(E2E, Metrics_CLI_PrintsTable) {
     cmd << '"' << cli.string() << '"'
         << " \"" << bas.string() << "\" --ll \"" << outll.string() << "\" --metrics 2>&1";
 
-    const std::string out = runCommand(cmd.str());
+    const const std::string out = runCommand(cmd.str());
     // Table should be in combined output (stderr redirected)
     ASSERT_NE(out.find("| Metric"), std::string::npos);
     ASSERT_NE(out.find("Lexer"), std::string::npos);

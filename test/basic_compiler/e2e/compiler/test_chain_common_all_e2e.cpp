@@ -22,7 +22,7 @@ using namespace e2e_helpers;
 TEST(E2E, Chain_Common_PassesVariable) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/pass-params.bas").c_str());
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_chain_common";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_chain_common";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "p.ll"; auto bin = tmp / "p.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
@@ -30,6 +30,6 @@ TEST(E2E, Chain_Common_PassesVariable) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_NE(out.find("123"), std::string::npos);
 }

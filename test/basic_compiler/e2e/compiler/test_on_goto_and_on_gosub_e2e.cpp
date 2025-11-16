@@ -29,19 +29,19 @@ TEST(E2E, OnGotoAndOnGosub) {
 100 PRINT 100: END
 200 PRINT 200: END
 )";
-        std::string ir = Compiler::compileString(src);
-        std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_on_goto";
+        const std::string ir = Compiler::compileString(src);
+        const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_on_goto";
         std::filesystem::create_directories(tmp);
-        std::filesystem::path ll = tmp / "program.ll";
-        std::filesystem::path bin = tmp / "program.out";
+        const std::filesystem::path ll = tmp / "program.ll";
+        const std::filesystem::path bin = tmp / "program.out";
         { std::ofstream f(ll); f << ir; }
         std::ostringstream c3; c3 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
         c3 << " -lm";
 #endif
-        int ec = std::system(c3.str().c_str());
+        const int ec = std::system(c3.str().c_str());
         ASSERT_EQ(ec, 0);
-        std::ostringstream r3; r3 << '"' << bin.string() << '"'; std::string out = runCommand(r3.str());
+        std::ostringstream r3; r3 << '"' << bin.string() << '"'; const std::string out = runCommand(r3.str());
         ASSERT_NE(out.find("200"), std::string::npos);
         ASSERT_EQ(out.find("999"), std::string::npos);
     }
@@ -51,19 +51,19 @@ TEST(E2E, OnGotoAndOnGosub) {
 100 PRINT "sub1": RETURN
 200 PRINT "sub2": RETURN
 )";
-        std::string ir = Compiler::compileString(src);
-        std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_on_gosub";
+        const std::string ir = Compiler::compileString(src);
+        const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_on_gosub";
         std::filesystem::create_directories(tmp);
-        std::filesystem::path ll = tmp / "program.ll";
-        std::filesystem::path bin = tmp / "program.out";
+        const std::filesystem::path ll = tmp / "program.ll";
+        const std::filesystem::path bin = tmp / "program.out";
         { std::ofstream f(ll); f << ir; }
         std::ostringstream c3; c3 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
         c3 << " -lm";
 #endif
-        int ec = std::system(c3.str().c_str());
+        const int ec = std::system(c3.str().c_str());
         ASSERT_EQ(ec, 0);
-        std::ostringstream r3; r3 << '"' << bin.string() << '"'; std::string out = runCommand(r3.str());
+        std::ostringstream r3; r3 << '"' << bin.string() << '"'; const std::string out = runCommand(r3.str());
         size_t p1 = out.find("sub1\n"); ASSERT_NE(p1, std::string::npos);
         size_t p2 = out.find("done\n", p1 + 1); ASSERT_NE(p2, std::string::npos);
     }

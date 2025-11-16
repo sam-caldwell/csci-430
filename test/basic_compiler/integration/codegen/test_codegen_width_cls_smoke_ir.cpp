@@ -14,7 +14,7 @@ TEST(Integration, WIDTH_then_CLS_Smoke_IR) {
     const char* src =
         "10 WIDTH 40\n"
         "20 CLS\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@gwb_screen_cols"), std::string::npos) << ir;
     EXPECT_NE(ir.find("@gwb_screen"), std::string::npos) << ir; // memset target
 }

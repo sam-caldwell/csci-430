@@ -18,7 +18,7 @@ TEST(Integration, StringArray_IR_UsesPtrElements) {
         "20 A$(2)=\"HI\"\n"
         "30 PRINT A$(2)\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Expect element type as ptr in gep and store ptr
     // Default OPTION BASE 0 -> upper bound 5 yields extent 6
     ASSERT_NE(ir.find("alloca [6 x ptr]"), std::string::npos);

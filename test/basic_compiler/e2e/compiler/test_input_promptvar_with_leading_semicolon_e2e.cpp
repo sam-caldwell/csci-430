@@ -25,8 +25,8 @@ TEST(E2E, Input_PromptVar_WithLeadingSemicolon) {
         "10 P$=\"Enter:\"\n"
         "20 INPUT ; P$, X\n"
         "30 PRINT X\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_input_prompt_var";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_input_prompt_var";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll"; auto bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }

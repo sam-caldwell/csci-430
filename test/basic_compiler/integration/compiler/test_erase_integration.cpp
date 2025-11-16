@@ -24,7 +24,7 @@ TEST(Integration, ERASE_ZerosArrays_IR) {
         "11 DIM S$(2)\n"
         "20 ERASE A,S$\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for array allocas
     ASSERT_NE(ir.find("%A_arr"), std::string::npos);
     ASSERT_NE(ir.find("%S$_arr"), std::string::npos);

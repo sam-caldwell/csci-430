@@ -24,7 +24,7 @@ TEST(Integration, Codegen_Mixed_Array_Types_IR) {
         "50 D#(1)=1.5\n"
         "60 PRINT A%(1),B&(1),C!(1),D#(1)\n"
         "70 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Typed allocations
     ASSERT_NE(ir.find("alloca [4 x i32]"), std::string::npos);   // A%
     ASSERT_NE(ir.find("alloca [4 x i64]"), std::string::npos);   // B&

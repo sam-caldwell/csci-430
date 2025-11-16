@@ -30,18 +30,18 @@ TEST(E2E, FactorialFromInput) {
 40 PRINT F
 50 END
 )";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_fact";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_fact";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path ll = tmp / "program.ll";
-    std::filesystem::path bin = tmp / "program.out";
+    const std::filesystem::path ll = tmp / "program.ll";
+    const std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
     std::ostringstream c5; c5 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     c5 << " -lm";
 #endif
     std::string cmd = c5.str();
-    int ec = std::system(cmd.c_str());
+    const int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0);
     std::string out = runCommandWithInput(bin.string(), "5\\n");
     ASSERT_NE(out.find("120\n"), std::string::npos);

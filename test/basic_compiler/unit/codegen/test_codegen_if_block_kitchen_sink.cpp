@@ -46,7 +46,7 @@ TEST(CodeGenIfBlock, KitchenSink) {
         "500 RETURN\n"
         "900 END\n"
         "910 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Spot check a few signatures that indicate most branches were reached
     ASSERT_NE(ir.find("@snprintf"), std::string::npos) << "screen write via snprintf present";
     ASSERT_NE(ir.find("@srand48"), std::string::npos);

@@ -15,6 +15,6 @@ TEST(Semantics, StringConcatTypeOf) {
     const char* src =
         "10 LET S$ = \"A\" + \"B\"\n"
         "20 END\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
 }

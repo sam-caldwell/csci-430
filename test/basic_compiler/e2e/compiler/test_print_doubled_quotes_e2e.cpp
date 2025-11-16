@@ -25,22 +25,22 @@ TEST(E2E, PrintDoubledQuotes_Works) {
     }
     // BASIC: PRINT "He said ""OK"""
     const std::string src = "10 PRINT \"He said \"\"OK\"\"\"\n20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
 
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path ll = tmp / "print_dq.ll";
-    std::filesystem::path bin = tmp / "print_dq.out";
+    const std::filesystem::path ll = tmp / "print_dq.ll";
+    const std::filesystem::path bin = tmp / "print_dq.out";
     { std::ofstream f(ll); f << ir; }
 
     std::ostringstream c1; c1 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     c1 << " -lm";
 #endif
-    int ec = std::system(c1.str().c_str());
+    const int ec = std::system(c1.str().c_str());
     ASSERT_EQ(ec, 0) << "Clang failed: " << c1.str();
 
     std::ostringstream r1; r1 << '"' << bin.string() << '"';
-    std::string out = runCommand(r1.str());
+    const std::string out = runCommand(r1.str());
     ASSERT_NE(out.find("He said \"OK\"\n"), std::string::npos);
 }

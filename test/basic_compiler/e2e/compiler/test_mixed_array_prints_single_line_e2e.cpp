@@ -35,8 +35,8 @@ TEST(E2E, MixedArrayPrints_SingleLine) {
         "33 H#(1)=6.75\n"
         "40 PRINT A%,E%(1),C!,G!(1),D#,H#(1),B&,F&(1)\n"
         "50 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_mixed_prints_single";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_mixed_prints_single";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"program.ll"; auto bin = tmp/"program.out";
     { std::ofstream f(ll); f << ir; }
@@ -45,7 +45,7 @@ TEST(E2E, MixedArrayPrints_SingleLine) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 1u);
     EXPECT_EQ(lines[0], std::string("1 3 2.250000 4.500000 5.125000 6.750000 -2 -7"));

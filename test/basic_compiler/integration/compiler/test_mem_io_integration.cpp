@@ -21,7 +21,7 @@ TEST(Integration, MemIO_IRContainsFileCalls) {
         "20 BSAVE \"f.bin\", 0, 10\n"
         "30 BLOAD \"f.bin\", 0\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     ASSERT_NE(ir.find("@fopen"), std::string::npos);
     ASSERT_NE(ir.find("@fwrite"), std::string::npos);

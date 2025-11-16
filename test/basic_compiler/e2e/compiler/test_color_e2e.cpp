@@ -27,9 +27,9 @@ TEST(E2E, COLOR_SetsAnsiCodes) {
         "10 COLOR 2,4\n"
         "20 PRINT \"X\"\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_color";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_color";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"program.ll";
     auto bin = tmp/"program.out";
@@ -38,9 +38,9 @@ TEST(E2E, COLOR_SetsAnsiCodes) {
 #ifndef __APPLE__
     c1 << " -lm";
 #endif
-    int ec = std::system(c1.str().c_str());
+    const int ec = std::system(c1.str().c_str());
     ASSERT_EQ(ec, 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     // Expect ESC[32m (green fg) and ESC[41m (red bg)
     ASSERT_NE(out.find("\033[32m"), std::string::npos);
     ASSERT_NE(out.find("\033[41m"), std::string::npos);

@@ -15,9 +15,9 @@ using namespace gwbasic;
 TEST(Lexer, IfstreamHandlesEmptyFile) {
     // Arrange: create an empty file under build/tmp
     // Use ../tmp relative to the build dir so files land under build/tmp
-    std::filesystem::path tmpdir = std::filesystem::path("..") / "tmp" / "lexer_ifstream";
+    const std::filesystem::path tmpdir = std::filesystem::path("..") / "tmp" / "lexer_ifstream";
     std::filesystem::create_directories(tmpdir);
-    std::filesystem::path srcPath = tmpdir / "empty.bas";
+    const std::filesystem::path srcPath = tmpdir / "empty.bas";
 
     {
         std::ofstream out(srcPath, std::ios::trunc);

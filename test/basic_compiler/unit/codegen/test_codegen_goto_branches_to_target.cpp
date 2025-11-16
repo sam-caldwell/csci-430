@@ -16,7 +16,7 @@ TEST(CodeGenFlow, GotoBranchesToTarget) {
         "10 GOTO 200\n"
         "100 PRINT 1\n"
         "200 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("line10:"), std::string::npos);
     EXPECT_NE(ir.find("  br label %line200"), std::string::npos);
 }

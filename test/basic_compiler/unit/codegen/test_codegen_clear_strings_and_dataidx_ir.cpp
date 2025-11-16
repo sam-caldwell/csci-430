@@ -17,7 +17,7 @@ TEST(CodeGenClear, EmitsStringNullAndDataIdxReset) {
         "10 S$=\"HI\"\n"
         "20 CLEAR\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("store ptr null, ptr %S$"), std::string::npos);
     ASSERT_NE(ir.find("store i32 0, ptr @gwb_data_idx"), std::string::npos);
 }

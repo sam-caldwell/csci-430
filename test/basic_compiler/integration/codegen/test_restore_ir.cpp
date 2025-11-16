@@ -15,6 +15,6 @@ TEST(Integration, RESTORE_ResetsDataIdxIR) {
     const std::string src = R"(10 RESTORE
 20 END
 )";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("store i32 0, ptr @gwb_data_idx"), std::string::npos);
 }

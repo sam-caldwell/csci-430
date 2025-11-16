@@ -16,7 +16,7 @@ TEST(CodeGenMath, SqrtCallEmitted) {
     const auto src =
         "10 PRINT SQR(9)\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("declare double @sqrt(double)"), std::string::npos);
     EXPECT_NE(ir.find("call double @sqrt(double 9.0)"), std::string::npos);
 }

@@ -18,7 +18,7 @@ TEST(Integration, IfBlock_MidAssign_IR) {
         "40   MID$(A$,2)=\"Z\"\n"
         "50   MID$(B$(1),3,1)=\"Q\"\n"
         "60 END IF\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@strncpy"), std::string::npos) << ir;
     EXPECT_NE(ir.find("getelementptr inbounds i8, ptr"), std::string::npos) << ir;
 }

@@ -18,7 +18,7 @@ TEST(Integration, WHILE_MidAssign_Array_IR) {
         "40   MID$(A$(I),1)=\"Z\"\n"
         "50   I=I+1\n"
         "60 WEND\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("getelementptr inbounds ["), std::string::npos) << ir;
     EXPECT_NE(ir.find("@gwb_err_trap_line"), std::string::npos) << ir; // error dispatch helper presence
 }

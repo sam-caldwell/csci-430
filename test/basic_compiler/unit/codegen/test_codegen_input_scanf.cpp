@@ -15,7 +15,7 @@ TEST(CodeGenLoopsInput, InputStatementScanf) {
     const auto src =
         "10 INPUT X\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("getelementptr inbounds i8, ptr @.fmt_in"), std::string::npos);
     EXPECT_NE(ir.find("call i32 (ptr, ...) @scanf"), std::string::npos);
 }

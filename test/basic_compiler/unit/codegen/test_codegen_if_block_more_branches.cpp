@@ -26,7 +26,7 @@ TEST(CodeGenIfBlock, MoreBranches) {
         "300 END\n"
         "400 RETURN\n"
         "500 RETURN\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Randomize uses srand48 path
     ASSERT_NE(ir.find("@srand48"), std::string::npos);
     // Nested FOR compiles

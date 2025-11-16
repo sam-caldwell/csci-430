@@ -18,7 +18,7 @@ TEST(CodeGenRun, RunNoArg_BranchesToFirstLine) {
         "10 LET X = 5\n"
         "20 RUN \"demo.bas\"\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Expect branch back to the first line label (line10)
     EXPECT_NE(ir.find("line20:"), std::string::npos);
     EXPECT_NE(ir.find("br label %line10"), std::string::npos);

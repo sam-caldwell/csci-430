@@ -21,7 +21,7 @@ TEST(CodeGenMathExt, RndCintCsngCdbl) {
         "30 PRINT CSNG(1.5)\n"
         "40 PRINT CDBL(2)\n"
         "50 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // RND -> gwb_rnd helper
     EXPECT_NE(ir.find("define double @gwb_rnd(double"), std::string::npos);
     EXPECT_NE(ir.find("call double @gwb_rnd(double"), std::string::npos);

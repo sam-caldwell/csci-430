@@ -28,8 +28,8 @@ TEST(E2E, OnErrorGotoZeroDisablesTrap) {
 30 ERROR 5
 40 PRINT 2
 )";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_on_error_zero";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_on_error_zero";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll";
     auto bin = tmp / "program.out";
@@ -40,7 +40,7 @@ TEST(E2E, OnErrorGotoZeroDisablesTrap) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::ostringstream run; run << '"' << bin.string() << '"';
-    std::string out = runCommand(run.str());
+    const std::string out = runCommand(run.str());
     // With trap disabled, program branches to exit at ERROR; expect only '1' printed
     ASSERT_NE(out.find("1\n"), std::string::npos);
     ASSERT_EQ(out.find("2\n"), std::string::npos);

@@ -27,8 +27,8 @@ TEST(E2E, If_ThenLine_ElseLine_Branches) {
         src << "30 END\n";
         src << "100 PRINT 1\n";
         src << "200 PRINT 2\n";
-        std::string ir = Compiler::compileString(src.str());
-        std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_if_then_else_line";
+        const std::string ir = Compiler::compileString(src.str());
+        const std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_if_then_else_line";
         std::filesystem::create_directories(tmp);
         auto ll = tmp/ (std::string("p_") + (a==0?"t":"f") + ".ll");
         auto bin = tmp/ (std::string("p_") + (a==0?"t":"f") + ".out");

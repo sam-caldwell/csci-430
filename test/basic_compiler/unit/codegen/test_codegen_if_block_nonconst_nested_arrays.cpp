@@ -75,7 +75,7 @@ TEST(CodeGenIfBlock, NonConst_Nested_3D_Arrays) {
         "500 RETURN\n"
         "900 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // IF structure
     ASSERT_NE(ir.find("_if_then"), std::string::npos);
     ASSERT_NE(ir.find("_if_else"), std::string::npos);

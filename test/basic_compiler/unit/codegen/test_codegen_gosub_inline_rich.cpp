@@ -18,7 +18,7 @@ TEST(CodeGenGosub, InlineRichBody) {
         "100 PRINT 1: INPUT Z\n"
         "105 MID$(S$,1,1)=\"Q\"\n"
         "110 RETURN\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Inline gosub labels
     ASSERT_NE(ir.find("_gosub_entry"), std::string::npos);
     ASSERT_NE(ir.find("_gosub_cont"), std::string::npos);

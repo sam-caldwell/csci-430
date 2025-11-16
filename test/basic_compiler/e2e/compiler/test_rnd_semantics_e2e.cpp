@@ -31,18 +31,18 @@ TEST(E2E, RndZeroRepeatsLast) {
         "30 PRINT A\n"
         "40 PRINT RND(0)\n"
         "50 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_rnd_zero";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_rnd_zero";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path ll = tmp / "program.ll";
-    std::filesystem::path bin = tmp / "program.out";
+    const std::filesystem::path ll = tmp / "program.ll";
+    const std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 2u);
     EXPECT_EQ(lines[0], lines[1]);

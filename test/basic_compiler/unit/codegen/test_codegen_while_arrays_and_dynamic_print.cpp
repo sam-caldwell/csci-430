@@ -25,7 +25,7 @@ TEST(CodeGenWhile, Arrays_And_DynamicPrint) {
         "54 I=I+1\n"
         "60 WEND\n"
         "70 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Array element access triggers gep computations
     ASSERT_NE(ir.find("getelementptr inbounds ["), std::string::npos);
     // Dynamic integer detection branches present

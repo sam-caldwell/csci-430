@@ -34,8 +34,8 @@ TEST(E2E, IntDiv_Mod_Behavior) {
         "90 PRINT 5.9 MOD 2.1\n"  // 1 (truncate operands)
         "100 END\n";
 
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_intdiv_mod";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_intdiv_mod";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"program.ll"; auto bin = tmp/"program.out";
     { std::ofstream f(ll); f << ir; }
@@ -44,7 +44,7 @@ TEST(E2E, IntDiv_Mod_Behavior) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 9u);
     EXPECT_EQ(lines[0], std::string("2"));

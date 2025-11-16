@@ -18,7 +18,7 @@ TEST(Integration, Codegen_IntArray_i32_StoresAndLoads) {
         "20 A%(1)=2.7\n"
         "30 PRINT A%(1)\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Alloca and GEP on i32
     ASSERT_NE(ir.find("alloca [4 x i32]"), std::string::npos);
     ASSERT_NE(ir.find("getelementptr inbounds [4 x i32]"), std::string::npos);

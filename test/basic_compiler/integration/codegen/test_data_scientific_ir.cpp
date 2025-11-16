@@ -14,7 +14,7 @@ using namespace gwbasic;
 TEST(Integration, DATA_Supports_D_Exponent) {
     std::string src = R"(10 DATA 1D2
 )";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for @gwb_data_num with 1.000000e+02 exactly once
     ASSERT_NE(ir.find("@gwb_data_num"), std::string::npos);
     ASSERT_NE(ir.find("double 1.000000e+02"), std::string::npos);

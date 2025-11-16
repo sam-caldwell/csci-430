@@ -17,7 +17,7 @@ TEST(CodeGenRND, EmitsHelperAndGlobal) {
     const auto src =
         "10 PRINT RND(1)\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@gwb_last_rnd = global float 0.0"), std::string::npos);
     EXPECT_NE(ir.find("define double @gwb_rnd(double"), std::string::npos);
     EXPECT_NE(ir.find("call double @gwb_rnd(double"), std::string::npos);

@@ -25,7 +25,7 @@ TEST(CLI, WritesLLFileWhenRequested) {
     const fs::path ll  = tmp / "a.ll";
     { std::ofstream f(bas); f << "10 PRINT 5\n"; }
     const std::string cmd = '"' + cliPath_ll() + '"' + " \"" + bas.string() + "\" --ll \"" + ll.string() + "\" --no-logs 2>&1; echo EXIT:$?";
-    const std::string out = runCommand(cmd);
+    const const std::string out = runCommand(cmd);
     ASSERT_NE(out.find("EXIT:0"), std::string::npos);
     ASSERT_TRUE(fs::exists(ll));
     // Verify IR content

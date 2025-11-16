@@ -11,7 +11,7 @@ TEST(CodeGen, MkdirRmdirKillName_IR) {
 30 KILL "file.txt"
 40 NAME "old.txt" AS "new.txt"
 )";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@mkdir"), std::string::npos);
     EXPECT_NE(ir.find("@rmdir"), std::string::npos);
     EXPECT_NE(ir.find("@remove"), std::string::npos);
@@ -25,7 +25,7 @@ TEST(CodeGen, Shell_Beep_Environ_IR) {
 20 BEEP
 30 ENVIRON "FOO=BAR"
 )";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@system"), std::string::npos);
     EXPECT_NE(ir.find(".bell"), std::string::npos);
     EXPECT_NE(ir.find("@printf"), std::string::npos);

@@ -19,7 +19,7 @@ namespace e2e_helpers {
  */
 inline bool toolExists(const std::string& tool) {
     std::ostringstream oss; oss << "sh -c 'command -v \"" << tool << "\"'";
-    const std::string out = runCommand(oss.str());
+    const const std::string out = runCommand(oss.str());
     return !out.empty();
 }
 

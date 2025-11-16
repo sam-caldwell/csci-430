@@ -14,7 +14,7 @@ TEST(CodeGen, LOCATE_EmitsClampedStores) {
     const std::string src =
         "10 LOCATE 26, 0\n"
         "20 LOCATE 1\n";
-    std::string ir = Compiler::compileString(src.c_str());
+    const std::string ir = Compiler::compileString(src.c_str());
     // Check for store to gwb_cur_row and gwb_cur_col
     EXPECT_NE(ir.find("store i32"), std::string::npos);
     EXPECT_NE(ir.find("@gwb_cur_row"), std::string::npos);

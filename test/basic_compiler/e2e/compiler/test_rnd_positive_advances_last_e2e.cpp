@@ -31,8 +31,8 @@ TEST(E2E, RndPositiveAdvancesLast) {
         "50 PRINT B\n"
         "60 PRINT RND(0)\n"
         "70 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_rnd_pos";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_rnd_pos";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll"; auto bin = tmp / "program.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
@@ -40,7 +40,7 @@ TEST(E2E, RndPositiveAdvancesLast) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 3u);
     EXPECT_NE(lines[0], lines[1]);

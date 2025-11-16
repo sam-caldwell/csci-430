@@ -16,7 +16,7 @@ TEST(Integration, For_Negative_Step_And_Zones_IR) {
         "20   PRINT I,\n"
         "30 NEXT I\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Negative step check in condition
     EXPECT_NE(ir.find("fcmp olt double"), std::string::npos) << ir; // step < 0
     // PRINT comma padding for zones

@@ -18,7 +18,7 @@ TEST(Integration, Codegen_LongArray_i64_StoresAndLoads) {
         "20 B&(2)=42.9\n"
         "30 PRINT B&(2)\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Alloca and GEP on i64
     ASSERT_NE(ir.find("alloca [4 x i64]"), std::string::npos);
     ASSERT_NE(ir.find("getelementptr inbounds [4 x i64]"), std::string::npos);

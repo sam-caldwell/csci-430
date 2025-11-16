@@ -23,7 +23,7 @@ TEST(CodeGenIfBlock, StringUsing_WithAndWithoutChannel) {
         "50 END IF\n"
         "60 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("@fprintf"), std::string::npos);
     ASSERT_NE(ir.find("@printf"), std::string::npos);
     ASSERT_NE(ir.find("@snprintf"), std::string::npos);

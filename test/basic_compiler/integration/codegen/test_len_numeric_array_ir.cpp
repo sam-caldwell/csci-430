@@ -17,7 +17,7 @@ TEST(Integration, LEN_Numeric_Array_IR_NoStrlen) {
         "10 DIM A%(3)\n"
         "20 PRINT LEN(A%(1))\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Header may declare strlen; ensure we do not call it for LEN numeric
     ASSERT_EQ(ir.find("call i64 @strlen(ptr"), std::string::npos);
     // Should embed a floating constant 2.0 for i16 sized variables

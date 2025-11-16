@@ -14,7 +14,7 @@ TEST(Integration, CHR_ASC_IRPatterns) {
         "10 PRINT CHR$(65)\n"
         "20 PRINT ASC(\"B\")\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     ASSERT_NE(ir.find("call ptr @malloc(i64 2)"), std::string::npos);
     ASSERT_NE(ir.find("load i8, ptr"), std::string::npos);

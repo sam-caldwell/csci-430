@@ -18,7 +18,7 @@ TEST(CodeGenLineBlock, MemIO_POKE_BSAVE_BLOAD) {
         "20 BSAVE \"OUT.BIN\", 0, 128\n"
         "30 BLOAD \"OUT.BIN\", 0\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // POKE path: writes a byte to @gwb_mem via computed address
     ASSERT_NE(ir.find("@gwb_mem"), std::string::npos);
     ASSERT_NE(ir.find("store i8"), std::string::npos);

@@ -18,7 +18,7 @@ TEST(CodeGenWhile, PrintNextStartsWithSpace) {
         "40 I=I+1\n"
         "50 WEND\n"
         "60 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("@.fmt_int_ns"), std::string::npos);
     ASSERT_NE(ir.find("@.fmt_num_ns"), std::string::npos);
 }

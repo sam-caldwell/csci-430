@@ -17,7 +17,7 @@ TEST(Integration, CIRCLE_IRPatterns) {
         "10 SCREEN 1\n"
         "20 CIRCLE (5,5), 2,, 0, 3.14\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("define void @gwb_gfx_circle"), std::string::npos);
     ASSERT_NE(ir.find("@gwb_gfx_ready"), std::string::npos);
     ASSERT_NE(ir.find("call void @gwb_gfx_circle(double"), std::string::npos);

@@ -16,7 +16,7 @@ TEST(CodeGenScreenStmt, EmitsGraphicsInit) {
     const char* src =
         "10 SCREEN 1\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("define void @gwb_graphics_init"), std::string::npos);
     ASSERT_NE(ir.find("call void @gwb_graphics_init(i32"), std::string::npos);
 }

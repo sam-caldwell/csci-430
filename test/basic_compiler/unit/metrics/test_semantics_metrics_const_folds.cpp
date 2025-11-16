@@ -23,7 +23,7 @@ TEST(SemanticsMetrics, ConstFolds_CountersIncrement) {
         "60 END\n";
 
     Metrics m; auto* prev = gMetrics; gMetrics = &m;
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     (void)ir;
     gMetrics = prev;
 

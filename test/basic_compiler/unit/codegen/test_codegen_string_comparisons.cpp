@@ -18,7 +18,7 @@ TEST(CodeGenStrings, StringComparisonsUseStrcmp) {
         "15 IF \"A\" < \"B\" THEN 30\n"
         "20 PRINT 1\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@.fmt_num"), std::string::npos);
     EXPECT_NE(ir.find("@strcmp"), std::string::npos);
 }

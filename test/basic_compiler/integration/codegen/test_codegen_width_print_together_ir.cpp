@@ -14,7 +14,7 @@ TEST(Integration, WIDTH_PRINT_Together_IR) {
     const char* src =
         "10 WIDTH 40\n"
         "20 PRINT \"HELLO\";\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@gwb_screen_cols"), std::string::npos) << ir; // WIDTH target
     EXPECT_NE(ir.find("@gwb_screen_write"), std::string::npos) << ir; // PRINT mirroring
 }

@@ -16,7 +16,7 @@ TEST(Integration, Open_Modes_IR_ContainsModeStrings) {
     const char* src =
         "10 OPEN \"r.txt\" FOR INPUT AS #1\n"
         "20 OPEN \"w.txt\" FOR OUTPUT AS #2\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@.mode_r"), std::string::npos);
     EXPECT_NE(ir.find("@.mode_w"), std::string::npos);
     EXPECT_NE(ir.find("@gwb_files"), std::string::npos);

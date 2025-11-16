@@ -23,7 +23,7 @@ using namespace e2e_helpers;
 TEST(E2E, VariableState_InitialValues) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     std::string srcIR = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/variable-state-test.bas").c_str());
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_var_state";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_var_state";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "prog.ll"; auto bin = tmp / "prog.out";
     { std::ofstream f(ll); f << srcIR; }
@@ -32,7 +32,7 @@ TEST(E2E, VariableState_InitialValues) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     // Expect dynamic formatting: integers print without decimals
     ASSERT_NE(out.find("initial state: X= 99 Y= 42"), std::string::npos);
 }

@@ -40,7 +40,7 @@ TEST(CodeGenWhile, DeepNesting_3D_Arrays) {
         "310 RETURN\n"
         "900 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("_while_cond"), std::string::npos);
     ASSERT_NE(ir.find("_for_cond"), std::string::npos);
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);

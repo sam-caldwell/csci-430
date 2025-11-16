@@ -22,7 +22,7 @@ TEST(Integration, SubroutineInline_Kitchen_Sink_IR) {
         "140 I=I+1\n"
         "145 NEXT J\n"
         "150 RETURN\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("_gosub_entry"), std::string::npos) << ir;
     EXPECT_NE(ir.find("_gosub_cont"), std::string::npos) << ir;
     EXPECT_NE(ir.find("IfStmt ->"), std::string::npos) << ir; // log marker typically present

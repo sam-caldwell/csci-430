@@ -14,7 +14,7 @@ TEST(Integration, CDBL_CompilesToNoopCast) {
     const auto src =
         "10 PRINT CDBL(2)\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     // Presence of printf is expected due to PRINT
     ASSERT_NE(ir.find("declare i32 @printf(ptr, ...)"), std::string::npos);

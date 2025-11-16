@@ -29,9 +29,9 @@ TEST(E2E, ResumeLine_FlowsToExplicitTarget) {
         "30 PRINT 3\n"
         "100 PRINT \"H\"\n"
         "110 RESUME 30\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_resume_line";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_resume_line";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll"; auto bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
@@ -41,7 +41,7 @@ TEST(E2E, ResumeLine_FlowsToExplicitTarget) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::ostringstream run; run << '"' << bin.string() << '"';
-    std::string out = runCommand(run.str());
+    const std::string out = runCommand(run.str());
     // Expect to see 1, then H, then 3; and not 2
     size_t p1 = out.find("1\n"); ASSERT_NE(p1, std::string::npos);
     size_t pH = out.find("H\n", p1+1); ASSERT_NE(pH, std::string::npos);

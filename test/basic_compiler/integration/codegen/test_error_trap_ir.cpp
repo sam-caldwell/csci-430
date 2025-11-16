@@ -20,7 +20,7 @@ TEST(Integration, ErrorTrapIR) {
 310 RESUME NEXT
 320 PRINT 3
 )";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Check globals and key patterns
     ASSERT_NE(ir.find("@gwb_err_trap_line"), std::string::npos);
     ASSERT_NE(ir.find("store i32 300, ptr @gwb_err_trap_line"), std::string::npos);

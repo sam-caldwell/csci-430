@@ -17,7 +17,7 @@ TEST(Integration, Codegen_Emits_Logical_AND_OR_NOT) {
 20 PRINT 1 OR 0
 30 PRINT NOT 0
 )";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for i1 and/or ops
     ASSERT_NE(ir.find(" and i1 "), std::string::npos);
     ASSERT_NE(ir.find(" or i1 "), std::string::npos);

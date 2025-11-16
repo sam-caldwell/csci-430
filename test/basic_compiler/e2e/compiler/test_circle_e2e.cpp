@@ -25,19 +25,19 @@ TEST(E2E, CIRCLE_CompilesAndRunsSafely) {
         "20 CIRCLE (100,100), 50, 3, 0, 6.28, 1.0\n"
         "30 PRINT \"CIRCLE OK\"\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_circle";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_circle";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path ll = tmp / "program.ll";
-    std::filesystem::path bin = tmp / "program.out";
+    const std::filesystem::path ll = tmp / "program.ll";
+    const std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
     std::ostringstream c2; c2 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     c2 << " -lm";
 #endif
-    int ec = std::system(c2.str().c_str());
+    const int ec = std::system(c2.str().c_str());
     ASSERT_EQ(ec, 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_NE(out.find("CIRCLE OK\n"), std::string::npos);
 }
 

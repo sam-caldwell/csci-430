@@ -15,7 +15,7 @@ TEST(CodeGenLoops, ForLoopMultilineBody) {
         "20 PRINT I\n"
         "30 NEXT I\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for loop structure and a printf call from PRINT in the body
     EXPECT_NE(ir.find("line10_for_cond"), std::string::npos);
     EXPECT_NE(ir.find("line10_for_body"), std::string::npos);

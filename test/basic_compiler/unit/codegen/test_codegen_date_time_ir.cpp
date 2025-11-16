@@ -14,7 +14,7 @@ TEST(CodeGenDateTime, IntrinsicsIR) {
     const char* src =
         "10 PRINT DATE$\n"
         "20 PRINT TIME$\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("declare i64 @strftime(ptr, i64, ptr, ptr)"), std::string::npos);
     ASSERT_NE(ir.find("declare ptr @localtime(ptr)"), std::string::npos);
     ASSERT_NE(ir.find("@.fmt_date"), std::string::npos);

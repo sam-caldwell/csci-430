@@ -24,7 +24,7 @@ TEST(CodeGenLineBlock, SWAP_Arrays_And_Scalars) {
         "41 SWAP S$, S$(2)\n"
         "42 SWAP C!(1), A%(1)\n"
         "50 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // String swap uses load/store ptr
     ASSERT_NE(ir.find("load ptr, ptr"), std::string::npos);
     ASSERT_NE(ir.find("store ptr"), std::string::npos);

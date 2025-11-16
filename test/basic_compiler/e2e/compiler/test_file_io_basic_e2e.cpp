@@ -26,8 +26,8 @@ TEST(E2E, FileOutput_PRINT_ToFile) {
     src << "10 OPEN \"" << outfile << "\" FOR OUTPUT AS #1\n"
         << "20 PRINT #1, \"HELLO\"\n"
         << "30 CLOSE #1\n";
-    std::string ir = Compiler::compileString(src.str());
-    std::filesystem::path ll = "e2e_print.ll"; std::filesystem::path bin = "e2e_print.out"; { std::ofstream f(ll); f << ir; }
+    const std::string ir = Compiler::compileString(src.str());
+    const std::filesystem::path ll = "e2e_print.ll"; const std::filesystem::path bin = "e2e_print.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     cmd << " -lm";
@@ -54,13 +54,13 @@ TEST(E2E, FileInput_LINE_INPUT_FromFile) {
     src << "10 OPEN \"" << infile << "\" FOR INPUT AS #1\n"
         << "20 LINE INPUT #1, S$\n"
         << "30 PRINT S$\n";
-    std::string ir = Compiler::compileString(src.str());
-    std::filesystem::path ll = "e2e_lineinput.ll"; std::filesystem::path bin = "e2e_lineinput.out"; { std::ofstream f(ll); f << ir; }
+    const std::string ir = Compiler::compileString(src.str());
+    const std::filesystem::path ll = "e2e_lineinput.ll"; const std::filesystem::path bin = "e2e_lineinput.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("./") + bin.string());
+    const std::string out = runCommand(std::string("./") + bin.string());
     ASSERT_NE(out.find("Line from file\n"), std::string::npos);
 }

@@ -18,7 +18,7 @@ TEST(Integration, ApostropheComment_IgnoresRestOfLine) {
         "10 PRINT 1 ' !! $$$ invalid tokens after comment\n"
         "20 PRINT 2 ' more !@# junk\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Two numeric print format references should appear in IR
     size_t pos = 0; int count = 0; while ((pos = ir.find("@.fmt_num", pos)) != std::string::npos) { ++count; ++pos; }
     ASSERT_GE(count, 2);

@@ -17,7 +17,7 @@ TEST(Integration, OptionPrintZones_IRContainsPad) {
         "10 OPTION PRINTZONES ON\n"
         "20 PRINT \"A\", \"B\"\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("@.fmt_pad"), std::string::npos);
     ASSERT_NE(ir.find("@.spaces_14"), std::string::npos);
 }

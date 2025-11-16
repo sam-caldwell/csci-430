@@ -28,8 +28,8 @@ TEST(E2E, LEN_Numeric_Variable) {
         "40 A%=1: B!=1: C#=1: D&=1: X=1\n"
         "50 PRINT LEN(A%), LEN(B!), LEN(C#), LEN(D&), LEN(X)\n"
         "60 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_len_numeric";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_len_numeric";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"program.ll"; auto bin = tmp/"program.out";
     { std::ofstream f(ll); f << ir; }
@@ -38,7 +38,7 @@ TEST(E2E, LEN_Numeric_Variable) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     // Expected: 2 4 8 4 4 (each followed by newline or spaces per print rules)
     // Since PRINT separates items with a space (legacy behavior), we search for substrings
     ASSERT_NE(out.find("2"), std::string::npos);

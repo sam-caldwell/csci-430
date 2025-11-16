@@ -31,7 +31,7 @@ TEST(E2E, TrigDemo_MathAccuracy) {
     std::string ir = Compiler::compileFile(srcPath.c_str());
 
     // Materialize a binary
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_trig";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_trig";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll"; auto bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
@@ -42,7 +42,7 @@ TEST(E2E, TrigDemo_MathAccuracy) {
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
 
     // Run and capture output
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_FALSE(out.empty());
 
     // Split lines

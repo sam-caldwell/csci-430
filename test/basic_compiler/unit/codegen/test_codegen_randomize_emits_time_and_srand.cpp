@@ -17,7 +17,7 @@ TEST(CodeGenRandomize, EmitsTimeAndSrandWhenNoArg) {
     const auto src =
         "10 RANDOMIZE\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("declare i64 @time(ptr)"), std::string::npos);
     EXPECT_NE(ir.find("call i64 @time(ptr null)"), std::string::npos);
     EXPECT_NE(ir.find("declare void @srand48(i64)"), std::string::npos);

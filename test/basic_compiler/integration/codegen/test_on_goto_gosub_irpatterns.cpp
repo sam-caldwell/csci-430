@@ -20,7 +20,7 @@ TEST(Integration, OnGotoGosub_IRPatterns) {
             "20 PRINT 0\n"
             "100 PRINT 1\n"
             "200 PRINT 2\n";
-        const std::string ir = Compiler::compileString(src);
+        const const std::string ir = Compiler::compileString(src);
         auto blk = irBlockSlice(ir, "line10");
         ASSERT_NE(blk.find("switch i32"), std::string::npos);
         ASSERT_NE(blk.find("label %line100"), std::string::npos);
@@ -32,7 +32,7 @@ TEST(Integration, OnGotoGosub_IRPatterns) {
             "20 PRINT 0\n"
             "100 PRINT 1: RETURN\n"
             "200 PRINT 2: RETURN\n";
-        const std::string ir = Compiler::compileString(src);
+        const const std::string ir = Compiler::compileString(src);
         auto blk = irBlockSlice(ir, "line10");
         ASSERT_NE(blk.find("switch i32"), std::string::npos);
         // Entries should be auto-generated under line10 prefix

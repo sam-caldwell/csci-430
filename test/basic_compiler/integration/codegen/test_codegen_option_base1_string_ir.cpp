@@ -18,7 +18,7 @@ TEST(Integration, StringArray_With_OptionBase1_IR_UsesUb) {
         "20 DIM S$(5)\n"
         "30 S$(1)=\"Z\"\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Under BASE 1, extent == upper bound (5)
     ASSERT_NE(ir.find("alloca [5 x ptr]"), std::string::npos);
 }

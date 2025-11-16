@@ -15,7 +15,7 @@ TEST(CodeGen, CLS_EmitsMemsetAndCursorReset) {
         "10 PRINT \"HI\"\n"
         "20 CLS\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src.c_str());
+    const std::string ir = Compiler::compileString(src.c_str());
     // Expect a memset to clear 2000 bytes and stores to cursor globals
     EXPECT_NE(ir.find("call ptr @memset(ptr @gwb_screen, i32 0, i64 2000)"), std::string::npos);
     EXPECT_NE(ir.find("store i32 0, ptr @gwb_cur_row"), std::string::npos);

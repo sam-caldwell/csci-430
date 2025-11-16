@@ -18,7 +18,7 @@ TEST(Integration, Codegen_DIM_With_OptionBase1_Alloc_UsesUb) {
         "20 DIM A(5)\n"
         "30 A(1)=1\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Under BASE 1, extent == upper bound (5); default numeric kind is Single => float
     ASSERT_NE(ir.find("alloca [5 x float]"), std::string::npos);
 }

@@ -25,7 +25,7 @@ TEST(CodeGenIfBlock, WhileAndForInThenElse) {
         "70 END IF\n"
         "80 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // IF labels present
     ASSERT_NE(ir.find("_if_then"), std::string::npos);
     ASSERT_NE(ir.find("_if_else"), std::string::npos);

@@ -42,8 +42,8 @@ TEST(E2E, MixedTypeArithmetic_ComputeInDouble_StoreByType) {
         "120 PRINT G#\n"
         "130 END\n";
 
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_mixed_type_arith";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_mixed_type_arith";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"program.ll";
     auto bin = tmp/"program.out";
@@ -55,7 +55,7 @@ TEST(E2E, MixedTypeArithmetic_ComputeInDouble_StoreByType) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
 
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 5u);
     EXPECT_EQ(lines[0], std::string("1"));          // 1.9 -> 1 (trunc)

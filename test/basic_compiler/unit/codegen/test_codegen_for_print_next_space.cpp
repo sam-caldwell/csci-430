@@ -16,7 +16,7 @@ TEST(CodeGenFor, PrintNextStartsWithSpace) {
         "20 PRINT 2, \" X\"\n"
         "30 NEXT I\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("@.fmt_int_ns"), std::string::npos);
     ASSERT_NE(ir.find("@.fmt_num_ns"), std::string::npos);
 }

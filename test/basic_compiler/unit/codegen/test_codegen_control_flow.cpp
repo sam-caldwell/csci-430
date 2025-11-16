@@ -22,7 +22,7 @@ TEST(CodeGenFlow, IfThenComparisonGeneratesBranch) {
         "20 END\n"
         "100 PRINT 1\n"
         "110 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Check for conditional fcmp and branch to line100 and cont label
     EXPECT_NE(ir.find(" = fcmp olt double 1.0, 2.0"), std::string::npos);
     EXPECT_NE(ir.find("br i1 %"), std::string::npos);

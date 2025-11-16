@@ -28,7 +28,7 @@ TEST(Integration, Comparison_All_Ops_IR) {
         "140 IF \"B\">=\"A\" THEN 160\n"
         "150 PRINT \"STR\"\n"
         "160 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Numeric fcmp predicates should appear
     EXPECT_NE(ir.find("fcmp oeq double"), std::string::npos);
     EXPECT_NE(ir.find("fcmp one double"), std::string::npos);

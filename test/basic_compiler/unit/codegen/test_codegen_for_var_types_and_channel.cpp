@@ -23,7 +23,7 @@ TEST(CodeGenFor, VarTypesAndChannelPrint) {
         "80 PRINT D# + 0.5\n"
         "90 NEXT D#\n"
         "100 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for signatures implying all numeric kinds were handled
     ASSERT_NE(ir.find("sitofp i32"), std::string::npos);   // Long32 path
     ASSERT_NE(ir.find("fpext float"), std::string::npos);  // Single path

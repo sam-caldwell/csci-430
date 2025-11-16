@@ -31,22 +31,22 @@ TEST(E2E, LenValInstr_ProduceExpectedResults) {
         "40 PRINT VAL(\"42\")\n"
         "50 END\n";
 
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_len_val_instr";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_len_val_instr";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path ll = tmp / "program.ll";
-    std::filesystem::path bin = tmp / "program.out";
+    const std::filesystem::path ll = tmp / "program.ll";
+    const std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
 
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     cmd << " -lm";
 #endif
-    int ec = std::system(cmd.str().c_str());
+    const int ec = std::system(cmd.str().c_str());
     ASSERT_EQ(ec, 0);
 
     std::ostringstream run; run << '"' << bin.string() << '"';
-    std::string out = runCommand(run.str());
+    const std::string out = runCommand(run.str());
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 4u);
     EXPECT_EQ(lines[0], std::string("5"));

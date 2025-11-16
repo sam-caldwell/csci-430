@@ -20,7 +20,7 @@ TEST(CodeGenStringFuncs, MoreStringIntrinsicsIR) {
         "40 PRINT LTRIM$(\"  HI\")\n"
         "50 PRINT RTRIM$(\"HI  \")\n"
         "60 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // STR$ uses snprintf into a buffer
     EXPECT_NE(ir.find("@snprintf"), std::string::npos);
     // SPACE$/STRING$ use memset to fill buffers

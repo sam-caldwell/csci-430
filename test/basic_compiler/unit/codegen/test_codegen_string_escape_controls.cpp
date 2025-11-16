@@ -15,7 +15,7 @@ using namespace gwbasic;
 TEST(CodeGenStrings, EscapeControlCharacters) {
     const std::string tab_cr = std::string("A\tB\rC");
     const std::string src = std::string("10 PRINT \"") + tab_cr + "\"\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for escapes for tab and carriage return in the global constant
     ASSERT_NE(ir.find("\\09"), std::string::npos);
     ASSERT_NE(ir.find("\\0D"), std::string::npos);

@@ -28,19 +28,19 @@ TEST(E2E, IfBlock_ThenElse_HighBranch) {
         "50 PRINT \"HIGH\"\n"
         "60 END IF\n"
         "70 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_if_high";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_if_high";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path ll = tmp / "program.ll";
-    std::filesystem::path bin = tmp / "program.out";
+    const std::filesystem::path ll = tmp / "program.ll";
+    const std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
     std::ostringstream c2; c2 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     c2 << " -lm";
 #endif
-    int ec = std::system(c2.str().c_str());
+    const int ec = std::system(c2.str().c_str());
     ASSERT_EQ(ec, 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_NE(out.find("HIGH\n"), std::string::npos);
 }
 

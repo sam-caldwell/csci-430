@@ -24,7 +24,7 @@ TEST(CodeGenCore, AssignAndArithmeticAndPrint) {
         "50 PRINT 1 < 2\n"
         "60 PRINT 2 = 3\n"
         "70 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("define i32 @main()"), std::string::npos);
     EXPECT_NE(ir.find("%X = alloca float"), std::string::npos);
     EXPECT_NE(ir.find("store float 0.0, ptr %X"), std::string::npos);

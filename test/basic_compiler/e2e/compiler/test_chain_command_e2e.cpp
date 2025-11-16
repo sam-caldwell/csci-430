@@ -24,7 +24,7 @@ TEST(E2E, ChainCommand_ExecutesTrigDemo) {
         GTEST_SKIP() << "clang not found";
     }
     std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/chain-test.bas").c_str());
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_chain";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_chain";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll"; auto bin = tmp / "program.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
@@ -32,7 +32,7 @@ TEST(E2E, ChainCommand_ExecutesTrigDemo) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     const std::string expected =
         "chain-test.bas starting\n"
         "chain-level2.bas starting\n"

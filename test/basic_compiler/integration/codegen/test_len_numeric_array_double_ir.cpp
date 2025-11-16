@@ -17,7 +17,7 @@ TEST(Integration, LEN_Numeric_Array_Double_IR) {
         "10 DIM C#(3)\n"
         "20 PRINT LEN(C#(1))\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_EQ(ir.find("call i64 @strlen(ptr"), std::string::npos);
     ASSERT_NE(ir.find("8.0"), std::string::npos);
 }

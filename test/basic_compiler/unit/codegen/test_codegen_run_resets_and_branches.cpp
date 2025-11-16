@@ -18,7 +18,7 @@ TEST(CodeGenRun, RunWithTarget_ResetsAndBranches) {
         "30 END\n"
         "100 PRINT A, B\n"
         "110 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Expect stores to zero for A and B on the RUN line (line20 block) using typed storage (float default)
     EXPECT_NE(ir.find("line20:"), std::string::npos);
     EXPECT_NE(ir.find("store float 0.0, ptr %A"), std::string::npos);

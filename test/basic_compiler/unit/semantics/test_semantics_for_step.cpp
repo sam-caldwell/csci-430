@@ -20,6 +20,6 @@ TEST(Semantics, ForWithoutStepAnalyzed) {
     const auto src =
         "10 FOR I=1 TO 3:NEXT I\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@.fmt_num"), std::string::npos);
 }

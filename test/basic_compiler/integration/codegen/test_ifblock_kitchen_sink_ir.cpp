@@ -56,7 +56,7 @@ TEST(Integration, IfBlock_Kitchen_Sink_IR) {
         "410 RETURN\n"
         "500 PRINT \"SG2\"\n"
         "510 RETURN\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // A few smoke checks for key constructs (not exhaustive)
     EXPECT_NE(ir.find("@snprintf"), std::string::npos) << ir;
     EXPECT_NE(ir.find("@fwrite"), std::string::npos) << ir;

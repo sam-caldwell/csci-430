@@ -35,7 +35,7 @@ TEST(CodeGenIfBlock, NoElse_NestedMix) {
         "110 END IF\n"
         "120 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("_if_then"), std::string::npos);
     ASSERT_NE(ir.find("_if_end"), std::string::npos);
     // Intentionally no check for _if_else, as this test targets no-ELSE form

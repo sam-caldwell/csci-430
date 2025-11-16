@@ -22,7 +22,7 @@ TEST(CodeGenWhile, ArrayBoundsErrors) {
         "60 X=X+1\n"
         "70 WEND\n"
         "80 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("_while_arr_err_"), std::string::npos);
     ASSERT_NE(ir.find("@gwb_err_code"), std::string::npos);
 }

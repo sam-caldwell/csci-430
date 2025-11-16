@@ -25,8 +25,8 @@ TEST(E2E, StopPrintsBreakAndHalts) {
 20 STOP
 30 PRINT 2
 )";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_stop";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_stop";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll";
     auto bin = tmp / "program.out";
@@ -37,7 +37,7 @@ TEST(E2E, StopPrintsBreakAndHalts) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::ostringstream run; run << '"' << bin.string() << '"';
-    std::string out = runCommand(run.str());
+    const std::string out = runCommand(run.str());
     // Expect 1, then Break in 20, and no 2
     size_t p1 = out.find("1\n"); ASSERT_NE(p1, std::string::npos);
     size_t pb = out.find("Break in 20\n", p1 + 1); ASSERT_NE(pb, std::string::npos);

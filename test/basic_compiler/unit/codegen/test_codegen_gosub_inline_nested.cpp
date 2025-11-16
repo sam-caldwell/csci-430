@@ -20,7 +20,7 @@ TEST(CodeGenGosub, InlineNested) {
         "100 PRINT \"A\": GOSUB 200: PRINT 1: RETURN\n"
         "200 PRINT \"B\": RETURN\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // At least two inline gosub entries should exist (outer + nested)
     size_t first = ir.find("_gosub_entry");
     ASSERT_NE(first, std::string::npos);

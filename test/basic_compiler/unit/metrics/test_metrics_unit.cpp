@@ -19,7 +19,7 @@ TEST(Unit, Metrics_Collection_SimpleProgram) {
 20 PRINT A
 30 END
 )";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     (void)ir;
     gMetrics = nullptr;
 

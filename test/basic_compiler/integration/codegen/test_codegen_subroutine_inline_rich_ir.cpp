@@ -39,7 +39,7 @@ TEST(Integration, SubroutineInline_Rich_IR_Coverage) {
         "320 NEXT I\n"
         "330 RETURN\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Subroutine inlining emits entry/cont labels and uses strncpy/malloc for MID$
     EXPECT_NE(ir.find("_gosub_entry"), std::string::npos);
     EXPECT_NE(ir.find("_gosub_cont"), std::string::npos);

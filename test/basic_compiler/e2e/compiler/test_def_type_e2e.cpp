@@ -32,15 +32,15 @@ TEST(E2E, DEF_TYPE) {
         "60 PRINT B\n"
         "70 END\n";
     // Write to a temp file and compile via compileFile to align with file-based resolution
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_def_type";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_def_type";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path bas = tmp / "program.bas";
+    const std::filesystem::path bas = tmp / "program.bas";
     { std::ofstream f(bas); f << src; }
     std::string ir = Compiler::compileFile(bas.string().c_str());
     ASSERT_FALSE(ir.empty());
 
-    std::filesystem::path ll = tmp / "program.ll";
-    std::filesystem::path bin = tmp / "program.out";
+    const std::filesystem::path ll = tmp / "program.ll";
+    const std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
 
     std::ostringstream c1; c1 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
@@ -48,11 +48,11 @@ TEST(E2E, DEF_TYPE) {
     c1 << " -lm";
 #endif
     std::string cmd = c1.str();
-    int ec = std::system(cmd.c_str());
+    const int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0) << "Clang failed: " << cmd;
 
     std::ostringstream r1; r1 << '"' << bin.string() << '"';
-    std::string out = runCommand(r1.str());
+    const std::string out = runCommand(r1.str());
     ASSERT_NE(out.find("ok\n"), std::string::npos);
     ASSERT_NE(out.find("5\n"), std::string::npos);
 }

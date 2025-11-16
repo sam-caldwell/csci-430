@@ -18,7 +18,7 @@ TEST(Integration, VAL_LEN_INSTR_IR_Contains_Deps) {
         "20 PRINT VAL(\"42\")\n"
         "30 PRINT INSTR(\"HELLO\",\"EL\")\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
     ASSERT_NE(ir.find("declare i64 @strlen(ptr)"), std::string::npos);
     ASSERT_NE(ir.find("declare double @strtod(ptr, ptr)"), std::string::npos);

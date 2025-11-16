@@ -16,7 +16,7 @@ TEST(CodeGenLineBlock, OpenWriteClose) {
         "20 WRITE #1, \"A\", 2\n"
         "30 CLOSE #1\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("@fopen"), std::string::npos);
     ASSERT_NE(ir.find("@fprintf"), std::string::npos);
     ASSERT_NE(ir.find("@fclose"), std::string::npos);

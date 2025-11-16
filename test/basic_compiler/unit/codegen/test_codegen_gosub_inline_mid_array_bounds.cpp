@@ -22,7 +22,7 @@ TEST(CodeGenGosub, MidArrayBounds_ErrorPath) {
         // Out-of-bounds on first index (3 > 2)
         "100 MID$(S$(3,1),1,1)=\"Z\": RETURN\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Expect mid error labels/handler scaffolding
     ASSERT_NE(ir.find("_mid_err_"), std::string::npos);
     ASSERT_NE(ir.find("@gwb_err_code"), std::string::npos);

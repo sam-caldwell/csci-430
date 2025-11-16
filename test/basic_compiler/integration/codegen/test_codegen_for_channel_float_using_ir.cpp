@@ -17,7 +17,7 @@ TEST(Integration, For_Channel_Float_Using_IR) {
         "30   PRINT #1, USING(\"%f\"), 3.14\n"
         "40 NEXT I\n"
         "50 CLOSE #1\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@fprintf"), std::string::npos) << ir;
     EXPECT_NE(ir.find("double 3.140000"), std::string::npos) << ir; // baked literal path
 }

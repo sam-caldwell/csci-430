@@ -21,7 +21,7 @@ TEST(Integration, IfBlock_Print_Channels_Else_IR) {
         "70   PRINT #1, 3,\n"
         "80 END IF\n"
         "90 CLOSE #1\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     // Expect snprintf + fwrite and padding usage
     EXPECT_NE(ir.find("@snprintf"), std::string::npos) << ir;
     EXPECT_NE(ir.find("@fwrite"), std::string::npos) << ir;

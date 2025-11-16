@@ -18,7 +18,7 @@ TEST(Semantics, SwapAndOnPositive) {
             "10 A=1: B=2\n"
             "20 SWAP A, B\n"
             "30 END\n";
-        const std::string ir = Compiler::compileString(src);
+        const const std::string ir = Compiler::compileString(src);
         ASSERT_FALSE(ir.empty());
     }
     // ON GOTO to existing target
@@ -27,7 +27,7 @@ TEST(Semantics, SwapAndOnPositive) {
             "10 A=1\n"
             "20 ON A GOTO 100\n"
             "100 END\n";
-        const std::string ir = Compiler::compileString(src);
+        const const std::string ir = Compiler::compileString(src);
         ASSERT_FALSE(ir.empty());
     }
     // ON GOSUB to existing target
@@ -37,7 +37,7 @@ TEST(Semantics, SwapAndOnPositive) {
             "20 ON N GOSUB 100\n"
             "30 END\n"
             "100 RETURN\n";
-        const std::string ir = Compiler::compileString(src);
+        const const std::string ir = Compiler::compileString(src);
         ASSERT_FALSE(ir.empty());
     }
 }

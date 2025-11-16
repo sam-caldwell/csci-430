@@ -14,7 +14,7 @@ using namespace gwbasic;
 TEST(Integration, CodegenStopSystemIR) {
     {
         std::string src = "10 PRINT 1\n20 STOP\n30 PRINT 2\n";
-        std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         // STOP uses @.msg_break and call to printf with current line
         ASSERT_NE(ir.find("@.msg_break"), std::string::npos);
         ASSERT_NE(ir.find("call i32 (ptr, ...) @printf(ptr %"), std::string::npos);
@@ -24,7 +24,7 @@ TEST(Integration, CodegenStopSystemIR) {
     }
     {
         std::string src = "10 PRINT 1\n20 SYSTEM\n30 PRINT 2\n";
-        std::string ir = Compiler::compileString(src);
+        const std::string ir = Compiler::compileString(src);
         // SYSTEM should branch to exit but not include break message
         ASSERT_EQ(ir.find("@.msg_break"), std::string::npos);
         ASSERT_NE(ir.find("br label %exit"), std::string::npos);

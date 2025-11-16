@@ -18,7 +18,7 @@ static std::string cliPath_e2e_printtriple() { return e2e_helpers::sourceRoot() 
 TEST(CLI, PrintTriplePrintsAndExits0) {
     // CLI expects an input path; print-triple exits before reading it
     const std::string cmd = '"' + cliPath_e2e_printtriple() + '"' + " dummy.bas --print-triple 2>&1; echo EXIT:$?";
-    const std::string out = runCommand(cmd);
+    const const std::string out = runCommand(cmd);
     // Expect something like x86_64-apple-darwin or arm64-apple-macosx...
     ASSERT_NE(out.find("-"), std::string::npos);
     ASSERT_NE(out.find("EXIT:0"), std::string::npos);

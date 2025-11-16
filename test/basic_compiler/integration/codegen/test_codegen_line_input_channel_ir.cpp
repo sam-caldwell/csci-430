@@ -16,7 +16,7 @@ TEST(Integration, LineInput_Channel_IR_UsesFgets) {
     const char* src =
         "10 OPEN \"in.txt\" FOR INPUT AS #1\n"
         "20 LINE INPUT #1, S$\n";
-    const std::string ir = Compiler::compileString(src);
+    const const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("@fgets"), std::string::npos);
     EXPECT_NE(ir.find("@gwb_files"), std::string::npos);
 }

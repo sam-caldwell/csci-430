@@ -24,7 +24,7 @@ TEST(CodeGenWhile, Body_MoreTransfers) {
         "40 WEND\n"
         "400 RETURN\n"
         "900 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for gosub inline scaffolding
     ASSERT_NE(ir.find("_gosub_entry"), std::string::npos);
     ASSERT_NE(ir.find("_gosub_cont"), std::string::npos);

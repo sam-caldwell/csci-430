@@ -18,7 +18,7 @@ TEST(CodeGenWhile, Print_ConstantFloat_NextSpace) {
         "40 I=I+1\n"
         "50 WEND\n"
         "60 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Expect printf on constant double literal
     ASSERT_NE(ir.find("call i32 (ptr, ...) @printf(ptr"), std::string::npos);
 }

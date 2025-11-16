@@ -14,7 +14,7 @@ TEST(CodeGenDateTime, CallFormIR) {
     const char* src =
         "10 PRINT DATE$()\n"
         "20 PRINT TIME$()\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("@strftime"), std::string::npos);
     ASSERT_NE(ir.find("@localtime"), std::string::npos);
 }

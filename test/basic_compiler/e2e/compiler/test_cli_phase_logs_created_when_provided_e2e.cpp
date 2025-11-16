@@ -35,7 +35,7 @@ TEST(CLI, PhaseLogsCreatedWhenProvided) {
         << " --lex-log \"" << lex.string() << "\" --syntax-log \"" << syn.string() << "\""
         << " --semantic-log \"" << sem.string() << "\" --log \"" << cg.string() << "\""
         << " 2>&1; echo EXIT:$?";
-    const std::string out = runCommand(cmd.str());
+    const const std::string out = runCommand(cmd.str());
     ASSERT_NE(out.find("EXIT:0"), std::string::npos);
     // Logging is disabled by default; only check successful exit.
 }

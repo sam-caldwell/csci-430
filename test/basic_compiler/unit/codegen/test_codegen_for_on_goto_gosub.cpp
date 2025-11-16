@@ -25,7 +25,7 @@ TEST(CodeGenFor, OnGotoGosub_InsideBody) {
         "300 RETURN\n"
         "400 RETURN\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // ON GOTO continuation label
     ASSERT_NE(ir.find("_on_cont_"), std::string::npos);
     // ON GOSUB entries and continuation

@@ -35,9 +35,9 @@ TEST(SemanticsScope, VarDeclaredInWhileBodyVisibleAfter) {
     Parser p(std::move(toks));
     auto prog = p.parseProgram();
 
-    std::filesystem::path logDir = std::filesystem::path("..") / "basic_compiler";
+    const std::filesystem::path logDir = std::filesystem::path("..") / "basic_compiler";
     std::filesystem::create_directories(logDir);
-    std::filesystem::path logPath = logDir / "sem_scope_while.log";
+    const std::filesystem::path logPath = logDir / "sem_scope_while.log";
     std::error_code ec; std::filesystem::remove(logPath, ec);
 
     SemanticAnalyzer sema;

@@ -23,6 +23,6 @@ TEST(SemanticsMathDomains, SqrtNegativeNonConstantPasses) {
         "10 LET A = -1\n"
         "20 PRINT SQR(A)\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("call double @sqrt(double"), std::string::npos);
 }

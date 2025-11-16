@@ -15,7 +15,7 @@ TEST(CodeGenCHDIR, EmitsChdirCallAndDecl) {
     const auto src =
         "10 CHDIR \"/tmp\"\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("declare i32 @chdir(ptr)"), std::string::npos);
     ASSERT_NE(ir.find("call i32 @chdir(ptr"), std::string::npos);
 }

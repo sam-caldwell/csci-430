@@ -34,7 +34,7 @@ TEST(Integration, LineBlock_KitchenSink_IR) {
         "210 END\n"
         "300 PRINT \"T2\"\n"
         "310 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // File operations
     EXPECT_NE(ir.find("@fopen"), std::string::npos);
     EXPECT_NE(ir.find("@fclose"), std::string::npos);

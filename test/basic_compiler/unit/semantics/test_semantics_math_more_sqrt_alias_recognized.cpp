@@ -22,6 +22,6 @@ TEST(SemanticsMathMore, SqrtAliasSQRTRecognized) {
     const auto src =
         "10 PRINT SQRT(16)\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("call double @sqrt(double 16.0)"), std::string::npos);
 }

@@ -23,7 +23,7 @@ TEST(CodeGenIfBlock, Else_MidScalarAndArray) {
         "80 MID$(S$(2),1)=\"Q\"\n"
         "90 END IF\n"
         "100 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("_if_else"), std::string::npos);
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);
 }

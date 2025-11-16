@@ -17,7 +17,7 @@ TEST(CodeGenIfBlock, Then_Randomize_SeedAndTime) {
         "30 RANDOMIZE\n"
         "40 END IF\n"
         "50 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for srand48 call and time+ srandom path
     ASSERT_NE(ir.find("@srand48"), std::string::npos);
     ASSERT_NE(ir.find("@time"), std::string::npos);

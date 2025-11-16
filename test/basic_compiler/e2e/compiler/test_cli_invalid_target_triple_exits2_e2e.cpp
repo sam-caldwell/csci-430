@@ -24,7 +24,7 @@ TEST(CLI, InvalidTargetTripleExits2) {
     const fs::path bas = tmp / "prog.bas";
     { std::ofstream f(bas); f << "10 PRINT 1\n"; }
     const std::string cmd = '"' + cliPath_e2e_badtriple() + '"' + " \"" + bas.string() + "\" --target not_a_real_triple 2>&1; echo EXIT:$?";
-    const std::string out = runCommand(cmd);
+    const const std::string out = runCommand(cmd);
     ASSERT_NE(out.find("unsupported target triple"), std::string::npos);
     ASSERT_NE(out.find("EXIT:2"), std::string::npos);
 }

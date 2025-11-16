@@ -14,7 +14,7 @@ TEST(Integration, DateTime_StrftimePatternsIR) {
     const char* src =
         "10 PRINT DATE$\n"
         "20 PRINT TIME$\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("c\"%m-%d-%y\\00\""), std::string::npos);
     ASSERT_NE(ir.find("c\"%H:%M:%S\\00\""), std::string::npos);
     ASSERT_NE(ir.find("@strftime"), std::string::npos);

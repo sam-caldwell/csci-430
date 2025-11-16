@@ -30,8 +30,8 @@ TEST(E2E, DivisionByZero_TriggersErrorHandler) {
         "50 END\n"
         "100 PRINT \"Z\"\n"
         "110 RESUME NEXT\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_div_zero";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..")/"tmp"/"gwbasic_e2e_div_zero";
     std::filesystem::create_directories(tmp);
     auto ll = tmp/"program.ll"; auto bin = tmp/"program.out";
     { std::ofstream f(ll); f << ir; }
@@ -40,7 +40,7 @@ TEST(E2E, DivisionByZero_TriggersErrorHandler) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     auto lines = splitLines(out);
     ASSERT_EQ(lines.size(), 3u);
     EXPECT_EQ(lines[0], std::string("Z"));

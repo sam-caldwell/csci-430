@@ -21,7 +21,7 @@ TEST(Integration, IfBlock_Print_IntVsLong_Channel_IR) {
         "70   PRINT #1, L&\n"
         "80 END IF\n"
         "90 CLOSE #1\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Channel print formatting should be present
     EXPECT_NE(ir.find("@fprintf"), std::string::npos) << ir;
 }

@@ -28,7 +28,7 @@ TEST(CodeGenIfBlock, UsingFloat_IntFloat_And_Channel) {
         "50 END IF\n"
         "60 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // IF block is present
     ASSERT_NE(ir.find("_if_then"), std::string::npos);
     ASSERT_NE(ir.find("_if_else"), std::string::npos);

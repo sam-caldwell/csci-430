@@ -33,8 +33,8 @@ TEST(E2E, READ_Restore_RewindsData) {
         "60 READ S$, T$\n"
         "70 PRINT S$\n"
         "80 PRINT T$\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_read_restore";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_read_restore";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll";
     auto bin = tmp / "program.out";
@@ -45,7 +45,7 @@ TEST(E2E, READ_Restore_RewindsData) {
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
     std::ostringstream run; run << '"' << bin.string() << '"';
-    std::string out = runCommand(run.str());
+    const std::string out = runCommand(run.str());
     // Expect four lines: A, B, A, B
     size_t p1 = out.find("A\n"); ASSERT_NE(p1, std::string::npos);
     size_t p2 = out.find("B\n", p1 + 2); ASSERT_NE(p2, std::string::npos);

@@ -14,7 +14,7 @@ TEST(CodeGenFILES, EmitsHelperAndCall) {
     const char* src =
         "10 FILES\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Decls used by helper
     ASSERT_NE(ir.find("declare ptr @popen(ptr, ptr)"), std::string::npos);
     ASSERT_NE(ir.find("declare i32 @pclose(ptr)"), std::string::npos);

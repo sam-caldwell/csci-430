@@ -21,6 +21,6 @@ TEST(SemanticsCircle, Accepts_NumericArgs) {
     const char* ok =
         "10 CIRCLE (1,2),3\n"
         "20 END\n";
-    const std::string ir = Compiler::compileString(ok);
+    const const std::string ir = Compiler::compileString(ok);
     ASSERT_FALSE(ir.empty());
 }

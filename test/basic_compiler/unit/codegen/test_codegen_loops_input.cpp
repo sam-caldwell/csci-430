@@ -18,7 +18,7 @@ TEST(CodeGenLoopsInput, ForLoopDefaultStepLabelsAndOps) {
     const auto src =
         "10 FOR I = 1 TO 3: PRINT I: NEXT\n"
         "20 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Check loop blocks and operations
     EXPECT_NE(ir.find("line10_for_cond1:"), std::string::npos);
     EXPECT_NE(ir.find("line10_for_body1:"), std::string::npos);

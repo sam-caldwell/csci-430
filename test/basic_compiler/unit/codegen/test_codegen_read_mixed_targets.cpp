@@ -19,7 +19,7 @@ TEST(CodeGenLineBlock, READ_MixedTargets) {
         "31 DIM S$(2)\n"
         "40 READ S$(1), A(2), S$, A\n"
         "50 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Evidence of DATA backing tables and typed stores
     ASSERT_NE(ir.find("@gwb_data"), std::string::npos);          // pointer table to string literals
     ASSERT_NE(ir.find("@gwb_data_isstr"), std::string::npos);    // is-string flags

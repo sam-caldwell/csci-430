@@ -33,7 +33,7 @@ TEST(CodeGenFor, Arrays_Mid_Terminators) {
         "64 NEXT J\n"
         "70 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Look for array addressing, MID$, formatting, channel printing, and terminators
     ASSERT_NE(ir.find("getelementptr inbounds ["), std::string::npos);
     ASSERT_NE(ir.find("@strncpy"), std::string::npos);

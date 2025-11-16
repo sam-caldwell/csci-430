@@ -16,7 +16,7 @@ TEST(CodeGenLPRINT, BasicAndUsing) {
     const char* src =
         "10 LPRINT \"HELLO\"\n"
         "20 LPRINT USING(\"%d\"), 7\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Channel path references @gwb_files index 0
     ASSERT_NE(ir.find("getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 0"), std::string::npos);
     // Should not mirror to screen buffer helper

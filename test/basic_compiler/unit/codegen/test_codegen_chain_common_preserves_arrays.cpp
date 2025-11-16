@@ -24,7 +24,7 @@ TEST(CodeGenChain, CommonPreservesArrays) {
         "40 END\n"
         "100 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     auto p = ir.find("line30:");
     ASSERT_NE(p, std::string::npos);
     std::string blk = ir.substr(p, 1200);

@@ -29,7 +29,7 @@ TEST(CodeGenIfBlock, Arrays3D_And_BoundsErrors) {
         "62 Y$(2,2,3)=\"T\"\n"  // upper OOB third dim
         "70 END IF\n"
         "80 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Expect array error handling scaffolding
     ASSERT_NE(ir.find("_arr_err_"), std::string::npos);
     ASSERT_NE(ir.find("@gwb_err_code"), std::string::npos);

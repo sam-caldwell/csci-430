@@ -23,7 +23,7 @@ using namespace e2e_helpers;
 TEST(E2E, Chain_WithoutCommon_DoesNotPass) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
     std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/pass-params-nocommon.bas").c_str());
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_chain_nocommon";
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_chain_nocommon";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "p.ll"; auto bin = tmp / "p.out"; { std::ofstream f(ll); f << ir; }
     std::ostringstream cmd; cmd << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
@@ -31,6 +31,6 @@ TEST(E2E, Chain_WithoutCommon_DoesNotPass) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_NE(out.find("0"), std::string::npos);
 }

@@ -18,7 +18,7 @@ TEST(CodeGen, MidAssign_EmitsStrncpyAndBounds) {
         "20 MID$(S$,3)=\"xyz\"\n"
         "30 PRINT S$\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Decl and call present
     ASSERT_NE(ir.find("declare ptr @strncpy(ptr, ptr, i64)"), std::string::npos);
     ASSERT_NE(ir.find("call ptr @strncpy(ptr"), std::string::npos);

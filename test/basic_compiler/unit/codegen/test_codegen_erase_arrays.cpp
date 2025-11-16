@@ -21,7 +21,7 @@ TEST(CodeGenLineBlock, ERASE_Arrays_AllKinds) {
         "24 DIM S$(2)\n"
         "30 ERASE A%, B&, C!, D#, S$\n"
         "40 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // Evidence of array element addressing and stores for each numeric kind
     ASSERT_NE(ir.find("getelementptr inbounds ["), std::string::npos);
     ASSERT_NE(ir.find("store i32 0, ptr"), std::string::npos);

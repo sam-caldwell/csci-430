@@ -27,7 +27,7 @@ TEST(CodeGenIfBlock, ElseWhile_UsingMidListOverrides) {
         "90 END IF\n"
         "100 END\n";
 
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     // IF with ELSE and WHILE lowering present
     ASSERT_NE(ir.find("_if_else"), std::string::npos);
     ASSERT_NE(ir.find("_while_cond"), std::string::npos);

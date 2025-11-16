@@ -24,8 +24,8 @@ TEST(E2E, Input_VarList_WithoutPrompt) {
     const char* src =
         "10 INPUT N, M\n"
         "20 PRINT N+M\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_input_prompt_list";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_input_prompt_list";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "program.ll"; auto bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }

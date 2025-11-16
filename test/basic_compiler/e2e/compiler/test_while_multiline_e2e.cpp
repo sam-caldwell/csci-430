@@ -26,18 +26,18 @@ TEST(E2E, WhileMultiline_CountsUp) {
         "40 LET I = I + 1\n"
         "50 WEND\n"
         "60 END\n";
-    std::string ir = Compiler::compileString(src);
-    std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_while_multiline";
+    const std::string ir = Compiler::compileString(src);
+    const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_while_multiline";
     std::filesystem::create_directories(tmp);
-    std::filesystem::path ll = tmp / "program.ll";
-    std::filesystem::path bin = tmp / "program.out";
+    const std::filesystem::path ll = tmp / "program.ll";
+    const std::filesystem::path bin = tmp / "program.out";
     { std::ofstream f(ll); f << ir; }
     std::ostringstream c2; c2 << CLANG_PATH << " \"" << ll.string() << "\" -o \"" << bin.string() << "\"";
 #ifndef __APPLE__
     c2 << " -lm";
 #endif
-    int ec = std::system(c2.str().c_str());
+    const int ec = std::system(c2.str().c_str());
     ASSERT_EQ(ec, 0);
-    std::string out = runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_NE(out.find("1\n2\n3\n"), std::string::npos);
 }

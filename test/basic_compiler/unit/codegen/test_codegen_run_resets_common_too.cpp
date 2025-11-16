@@ -22,7 +22,7 @@ TEST(CodeGenRun, RunResetsCommonAndBranches) {
         "40 END\n"
         "100 PRINT A, B\n"
         "110 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     auto blk = irBlockSlice(ir, "line30");
     ASSERT_FALSE(blk.empty());
     EXPECT_NE(blk.find("store float 0.0, ptr %A"), std::string::npos);

@@ -18,7 +18,7 @@ TEST(Integration, StringArray_WRITE_IR_UsesFprintf) {
         "40 WRITE #1, A$(1)\n"
         "50 CLOSE #1\n"
         "60 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("declare i32 @fprintf(ptr, ptr, ...)"), std::string::npos);
     ASSERT_NE(ir.find("getelementptr inbounds [16 x ptr], ptr @gwb_files"), std::string::npos);
     ASSERT_NE(ir.find("call i32 (ptr, ...) @fprintf"), std::string::npos);

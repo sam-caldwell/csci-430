@@ -18,7 +18,7 @@ TEST(Semantics, OpenCloseChannelRange) {
         const char* src =
             "10 OPEN \"f\" FOR INPUT AS #1\n"
             "20 CLOSE #1\n";
-        const std::string ir = Compiler::compileString(src);
+        const const std::string ir = Compiler::compileString(src);
         ASSERT_FALSE(ir.empty());
     }
     // Invalid OPEN (#0)

@@ -18,7 +18,7 @@ TEST(Integration, If_ThenLine_ElseLine_IR) {
         "20 END\n"
         "100 PRINT 1\n"
         "200 PRINT 2\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     ASSERT_NE(ir.find("line10_if_then"), std::string::npos);
     ASSERT_NE(ir.find("line10_if_else"), std::string::npos);
     ASSERT_NE(ir.find("br label %line100"), std::string::npos);

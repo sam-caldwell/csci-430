@@ -23,6 +23,6 @@ TEST(Semantics, GotoValidTargetCompiles) {
         "10 GOTO 30\n"
         "20 PRINT 1\n"
         "30 END\n";
-    std::string ir = Compiler::compileString(src);
+    const std::string ir = Compiler::compileString(src);
     EXPECT_NE(ir.find("line10:"), std::string::npos);
 }
