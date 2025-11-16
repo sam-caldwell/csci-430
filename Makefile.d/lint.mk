@@ -29,7 +29,7 @@ lint: configure
 	      rg -o --no-line-number '"file"\s*:\s*"([^"]+)"' -r '$$1' "$(BUILD_DIR)/compile_commands.json"; \
 	    else \
 	      sed -n 's/.*"file"[[:space:]]*:[[:space:]]*"\([^\"]*\)".*/\1/p' "$(BUILD_DIR)/compile_commands.json"; \
-	    fi | awk '!seen[$$0]++' \
+		    fi | awk '!seen[$$0]++' | awk '/\/(src|include|test)\//' \
 	  )"; \
 	  if [ -z "$$FILES" ]; then \
 	    echo "No files found in compile_commands.json"; exit 0; \

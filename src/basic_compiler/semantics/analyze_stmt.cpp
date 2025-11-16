@@ -79,7 +79,7 @@ namespace gwbasic {
  */
 void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
     constexpr int kMaxChannel = 16; // NOLINT(readability-magic-numbers)
-    if (auto us = dyn_cast<const UnsupportedStmt>(s)) {
+    if (dyn_cast<const UnsupportedStmt>(s)) {
         // For now, unsupported statements are accepted but logged as no-ops.
         
         return;
@@ -279,10 +279,7 @@ void SemanticAnalyzer::analyzeStmt(const Stmt* s) {
         if (cl->channel < 1 || cl->channel > kMaxChannel) { std::ostringstream m; m << "IOError: channel out of range @ " << cl->pos.line << ':' << cl->pos.col; throw SemanticError(m.str()); }
         return;
     }
-    if (auto d = dyn_cast<const DataStmt>(s)) {
-        
-        return;
-    }
+    if (dyn_cast<const DataStmt>(s)) { return; }
     if (auto rd = dyn_cast<const ReadStmt>(s)) {
         for (const auto& t : rd->targets) {
             if (!t.indices.empty()) {

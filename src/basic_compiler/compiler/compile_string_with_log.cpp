@@ -23,6 +23,7 @@ namespace gwbasic {
  *    IR with source lines and AST nodes to the provided logPath.
  */
 std::string Compiler::compileStringWithLog(const std::string& source, const std::string& logPath) {
+    (void)logPath; // logging disabled; retain parameter for API compatibility
     Lexer lex(source);
     auto tokens = lex.tokenize();
     Parser parser(std::move(tokens));

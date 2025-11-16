@@ -17,6 +17,7 @@ namespace gwbasic {
  *    logs implicit declaration; otherwise logs a reference event.
  */
 void SemanticAnalyzer::reference(const std::string& name, const SourcePos& pos) {
+    (void)pos; // logging removed; suppress unused parameter warning
     // Inside DEF FN body, treat the parameter as local (do not record as global var)
     if (currentFnParam_.has_value() && *currentFnParam_ == name) { return; }
     if (!isDeclared(name)) {

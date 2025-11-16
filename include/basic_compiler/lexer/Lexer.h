@@ -244,7 +244,7 @@ private:
     // Overload: emitFixed from string_view
     template <TokenType TT>
     void emitFixed(std::vector<Token>& out, std::string_view lex, const int line, const int col) {
-        Token token{TT, std::string(lex), line, col};
+        const Token token{TT, std::string(lex), line, col};
         out.emplace_back(token);
         logToken(token);
     }
@@ -252,7 +252,7 @@ private:
     // Overload: emitFixed from Symbol
     template <TokenType TT>
     void emitFixed(std::vector<Token>& out, const Symbol& sym, const int line, const int col) {
-        Token token{TT, sym.to_string(), line, col};
+        const Token token{TT, sym.to_string(), line, col};
         out.emplace_back(token);
         logToken(token);
     }

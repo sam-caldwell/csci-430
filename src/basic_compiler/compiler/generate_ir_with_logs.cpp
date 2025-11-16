@@ -21,6 +21,7 @@ namespace gwbasic::phase_log_helpers {
  */
 std::string generateIRWithLogs(const gwbasic::Program& program,
                                const LogPaths& logs) {
+    (void)logs; // logging disabled; retain parameter for API compatibility
     SemanticAnalyzer sema;
     const auto semRes = sema.analyze(program);
     CodeGenerator gen;

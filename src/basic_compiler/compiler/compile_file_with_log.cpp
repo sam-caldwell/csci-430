@@ -24,6 +24,7 @@ namespace gwbasic {
  *    logging behavior are used for both file and string inputs.
  */
 std::string Compiler::compileFileWithLog(const std::string& path, const std::string& logPath) {
+    (void)logPath; // logging disabled; retain parameter for API compatibility
     std::ifstream inputFile(path);
     if (!inputFile) { throw gwbasic::FileOpenError(path); }
     Lexer lex(inputFile);

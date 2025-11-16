@@ -42,12 +42,6 @@ TEST(LoggerIntegration, CompilerPhaseLogsProduceContent) {
   );
   EXPECT_NE(irText.find("define i32 @main()"), std::string::npos);
 
-  auto slurp = [](const fs::path& path) {
-    std::ifstream input(path); return std::string(
-        std::istreambuf_iterator<char>(input),
-        std::istreambuf_iterator<char>()
-    );
-  };
   // Logging is disabled; skip file existence/content checks.
 }
 

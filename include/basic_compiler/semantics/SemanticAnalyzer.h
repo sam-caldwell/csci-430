@@ -71,16 +71,9 @@ public:
     /*
      * Function: SemanticAnalyzer::setLogPath
      * Purpose:
-     *  - Enable semantic-phase logging to the specified file path.
-     * Inputs:
-     *  - path: Filesystem path to write log entries
-     * Outputs:
-     *  - void (opens/truncates file; toggles logEnabled_)
+     *  - No-op retained for API compatibility after logging removal.
      */
-    void setLogPath(const std::string& path) {
-        logger_.open(path, /*append=*/false);
-        logger_.setEnabled(true);
-    }
+    void setLogPath(const std::string& /*path*/) {}
 
     /*
      * Function: SemanticAnalyzer::setStrictControlFlow

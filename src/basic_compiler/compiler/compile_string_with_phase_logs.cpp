@@ -31,6 +31,7 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
                                                  const std::string& syntaxLogPath,
                                                  const std::string& semanticLogPath,
                                                  const std::string& codegenLogPath) {
+    (void)semanticLogPath; (void)codegenLogPath; // logging disabled
     Lexer lex(source);
     lex.setLexLogPath(lexLogPath);
     auto tokens = lex.tokenize();

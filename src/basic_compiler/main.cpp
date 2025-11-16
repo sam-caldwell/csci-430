@@ -57,12 +57,12 @@ int main(int argc, char **argv) {
     }
 
     // Handle help in first position
-    if (std::string first = argv[1]; first == "-h" || first == "--help") {
+    if (const std::string first = argv[1]; first == "-h" || first == "--help") {
         usage(argv[0]);
         return 0;
     }
 
-    std::string input = argv[1];
+    const std::string input = argv[1];
     std::optional<std::string> outLL;
     std::optional<std::string> outBC;
     std::optional<std::string> outBIN;
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
     bool noLogs = false; // accepted but ignored
     bool wantMetrics = false;
     for (int i = 2; i < argc; ++i) {
-        std::string a = argv[i];
+        const std::string a = argv[i];
 
         // Outputs
         if (takeOptValue(a, "--bc", i, argc, argv, outBC)) continue; // LLVM bitcode (.bc)
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
         if (takeOptValue(a, "--target", i, argc, argv, targetTriple)) continue;
         // Debug helper: print effective IR triple used by clang and exit
         if (a == "--print-triple") {
-            std::string t = detectDefaultTriple(CLANG_PATH);
+            const std::string t = detectDefaultTriple(CLANG_PATH);
             std::cout << t << '\n';
             return 0;
         }
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
         gwbasic::Metrics metrics;
         // ReSharper disable once CppDFALocalValueEscapesFunction
         if (wantMetrics) gwbasic::gMetrics = &metrics;
-        std::string ir = gwbasic::Compiler::compileFile(input);
+        const std::string ir = gwbasic::Compiler::compileFile(input);
         const std::string chosenTriple = targetTriple.value_or(detectDefaultTriple(CLANG_PATH));
         const std::string irWithTriple = withTripleHeader(ir, chosenTriple);
 
@@ -128,19 +128,19 @@ int main(int argc, char **argv) {
             writeTextFile(*outLL, irWithTriple);
         }
         if (outBC) {
-            std::filesystem::path llTmp = outLL ? std::filesystem::path(*outLL)
+            const std::filesystem::path llTmp = outLL ? std::filesystem::path(*outLL)
                                                 : std::filesystem::path(*outBC).replace_extension(".ll");
             if (!outLL) writeTextFile(llTmp, irWithTriple);
-            if (int ec = assembleBitcode(llTmp, *outBC, CLANG_PATH); ec != 0) {
+            if (const int ec = assembleBitcode(llTmp, *outBC, CLANG_PATH); ec != 0) {
                 std::cerr << "clang failed assembling bitcode\n";
                 return 1;
             }
         }
         if (outBIN) {
-            std::filesystem::path llTmp = outLL ? std::filesystem::path(*outLL)
+            const std::filesystem::path llTmp = outLL ? std::filesystem::path(*outLL)
                                                 : std::filesystem::path(*outBIN).replace_extension(".ll");
             if (!outLL) writeTextFile(llTmp, irWithTriple);
-            if (int ec = linkBinary(llTmp, *outBIN, chosenTriple, CLANG_PATH); ec != 0) {
+            if (const int ec = linkBinary(llTmp, *outBIN, chosenTriple, CLANG_PATH); ec != 0) {
                 std::cerr << "clang failed linking executable\n";
                 return 1;
             }
@@ -150,11 +150,11 @@ int main(int argc, char **argv) {
             if (asmOut.extension() != ".asm") asmOut += ".asm";
             // reflect enforced name back to outASM for consistency
             outASM = asmOut.string();
-            std::filesystem::path llTmp = outLL ? std::filesystem::path(*outLL)
+            const std::filesystem::path llTmp = outLL ? std::filesystem::path(*outLL)
                                                 : std::filesystem::path(*outASM).replace_extension(".ll");
             if (!outLL) writeTextFile(llTmp, irWithTriple);
             const std::string triple = targetTriple.value_or(detectDefaultTriple(CLANG_PATH));
-            if (int ec = emitAssembly(llTmp, std::filesystem::path(*outASM), triple, std::filesystem::path(input), CLANG_PATH); ec != 0) {
+            if (const int ec = emitAssembly(llTmp, std::filesystem::path(*outASM), triple, std::filesystem::path(input), CLANG_PATH); ec != 0) {
                 std::cerr << "clang failed generating assembly\n";
                 return 1;
             }

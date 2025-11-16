@@ -23,7 +23,6 @@ public:
     static bool atEnd(const Lexer& lexer) { return lexer.atEnd(); }
     static char peek(const Lexer& lexer) { return lexer.peek(); }
     static void emitAmpLiteral(Lexer& lexer, std::vector<Token>& out, int line, int col) { lexer.emitAmpLiteral(out, line, col); }
-    static std::string escapeForLog(const std::string& text) { return Lexer::escapeForLog(text); }
     static Token identifierOrKeyword(Lexer& lexer) { return lexer.identifierOrKeyword(); }
 };
 
