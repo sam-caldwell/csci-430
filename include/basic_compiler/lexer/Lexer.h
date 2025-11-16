@@ -25,8 +25,6 @@
 #include "basic_compiler/lexer/LexError.h"
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/TokenType.h"
-namespace logger { class Logger; }
-
 namespace gwbasic {
 
 /**
@@ -53,9 +51,7 @@ public:
      */
     explicit Lexer(std::istream& inputStream);
 
-    // Explicit out-of-line destructor to ensure
-    // complete type for logger::Logger at destruction time.
-    ~Lexer();
+    ~Lexer() = default;
 
     /**
      * Tokenize: Produce the complete list of tokens for the source.
@@ -71,20 +67,8 @@ public:
      */
     std::vector<Token> tokenize();
 
-    /**
-     * setLexLogPath: Enable lexical logging to a file.
-     *
-     * Inputs:
-     *  - path: Filesystem path to write token stream diagnostics.
-     *
-     * Outputs:
-     *  - void (opens/initializes internal log file state)
-     *
-     * Purpose:
-     *  - When enabled, each produced token is logged as:
-     *    "token <TYPE> @ <line>:<col> \"<lexeme>\"".
-     */
-    void setLexLogPath(const std::string& path);
+    // Logging support removed: kept for API compatibility (no-op)
+    void setLexLogPath(const std::string& /*path*/) {}
 
 private:
 
@@ -461,33 +445,8 @@ private:
      */
     void skipToEOL();
 
-    // Lexical logging via ostream-based logger
-    std::unique_ptr<logger::Logger> lexLogger_;
-
-    /*
-     * Function: Lexer::logToken
-     * Purpose:
-     *  - Emit a human-readable token description to the lex log when
-     *    logging is enabled.
-     * Inputs:
-     *  - t: Token to log
-     * Outputs:
-     *  - void (writes a line to the log file if open)
-     */
-    void logToken(const Token& token);
-    // Stream accessor for lex logging
-    std::ostream& log();
-
-    /*
-     * Function: Lexer::escapeForLog
-     * Purpose:
-     *  - Escape control characters and quotes for readable log output.
-     * Inputs:
-     *  - s: Raw string input
-     * Outputs:
-     *  - std::string: Escaped representation suitable for logs
-     */
-    static std::string escapeForLog(const std::string& text);
+    // Logging removed: keep stubs for compatibility
+    void logToken(const Token& /*token*/) {}
 
     // Lightweight helpers used by tokenize() to reduce branching
     bool tryEmitNewline(std::vector<Token>& out);

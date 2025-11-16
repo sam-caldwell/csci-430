@@ -28,7 +28,6 @@ std::string Compiler::compileStringWithLog(const std::string& source, const std:
     Parser parser(std::move(tokens));
     auto program = parser.parseProgram();
     CodeGenerator gen;
-    gen.setLogPath(logPath);
     // Provide semantics
     SemanticAnalyzer sema;
     sema.setStrictControlFlow(false);

@@ -12,9 +12,8 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-void CodeGenerator::setLogPath(const std::string& path) {
-    codegenLogger_.open(path, /*append=*/false);
-    codegenLogger_.setEnabled(true);
+void CodeGenerator::setLogPath(const std::string& /*path*/) {
+    // Codegen logging disabled: no-op
 }
 
 } // namespace gwbasic

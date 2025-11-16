@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <memory>
 #include <ostream>
+#include <streambuf>
 #include <string>
 #include <utility>
 #include <vector>
@@ -19,7 +20,6 @@
 #include "basic_compiler/token/Token.h"
 #include "basic_compiler/token/TokenType.h"
 #include "basic_compiler/parser/ParseError.h"
-#include "logger/Logger.h"
 
 namespace gwbasic {
 
@@ -77,8 +77,7 @@ private:
      */
     size_t pos_{0};
 
-    // Syntax-phase logging via ostream-based logger
-    logger::Logger syntaxLogger_;
+    // Syntax-phase logging removed
 
     /**
      * Function: Parser::peek
@@ -431,9 +430,14 @@ public:
      * Outputs:
      *  - void (opens/truncates the file and enables logging)
      */
-    void setSyntaxLogPath(const std::string& path);
-    // Stream accessor: syntax-phase logger (ostream sink when disabled)
-    std::ostream& syntax() { return syntaxLogger_.stream(); }
+    // Logging removed: keep API no-ops and null sink
+    void setSyntaxLogPath(const std::string& /*path*/) {}
+    std::ostream& syntax() {
+        struct NullBuf : public std::streambuf { int overflow(int c) override { return traits_type::not_eof(c); } };
+        static NullBuf nb;
+        static std::ostream os(&nb);
+        return os;
+    }
     /**
      * Function: Parser::setSourcePath
      * Purpose:

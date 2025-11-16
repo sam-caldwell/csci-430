@@ -32,7 +32,6 @@ std::string Compiler::compileFileWithLog(const std::string& path, const std::str
     parser.setSourcePath(path);
     auto program = parser.parseProgram();
     CodeGenerator gen;
-    gen.setLogPath(logPath);
     // Keep semantics integration consistent
     SemanticAnalyzer sema;
     auto res = sema.analyze(program);

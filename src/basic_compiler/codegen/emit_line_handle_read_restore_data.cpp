@@ -23,13 +23,13 @@ void CodeGenerator::emitLineHandleReadRestoreData(std::ostringstream &out,
                                                   const std::string &currLineLabel,
                                                   int &localCounter) {
     if (isa<DataStmt>(stmt)) {
-        log() << "line " << currentLine_ << " DataStmt (no-op)" << Symbols::LF;
+        logLine("DataStmt (no-op)");
         return;
     }
     if (isa<RestoreStmt>(stmt)) {
         const std::string storeIr = std::format("  store i32 0, ptr @gwb_data_idx");
         out << storeIr << Symbols::LF;
-        log() << "line " << currentLine_ << " RestoreStmt data_idx -> " << storeIr << Symbols::LF;
+        logLine(std::string("RestoreStmt data_idx -> ") + storeIr);
         return;
     }
     const auto *readStmt = dyn_cast<ReadStmt>(stmt);

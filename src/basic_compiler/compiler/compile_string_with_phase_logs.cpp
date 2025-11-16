@@ -46,10 +46,8 @@ std::string Compiler::compileStringWithPhaseLogs(const std::string& source,
     }
     // Semantic analysis (scope + references + strings)
     SemanticAnalyzer sema;
-    sema.setLogPath(semanticLogPath);
     const auto semRes = sema.analyze(program);
     CodeGenerator gen;
-    if (!codegenLogPath.empty()) { gen.setLogPath(codegenLogPath); }
     gen.setSemantics(semRes);
     auto irText = gen.generate(program);
     if (gMetrics != nullptr) { gMetrics->setIrInstructionCount(Metrics::countIrInstructions(irText)); }

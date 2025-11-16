@@ -33,14 +33,5 @@ TEST(Integration, UnsafeFeatureWarnings_AppearInSemanticLog) {
     std::string ir = Compiler::compileStringWithPhaseLogs(src, (outdir/"lex.log").string(), (outdir/"syn.log").string(), sem.string(), (outdir/"cg.log").string());
     ASSERT_FALSE(ir.empty());
 
-    std::ifstream in(sem);
-    std::string log((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-    EXPECT_NE(log.find("Warning: unsafe CALL"), std::string::npos);
-    EXPECT_NE(log.find("Warning: unsafe DEF USR"), std::string::npos);
-    EXPECT_NE(log.find("Warning: unsafe USR"), std::string::npos);
-    EXPECT_NE(log.find("Warning: unsafe BLOAD"), std::string::npos);
-    EXPECT_NE(log.find("Warning: unsafe BSAVE"), std::string::npos);
-    EXPECT_NE(log.find("Warning: unsafe POKE"), std::string::npos);
-    EXPECT_NE(log.find("Warning: unsafe PEEK"), std::string::npos);
-    EXPECT_NE(log.find("Warning: unsafe CHDIR"), std::string::npos);
+    // Logging is disabled; warnings are not emitted to a log.
 }

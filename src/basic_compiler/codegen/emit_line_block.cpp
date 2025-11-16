@@ -103,7 +103,7 @@ namespace gwbasic {
             if (stmtTerminates) { terminated = true; }
             // Legacy chain removed: dispatcher handles all statements now.
             continue;
-#ifdef GW_BASIC_KEEP_LEGACY
+#if 0 // Legacy path removed (previously guarded by GW_BASIC_KEEP_LEGACY)
             if (auto aaset = dyn_cast<ArrayAssignStmt>(st.get())) {
                 // A(i[,j...]) = expr (numeric or string)
                 const auto &dims = arrayDims_[aaset->name];
@@ -219,7 +219,7 @@ namespace gwbasic {
                     if (isStringExpr(v)) {
                         auto sptr = emitExpr(out, v, "");
                         std::string fmt = nextTemp();
-                        { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (addNL ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt -> " << ir2; log() << m.str() << Symbols::LF; } }
+                        { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (addNL ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << Symbols::LF; logLine(std::string("PrintStmt -> ") + ir2); }
                         // Optional USING override
                         std::string useFmt = fmt;
                         if (pr->format) { useFmt = emitExpr(out, pr->format.get(), ""); }
@@ -231,7 +231,7 @@ namespace gwbasic {
                             std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
                             { std::string irw = std::format("  call i64 @fwrite(ptr {}, i64 {}, i64 1, ptr {})", sbuf, n64, fh); out << irw << Symbols::LF; }
                         } else {
-                            { std::string ir3 = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", useFmt, sptr); out << ir3 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt printf -> " << ir3; log() << m.str() << Symbols::LF; } }
+                            { std::string ir3 = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", useFmt, sptr); out << ir3 << Symbols::LF; logLine(std::string("PrintStmt printf -> ") + ir3); }
                             // Mirror to virtual screen using snprintf and helper
                             std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
                             std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, useFmt, sptr); out << irn << Symbols::LF; }
@@ -240,7 +240,7 @@ namespace gwbasic {
                         }
                         // Explicit zone padding after string items when separated by comma
                         if (printZones_ && !last && pi < pr->seps.size() && pr->seps[pi] == PrintStmt::Sep::Comma) {
-                            { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt (string) sep[" << pi << "]=Comma -> pad"; log() << m.str() << Symbols::LF; }
+                            logLine(std::format("PrintStmt (string) sep[{}]=Comma -> pad", pi));
                             emit_pad_to_next_zone();
                         }
                     } else {
@@ -256,9 +256,7 @@ namespace gwbasic {
                                 }
                             }
                             if (isIntegral) {
-                                std::string fmtI = nextTemp();
-                                const char* symI = addNL ? "@.fmt_int" : (nextStartsWithSpace ? "@.fmt_int_ns" : "@.fmt_int_sp");
-                                { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtI, symI); out << ir1 << Symbols::LF; }
+                                std::string fmtI = getFmtIntPtr(out, addNL, nextStartsWithSpace);
                                 long long iv = static_cast<long long>(cv);
                                 if (pr->channel >= 1) {
                                     std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
@@ -277,9 +275,7 @@ namespace gwbasic {
                                 
                                 continue;
                             } else {
-                                std::string fmtF = nextTemp();
-                                const char* symF = addNL ? "@.fmt_num" : (nextStartsWithSpace ? "@.fmt_num_ns" : "@.fmt_num_sp");
-                                { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtF, symF); out << ir1 << Symbols::LF; }
+                                std::string fmtF = getFmtNumPtr(out, addNL, nextStartsWithSpace);
                                 if (pr->channel >= 1) {
                                     std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
                                     std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, fptr); out << ir << Symbols::LF; }
@@ -309,34 +305,19 @@ namespace gwbasic {
                             }
                         }
                         // Build float and int format pointers
-                        std::string fmtF = nextTemp();
-                        {
-                            const char* sym = addNL ? "@.fmt_num" : (nextStartsWithSpace ? "@.fmt_num_ns" : "@.fmt_num_sp");
-                            std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtF, sym);
-                            out << ir1 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt fmtF -> " << ir1; log() << m.str() << Symbols::LF; }
-                        }
-                        std::string fmtI = nextTemp();
-                        {
-                            const char* symI = addNL ? "@.fmt_int" : (nextStartsWithSpace ? "@.fmt_int_ns" : "@.fmt_int_sp");
-                            std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtI, symI);
-                            out << ir1 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt fmtI -> " << ir1; log() << m.str() << Symbols::LF; }
-                        }
+                        std::string fmtF = getFmtNumPtr(out, addNL, nextStartsWithSpace);
+                        std::string fmtI = getFmtIntPtr(out, addNL, nextStartsWithSpace);
+                        logLine("PrintStmt fmtF/fmtI selected");
                         if (hasOverride) {
                             std::string useFmt = emitExpr(out, pr->format.get(), "");
                             if (pr->channel >= 1) {
-                                std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
-                                std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, fptr); out << ir << Symbols::LF; }
-                                std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
-                                std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, double {})", n, sbuf, useFmt, val); out << irn << Symbols::LF; }
-                                std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
-                                { std::string irw = std::format("  call i64 @fwrite(ptr {}, i64 {}, i64 1, ptr {})", sbuf, n64, fh); out << irw << Symbols::LF; }
+                                std::string fh = loadFileHandleAtFixed(out, pr->channel - 1);
+                                auto buf = snprintfSbufDouble(out, useFmt, val);
+                                out << std::format("  call i64 @fwrite(ptr {}, i64 {}, i64 1, ptr {})", buf.sbuf, buf.n64, fh) << Symbols::LF;
                             } else {
-                                { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", useFmt, val); out << ir2 << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt printf (override) -> " << ir2; log() << m.str() << Symbols::LF; } }
-                                // Mirror to virtual screen using snprintf
-                                std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
-                                std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, double {})", n, sbuf, useFmt, val); out << irn << Symbols::LF; }
-                                std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
-                                { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
+                                out << std::format("  call i32 (ptr, ...) @printf(ptr {}, double {})", useFmt, val) << Symbols::LF;
+                                auto buf2 = snprintfSbufDouble(out, useFmt, val);
+                                emitScreenWrite(out, buf2.sbuf, buf2.n64);
                             }
                         } else {
                             // Dynamic integer detection: compare value to its integer cast
@@ -350,18 +331,13 @@ namespace gwbasic {
                             // Integer path
                             out << intLbl << ":" << Symbols::LF;
                             if (pr->channel >= 1) {
-                                std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
-                                std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, fptr); out << ir << Symbols::LF; }
-                                std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
-                                std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, i64 {})", n, sbuf, fmtI, iv); out << irn << Symbols::LF; }
-                                std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
-                                { std::string irw = std::format("  call i64 @fwrite(ptr {}, i64 {}, i64 1, ptr {})", sbuf, n64, fh); out << irw << Symbols::LF; }
+                                std::string fh = loadFileHandleAtFixed(out, pr->channel - 1);
+                                auto bufI = snprintfSbufI64(out, fmtI, iv);
+                                out << std::format("  call i64 @fwrite(ptr {}, i64 {}, i64 1, ptr {})", bufI.sbuf, bufI.n64, fh) << Symbols::LF;
                             } else {
-                                { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmtI, iv); out << ir << Symbols::LF; }
-                                std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
-                                std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, i64 {})", n, sbuf, fmtI, iv); out << irn << Symbols::LF; }
-                                std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
-                                { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
+                                out << std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmtI, iv) << Symbols::LF;
+                                auto buf = snprintfSbufI64(out, fmtI, iv);
+                                emitScreenWrite(out, buf.sbuf, buf.n64);
                             }
                             { std::string ir = std::format("  br label %{}", contLbl); out << ir << Symbols::LF; }
                             // Float path
@@ -385,7 +361,7 @@ namespace gwbasic {
                         }
                         // Handle separator between items (zone for comma)
                         if (!last && pi < pr->seps.size() && pr->seps[pi] == PrintStmt::Sep::Comma && printZones_) {
-                            { std::ostringstream m; m << "line " << currentLine_ << " PrintStmt sep[" << pi << "]=Comma -> pad"; log() << m.str() << Symbols::LF; }
+                            logLine(std::format("PrintStmt sep[{}]=Comma -> pad", pi));
                             emit_pad_to_next_zone();
                         }
                     }
@@ -396,18 +372,13 @@ namespace gwbasic {
                         std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.fmt_str, i64 0", fmt); out << ir << Symbols::LF; }
                         std::string empty = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.str_empty, i64 0", empty); out << ir << Symbols::LF; }
                         if (pr->channel >= 1) {
-                            std::string fptr = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds [16 x ptr], ptr @gwb_files, i64 0, i64 {}", fptr, pr->channel - 1); out << ir << Symbols::LF; }
-                            std::string fh = nextTemp(); { std::string ir = std::format("  {} = load ptr, ptr {}", fh, fptr); out << ir << Symbols::LF; }
-                            std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
-                            std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, empty); out << irn << Symbols::LF; }
-                            std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
-                            { std::string irw = std::format("  call i64 @fwrite(ptr {}, i64 {}, i64 1, ptr {})", sbuf, n64, fh); out << irw << Symbols::LF; }
+                            std::string fh = loadFileHandleAtFixed(out, pr->channel - 1);
+                            auto buf = snprintfSbufStr(out, fmt, empty);
+                            out << std::format("  call i64 @fwrite(ptr {}, i64 {}, i64 1, ptr {})", buf.sbuf, buf.n64, fh) << Symbols::LF;
                         } else {
-                            { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmt, empty); out << ir << Symbols::LF; }
-                            std::string sbuf = nextTemp(); { std::string irb = std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf); out << irb << Symbols::LF; }
-                            std::string n = nextTemp(); { std::string irn = std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, ptr {})", n, sbuf, fmt, empty); out << irn << Symbols::LF; }
-                            std::string n64 = nextTemp(); { std::string irl = std::format("  {} = sext i32 {} to i64", n64, n); out << irl << Symbols::LF; }
-                            { std::string irw = std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64); out << irw << Symbols::LF; }
+                            out << std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmt, empty) << Symbols::LF;
+                            auto buf2 = snprintfSbufStr(out, fmt, empty);
+                            emitScreenWrite(out, buf2.sbuf, buf2.n64);
                         }
                     } else if (pr->trail == PrintStmt::Terminator::Comma) {
                         emit_pad_to_next_zone();
@@ -418,7 +389,7 @@ namespace gwbasic {
             } else if (auto gt = dyn_cast<GotoStmt>(st.get())) {
                 std::string ir = std::format("  br label %{}", lineLabelName(gt->targetLine));
                 out << ir << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " GotoStmt -> " << ir; log() << m.str() << Symbols::LF; }
+                logLine(std::string("GotoStmt -> ") + ir);
                 stmtTerminates = true;
             } else if (auto gs = dyn_cast<GosubStmt>(st.get())) {
                 std::string contLbl = std::format("{}_gosub_cont{}", lineLabelName(line.number), ++localContCounter);
@@ -436,13 +407,13 @@ namespace gwbasic {
                 std::string contLbl = std::format("{}_cont{}", lineLabelName(line.number), ++localContCounter);
                 std::string ir = std::format("  br i1 {}, label %{}, label %{}", cond, lineLabelName(is->targetLine), contLbl);
                 out << ir << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " IfStmt -> " << ir; log() << m.str() << Symbols::LF; }
+                logLine(std::string("IfStmt -> ") + ir);
                 out << std::format("{}:", contLbl) << Symbols::LF;
             } else if (auto og = dyn_cast<OnGotoStmt>(st.get())) {
                 // Evaluate index and dispatch to one of the targets by 1-based index; default falls through
                 std::string idx = emitExpr(out, og->index.get(), lineLabelName(line.number));
                 std::string idxi32 = nextTemp();
-                { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " OnGoto fptosi -> " << ir; log() << m.str() << Symbols::LF; } }
+                { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; logLine(std::string("OnGoto fptosi -> ") + ir); }
                 std::string contLbl = std::format("{}_on_cont_{}", lineLabelName(line.number), ++localContCounter);
                 // Emit switch header
                 {
@@ -453,7 +424,7 @@ namespace gwbasic {
                     }
                     ir << " ]";
                     out << ir.str() << Symbols::LF;
-                    { std::ostringstream m; m << "line " << currentLine_ << " OnGoto switch -> " << ir.str(); log() << m.str() << Symbols::LF; }
+                    logLine(std::string("OnGoto switch -> ") + ir.str());
                 }
                 // Continuation label for out-of-range/zero
                 out << contLbl << ":" << Symbols::LF;
@@ -461,7 +432,7 @@ namespace gwbasic {
                 // Evaluate index and dispatch to one of several subroutine entries
                 std::string idx = emitExpr(out, ogs->index.get(), lineLabelName(line.number));
                 std::string idxi32 = nextTemp();
-                { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " OnGosub fptosi -> " << ir; log() << m.str() << Symbols::LF; } }
+                { std::string ir = std::format("  {} = fptosi double {} to i32", idxi32, idx); out << ir << Symbols::LF; logLine(std::string("OnGosub fptosi -> ") + ir); }
                 std::string contLbl = std::format("{}_on_gs_cont_{}", lineLabelName(line.number), ++localContCounter);
                 // Build case entries and emit switch to per-case entry labels
                 std::vector<std::string> entryLbls; entryLbls.reserve(ogs->targets.size());
@@ -477,7 +448,7 @@ namespace gwbasic {
                     }
                     ir << " ]";
                     out << ir.str() << Symbols::LF;
-                    { std::ostringstream m; m << "line " << currentLine_ << " OnGosub switch -> " << ir.str(); log() << m.str() << Symbols::LF; }
+                    logLine(std::string("OnGosub switch -> ") + ir.str());
                 }
                 // Emit each entry label and inline the subroutine
                 for (size_t i = 0; i < ogs->targets.size(); ++i) {
@@ -491,20 +462,20 @@ namespace gwbasic {
             } else if (isa<EndStmt>(st.get())) {
                 std::string ir = std::format("  br label %exit");
                 out << ir << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " EndStmt -> " << ir; log() << m.str() << Symbols::LF; }
+                logLine(std::string("EndStmt -> ") + ir);
                 terminated = true;
             } else if (isa<StopStmt>(st.get())) {
                 // STOP: print break message and terminate
                 std::string fmt = nextTemp(); { std::string ir = std::format("  {} = getelementptr inbounds i8, ptr @.msg_break, i64 0", fmt); out << ir << Symbols::LF; }
                 { std::string ir = std::format("  call i32 (ptr, ...) @printf(ptr {}, i32 {})", fmt, currentLine_); out << ir << Symbols::LF; }
                 { std::string ir = std::format("  br label %exit"); out << ir << Symbols::LF; }
-                { std::ostringstream m; m << "line " << currentLine_ << " StopStmt -> break+exit"; log() << m.str() << Symbols::LF; }
+                logLine("StopStmt -> break+exit");
                 terminated = true;
             } else if (isa<SystemStmt>(st.get())) {
                 // SYSTEM: terminate program (like END)
                 std::string ir = std::format("  br label %exit");
                 out << ir << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " SystemStmt -> " << ir; log() << m.str() << Symbols::LF; }
+                logLine(std::string("SystemStmt -> ") + ir);
                 terminated = true;
             } else if (auto ins = dyn_cast<InputStmt>(st.get())) {
                 // Optional prompt: literal or variable
@@ -602,24 +573,24 @@ namespace gwbasic {
                     {
                         std::string ir = std::format("  {} = fptosi double {} to i64", si, val);
                         out << ir << Symbols::LF;
-                        { std::ostringstream m; m << "line " << currentLine_ << " Randomize fptosi -> " << ir; log() << m.str() << Symbols::LF; }
+                        logLine(std::string("Randomize fptosi -> ") + ir);
                     }
                     {
                         std::string ir = std::format("  call void @srand48(i64 {})", si);
                         out << ir << Symbols::LF;
-                        { std::ostringstream m; m << "line " << currentLine_ << " Randomize srand48 -> " << ir; log() << m.str() << Symbols::LF; }
+                        logLine(std::string("Randomize srand48 -> ") + ir);
                     }
                 } else {
                     std::string t = nextTemp();
                     {
                         std::string ir = std::format("  {} = call i64 @time(ptr null)", t);
                         out << ir << Symbols::LF;
-                        { std::ostringstream m; m << "line " << currentLine_ << " Randomize time -> " << ir; log() << m.str() << Symbols::LF; }
+                        logLine(std::string("Randomize time -> ") + ir);
                     }
                     {
                         std::string ir = std::format("  call void @srand48(i64 {})", t);
                         out << ir << Symbols::LF;
-                        { std::ostringstream m; m << "line " << currentLine_ << " Randomize srand48(time) -> " << ir; log() << m.str() << Symbols::LF; }
+                        logLine(std::string("Randomize srand48(time) -> ") + ir);
                     }
                 }
             } else if (isa<ReturnStmt>(st.get())) {
@@ -761,28 +732,26 @@ namespace gwbasic {
                         // Fallback: print to stdout and mirror to screen
                         out << useStd << ":" << Symbols::LF;
                         out << std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmt, ln64) << Symbols::LF;
-                        out << std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64) << Symbols::LF;
+                        emitScreenWrite(out, sbuf, n64);
                         out << std::format("  br label %{}", contLbl) << Symbols::LF;
                         // Printer: write to channel
                         out << useLpt << ":" << Symbols::LF;
                         out << std::format("  call i64 @fwrite(ptr {}, i64 {}, i64 1, ptr {})", sbuf, n64, fh) << Symbols::LF;
                     } else {
                         out << std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmt, ln64) << Symbols::LF;
-                        std::string sbuf = nextTemp(); out << std::format("  {} = getelementptr inbounds [256 x i8], ptr @gwb_sbuf, i64 0, i64 0", sbuf) << Symbols::LF;
-                        std::string n = nextTemp(); out << std::format("  {} = call i32 (ptr, i64, ptr, ...) @snprintf(ptr {}, i64 256, ptr {}, i64 {})", n, sbuf, fmt, ln64) << Symbols::LF;
-                        std::string n64 = nextTemp(); out << std::format("  {} = sext i32 {} to i64", n64, n) << Symbols::LF;
-                        out << std::format("  call void @gwb_screen_write(ptr {}, i64 {})", sbuf, n64) << Symbols::LF;
+                        auto buf = snprintfSbufI64(out, fmt, ln64);
+                        emitScreenWrite(out, buf.sbuf, buf.n64);
                     }
                     out << std::format("  br label %{}", contLbl) << Symbols::LF;
                     out << contLbl << ":" << Symbols::LF;
                 }
-                { std::ostringstream m; m << "line " << currentLine_ << " ListStmt -> emit listing"; log() << m.str() << Symbols::LF; }
+                logLine("ListStmt -> emit listing");
             } else if (auto fl = dyn_cast<FilesStmt>(st.get())) {
                 // FILES [device$,] [pattern$] -> call helper @gwb_list_files
                 std::string dev = (fl->device ? emitExpr(out, fl->device.get(), "") : std::string("null"));
                 std::string pat = (fl->pattern ? emitExpr(out, fl->pattern.get(), "") : std::string("null"));
                 out << std::format("  call void @gwb_list_files(ptr {}, ptr {})", dev, pat) << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " FilesStmt -> gwb_list_files()"; log() << m.str() << Symbols::LF; }
+                logLine("FilesStmt -> gwb_list_files()");
             } else if (auto mk = dyn_cast<MkdirStmt>(st.get())) {
                 // MKDIR path$
                 auto p = emitExpr(out, mk->path.get(), "");
@@ -794,7 +763,7 @@ namespace gwbasic {
                 out << errLbl << ":" << Symbols::LF;
                 emitErrorDispatch(out, 75, currentLine_, stmtIndex);
                 out << okLbl << ":" << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " Mkdir -> mkdir()"; log() << m.str() << Symbols::LF; }
+                logLine("Mkdir -> mkdir()");
             } else if (auto rd = dyn_cast<RmdirStmt>(st.get())) {
                 // RMDIR path$
                 auto p = emitExpr(out, rd->path.get(), "");
@@ -806,7 +775,7 @@ namespace gwbasic {
                 out << errLbl << ":" << Symbols::LF;
                 emitErrorDispatch(out, 75, currentLine_, stmtIndex);
                 out << okLbl << ":" << Symbols::LF;
-                { std::ostringstream m; m << "line " << currentLine_ << " Rmdir -> rmdir()"; log() << m.str() << Symbols::LF; }
+                logLine("Rmdir -> rmdir()");
             } else if (auto kl = dyn_cast<KillStmt>(st.get())) {
                 // KILL filespec$ (no wildcard expansion yet)
                 auto f = emitExpr(out, kl->filespec.get(), "");
@@ -956,11 +925,11 @@ namespace gwbasic {
                 terminated = true;
             } else if (auto oeg = dyn_cast<OnErrorGotoStmt>(st.get())) {
                 // Set trap line (0 disables)
-                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_trap_line", oeg->targetLine); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " OnErrorGoto trap -> " << ir; log() << m.str() << Symbols::LF; } }
+                { std::string ir = std::format("  store i32 {}, ptr @gwb_err_trap_line", oeg->targetLine); out << ir << Symbols::LF; logLine(std::string("OnErrorGoto trap -> ") + ir); }
             } else if (auto ers = dyn_cast<ErrorStmt>(st.get())) {
                 // Evaluate error code and set globals
                 std::string dv = emitExpr(out, ers->code.get(), "");
-                std::string i32v = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", i32v, dv); out << ir << Symbols::LF; { std::ostringstream m; m << "line " << currentLine_ << " Error fptosi -> " << ir; log() << m.str() << Symbols::LF; } }
+                std::string i32v = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i32", i32v, dv); out << ir << Symbols::LF; logLine(std::string("Error fptosi -> ") + ir); }
                 { std::string ir = std::format("  store i32 {}, ptr @gwb_err_code", i32v); out << ir << Symbols::LF; }
                 { std::string ir = std::format("  store i32 {}, ptr @gwb_err_line", currentLine_); out << ir << Symbols::LF; }
                 { std::string ir = std::format("  store i32 {}, ptr @gwb_resume_line", currentLine_); out << ir << Symbols::LF; }
@@ -987,7 +956,7 @@ namespace gwbasic {
                     { std::string ir = std::format("  store i1 false, ptr @gwb_in_handler"); out << ir << Symbols::LF; }
                     std::string ir = std::format("  br label %{}", lineLabelName(rs->line));
                     out << ir << Symbols::LF;
-                    { std::ostringstream m; m << "line " << currentLine_ << " Resume line -> " << ir; log() << m.str() << Symbols::LF; }
+                    logLine(std::string("Resume line -> ") + ir);
                     stmtTerminates = true;
                 } else {
                     // Load resume line and dispatch: RESUME -> start of that line; RESUME NEXT -> next line.

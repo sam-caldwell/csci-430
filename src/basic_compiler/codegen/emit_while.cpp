@@ -197,23 +197,31 @@ void CodeGenerator::emitWhile(std::ostringstream& out, const WhileStmt* while_st
                     std::string fmt = nextTemp(); { std::string ir2 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmt, (last ? "@.fmt_str" : "@.fmt_str_sp")); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Print -> " << ir2 << Symbols::LF; }
                     { std::string ir3 = std::format("  call i32 (ptr, ...) @printf(ptr {}, ptr {})", fmt, sptr); out << ir3 << Symbols::LF; log() << "line " << currentLine_ << " While body Print -> " << ir3 << Symbols::LF; }
                 } else {
+                    // Determine formatting flags for numeric auto formats
+                    const bool addNL = last;
+                    bool nextStartsWithSpace = false;
+                    if (!last && (pi + 1) < items.size()) {
+                        if (const auto* ns = dyn_cast<const StringExpr>(items[pi + 1])) {
+                            if (!ns->value.empty() && ns->value.front() == ' ') nextStartsWithSpace = true;
+                        }
+                    }
                     // Constant number? Avoid runtime fcmp in while prints as well
                     if (const auto* cnum = dyn_cast<const NumberExpr>(v)) {
                         const double cv = cnum->value;
                         const bool isIntegral = (std::floor(cv) == cv);
                         if (isIntegral) {
-                            std::string fmtI = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtI, (last ? "@.fmt_int" : "@.fmt_int_sp")); out << ir1 << Symbols::LF; }
+                            std::string fmtI = getFmtIntPtr(out, addNL, nextStartsWithSpace);
                             long long iv = static_cast<long long>(cv);
                             { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, i64 {})", fmtI, iv); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Print int -> " << ir2 << Symbols::LF; }
                         } else {
-                            std::string fmtF = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtF, (last ? "@.fmt_num" : "@.fmt_num_sp")); out << ir1 << Symbols::LF; }
+                            std::string fmtF = getFmtNumPtr(out, addNL, nextStartsWithSpace);
                             { std::string ir2 = std::format("  call i32 (ptr, ...) @printf(ptr {}, double {:.6f})", fmtF, cv); out << ir2 << Symbols::LF; log() << "line " << currentLine_ << " While body Print flt -> " << ir2 << Symbols::LF; }
                         }
                     } else {
                         auto val = emitExpr(out, v, currLineLabel);
                         // Build float and int format pointers
-                        std::string fmtF = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtF, (last ? "@.fmt_num" : "@.fmt_num_sp")); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " While body Print -> " << ir1 << Symbols::LF; }
-                        std::string fmtI = nextTemp(); { std::string ir1 = std::format("  {} = getelementptr inbounds i8, ptr {}, i64 0", fmtI, (last ? "@.fmt_int" : "@.fmt_int_sp")); out << ir1 << Symbols::LF; log() << "line " << currentLine_ << " While body Print -> " << ir1 << Symbols::LF; }
+                        std::string fmtF = getFmtNumPtr(out, addNL, nextStartsWithSpace);
+                        std::string fmtI = getFmtIntPtr(out, addNL, nextStartsWithSpace);
                         // Integer detection
                         std::string iv = nextTemp(); { std::string ir = std::format("  {} = fptosi double {} to i64", iv, val); out << ir << Symbols::LF; }
                         std::string dv = nextTemp(); { std::string ir = std::format("  {} = sitofp i64 {} to double", dv, iv); out << ir << Symbols::LF; }

@@ -7,11 +7,12 @@
 #include "basic_compiler/ast/Program.h"
 #include "basic_compiler/ast/SourcePos.h"
 #include "basic_compiler/ast/Stmt.h"
-#include "logger/Logger.h"
+#include "basic_compiler/semantics/SemanticError.h"
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <streambuf>
 #include <map>
 #include <optional>
 #include <ostream>
@@ -162,8 +163,7 @@ private:
     // Helper: determine numeric kind for a non-string variable name
     Result::NumericKind numericKindOf(const std::string& name) const;
 
-    // Logging via ostream-based logger
-    logger::Logger logger_;
+    // Logging removed; use a null sink
 
     /*
      * Property: currentLine_
@@ -224,8 +224,13 @@ private:
      */
     void reference(const std::string& name, const SourcePos& position);
 
-    // Stream accessor for integration symmetry with other phases
-    std::ostream& log() { return logger_.stream(); }
+    // Stream accessor: null sink for disabled logging
+    std::ostream& log() {
+        struct NullBuf : public std::streambuf { int overflow(int c) override { return traits_type::not_eof(c); } };
+        static NullBuf nb;
+        static std::ostream os(&nb);
+        return os;
+    }
 
     /**
      * Function: SemanticAnalyzer::analyzeLine

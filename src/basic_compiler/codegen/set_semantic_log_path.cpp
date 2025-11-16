@@ -12,9 +12,8 @@ namespace gwbasic {
  * Returns:
  *  - void
  */
-void CodeGenerator::setSemanticLogPath(const std::string& path) {
-    semLogger_.open(path, /*append=*/false);
-    semLogger_.setEnabled(true);
+void CodeGenerator::setSemanticLogPath(const std::string& /*path*/) {
+    // Semantic logging disabled: no-op
 }
 
 } // namespace gwbasic

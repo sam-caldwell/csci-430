@@ -22,10 +22,8 @@ namespace gwbasic::phase_log_helpers {
 std::string generateIRWithLogs(const gwbasic::Program& program,
                                const LogPaths& logs) {
     SemanticAnalyzer sema;
-    sema.setLogPath(logs.semantic);
     const auto semRes = sema.analyze(program);
     CodeGenerator gen;
-    if (!logs.codegen.empty()) { gen.setLogPath(logs.codegen); }
     gen.setSemantics(semRes);
     return gen.generate(program);
 }

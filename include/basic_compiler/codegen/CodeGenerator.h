@@ -32,7 +32,6 @@
 #include "basic_compiler/ast/WhileStmt.h"
 #include "basic_compiler/semantics/SemanticAnalyzer.h"
 #include "basic_compiler/codegen/CodeGenError.h"
-#include "logger/Logger.h"
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -259,11 +258,7 @@ namespace gwbasic {
         // DATA numeric values (double) for numeric items; undefined for string items
         std::vector<double> dataNumValues_;
 
-        // Phase logging via ostream-based logger
-        logger::Logger codegenLogger_;
-        logger::Logger semLogger_;
-        // Optional: a syntax logger accessor exists for unified interface
-        logger::Logger syntaxLogger_;
+        // Logging removed; debug streams are now null sinks
 
         // Naming helpers
         /**
@@ -747,6 +742,37 @@ namespace gwbasic {
 
         /** Stream accessor: syntax-phase logger (unused here; provided for interface parity). */
         std::ostream &syntax();
+
+        // Logging convenience: prefixes with current line number
+        void logLine(std::string_view message);
+
+        // Print buffer helper for screen mirroring
+        struct PrintBuffer { std::string sbuf; std::string n64; };
+
+        // Build snprintf buffer for different argument types and return sbuf/n64
+        PrintBuffer snprintfSbufI64(std::ostringstream &out,
+                                    const std::string &fmtReg,
+                                    const std::string &i64Reg);
+
+        PrintBuffer snprintfSbufDouble(std::ostringstream &out,
+                                       const std::string &fmtReg,
+                                       const std::string &dblReg);
+
+        PrintBuffer snprintfSbufStr(std::ostringstream &out,
+                                    const std::string &fmtReg,
+                                    const std::string &strReg);
+
+        // Emit call to virtual screen writer from prepared buffer
+        void emitScreenWrite(std::ostringstream &out,
+                             const std::string &sbufReg,
+                             const std::string &n64Reg);
+
+        // File channel helpers (gwb_files[index])
+        std::string loadFileHandleAtFixed(std::ostringstream &out, long long index);
+
+        // Select numeric/integter format pointers based on newline and spacing policy
+        std::string getFmtNumPtr(std::ostringstream &out, bool addNewline, bool nextStartsWithSpace);
+        std::string getFmtIntPtr(std::ostringstream &out, bool addNewline, bool nextStartsWithSpace);
 
         /** Human-readable name for a Stmt node kind (for logging). */
         static const char *nodeName(const Stmt *stmt);
