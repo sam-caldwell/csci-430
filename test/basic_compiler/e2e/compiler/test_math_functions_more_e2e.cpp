@@ -60,7 +60,7 @@ TEST(E2E, MoreMathIntrinsicsWork) {
     EXPECT_EQ(lines[3], std::string("1.500000"));     // CSNG(1.5)
     // RND(1): 0.0 <= x < 1.0 (value varies)
     {
-        double v = std::stod(lines[4]);
+        const double v = std::stod(lines[4]);
         EXPECT_GE(v, 0.0);
         EXPECT_LT(v, 1.0);
     }

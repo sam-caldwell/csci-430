@@ -67,7 +67,7 @@ inline bool irContainsApproxLiteral(const std::string& ir,
     // Escape prefix/suffix minimalistically for regex meta-characters
     auto esc = [](std::string_view t) {
         std::string out; out.reserve(t.size());
-        for (char c : t) {
+        for (const char c : t) {
             if (c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}' ||
                 c == '.' || c == '+' || c == '*' || c == '?' || c == '^' || c == '$' ||
                 c == '|' || c == '\\') out.push_back('\\');

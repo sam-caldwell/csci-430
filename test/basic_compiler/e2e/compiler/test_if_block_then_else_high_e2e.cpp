@@ -20,7 +20,7 @@ using namespace e2e_helpers;
  */
 TEST(E2E, IfBlock_ThenElse_HighBranch) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
-    std::string src =
+    const std::string src =
         "10 LET A = 9\n"
         "20 IF A < 5 THEN\n"
         "30 PRINT \"LOW\"\n"
@@ -43,4 +43,3 @@ TEST(E2E, IfBlock_ThenElse_HighBranch) {
     const std::string out = runCommand(std::string("\"") + bin.string() + "\"");
     ASSERT_NE(out.find("HIGH\n"), std::string::npos);
 }
-

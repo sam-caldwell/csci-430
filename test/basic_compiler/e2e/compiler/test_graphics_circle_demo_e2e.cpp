@@ -25,7 +25,7 @@ TEST(E2E, GraphicsCircleDemo_PrintsOk) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
     }
     // Compile demo from file
-    std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/graphics-circle.bas").c_str());
+    const std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/graphics-circle.bas").c_str());
     ASSERT_FALSE(ir.empty());
 
     // Write IR and compile with clang

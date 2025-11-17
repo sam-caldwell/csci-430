@@ -25,9 +25,9 @@ TEST(CodeGenChain, CommonPreservesArrays) {
         "100 END\n";
 
     const std::string ir = Compiler::compileString(src);
-    auto p = ir.find("line30:");
+    const auto p = ir.find("line30:");
     ASSERT_NE(p, std::string::npos);
-    std::string blk = ir.substr(p, 1200);
+    const std::string blk = ir.substr(p, 1200);
     // Non-COMMON arrays should be zeroed per element kind
     EXPECT_NE(blk.find("store i32 0, ptr"), std::string::npos);      // Int16 elements
     EXPECT_NE(blk.find("store i64 0, ptr"), std::string::npos);      // Long32 elements

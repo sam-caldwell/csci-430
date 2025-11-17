@@ -34,6 +34,6 @@ TEST(E2E, Input_VarList_WithoutPrompt) {
     cc << " -lm";
 #endif
     ASSERT_EQ(std::system(cc.str().c_str()), 0);
-    std::string out = runCommandWithInput(bin.string(), "2 3\\n");
+    const std::string out = runCommandWithInput(bin.string(), "2 3\\n");
     ASSERT_NE(out.find("5\n"), std::string::npos);
 }

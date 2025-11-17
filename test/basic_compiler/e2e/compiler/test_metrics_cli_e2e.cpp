@@ -18,10 +18,10 @@ using namespace e2e_helpers;
 TEST(E2E, Metrics_CLI_PrintsTable) {
     // Create a small program on disk
     namespace fs = std::filesystem;
-    fs::path tmp = fs::path("..") / "tmp" / "metrics_cli";
+    const fs::path tmp = fs::path("..") / "tmp" / "metrics_cli";
     fs::create_directories(tmp);
-    fs::path bas = tmp / "prog.bas";
-    fs::path outll = tmp / "prog.ll";
+    const fs::path bas = tmp / "prog.bas";
+    const fs::path outll = tmp / "prog.ll";
     {
         std::ofstream f(bas);
         f << "10 LET A=1+2*3\n20 PRINT A\n30 END\n";

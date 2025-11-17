@@ -22,7 +22,7 @@ TEST(E2E, GosubSimple) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
     }
-    std::string src = R"(10 PRINT "main1"
+    const std::string src = R"(10 PRINT "main1"
 20 GOSUB 100 : PRINT "main2" : END
 100 PRINT "sub" : RETURN
 )";
@@ -38,11 +38,11 @@ TEST(E2E, GosubSimple) {
 #ifndef __APPLE__
     c3 << " -lm";
 #endif
-    std::string cmd = c3.str();
+    const std::string cmd = c3.str();
     const int ec = std::system(cmd.c_str());
     ASSERT_EQ(ec, 0);
     std::ostringstream r3; r3 << '"' << bin.string() << '"'; const std::string out = runCommand(r3.str());
-    size_t p1 = out.find("main1\n"); ASSERT_NE(p1, std::string::npos);
-    size_t p2 = out.find("sub\n", p1 + 1); ASSERT_NE(p2, std::string::npos);
-    size_t p3 = out.find("main2\n", p2 + 1); ASSERT_NE(p3, std::string::npos);
+    const size_t p1 = out.find("main1\n"); ASSERT_NE(p1, std::string::npos);
+    const size_t p2 = out.find("sub\n", p1 + 1); ASSERT_NE(p2, std::string::npos);
+    const size_t p3 = out.find("main2\n", p2 + 1); ASSERT_NE(p3, std::string::npos);
 }

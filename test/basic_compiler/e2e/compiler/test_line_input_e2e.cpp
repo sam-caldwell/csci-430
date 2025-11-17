@@ -21,7 +21,7 @@ using namespace e2e_helpers;
  */
 TEST(E2E, LineInput_ReadsLineAndPrints) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP();
-    auto src =
+    const auto src =
         "10 LINE INPUT A$\n"
         "20 PRINT A$\n";
     const std::string ir = Compiler::compileString(src);
@@ -34,6 +34,6 @@ TEST(E2E, LineInput_ReadsLineAndPrints) {
     cc << " -lm";
 #endif
     ASSERT_EQ(std::system(cc.str().c_str()), 0);
-    std::string out = runCommandWithInput(bin.string(), "hello world\\n");
+    const std::string out = runCommandWithInput(bin.string(), "hello world\\n");
     ASSERT_NE(out.find("hello world\n"), std::string::npos);
 }

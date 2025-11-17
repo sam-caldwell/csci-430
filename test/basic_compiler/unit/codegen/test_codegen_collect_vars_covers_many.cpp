@@ -36,6 +36,6 @@ TEST(CodeGenCollectVars, CoversManyKinds) {
     auto prog = p.parseProgram();
 
     CodeGenerator cg; // do not set semantics; force internal collectors to run
-    std::string ir = cg.generate(prog);
+    const std::string ir = cg.generate(prog);
     EXPECT_NE(ir.find("@.str."), std::string::npos);
 }

@@ -32,8 +32,8 @@ TEST(E2E, NextVarList_NestedLoopsPrints) {
     cmd << " -lm";
 #endif
     ASSERT_EQ(std::system(cmd.str().c_str()), 0);
-    std::string out = e2e_helpers::runCommand(std::string("\"") + bin.string() + "\"");
+    const std::string out = e2e_helpers::runCommand(std::string("\"") + bin.string() + "\"");
     // Expect four occurrences of '-' and presence of 1.000000 and 2.000000
-    size_t hyphenCount = 0; for (char ch : out) if (ch == '-') ++hyphenCount;
+    size_t hyphenCount = 0; for (const char ch : out) if (ch == '-') ++hyphenCount;
     ASSERT_EQ(hyphenCount, 4u);
 }

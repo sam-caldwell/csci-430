@@ -36,9 +36,8 @@ TEST(CodeGenCore, CollectsVars_MoreKinds_NoSemantics) {
     Parser p(std::move(toks));
     auto prog = p.parseProgram();
     CodeGenerator gen; // no semantics set
-    std::string ir = gen.generate(prog);
+    const std::string ir = gen.generate(prog);
     ASSERT_NE(ir.find("@.str."), std::string::npos);       // DATA literal
     ASSERT_NE(ir.find("switch i32"), std::string::npos);   // ON ...
     ASSERT_NE(ir.find("printf"), std::string::npos);       // PRINT lowering
 }
-

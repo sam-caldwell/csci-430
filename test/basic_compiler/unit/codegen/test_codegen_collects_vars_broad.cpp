@@ -35,11 +35,11 @@ TEST(CodeGenCore, CollectsVarsBroadWithoutSemantics) {
     Parser p(std::move(toks));
     auto prog = p.parseProgram();
     CodeGenerator gen; // no semantics set
-    std::string ir = gen.generate(prog);
+    const std::string ir = gen.generate(prog);
     // Presence checks for various constructs recorded by collectors
     ASSERT_NE(ir.find("@.str."), std::string::npos);          // DATA string literal interned
     // RANDOMIZE plumbing present (either RNG state or srand48/drand48 usage)
-    bool hasRng = ir.find("@gwb_last_rnd") != std::string::npos
+    const bool hasRng = ir.find("@gwb_last_rnd") != std::string::npos
                || ir.find("@srand48") != std::string::npos
                || ir.find("@drand48") != std::string::npos;
     ASSERT_TRUE(hasRng);
