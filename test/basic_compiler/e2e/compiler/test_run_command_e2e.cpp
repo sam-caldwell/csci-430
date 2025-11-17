@@ -25,7 +25,7 @@ TEST(E2E, RunCommand_ExecutesTrigDemo) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
     }
     // Compile from file to enable MERGE/RUN file resolution
-    std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/run-test.bas").c_str());
+    const std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/run-test.bas").c_str());
     const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_run";
     std::filesystem::create_directories(tmp);
     const std::filesystem::path ll = tmp / "program.ll";

@@ -22,7 +22,7 @@ using namespace e2e_helpers;
 
 TEST(E2E, VariableState_InitialValues) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
-    std::string srcIR = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/variable-state-test.bas").c_str());
+    const std::string srcIR = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/variable-state-test.bas").c_str());
     const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_var_state";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "prog.ll"; auto bin = tmp / "prog.out";

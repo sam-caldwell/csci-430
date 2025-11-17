@@ -43,8 +43,8 @@ TEST(E2E, ResumeLine_FlowsToExplicitTarget) {
     std::ostringstream run; run << '"' << bin.string() << '"';
     const std::string out = runCommand(run.str());
     // Expect to see 1, then H, then 3; and not 2
-    size_t p1 = out.find("1\n"); ASSERT_NE(p1, std::string::npos);
-    size_t pH = out.find("H\n", p1+1); ASSERT_NE(pH, std::string::npos);
-    size_t p3 = out.find("3\n", pH+1); ASSERT_NE(p3, std::string::npos);
+    const size_t p1 = out.find("1\n"); ASSERT_NE(p1, std::string::npos);
+    const size_t pH = out.find("H\n", p1+1); ASSERT_NE(pH, std::string::npos);
+    const size_t p3 = out.find("3\n", pH+1); ASSERT_NE(p3, std::string::npos);
     ASSERT_EQ(out.find("2\n"), std::string::npos);
 }

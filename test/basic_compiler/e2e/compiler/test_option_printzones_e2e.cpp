@@ -43,5 +43,5 @@ TEST(E2E, OptionPrintZones_ProducesZoneSpacing) {
     auto between = out.substr(ai + 1, bi - ai - 1);
     // At least a few spaces inserted
     ASSERT_GE(between.size(), 5u);
-    for (char ch : between) ASSERT_EQ(ch, ' ');
+    for (const char ch : between) ASSERT_EQ(ch, ' ');
 }

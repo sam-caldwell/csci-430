@@ -42,11 +42,11 @@ lint: configure
 	      -p "$(BUILD_DIR)" -warnings-as-errors=* -quiet \
 	      $$([ -n "$$SYSROOT" ] && printf -- " --extra-arg=-isysroot --extra-arg=%s" "$$SYSROOT"); \
 	  fi; \
-	  echo "clang-tidy (tests, warn-only): $$(( $$(printf '%s\n' "$$FILES_TEST" | wc -l | tr -d ' ') )) files"; \
+  echo "clang-tidy (tests, warn-only): $$(( $$(printf '%s\n' "$$FILES_TEST" | wc -l | tr -d ' ') )) files"; \
 	  if [ -n "$$FILES_TEST" ]; then \
-	    printf '%s\n' "$$FILES_TEST" | xargs -P "$(NUM_CPUS)" -n 1 $(CLANG_TIDY) \
-	      -p "$(BUILD_DIR)" -quiet -config='{Checks: "misc-const-correctness,clang-diagnostic-*", WarningsAsErrors: ""}' \
-	      $$([ -n "$$SYSROOT" ] && printf -- " --extra-arg=-isysroot --extra-arg=%s" "$$SYSROOT") || true; \
+    printf '%s\n' "$$FILES_TEST" | xargs -P "$(NUM_CPUS)" -n 1 $(CLANG_TIDY) \
+      -p "$(BUILD_DIR)" -quiet -config='{Checks: "misc-const-correctness,clang-diagnostic-*", WarningsAsErrors: ""}' \
+      $$([ -n "$$SYSROOT" ] && printf -- " --extra-arg=-isysroot --extra-arg=%s" "$$SYSROOT") || true; \
 	  fi
 	@echo "lint: ok"
 

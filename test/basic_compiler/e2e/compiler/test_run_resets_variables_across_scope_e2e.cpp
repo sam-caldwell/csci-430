@@ -22,7 +22,7 @@ using namespace e2e_helpers;
  */
 TEST(E2E, Run_ResetsVariablesAcrossScope) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
-    std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/run-pass-vars.bas").c_str());
+    const std::string ir = Compiler::compileFile((e2e_helpers::sourceRoot()+"/demos/run-pass-vars.bas").c_str());
     const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_run_reset";
     std::filesystem::create_directories(tmp);
     auto ll = tmp / "p.ll"; auto bin = tmp / "p.out"; { std::ofstream f(ll); f << ir; }

@@ -23,7 +23,7 @@ TEST(E2E, OnErrorGotoAndResumeNext) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
     }
-    std::string src = R"(10 ON ERROR GOTO 300
+    const std::string src = R"(10 ON ERROR GOTO 300
 20 PRINT 1
 30 ERROR 5
 40 PRINT 2
@@ -45,8 +45,8 @@ TEST(E2E, OnErrorGotoAndResumeNext) {
     std::ostringstream run; run << '"' << bin.string() << '"';
     const std::string out = runCommand(run.str());
     // Expect the handler line to print H, and overall sequence 1, H, 2, 3
-    size_t p1 = out.find("1\n"); ASSERT_NE(p1, std::string::npos);
-    size_t pH = out.find("H\n", p1 + 1); ASSERT_NE(pH, std::string::npos);
-    size_t p2 = out.find("2\n", pH + 1); ASSERT_NE(p2, std::string::npos);
-    size_t p3 = out.find("3\n", p2 + 1); ASSERT_NE(p3, std::string::npos);
+    const size_t p1 = out.find("1\n"); ASSERT_NE(p1, std::string::npos);
+    const size_t pH = out.find("H\n", p1 + 1); ASSERT_NE(pH, std::string::npos);
+    const size_t p2 = out.find("2\n", pH + 1); ASSERT_NE(p2, std::string::npos);
+    const size_t p3 = out.find("3\n", p2 + 1); ASSERT_NE(p3, std::string::npos);
 }

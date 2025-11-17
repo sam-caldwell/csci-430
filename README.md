@@ -1,7 +1,7 @@
 # GW-BASIC Compiler (basic_compiler)
 
 This project develops a GW-BASIC compiler which emits LLVM IR, byte code, native assembly, and native executables.
-This is designed for reproducible builds and detailed phase logging for compiler development.
+It is designed for reproducible builds. Phase logging has been removed to simplify the codebase.
 
 Code repo: https://github.com/sam-caldwell/csci-430
 
@@ -49,14 +49,12 @@ Code repo: https://github.com/sam-caldwell/csci-430
 
 - Binary: `build/basic_compiler/basic_compiler`
 - Synopsis:
-    - `basic_compiler <input.bas> [-ll|--ll <file>] [--bc <file>] [-o <exe>] [--asm <file>] [--target <triple>] 
-          [--lex-log <file>] [--syntax-log <file>] [--semantic-log <file>] [--log <file>]`
+    - `basic_compiler <input.bas> [-ll|--ll <file>] [--bc <file>] [-o <exe>] [--asm <file>] [--target <triple>]`
     - Help: `basic_compiler -h` or `basic_compiler --help`
 - Notes:
     - Assembly files begin with a header comment line:
       `Source: <file> | Target: os=<os>, cpu=<arch> (triple=<triple>)`
       using an architecture-appropriate comment leader.
-    - If log paths are omitted, logs default next to the input with matching extensions.
     - Bitcode/EXE/ASM require `clang` to be available; the build injects its path as `CLANG_PATH`.
 
 ## Supported Targets
@@ -65,17 +63,13 @@ Code repo: https://github.com/sam-caldwell/csci-430
 - Windows/MSVC, ARM32, WebAssembly are not supported.
 - Set explicitly via `--target <triple>`, e.g. `x86_64-unknown-linux-gnu`, `aarch64-apple-macos`.
 
-## Artifacts And Logs
+## Artifacts
 
 - IR: `.ll` human-readable LLVM IR.
 - Bitcode: `.bc` machine IR, useful for linking or analysis.
 - Assembly: `.asm` with a header comment reflecting source and target; dialect matches target triple.
 - Executable: platform-native binary produced by `clang`.
-- Logs: phase logs capture tokens, syntax steps, semantic validations, and codegen mappings.
-    - Lexical (`.lex.log`): token stream with locations.
-    - Syntax (`.syntax.log`): recursive-descent parse events by line and node.
-    - Semantic (`.semantic.log`): symbol declarations/references, loop structure, and scope enter/exit.
-    - Codegen (`.codegen.log`): mapping from AST nodes to emitted LLVM IR.
+    
 
 ## Architecture Notes
 
@@ -84,9 +78,8 @@ Code repo: https://github.com/sam-caldwell/csci-430
 - AST: lightweight hierarchy with LLVM-style RTTI
     - Each node carries a `NodeKind`; `isa<>`/`dyn_cast<>` helpers are available in `basic_compiler/ast/RTTI.h`.
     - `Expr`/`Stmt` are abstract bases; concrete nodes implement `classof()` for fast kind checks.
-- Semantics: dedicated pass (`SemanticAnalyzer`) performs symbol and scope analysis prior to codegen
-    - Records variable declarations/uses with simple, extensible scope tracking.
-    - Emits a semantic log independent from code generation.
+- Semantics: dedicated pass (`SemanticAnalyzer`) performs symbol and scope analysis prior to codegen, recording
+  variable declarations/uses with simple, extensible scope tracking.
 
 ## Tips
 

@@ -21,7 +21,7 @@ using namespace e2e_helpers;
  */
 TEST(E2E, SystemHaltsWithoutBreak) {
     if (!toolExists(CLANG_PATH)) GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "')";
-    std::string src = R"(10 PRINT 1
+    const std::string src = R"(10 PRINT 1
 20 SYSTEM
 30 PRINT 2
 )";
@@ -39,7 +39,7 @@ TEST(E2E, SystemHaltsWithoutBreak) {
     std::ostringstream run; run << '"' << bin.string() << '"';
     const std::string out = runCommand(run.str());
     // Expect only 1 and no Break message and no 2
-    size_t p1 = out.find("1\n"); ASSERT_NE(p1, std::string::npos);
+    const size_t p1 = out.find("1\n"); ASSERT_NE(p1, std::string::npos);
     ASSERT_EQ(out.find("Break in"), std::string::npos);
     ASSERT_EQ(out.find("2\n", p1 + 1), std::string::npos);
 }

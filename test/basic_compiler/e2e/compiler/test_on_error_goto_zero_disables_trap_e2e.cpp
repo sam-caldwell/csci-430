@@ -23,7 +23,7 @@ TEST(E2E, OnErrorGotoZeroDisablesTrap) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
     }
-    std::string src = R"(10 ON ERROR GOTO 0
+    const std::string src = R"(10 ON ERROR GOTO 0
 20 PRINT 1
 30 ERROR 5
 40 PRINT 2

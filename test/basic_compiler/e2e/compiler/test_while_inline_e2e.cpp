@@ -20,7 +20,7 @@ using namespace e2e_helpers;
  */
 TEST(E2E, WhileInline_CountsUp) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
-    std::string src =
+    const std::string src =
         "10 LET I = 1: WHILE I < 4: PRINT I: LET I = I + 1: WEND\n"
         "20 END\n";
     const std::string ir = Compiler::compileString(src);

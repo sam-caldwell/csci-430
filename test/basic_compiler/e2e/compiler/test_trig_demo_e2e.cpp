@@ -28,7 +28,7 @@ TEST(E2E, TrigDemo_MathAccuracy) {
 
     // Compile program to IR
     const std::string srcPath = sourceRoot() + "/demos/trig.bas";
-    std::string ir = Compiler::compileFile(srcPath.c_str());
+    const std::string ir = Compiler::compileFile(srcPath.c_str());
 
     // Materialize a binary
     const std::filesystem::path tmp = std::filesystem::path("..") / "tmp" / "gwbasic_e2e_trig";
@@ -60,7 +60,7 @@ TEST(E2E, TrigDemo_MathAccuracy) {
     // Index rows by integer degree for quick lookup
     std::vector<Row> byDeg(361);
     for (const auto& r : rows) {
-        int deg = static_cast<int>(std::llround(r.x));
+        const int deg = static_cast<int>(std::llround(r.x));
         if (deg >= 0 && deg <= 360) byDeg[deg] = r;
     }
 
@@ -70,7 +70,7 @@ TEST(E2E, TrigDemo_MathAccuracy) {
 
     // Validate selected degrees; avoid tan at 90/270 where undefined.
     const int samples[] = {0, 30, 45, 60, 120, 135, 150, 180, 360};
-    for (int d : samples) {
+    for (const int d : samples) {
         const Row& r = byDeg[d];
         const double rad = deg2rad(d);
         const double es = std::sin(rad);

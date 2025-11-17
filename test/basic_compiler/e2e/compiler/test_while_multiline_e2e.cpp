@@ -19,7 +19,7 @@ using namespace e2e_helpers;
  */
 TEST(E2E, WhileMultiline_CountsUp) {
     if (!toolExists(CLANG_PATH)) { GTEST_SKIP() << "clang not found"; }
-    std::string src =
+    const std::string src =
         "10 LET I = 1\n"
         "20 WHILE I < 4\n"
         "30 PRINT I\n"

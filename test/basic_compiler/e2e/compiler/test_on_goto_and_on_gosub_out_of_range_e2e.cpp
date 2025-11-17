@@ -41,7 +41,7 @@ TEST(E2E, OnGotoAndOnGosub_OutOfRange) {
 
     // ON GOTO: index 0 -> falls through; prints 777
     {
-        std::string src = R"(10 A=0: ON A GOTO 100,200: PRINT 777: END
+        const std::string src = R"(10 A=0: ON A GOTO 100,200: PRINT 777: END
 100 PRINT 100: END
 200 PRINT 200: END
 )";
@@ -52,7 +52,7 @@ TEST(E2E, OnGotoAndOnGosub_OutOfRange) {
     }
     // ON GOTO: index >N -> falls through; prints 777
     {
-        std::string src = R"(10 A=3: ON A GOTO 100,200: PRINT 777: END
+        const std::string src = R"(10 A=3: ON A GOTO 100,200: PRINT 777: END
 100 PRINT 100: END
 200 PRINT 200: END
 )";
@@ -63,7 +63,7 @@ TEST(E2E, OnGotoAndOnGosub_OutOfRange) {
     }
     // ON GOSUB: index 0 -> no sub called; prints only done
     {
-        std::string src = R"(10 N=0: ON N GOSUB 100,200: PRINT "done": END
+        const std::string src = R"(10 N=0: ON N GOSUB 100,200: PRINT "done": END
 100 PRINT "sub1": RETURN
 200 PRINT "sub2": RETURN
 )";
@@ -74,7 +74,7 @@ TEST(E2E, OnGotoAndOnGosub_OutOfRange) {
     }
     // ON GOSUB: index >N -> no sub called; prints only done
     {
-        std::string src = R"(10 N=9: ON N GOSUB 100,200: PRINT "done": END
+        const std::string src = R"(10 N=9: ON N GOSUB 100,200: PRINT "done": END
 100 PRINT "sub1": RETURN
 200 PRINT "sub2": RETURN
 )";

@@ -25,7 +25,7 @@ TEST(E2E, OnGotoAndOnGosub) {
     }
     // ON GOTO: index 2 should jump to 200 and not print X
     {
-        std::string src = R"(10 A=2: ON A GOTO 100,200: PRINT 999: END
+        const std::string src = R"(10 A=2: ON A GOTO 100,200: PRINT 999: END
 100 PRINT 100: END
 200 PRINT 200: END
 )";
@@ -47,7 +47,7 @@ TEST(E2E, OnGotoAndOnGosub) {
     }
     // ON GOSUB: index 1 should execute sub then continue to print main
     {
-        std::string src = R"(10 N=1: ON N GOSUB 100,200: PRINT "done": END
+        const std::string src = R"(10 N=1: ON N GOSUB 100,200: PRINT "done": END
 100 PRINT "sub1": RETURN
 200 PRINT "sub2": RETURN
 )";
@@ -64,7 +64,7 @@ TEST(E2E, OnGotoAndOnGosub) {
         const int ec = std::system(c3.str().c_str());
         ASSERT_EQ(ec, 0);
         std::ostringstream r3; r3 << '"' << bin.string() << '"'; const std::string out = runCommand(r3.str());
-        size_t p1 = out.find("sub1\n"); ASSERT_NE(p1, std::string::npos);
-        size_t p2 = out.find("done\n", p1 + 1); ASSERT_NE(p2, std::string::npos);
+        const size_t p1 = out.find("sub1\n"); ASSERT_NE(p1, std::string::npos);
+        const size_t p2 = out.find("done\n", p1 + 1); ASSERT_NE(p2, std::string::npos);
     }
 }

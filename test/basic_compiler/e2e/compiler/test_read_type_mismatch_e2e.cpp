@@ -23,7 +23,7 @@ TEST(E2E, READ_TypeMismatch_StringIntoNumericTriggersHandler) {
     if (!toolExists(CLANG_PATH)) {
         GTEST_SKIP() << "clang not found (CLANG_PATH='" << CLANG_PATH << "'), skipping E2E.";
     }
-    std::string src = R"(10 ON ERROR GOTO 100
+    const std::string src = R"(10 ON ERROR GOTO 100
 20 DATA "X"
 30 READ A
 40 PRINT 1

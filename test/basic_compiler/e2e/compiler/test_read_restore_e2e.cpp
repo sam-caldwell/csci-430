@@ -47,8 +47,8 @@ TEST(E2E, READ_Restore_RewindsData) {
     std::ostringstream run; run << '"' << bin.string() << '"';
     const std::string out = runCommand(run.str());
     // Expect four lines: A, B, A, B
-    size_t p1 = out.find("A\n"); ASSERT_NE(p1, std::string::npos);
-    size_t p2 = out.find("B\n", p1 + 2); ASSERT_NE(p2, std::string::npos);
-    size_t p3 = out.find("A\n", p2 + 2); ASSERT_NE(p3, std::string::npos);
-    size_t p4 = out.find("B\n", p3 + 2); ASSERT_NE(p4, std::string::npos);
+    const size_t p1 = out.find("A\n"); ASSERT_NE(p1, std::string::npos);
+    const size_t p2 = out.find("B\n", p1 + 2); ASSERT_NE(p2, std::string::npos);
+    const size_t p3 = out.find("A\n", p2 + 2); ASSERT_NE(p3, std::string::npos);
+    const size_t p4 = out.find("B\n", p3 + 2); ASSERT_NE(p4, std::string::npos);
 }

@@ -36,7 +36,7 @@ defines a clear integration with the CLI/compiler phases.
   unless `ALL` is specified.
 
 ## Compiler/CLI Pipeline Integration
-- Both `compileFile()` and `compileFileWithPhaseLogs()` perform a single pass over the root program lines, handling 
+- `compileFile()` performs a single pass over the root program lines, handling 
   directives per line:
      1) Detect `MERGE`/`CHAIN`/`RUN` on a line and resolve the include path against the current file.
      2) `MERGE`: parse the referenced file and append its lines (replacing duplicates) into the composite program.
