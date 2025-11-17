@@ -35,13 +35,7 @@ TEST(SemanticsScope, VarDeclaredInIfBodyVisibleAfter) {
     Parser p(std::move(toks));
     auto prog = p.parseProgram();
 
-    const std::filesystem::path logDir = std::filesystem::path("..") / "basic_compiler";
-    std::filesystem::create_directories(logDir);
-    const std::filesystem::path logPath = logDir / "sem_scope_if.log";
-    std::error_code ec; std::filesystem::remove(logPath, ec);
-
     SemanticAnalyzer sema;
-    sema.setLogPath(logPath.string());
     auto res = sema.analyze(prog);
     // Variable first seen in IF body should be globally declared and usable later
     EXPECT_TRUE(res.variables.contains("A"));

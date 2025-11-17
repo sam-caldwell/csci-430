@@ -14,7 +14,6 @@ namespace gwbasic {
  */
 class Compiler {
 public:
-    struct PhaseLogs { std::string lex; std::string syntax; std::string semantic; std::string codegen; };
     /**
      * Function: Compiler::compileString
      * Purpose:
@@ -40,70 +39,6 @@ public:
      */
     static std::string compileFile(const std::string& path);
 
-    /**
-     * Function: Compiler::compileStringWithLog
-     * Purpose:
-     *  - Compile a GW-BASIC program string and emit a codegen log.
-     * Inputs:
-     *  - source: Program text
-     *  - logPath: Path to write a human-readable codegen log
-     * Outputs:
-     *  - std::string: LLVM IR text (.ll)
-     */
-
-    static std::string compileStringWithLog(const std::string& source, const std::string& logPath);
-
-    /**
-     * Function: Compiler::compileFileWithLog
-     * Purpose:
-     *  - Compile a source file and emit a codegen log.
-     * Inputs:
-     *  - path: Source file path
-     *  - logPath: Log file path
-     * Outputs:
-     *  - std::string: LLVM IR text (.ll)
-     */
-
-    static std::string compileFileWithLog(const std::string& path, const std::string& logPath);
-
-    /**
-     * Function: Compiler::compileStringWithPhaseLogs
-     * Purpose:
-     *  - Compile program string with phase logs (lexer, syntax, semantics,
-     *    and optional codegen log).
-     * Inputs:
-     *  - source: Program text
-     *  - lexLogPath: Destination for lexer log
-     *  - syntaxLogPath: Destination for parser/syntax log
-     *  - semanticLogPath: Destination for semantics log
-     *  - codegenLogPath: Destination for codegen log
-     * Outputs:
-     *  - std::string: LLVM IR text (.ll)
-     */
-
-    static std::string compileStringWithPhaseLogs(const std::string& source,
-                                                  const std::string& lexLogPath,
-                                                  const std::string& syntaxLogPath,
-                                                  const std::string& semanticLogPath,
-                                                  const std::string& codegenLogPath);
-
-    /**
-     * Function: Compiler::compileFileWithPhaseLogs
-     * Purpose:
-     *  - Compile a source file with phase logs (lexer, syntax, semantics,
-     *    and optional codegen log).
-     * Inputs:
-     *  - path: Path to .bas source file
-     *  - lexLogPath: Destination for lexer log
-     *  - syntaxLogPath: Destination for parser/syntax log
-     *  - semanticLogPath: Destination for semantics log
-     *  - codegenLogPath: Destination for codegen log
-     * Outputs:
-     *  - std::string: LLVM IR text (.ll)
-     */
-
-    static std::string compileFileWithPhaseLogs(const std::string& path,
-                                                const PhaseLogs& logs);
 
     /**
      * Function: Compiler::compileStringOptimized

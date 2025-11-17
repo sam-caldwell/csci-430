@@ -422,23 +422,6 @@ private:
 
 public:
     /**
-     * Function: Parser::setSyntaxLogPath
-     * Purpose:
-     *  - Enable syntax analysis logging to the specified file path.
-     * Inputs:
-     *  - path: Filesystem path to write syntax-phase log entries
-     * Outputs:
-     *  - void (opens/truncates the file and enables logging)
-     */
-    // Logging removed: keep API no-ops and null sink
-    void setSyntaxLogPath(const std::string& /*path*/) {}
-    std::ostream& syntax() {
-        struct NullBuf : public std::streambuf { int overflow(int c) override { return traits_type::not_eof(c); } };
-        static NullBuf nb;
-        static std::ostream os(&nb);
-        return os;
-    }
-    /**
      * Function: Parser::setSourcePath
      * Purpose:
      *  - Inform the parser of the source file path for resolving MERGE/RUN/CHAIN.

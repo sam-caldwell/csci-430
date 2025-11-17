@@ -734,14 +734,7 @@ namespace gwbasic {
                                                std::vector<std::pair<int, int> > &deleteRanges);
 
         // Logging utilities
-        /** Stream accessor: codegen-phase logger (ostream sink when disabled). */
-        std::ostream &log();
-
-        /** Stream accessor: semantics-phase logger (ostream sink when disabled). */
-        std::ostream &logSem();
-
-        /** Stream accessor: syntax-phase logger (unused here; provided for interface parity). */
-        std::ostream &syntax();
+        // Logging removed.
 
         
 
@@ -780,23 +773,7 @@ namespace gwbasic {
         static const char *nodeName(const Expr *expr);
 
     public:
-        /***
-         * Function: CodeGenerator::setLogPath
-         * Purpose:
-         *  - Enable code generation logging to the specified file path.
-         * Inputs:
-         *  - path: Destination file path for codegen logs
-         */
-        void setLogPath(const std::string &path);
-
-        /***
-         * Function: CodeGenerator::setSemanticLogPath
-         * Purpose:
-         *  - Enable semantic analysis logging to the specified file path.
-         * Inputs:
-         *  - path: Destination file path for semantic logs
-         */
-        void setSemanticLogPath(const std::string &path);
+        // Logging configuration removed.
 
         // Control SQRT alias (non-standard). When false, only SQR is recognized.
         void setAllowSqrtAlias(bool allow);

@@ -33,13 +33,7 @@ TEST(LoggerIntegration, CompilerPhaseLogsProduceContent) {
   const fs::path sem = outdir / "semantic.log";
   const fs::path codegen = outdir / "codegen.log";
 
-  const std::string irText = Compiler::compileStringWithPhaseLogs(
-      src,
-      lex.string(),
-      syn.string(),
-      sem.string(),
-      codegen.string()
-  );
+  const std::string irText = Compiler::compileString(src);
   EXPECT_NE(irText.find("define i32 @main()"), std::string::npos);
 
   // Logging is disabled; skip file existence/content checks.

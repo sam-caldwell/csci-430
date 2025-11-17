@@ -67,8 +67,7 @@ public:
      */
     std::vector<Token> tokenize();
 
-    // Logging support removed: kept for API compatibility (no-op)
-    void setLexLogPath(const std::string& /*path*/) {}
+    // Logging support removed.
 
 private:
 

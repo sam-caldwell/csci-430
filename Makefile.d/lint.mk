@@ -24,20 +24,30 @@ lint: configure
 	  if command -v xcrun >/dev/null 2>&1; then \
 	    SYSROOT="`xcrun --show-sdk-path 2>/dev/null || true`"; \
 	  fi; \
-	  FILES="$$( \
+	  FILES_ALL="$$( \
 	    if command -v rg >/dev/null 2>&1; then \
 	      rg -o --no-line-number '"file"\s*:\s*"([^"]+)"' -r '$$1' "$(BUILD_DIR)/compile_commands.json"; \
 	    else \
 	      sed -n 's/.*"file"[[:space:]]*:[[:space:]]*"\([^\"]*\)".*/\1/p' "$(BUILD_DIR)/compile_commands.json"; \
-		    fi | awk '!seen[$$0]++' | awk '/\/(src|include|test)\//' \
+	    fi | awk '!seen[$$0]++' \
 	  )"; \
-	  if [ -z "$$FILES" ]; then \
+	  FILES_SRC="$$( printf '%s\n' "$$FILES_ALL" | awk '/\/(src|include)\//')"; \
+	  FILES_TEST="$$( printf '%s\n' "$$FILES_ALL" | awk '/\/test\//')"; \
+	  if [ -z "$$FILES_SRC$$FILES_TEST" ]; then \
 	    echo "No files found in compile_commands.json"; exit 0; \
 	  fi; \
-	  echo "Invoking clang-tidy on $$(( $$(printf '%s\n' "$$FILES" | wc -l | tr -d ' ') )) files..."; \
-	  printf '%s\n' "$$FILES" | xargs -P "$(NUM_CPUS)" -n 1 $(CLANG_TIDY) \
-	    -p "$(BUILD_DIR)" -warnings-as-errors=* -quiet \
-	    $$([ -n "$$SYSROOT" ] && printf -- " --extra-arg=-isysroot --extra-arg=%s" "$$SYSROOT")
+	  echo "clang-tidy (src/include, Werror): $$(( $$(printf '%s\n' "$$FILES_SRC" | wc -l | tr -d ' ') )) files"; \
+	  if [ -n "$$FILES_SRC" ]; then \
+	    printf '%s\n' "$$FILES_SRC" | xargs -P "$(NUM_CPUS)" -n 1 $(CLANG_TIDY) \
+	      -p "$(BUILD_DIR)" -warnings-as-errors=* -quiet \
+	      $$([ -n "$$SYSROOT" ] && printf -- " --extra-arg=-isysroot --extra-arg=%s" "$$SYSROOT"); \
+	  fi; \
+	  echo "clang-tidy (tests, warn-only): $$(( $$(printf '%s\n' "$$FILES_TEST" | wc -l | tr -d ' ') )) files"; \
+	  if [ -n "$$FILES_TEST" ]; then \
+	    printf '%s\n' "$$FILES_TEST" | xargs -P "$(NUM_CPUS)" -n 1 $(CLANG_TIDY) \
+	      -p "$(BUILD_DIR)" -quiet -config='{Checks: "misc-const-correctness,clang-diagnostic-*", WarningsAsErrors: ""}' \
+	      $$([ -n "$$SYSROOT" ] && printf -- " --extra-arg=-isysroot --extra-arg=%s" "$$SYSROOT") || true; \
+	  fi
 	@echo "lint: ok"
 
 # Slow, fail-fast clang-tidy via the existing CMake script

@@ -17,8 +17,7 @@ TEST(PhaseLogHelpers, TokenizeRootWithLogs) {
     auto d = std::filesystem::temp_directory_path() / "gwb_phase_root";
     std::filesystem::create_directories(d);
     auto f = d / "root.bas"; std::ofstream(f.string()) << "10 END\n";
-    auto lex = (d/"lex.log").string(); auto syn=(d/"syn.log").string();
-    std::string canon; int minLine=0; auto prog = tokenizeRootWithLogs(f.string(), lex, syn, canon, minLine);
+    std::string canon; int minLine=0; auto prog = tokenizeRootNoLogs(f.string(), canon, minLine);
     ASSERT_FALSE(prog.lines.empty());
     ASSERT_EQ(minLine, 10);
 }

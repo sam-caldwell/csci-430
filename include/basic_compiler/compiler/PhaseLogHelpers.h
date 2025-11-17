@@ -87,23 +87,6 @@ bool detectDirective(const gwbasic::Line& lineObj,
  */
 gwbasic::Program parseFileNoLogs(const std::string& fpath);
 
-/**
- * Function: tokenizeRootWithLogs
- * Purpose:
- *  - Tokenize and parse the root source with lexer/syntax logs enabled.
- * Inputs:
- *  - path: Filesystem path to root source
- *  - lexLogPath/syntaxLogPath: Destination log paths
- * Outputs:
- *  - Program: Parsed AST for the root file
- *  - outCanon: Canonical path to the root file
- *  - outMinLine: Minimum line number in the root program (or 0 if none)
- */
-gwbasic::Program tokenizeRootWithLogs(const std::string& path,
-                                      const std::string& lexLogPath,
-                                      const std::string& syntaxLogPath,
-                                      std::string& outCanon,
-                                      int& outMinLine);
 
 /**
  * Function: tokenizeRootNoLogs
@@ -153,19 +136,8 @@ int assignBase(const std::string& canon,
  */
 void renumberProgram(gwbasic::Program& prog, int base, int& outMinLine);
 
-/**
- * Struct: LogPaths
- * Purpose: Hold semantic/codegen log destinations to avoid swappable params.
- */
-struct LogPaths { std::string semantic; std::string codegen; };
-
-/**
- * Function: generateIRWithLogs
- * Purpose:
- *  - Run semantics and codegen with optional logs and return LLVM IR.
- */
-std::string generateIRWithLogs(const gwbasic::Program& program,
-                               const LogPaths& logs);
+// Logging-related helpers removed. Use tokenizeRootNoLogs() and the standard
+// semantics+codegen pipeline directly instead of logging variants.
 
 /**
  * Struct: ImportedProg

@@ -19,15 +19,14 @@ TEST(Compiler, CompileFileWithLog_Success) {
     // Create a temporary source file in the build directory
     fs::path tmpDir = fs::current_path();
     fs::path srcPath = tmpDir / "tmp_compile_success.bas";
-    fs::path logPath = tmpDir / "tmp_compile_success.log";
     {
         std::ofstream out(srcPath);
         out << "10 PRINT \"OK\"\n20 END\n";
     }
-    std::string ir = Compiler::compileFileWithLog(srcPath.string(), logPath.string());
+    const std::string ir = Compiler::compileFile(srcPath.string());
     ASSERT_FALSE(ir.empty());
     // Clean up temp files
     std::error_code ig;
     fs::remove(srcPath, ig);
-    fs::remove(logPath, ig);
+    // Logging removed; no log file to clean up.
 }

@@ -33,13 +33,7 @@ TEST(SemanticsScope, VarDeclaredInForBodyVisibleAfter) {
     Parser p(std::move(toks));
     auto prog = p.parseProgram();
 
-    const std::filesystem::path logDir = std::filesystem::path("..") / "basic_compiler";
-    std::filesystem::create_directories(logDir);
-    const std::filesystem::path logPath = logDir / "sem_scope_for.log";
-    std::error_code ec; std::filesystem::remove(logPath, ec);
-
     SemanticAnalyzer sema;
-    sema.setLogPath(logPath.string());
     auto res = sema.analyze(prog);
     EXPECT_TRUE(res.variables.contains("Z"));
 }

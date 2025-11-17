@@ -68,12 +68,7 @@ public:
 
     SemanticAnalyzer() = default;
 
-    /*
-     * Function: SemanticAnalyzer::setLogPath
-     * Purpose:
-     *  - No-op retained for API compatibility after logging removal.
-     */
-    void setLogPath(const std::string& /*path*/) {}
+    // Logging removed; no configuration needed.
 
     /*
      * Function: SemanticAnalyzer::setStrictControlFlow

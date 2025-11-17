@@ -22,13 +22,7 @@ TEST(Lexer, LoggingProducesOutput) {
     std::error_code ec; std::filesystem::remove(tmp, ec); // best-effort cleanup
     std::istringstream iss(src);
     Lexer lex(iss);
-    // Enable logging to a file (success path)
-    lex.setLexLogPath(tmp.string());
     auto toks = lex.tokenize();
-    // Now point logging at a directory (failure path) and tokenize again
-    lex.setLexLogPath(tmpdir.string());
-    auto toks2 = lex.tokenize();
     ASSERT_FALSE(toks.empty());
-    // We don't assert on the file (CI environments vary). Enabling logging
-    // and tokenizing exercises the log path for coverage.
+    // Logging has been removed; this test exercises tokenize() only.
 }

@@ -27,11 +27,7 @@ TEST(Integration, UnsafeFeatureWarnings_AppearInSemanticLog) {
         "80 CHDIR \".\"\n"
         "90 END\n";
 
-    const fs::path outdir = fs::current_path() / "unsafe_warns";
-    fs::create_directories(outdir);
-    const fs::path sem = outdir / "semantic.log";
-    std::string ir = Compiler::compileStringWithPhaseLogs(src, (outdir/"lex.log").string(), (outdir/"syn.log").string(), sem.string(), (outdir/"cg.log").string());
+    const std::string ir = Compiler::compileString(src);
     ASSERT_FALSE(ir.empty());
-
-    // Logging is disabled; warnings are not emitted to a log.
+    // Logging removed; semantic warnings are not emitted to log files.
 }
